@@ -47,3 +47,4 @@ Creative direction with structured ideation methodologies. Combines systematic i
 ## Sources
 
 
+
