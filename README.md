@@ -1,6 +1,6 @@
 ﻿# Shokunin · 職人
 
-**Artisan-grade agent skills for developers, designers, writers, and operators.**
+**Shokunin agent skills for developers, designers, writers, and operators.**
 
 35 skills across 7 domains. Compatible with OpenCode, Claude Code, Cursor, Codex.
 
@@ -13,7 +13,7 @@
 - **Communication** (5): professional-email, meeting-notes, feedback-craft, difficult-convo, translate-craft
 - **Content** (4): twitter-thread, blog-craft, case-study, newsletter-gen
 - **Sales** (3): pitch-deck, proposal-gen, sales-outreach
-- **Documentation** (5): api-docs, kb-writer, readme-forge, readme-artisan, changelog-gen
+- **Documentation** (5): api-docs, kb-writer, readme-forge, readme-shokunin, changelog-gen
 - **Support** (1): runbook-gen
 - **Strategy & Creative** (7): brainstorming, brand-guidelines, copywriting, creative-director, design-brief, enhance-prompt, marketing-psychology
 

@@ -1,10 +1,10 @@
 ﻿---
-name: readme-artisan
+name: readme-shokunin
 description: Original READMEs with personality and voice
 ---
 
 
-# README Artisan
+# README Shokunin
 
 Crafts READMEs that people actually read. Not template filler. Based on analysis of the top 50 GitHub repositories by stars.
 
