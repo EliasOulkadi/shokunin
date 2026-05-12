@@ -1,0 +1,20 @@
+# Python cache
+__pycache__/
+*.pyc
+
+# Node
+node_modules/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Environment
+.env
+.env.local

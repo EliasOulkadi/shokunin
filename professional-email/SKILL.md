@@ -1,6 +1,11 @@
 ﻿---
 name: professional-email
-description: Draft corporate emails with precise tone
+description: Draft professional emails with precise tone for internal communication, client outreach, follow-ups, proposals, announcements, and support. Use when user asks to write, draft, create, or compose an email, message, or corporate communication. Triggers on "write an email", "draft an email", "create an email", "compose a message", "corporate email", "professional email", "email template", "outreach email", "créame un correo", "escribe un email", "redactar un correo". Do NOT use for sales outreach (use sales-outreach skill) or translation (use translate-craft skill).
+license: MIT
+compatibility: opencode
+metadata:
+  workflow: communication
+  audience: developers
 ---
 
 

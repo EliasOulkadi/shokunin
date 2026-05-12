@@ -1,105 +1,158 @@
 ﻿---
 name: sales-outreach
-description: Generate cold and warm outreach emails
+description: Generate cold and warm outreach emails that get replies. Use when user asks to write a sales email, outreach sequence, cold email, follow-up, LinkedIn message, or prospecting message. Triggers on "write an outreach email", "cold email template", "sales sequence", "follow-up message", "reach out to [prospect]", "draft a prospecting email". Do NOT use for internal team communication, support replies, or transactional emails like invoices and receipts. Based on Close.com research, SalesHacker data, and outbound sales analysis.
+license: MIT
+compatibility: opencode
+metadata:
+  workflow: sales
+  audience: sales
 ---
 
+Generate outreach sequences that get replies. Follow the template below, then personalize based on user's context.
 
-# Sales Outreach
+## Required Discovery
 
-Generates outreach sequences that get replies. Based on sales research from Close.com, SalesHacker, and outbound sales data analysis.
+Before writing, determine:
+1. **Prospect**: Company + person + their role
+2. **Trigger**: Why now? (funding, post, product launch, job change)
+3. **Value prop**: One sentence: "We help [X] do [Y] so they can [Z]"
+4. **Proof**: Case study, testimonial, data point, or mutual connection
+5. **Goal**: Reply? Call? Demo? Trial?
 
 ## Cold Email Structure
 
-1. **Subject line**: personalized + curiosity (10 words max)
-2. **Opening**: reference to them (company, post, achievement)
-3. **Value proposition**: one sentence, their benefit
-4. **Proof**: social proof, case study, or relevant data
-5. **Ask**: low-friction next step (reply, call, link)
-6. **Close**: simple, no pressure
+1. **Subject line**: Personalized + curiosity gap. 10 words max.
+2. **Opening**: Specific reference to them. (company news, their post, achievement, mutual)
+3. **Value proposition**: One sentence. Their benefit, not your features.
+4. **Proof**: Social proof or relevant data point.
+5. **Ask**: Single, low-friction next step.
+6. **Close**: Simple. No pressure. "Best, [Name]"
 
 ## Subject Line Patterns
 
-| Pattern | Example | Use case |
+| Pattern | Example | Best For |
 |---------|---------|----------|
-| Reference | "Loved your post on API design" | Warm outreach |
-| Question | "Quick question about your auth setup" | Curiosity |
-| Compliment | "Impressed by your team's growth" | Ego bait (use genuinely) |
-| Value | "5 ways to speed up your CI pipeline" | Resource-led |
-| Mutual | "We both know [Name]" | Warm intro |
+| Reference | "[Company] + [specific observation]" | Always, minimum viable |
+| Question | "Quick question about [their specific situation]" | Curiosity, high open rate |
+| Compliment | "Impressed by [specific achievement]" | Warm outreach, use genuinely |
+| Resource | "[Common problem] — a fix we found" | Value-led, low pressure |
+| Mutual connection | "[Name] suggested I reach out" | Warm intro, highest conversion |
 
 ## Personalization Rules
 
-Levels of personalization (do all 3):
-1. Company research: recent news, funding, product launch
-2. Person research: recent post, talk, job change
-3. Fit-based: why this matters to them specifically
+3 levels of personalization. ALL required before sending:
 
-If you can't personalize beyond "Hi [First Name]", do not send the email.
+| Level | What | Examples |
+|-------|------|----------|
+| 1 — Company | Recent news, funding, product launch, hiring spree | "Congrats on the Series A" |
+| 2 — Person | Recent post, talk, job change, GitHub activity | "Loved your post on API design" |
+| 3 — Fit | Why this matters to THEM specifically | "Given you're scaling to 3 markets..." |
+
+If you cannot do level 2, do not send the email. Generic outreach gets ignored.
 
 ## Sequence Logic
 
 ```
-Email 1 (Day 1): Value + low-friction ask
-Email 2 (Day 4): Follow-up with additional value
-Email 3 (Day 8): Different angle or case study
-Email 4 (Day 12): Breakup email (move on)
+Email 1 (Day 1):   Value prop + low-friction ask
+                   Goal: start a conversation
 
-Between emails: engage on LinkedIn (like, comment, no DM)
+Email 2 (Day 4):   Follow-up with additional value
+                   Goal: provide new info, don't repeat
+
+Email 3 (Day 8):   Different angle or case study
+                   Goal: show proof it works
+
+Email 4 (Day 12):  Breakup email
+                   Goal: leave door open gracefully
 ```
 
-Never send more than 4 emails. If no response in 12 days, move to nurture.
+**Between emails**: Engage on LinkedIn (like, comment on posts — no DM).
+
+**Hard stop**: 4 emails max. No response in 12 days → move to nurture.
 
 ## Templates
 
-### Initial outreach (value-led)
+### Cold Outreach (Day 1)
 ```
-Subject: [Company] + [specific observation]
+Subject: [Observation about their company/work]
 
 Hi [Name],
 
-I noticed [specific detail about their work/company]. [One sentence on why it matters.]
+I noticed [specific observation]. [One sentence on why this matters.]
 
-We helped [similar company] achieve [specific result] with [your solution]. [One sentence on how.]
+We helped [similar company] achieve [measurable result] by [your solution].
 
-Would you be open to a brief chat next week? I have some ideas specific to [their situation].
+Would you be open to a 10-min chat next week? I have ideas specific to [their situation].
 
 Best,
-[Name]
+[Your name]
 ```
 
-### Follow-up (case study)
+### Follow-up with Value (Day 4)
 ```
 Subject: Re: [original subject]
 
 Hi [Name],
 
-Following up in case this got buried. I wanted to share a relevant example:
+Following up. I also wanted to share [specific resource relevant to them]:
 
-[Company] used [approach] to achieve [result in numbers].
+[One-liner about the resource and why it applies to their situation]
 
-Happy to walk through how this could apply to your situation.
+Happy to walk through how this applies to your setup if useful.
 
 Best,
-[Name]
+[Your name]
 ```
+
+### Case Study (Day 8)
+```
+Subject: Re: [original subject]
+
+Hi [Name],
+
+[Company X] was facing [same problem]. They used [approach] and got [result with numbers].
+
+Key insight: [one thing that made it work].
+
+Worth a quick call to see if this applies to you?
+
+Best,
+[Your name]
+```
+
+### Breakup (Day 12)
+```
+Subject: Re: [original subject]
+
+Hi [Name],
+
+I'll leave it here. If your priorities change, feel free to reach out — happy to help anytime.
+
+Best,
+[Your name]
+```
+
+## LinkedIn Outreach Rules
+
+- Do NOT connect + DM on the same day
+- Engage with their content for 3-5 days before connecting
+- Connection request note: reference-based, no sales pitch
+- After accepted: wait 2-3 days before sending a message
 
 ## Anti-Patterns
 
-- No "I hope this email finds you well"
-- No "I wanted to reach out" (reduce phrasing by 50%)
-- No multiple questions in one email (one ask only)
-- No attachments unless requested
-- No fake urgency ("limited time offer") unless genuine
-- No LinkedIn connection request + DM same day
+| Mistake | Fix |
+|---------|-----|
+| "I hope this email finds you well" | Delete. Start with substance. |
+| "I wanted to reach out" | Reduce filler by 50%. Just say what you want. |
+| Multiple questions (What's your process? Who decides? Budget?) | One ask per email. |
+| Attachments | No attachments unless explicitly requested. |
+| Fake urgency ("limited time") | Only if genuinely time-sensitive. |
+| LinkedIn + email same day | Pick one channel per 3-day window. |
+| No personalization | If you can't personalize beyond [Name], don't send. |
 
 ## Sources
-- Close.com sales research
-- SalesHacker outbound data
+- Close.com outbound sales research
+- SalesHacker cold email data analysis
 - Outreach.io sequencing studies
-
-
-
-
-
-
-
+- Lavender AI email analysis
