@@ -1,5 +1,5 @@
 ﻿---
-name: readme-artisan
+name: readme-shokunin
 description: Original READMEs with personality and voice
 ---
 
