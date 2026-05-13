@@ -1,8 +1,8 @@
-# Shokunin · 職人
+﻿# Shokunin Â· è·äºº
 
-**36 agent skills** — nivel 10/10. Progressive disclosure, scripts ejecutables, referencias profundas, assets reutilizables, YAML frontmatter completo, workflows procedimentales, manejo de errores, checklists de produccion, y anti-patrones. Incluye memoria persistente ChromaDB, bot de Telegram, y automatizaciones.
+**36 agent skills** â€” nivel 10/10. Progressive disclosure, scripts ejecutables, referencias profundas, assets reutilizables, YAML frontmatter completo, workflows procedimentales, manejo de errores, checklists de produccion, y anti-patrones. Incluye memoria persistente ChromaDB y automatizaciones.
 
-> 職人 (shokunin) means *artisan* in Japanese. These skills aim for that standard.
+> è·äºº (shokunin) means *artisan* in Japanese. These skills aim for that standard.
 
 ## One-Command Install
 
@@ -13,7 +13,7 @@ irm https://raw.githubusercontent.com/EliasOulkadi/shokunin/master/install.ps1 |
 El instalador configura automaticamente:
 - **36 skills** en ~/.config/opencode/skills/
 - **ChromaDB** memoria persistente entre sesiones
-- **Telegram bot** (necesitas crear uno en @BotFather)
+
 - **PowerShell profile** con 20+ aliases
 - **CLAUDE.md** con instrucciones globales
 - **MCP servers**: filesystem, fetch, playwright, memory
@@ -68,7 +68,7 @@ git clone https://github.com/EliasOulkadi/shokunin.git
 | **whendone-plus** | v1.0 | ~80 | - | - | - | Auto-notify when commands complete |
 | **windows-powershell** | v3.0 | ~180 | 3 | 1 | 1 | Windows 11 sysadmin, cleanup, profile |
 | **memory** | v1.0 | ~80 | - | 1 | - | ChromaDB memoria persistente entre sesiones |
-| **telegram-bot** | v1.0 | ~70 | - | - | - | Acceso movil via Telegram |
+| ** ~70 | - | - | - | Acceso movil via Telegram |
 | **chromadb** | v1.0 | ~60 | - | - | - | Gestion de base de memoria vectorial |
 
 ## Quality
@@ -86,3 +86,4 @@ git clone https://github.com/EliasOulkadi/shokunin.git
 ## License
 
 MIT
+

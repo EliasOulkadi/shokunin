@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
     Shokunin AI Ecosystem Installer v3.1
 .DESCRIPTION
@@ -175,52 +175,6 @@ function Install-MemorySystem {
 # ============================================================
 # SECTION 6: TELEGRAM BOT SETUP
 # ============================================================
-function Setup-TelegramBot {
-    Write-Step "Configurando Telegram bot..."
-
-    $existingToken = [Environment]::GetEnvironmentVariable('TELEGRAM_BOT_TOKEN','User')
-    if ($existingToken) {
-        Write-Log "Token ya configurado (usando existente)" Green
-        return
-    }
-
-    Write-Host @"
-
-  Para el bot de Telegram necesitas crear uno gratis:
-  1. Abre Telegram y busca @BotFather
-  2. Envia /newbot y sigue las instrucciones
-  3. COPIA EL TOKEN QUE TE DE (algo como 123456:ABCdef...)
-  4. Pegalo abajo
-
-"@ -ForegroundColor Yellow
-
-    $token = Read-Host "  Token de Telegram (deja vacio para saltar)"
-    if ($token) {
-        [Environment]::SetEnvironmentVariable('TELEGRAM_BOT_TOKEN', $token, 'User')
-        Write-Log "Token guardado" Green
-
-        # Create startup shortcut
-        $vbsPath = Join-Path $script:installDir "start-bot.vbs"
-        @"
-Set WshShell = CreateObject("WScript.Shell")
-WshShell.Run "cmd /c python `"$(Join-Path $script:installDir "telegram\bot.py")`"", 0, False
-"@ | Out-File -FilePath $vbsPath -Encoding ASCII -Force
-
-        $shortcutPath = Join-Path $script:startupDir "ShokuninBot.lnk"
-        $wshell = New-Object -ComObject WScript.Shell
-        $shortcut = $wshell.CreateShortcut($shortcutPath)
-        $shortcut.TargetPath = "wscript.exe"
-        $shortcut.Arguments = "`"$vbsPath`""
-        $shortcut.Save()
-        Write-Log "Auto-start creado (inicia con Windows)" Green
-    } else {
-        Write-Log "Telegram bot saltado. Ejecuta .shokunin\setup-telegram.ps1 mas tarde" Yellow
-    }
-}
-
-# ============================================================
-# SECTION 7: OPENCODE CONFIGURATION
-# ============================================================
 function Setup-OpenCodeConfig {
     Write-Step "Configurando OpenCode..."
 
@@ -270,10 +224,10 @@ function Setup-PowerShellProfile {
     Write-Step "Configurando PowerShell profile..."
 
     $profileContent = @'
-# Shokunin AI Ecosystem — PowerShell Profile
+# Shokunin AI Ecosystem â€” PowerShell Profile
 # Documentation: https://github.com/EliasOulkadi/shokunin
 
-# Aliases — Git
+# Aliases â€” Git
 Set-Alias -Name gst -Value "git status"
 Set-Alias -Name ga -Value "git add -A"
 Set-Alias -Name gc -Value "git commit -m"
@@ -282,18 +236,18 @@ Set-Alias -Name gl -Value "git pull --ff-only"
 Set-Alias -Name gb -Value "git branch"
 Set-Alias -Name gco -Value "git checkout"
 
-# Aliases — npm
+# Aliases â€” npm
 Set-Alias -Name ni -Value "npm install"
 Set-Alias -Name nrd -Value "npm run dev"
 Set-Alias -Name nrb -Value "npm run build"
 Set-Alias -Name nt -Value "npm test"
 
-# Aliases — Docker
+# Aliases â€” Docker
 Set-Alias -Name dps -Value "docker ps"
 Set-Alias -Name dlog -Value "docker logs -f"
 Set-Alias -Name dstop -Value "docker stop"
 
-# Aliases — Utils
+# Aliases â€” Utils
 Set-Alias -Name ll -Value "Get-ChildItem"
 function mkcd { param($Path) New-Item -ItemType Directory -Path $Path -Force | Set-Location }
 function touch { param($File) New-Item -ItemType File -Path $File -Force }
@@ -435,9 +389,9 @@ function Setup-Extras {
 function Show-Summary {
     Write-Host @"
 
-╔══════════════════════════════════════════════════╗
-║        Shokunin AI Ecosystem — Instalado         ║
-╚══════════════════════════════════════════════════╝
+â•”â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•—
+â•‘        Shokunin AI Ecosystem â€” Instalado         â•‘
+â•šâ•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
   Skills:       $((Get-ChildItem $script:skillsDir -Directory).Count) instaladas
   Memoria:      ChromaDB en $script:installDir\memory
@@ -479,15 +433,15 @@ function Show-Summary {
 # ============================================================
 Clear-Host
 Write-Host @"
-╔══════════════════════════════════════════════════╗
-║         Shokunin AI Ecosystem v$script:version       ║
-║         One-command installer                    ║
-║         github.com/EliasOulkadi/shokunin         ║
-╚══════════════════════════════════════════════════╝
+â•”â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•—
+â•‘         Shokunin AI Ecosystem v$script:version       â•‘
+â•‘         One-command installer                    â•‘
+â•‘         github.com/EliasOulkadi/shokunin         â•‘
+â•šâ•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
   Este instalador configura tu PC como estacion de trabajo
   AI Engineer con 36 skills, memoria persistente, bot de
-  Telegram, y automatizaciones — todo gratis y open source.
+  Telegram, y automatizaciones â€” todo gratis y open source.
 
   Requiere: Windows 10/11, Node.js 18+, Python 3.11+
   Tiempo estimado: 2-5 minutos
@@ -503,12 +457,4 @@ Install-Dependencies
 Install-Skills
 Install-MemorySystem
 Setup-OpenCodeConfig
-Setup-TelegramBot
-Setup-PowerShellProfile
-Setup-Instructions
-Setup-ScheduledTasks
-Setup-Extras
-Show-Summary
 
-Write-Host "  Log de instalacion: $script:logFile" -ForegroundColor DarkGray
-Write-Log "Instalacion completada. Abre un NUEVO terminal." Green
