@@ -1,0 +1,26 @@
+﻿name: CI
+on: [push, pull_request]
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check SKILL.md files
+        run: |
+          errors=0
+          for dir in */; do
+            if [ -f "\SKILL.md" ]; then
+              name=\
+              if [ "\" != "\" ]; then
+                echo "MISMATCH: \/SKILL.md has name=\"
+                errors=\
+              fi
+            fi
+          done
+          echo "Skills checked. Errors: \"
+          exit \
+      - name: Validate opencode.json
+        run: |
+          if [ -f ".pack/opencode.json" ]; then
+            python3 -c "import json; json.load(open('.pack/opencode.json'))" && echo "JSON valid" || echo "JSON invalid"
+          fi

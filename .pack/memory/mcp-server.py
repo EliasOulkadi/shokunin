@@ -1,3 +1,4 @@
+﻿import os
 import json
 import sys
 import uuid
@@ -6,7 +7,7 @@ from datetime import datetime, timezone
 import chromadb
 from chromadb.config import Settings
 
-CHROMA_PATH = r"C:\Users\swagger\.shokunin\memory\chroma_db"
+CHROMA_PATH = r"os.path.join(os.environ["USERPROFILE"], ".shokunin", "memory", "chroma_db")"
 COLLECTION_NAME = "shokunin_memory"
 
 client = chromadb.PersistentClient(
@@ -269,3 +270,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
