@@ -1,14 +1,17 @@
 ---
 name: terraform
-description: Design and manage infrastructure as code with Terraform. Covers project structure, module design, remote state (S3 + DynamoDB), workspace vs directory isolation, moved blocks for refactoring, CI/CD pipelines with plan/apply separation, and emergency state surgery. Use when user asks to write Terraform config, set up remote state, design modules, manage state, or automate infrastructure. Triggers on "terraform", "infrastructure as code", "IaC", "state management", "remote backend", "module", "HCL", "plan", "apply". Do NOT use for Kubernetes manifests, Dockerfiles, or CI/CD pipeline config — those have their own skills.
+description: Design and manage infrastructure as code with Terraform — modules, remote state (S3 + DynamoDB), Stacks (deployments), test framework, preconditions/postconditions, moved/removed blocks, and CI/CD plan/apply separation. Use when user asks to write Terraform config, set up remote state, design modules, manage state, or automate infrastructure. Do NOT use for Kubernetes (use kubernetes), Docker (use docker), or CI/CD pipeline design (use ci-cd).
 license: MIT
 compatibility: opencode
 metadata:
   workflow: infrastructure
   audience: devops
+  version: "2.0"
 ---
 
-Design, manage, and operate infrastructure as code with Terraform. Covers project structure, module design, state management, and CI/CD integration.
+# Terraform Architect
+
+Design infrastructure as code with Terraform 1.10+ features: Stacks, test framework, provider-defined functions, and state management.
 
 ## Workflow
 
@@ -16,14 +19,14 @@ Design, manage, and operate infrastructure as code with Terraform. Covers projec
 
 | Scale | Structure | State Strategy |
 |-------|-----------|---------------|
-| Personal project | Single `main.tf` | Remote backend, optional workspaces |
-| Team (2-5) | `envs/{dev,staging,prod}/` + `modules/` | Directory-per-environment, separate backends |
-| Platform team | `infra/{networking,compute,data,iam}/` per repo | Per-component state files, `terraform_remote_state` for cross-refs |
+| Personal | Single `main.tf` | Remote backend, optional workspaces |
+| Team (2-5) | `envs/{dev,prod}/modules/` | Directory-per-environment, separate backends |
+| Platform team | `infra/{networking,compute,data,iam}/` per repo | Per-component state, `terraform_remote_state` |
 
 ### Step 2: Bootstrap remote backend
 
 ```hcl
-# backend.tf — bootstrap once, store state in S3 + DynamoDB lock
+# backend.tf
 terraform {
   backend "s3" {
     bucket         = "tf-state-{account}-{region}"
@@ -32,7 +35,7 @@ terraform {
     encrypt        = true
     dynamodb_table = "tf-state-lock"
   }
-  required_version = ">= 1.9"
+  required_version = ">= 1.10"
   required_providers {
     aws = { source = "hashicorp/aws", version = "~> 5.0" }
   }
@@ -41,68 +44,159 @@ terraform {
 
 ### Step 3: Design modules
 
-Module single responsibility: one module = one domain (networking, compute, database, IAM).
+Single responsibility: one module = one domain.
 
 ```
 modules/
 ├ networking/
-│   main.tf
-│   variables.tf
-│   outputs.tf
+│   main.tf, variables.tf, outputs.tf
 ├ compute/
-│   main.tf
-│   variables.tf
-│   outputs.tf
+│   main.tf, variables.tf, outputs.tf
 └ database/
-    main.tf
-    variables.tf
-    outputs.tf
+    main.tf, variables.tf, outputs.tf
 environments/
 ├ prod/
-│   backend.tf    # key = "prod/compute/terraform.tfstate"
-│   main.tf       # module "compute" { source = "../../modules/compute" ... }
+│   backend.tf -> key = "prod/compute/terraform.tfstate"
+│   main.tf       module "compute" { source = "../../modules/compute" }
 │   terraform.tfvars
 └ dev/
-    ├ backend.tf  # key = "dev/compute/terraform.tfstate"
-    ├ main.tf
-    └ terraform.tfvars
 ```
 
-### Step 4: Write production module guidelines
-
-- **Single responsibility**: One module handles one domain
-- **Sensible defaults**: Secure by default, require explicit opt-out for insecure configs
-- **Input validation**: `validation { condition = ... }` on all variables
-- **Outputs**: Only what consumers need via `terraform_remote_state`
-- **Versioning**: Pin module version via git tag or registry
-
-## State Management Rules
-
-| Rule | Why |
-|------|-----|
-| Remote state always | Local state is single-player. Team = remote. |
-| S3 + DynamoDB | S3 stores, DynamoDB locks. Standard. |
-| Versioning on state bucket | Rollback from bad apply in 30 seconds. |
-| KMS encryption | State files contain secrets in plaintext. |
-| Per-environment isolation | A `terraform destroy` in dev should never touch prod. |
-| Per-component state | Change to IAM should not re-evaluate RDS. |
-| Directory-per-environment preferred | Workspaces share backend — too easy to `select prod` by accident. |
-| `moved` blocks over `state rm/mv` | Code-reviewed, reversible, self-documenting. |
-
-## moved Block (for refactoring)
+### Step 4: Use preconditions/postconditions
 
 ```hcl
-# When you move a resource from one module to another
+resource "aws_db_instance" "main" {
+  allocated_storage = 100
+  engine = "postgres"
+  engine_version = "16.3"
+  instance_class = "db.r6g.large"
+
+  lifecycle {
+    postcondition {
+      condition     = self.engine == "postgres"
+      error_message = "Only PostgreSQL is supported"
+    }
+  }
+}
+
+data "aws_iam_policy_document" "example" {
+  statement {
+    actions = ["s3:GetObject"]
+
+    condition {
+      test     = "Bool"
+      variable = "aws:SecureTransport"
+      values   = ["true"]
+    }
+
+    condition {
+      test     = "IpAddress"
+      variable = "aws:SourceIp"
+      values   = var.allowed_ips
+    }
+  }
+
+  lifecycle {
+    precondition {
+      condition     = length(var.allowed_ips) > 0
+      error_message = "At least one allowed IP must be specified"
+    }
+  }
+}
+```
+
+### Step 5: Use moved and removed blocks for refactoring
+
+```hcl
+# Instead of manual state mv, code-review it:
 moved {
   from = aws_s3_bucket.old
   to   = module.storage.aws_s3_bucket.main
 }
 
-# When you rename a resource
-moved {
-  from = aws_instance.web
-  to   = aws_instance.app
+# To remove a resource from state without destroying it:
+removed {
+  from = aws_instance.legacy
+  lifecycle {
+    destroy = false  # Keep the resource alive
+  }
 }
+```
+
+## Terraform Stacks (2025+)
+
+Stacks enable deployment of multiple configurations with shared state:
+
+```hcl
+# stacks/stack.hcl
+stack "dev" {
+  source = "./infrastructure"
+  path   = "dev"
+}
+
+stack "prod" {
+  source = "./infrastructure"
+  path   = "prod"
+}
+```
+
+## Provider-defined Functions (1.10+)
+
+```hcl
+# Built-in providers now expose functions
+result = provider::aws::arn_parse("arn:aws:s3:::my-bucket")
+# or
+result = provider::aws::arn_build("s3", "my-bucket", "", "us-east-1")
+```
+
+## Testing Framework
+
+```hcl
+# tests/example.tftest.hcl
+run "create_bucket" {
+  command = apply
+  variables {
+    bucket_name = "test-bucket-${run_id}"
+  }
+  assert {
+    condition     = aws_s3_bucket.main.bucket == "test-bucket-${run_id}"
+    error_message = "Bucket name mismatch"
+  }
+}
+
+run "verify_encryption" {
+  command = apply
+  assert {
+    condition     = aws_s3_bucket.main.server_side_encryption_configuration[0].rule[0].apply_server_side_encryption_by_default[0].sse_algorithm == "AES256"
+    error_message = "Bucket must have AES256 encryption"
+  }
+}
+```
+
+```bash
+terraform test
+```
+
+## State Management Rules
+
+| Rule | Why |
+|------|-----|
+| Remote state always | Local is single-player |
+| S3 + DynamoDB | Standard state storage + locking |
+| Versioning on state bucket | Rollback bad apply |
+| KMS encryption | State files contain secrets |
+| Per-environment isolation | `destroy` in dev should never touch prod |
+| Per-component state | Change IAM should not re-evaluate RDS |
+| Directory-per-environment preferred | Workspaces share backend — too easy to select prod by accident |
+| `moved` blocks over `state rm/mv` | Code-reviewed, reversible, self-documenting |
+
+## Provider Caching (CI speedup)
+
+```bash
+export TF_PLUGIN_CACHE_DIR="$HOME/.terraform.d/plugin-cache"
+
+# Share cache across projects
+mkdir -p $TF_PLUGIN_CACHE_DIR
 ```
 
 ## CI/CD Pipeline
@@ -141,29 +235,29 @@ jobs:
 
 | Situation | Command |
 |-----------|---------|
-| Remove resource from state (not destroy) | `terraform state rm <address>` |
-| Import existing resource into state | `terraform import <address> <id>` |
-| Move resource in state (refactoring) | `terraform state mv <from> <to>` |
+| Remove resource from state | `terraform state rm <address>` |
+| Import existing resource | `terraform import <address> <id>` |
+| Move resource (refactoring) | `terraform state mv <from> <to>` |
 | Unlock stuck state | `terraform force-unlock <lock-id>` |
-| Rollback corrupted state | Restore previous version from S3 versioning |
-| List resources in state | `terraform state list` |
+| Rollback corrupted state | Restore previous S3 version |
+| List resources | `terraform state list` |
 | Show resource details | `terraform state show <address>` |
 
 ## Production Checklist
 
-- [ ] Remote backend with S3 + DynamoDB locking
+- [ ] Remote backend S3 + DynamoDB locking
 - [ ] KMS encryption on state bucket
 - [ ] Versioning enabled on state bucket
 - [ ] Public access blocked on state bucket
-- [ ] Per-environment state isolation (directory approach preferred)
-- [ ] Per-component state files (not one monolith)
-- [ ] State access IAM roles follow least privilege
-- [ ] Plan runs on PR, apply only from CI
-- [ ] `concurrency` key prevents simultaneous applies
+- [ ] Per-environment state isolation
+- [ ] Per-component state files
+- [ ] State access IAM roles (least privilege)
+- [ ] Plan on PR, apply only from CI
+- [ ] `concurrency` prevents simultaneous applies
 - [ ] `terraform validate` + `fmt -check` in CI
 - [ ] Module versions pinned (not `latest`)
-- [ ] Secrets use `sensitive = true` on outputs
-- [ ] No secrets in state (use Vault / AWS Secrets Manager)
+- [ ] Secrets as `sensitive = true` on outputs
+- [ ] No secrets in state (Vault / AWS Secrets Manager)
 
 ## Anti-Patterns
 
@@ -177,3 +271,13 @@ jobs:
 | Running `apply` from laptop | CI/CD with saved plan |
 | No locking | DynamoDB table for state lock |
 | Secrets in state outputs | Mark `sensitive = true`, use external secrets manager |
+| No preconditions/postconditions | Add for security-critical resources |
+
+## Sources
+
+- Terraform Documentation (developer.hashicorp.com/terraform)
+- Terraform Stacks — HCP documentation
+- Terraform Test Framework — developer.hashicorp.com
+- HashiCorp Learn: moved blocks
+- AWS Well-Architected IaC patterns
+- Gruntwork — Terraform best practices

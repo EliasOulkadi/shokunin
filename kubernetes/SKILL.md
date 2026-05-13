@@ -1,18 +1,22 @@
 ---
 name: kubernetes
-description: Deploy, manage, and debug applications on Kubernetes. Covers Deployments, Services, Ingress, NetworkPolicies, ConfigMaps, Secrets, RBAC, Helm, probes, HPA, StatefulSets, and security hardening (Pod Security Standards, OPA/Kyverno, seccomp). Use when user asks to write K8s manifests, deploy to a cluster, debug a broken pod, set up ingress, configure autoscaling, or harden cluster security. Triggers on "kubernetes", "k8s", "deployment", "pod", "service", "ingress", "helm", "kubectl", "cluster", "container orchestration". Do NOT use for Docker containers, Terraform infrastructure, or CI/CD pipelines.
+description: Deploy and manage Kubernetes in production — Deployments, Services, Gateway API, Service Mesh (Istio/Linkerd), eBPF observability (Cilium), security hardening (Pod Security Standards, OPA/Kyverno, seccomp), Helm, HPA, PDB, and debugging. Use when user asks to write K8s manifests, deploy to a cluster, debug pods, set up ingress/gateway, configure autoscaling, or harden cluster security. Do NOT use for Docker containers (use docker), CI/CD pipelines (use ci-cd), or Terraform infrastructure (use terraform).
 license: MIT
 compatibility: opencode
 metadata:
   workflow: infrastructure
   audience: devops
+  version: "2.0"
 ---
 
-Expert Kubernetes knowledge for production-grade deployments, networking, security, and debugging.
+# Kubernetes Architect
+
+Production-grade Kubernetes: deployments, networking, security, observability, and service mesh.
 
 ## Core Resources
 
-### Deployment (stateless apps)
+### Deployment
+
 ```yaml
 apiVersion: apps/v1
 kind: Deployment
@@ -56,7 +60,8 @@ spec:
       automountServiceAccountToken: false
 ```
 
-### Service (stable network endpoint)
+### Service
+
 ```yaml
 apiVersion: v1
 kind: Service
@@ -72,50 +77,45 @@ spec:
   type: ClusterIP
 ```
 
-### Ingress (external HTTP traffic)
+### Gateway API (replaces Ingress)
+
+Gateway API is the successor to Ingress, supporting HTTPRoute, GRPCRoute, TCPRoute.
+
 ```yaml
-apiVersion: networking.k8s.io/v1
-kind: Ingress
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
 metadata:
-  name: api-ingress
+  name: api-gateway
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-prod
 spec:
-  ingressClassName: nginx
-  tls:
-    - hosts: [api.example.com]
-      secretName: api-tls
+  gatewayClassName: istio
+  listeners:
+    - name: https
+      protocol: HTTPS
+      port: 443
+      hostname: api.example.com
+      tls:
+        mode: Terminate
+        certificateRefs: [{ name: api-tls }]
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: api-route
+spec:
+  parentRefs: [{ name: api-gateway }]
+  hostnames: ["api.example.com"]
   rules:
-    - host: api.example.com
-      http:
-        paths:
-          - path: /api
-            pathType: Prefix
-            backend:
-              service:
-                name: api
-                port:
-                  number: 80
-```
-
-### ConfigMap & Secret
-```yaml
-apiVersion: v1
-kind: ConfigMap
-metadata: { name: api-config }
-data:
-  NODE_ENV: production
-  LOG_LEVEL: info
-
-apiVersion: v1
-kind: Secret
-metadata: { name: api-secrets }
-type: Opaque
-stringData:
-  DATABASE_URL: postgres://user:pass@host:5432/db
+    - matches:
+        - path: { type: PathPrefix, value: /api }
+      backendRefs:
+        - name: api
+          port: 80
 ```
 
 ### NetworkPolicy (zero-trust)
+
 ```yaml
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -123,7 +123,6 @@ metadata: { name: default-deny-all }
 spec:
   podSelector: {}
   policyTypes: [Ingress, Egress]
-
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -137,6 +136,7 @@ spec:
 ```
 
 ### HorizontalPodAutoscaler
+
 ```yaml
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
@@ -155,6 +155,24 @@ spec:
         target:
           type: Utilization
           averageUtilization: 70
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
+```
+
+### PodDisruptionBudget
+
+```yaml
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata: { name: api-pdb }
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels: { app: api }
 ```
 
 ## Critical Security Rules
@@ -164,26 +182,99 @@ spec:
 | No containers as root | `securityContext.runAsNonRoot: true` |
 | Drop all capabilities | `capabilities.drop: ["ALL"]` |
 | Read-only filesystem | `readOnlyRootFilesystem: true` |
-| No service account token by default | `automountServiceAccountToken: false` |
-| Default-deny NetworkPolicy per namespace | See NetworkPolicy above |
+| No SA token by default | `automountServiceAccountToken: false` |
+| Default-deny NetworkPolicy per namespace | First policy in namespace |
 | Pod Security Standards | `pod-security.kubernetes.io/enforce: restricted` |
-| Image with digest, not tag | `image: repo/app@sha256:abc...` |
+| Image by digest, not tag | `image: repo/app@sha256:abc...` |
 | Resource limits on every container | `resources.limits.cpu/memory` |
+
+## Service Mesh (Istio)
+
+```yaml
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata: { name: default, namespace: istio-system }
+spec:
+  mtls:
+    mode: STRICT  # All traffic must be mTLS
+---
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata: { name: api-canary }
+spec:
+  hosts: [api]
+  http:
+    - route:
+        - destination: { host: api, subset: stable }
+          weight: 90
+        - destination: { host: api, subset: canary }
+          weight: 10
+```
+
+## eBPF Observability (Cilium)
+
+```yaml
+# Install Cilium
+# cilium install
+
+# Hubble for network observability
+# cilium hubble enable
+# cilium hubble ui
+
+# Network policies with Cilium (L7-aware)
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata: { name: allow-api-http }
+spec:
+  endpointSelector: { matchLabels: { app: api } }
+  ingress:
+    - fromEndpoints: [{ matchLabels: { app: frontend } }]
+      toPorts:
+        - ports: [{ port: "3000", protocol: TCP }]
+          rules:
+            http:
+              - method: "GET"
+                path: "/api/public/*"
+```
 
 ## Helm Chart Structure
 
 ```
 chart/
-├── Chart.yaml          # metadata: name, version, dependencies
-├── values.yaml         # default values
+├── Chart.yaml
+├── values.yaml
 ├── templates/
 │   ├── deployment.yaml
 │   ├── service.yaml
 │   ├── ingress.yaml
 │   ├── configmap.yaml
-│   ├── _helpers.tpl    # named templates
+│   ├── _helpers.tpl
 │   └── tests/
-└── charts/             # subcharts
+└── charts/
+```
+
+## Advanced Scheduling
+
+```yaml
+# Topology spread constraints
+spec:
+  topologySpreadConstraints:
+    - maxSkew: 1
+      topologyKey: topology.kubernetes.io/zone
+      whenUnsatisfiable: DoNotSchedule
+      labelSelector: { matchLabels: { app: api } }
+
+# Node affinity
+spec:
+  affinity:
+    nodeAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 100
+          preference:
+            matchExpressions:
+              - key: node-type
+                operator: In
+                values: [spot]
 ```
 
 ## Debugging Cheatsheet
@@ -195,26 +286,26 @@ chart/
 | Pod not ready | `kubectl get events --sort-by=.metadata.creationTimestamp` |
 | Service not reachable | `kubectl port-forward svc/<name> 8080:80` |
 | DNS resolution | `kubectl run dnsutils --image=registry.k8s.io/e2e-test-images/jessie-dnsutils:1.3 -- sleep 3600` |
-| Start ephemeral debug container | `kubectl debug -it <pod> --image=ubuntu -- /bin/bash` |
+| Debug pod | `kubectl debug -it <pod> --image=ubuntu -- /bin/bash` |
 | Resource usage | `kubectl top pod` |
 | Watch events | `kubectl get events -w` |
 
 ## Production Checklist
 
 - [ ] Resource requests + limits on every container
-- [ ] Liveness + readiness probes configured
-- [ ] Pod Security Standards enforced per namespace
+- [ ] Liveness + readiness probes
+- [ ] Pod Security Standards (restricted)
 - [ ] NetworkPolicy: default-deny + explicit allow
-- [ ] No privileged containers
 - [ ] Containers run as non-root
 - [ ] Read-only root filesystem
-- [ ] Secrets via external provider (Vault, AWS Secrets Manager, CSI driver)
-- [ ] HorizontalPodAutoscaler configured
-- [ ] PodDisruptionBudget for >= 1
+- [ ] Secrets via external provider (Vault, AWS Secrets Manager, CSI)
+- [ ] HPA configured for CPU + memory
+- [ ] PDB >= 1 for critical services
 - [ ] Helm chart with versioned releases
-- [ ] container image with digest (not tag)
-- [ ] Audit logging enabled and shipped
-- [ ] RBAC: least privilege, no cluster-admin bindings
+- [ ] Image with digest (not tag)
+- [ ] mTLS between all services (service mesh)
+- [ ] Audit logging enabled
+- [ ] RBAC: least privilege, no cluster-admin
 - [ ] Falco or Tetragon for runtime security
 
 ## Anti-Patterns
@@ -229,3 +320,13 @@ chart/
 | No probes | Liveness + readiness mandatory |
 | Hardcoded config in image | ConfigMap + Secret |
 | No NetworkPolicy | Default-deny per namespace |
+
+## Sources
+
+- Kubernetes Documentation (kubernetes.io/docs)
+- Gateway API (gateway-api.sigs.k8s.io)
+- Istio Documentation (istio.io)
+- Cilium Documentation (docs.cilium.io)
+- Helm Documentation (helm.sh)
+- OWASP Kubernetes Security
+- NSA/CISA Kubernetes Hardening Guide

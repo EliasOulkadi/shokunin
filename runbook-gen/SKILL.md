@@ -1,185 +1,197 @@
 ﻿---
 name: runbook-gen
-description: Generate operations runbooks for incident response and post-mortems. Use when user asks to create a runbook, incident response guide, on-call playbook, SRE procedure, escalation path, outage playbook, or post-mortem. Triggers on "write a runbook", "create an incident response plan", "on-call guide", "SOP for [service]", "post-mortem template". Do NOT use for general documentation, architecture docs, or user-facing guides. Based on Google SRE practices, PagerDuty incident response, and post-mortem culture.
+description: Generate operations runbooks and post-mortems for incident response — severity matrix, decision trees, escalation paths, war room setup (Slack/Zoom), status page updates, customer comms templates, and blameless post-mortems with action items. Use when user asks to create a runbook, incident response plan, on-call guide, SRE procedure, escalation path, outage playbook, or post-mortem. Do NOT use for general documentation (use documentation), error handling patterns (use error-handler), or monitoring/alerting configuration (vendor-specific).
 license: MIT
 compatibility: opencode
 metadata:
   workflow: operations
   audience: sre
+  version: "2.0"
 ---
 
-Generate operations runbooks that on-call engineers can follow under pressure.
+# Runbook Generator
+
+Operation runbooks that on-call engineers can follow under pressure. Based on Google SRE practices, PagerDuty incident response, and post-mortem culture.
 
 ## Required Discovery
 
-Before writing, determine:
-
-1. **Service/System**: What is the runbook about? (API, database, cache, queue, etc.)
+1. **Service/System**: What is the runbook about? (API, database, cache, queue)
 2. **Incident types**: What can go wrong? (down, degraded, slow, data loss)
-3. **Environment**: Production, staging, both?
-4. **Team structure**: Who is primary, secondary, escalation?
-5. **Existing monitoring**: What alerts exist? What dashboards?
+3. **Environment**: Production, staging, or both?
+4. **Team structure**: Primary, secondary, escalation contacts
+5. **Existing monitoring**: Alerts, dashboards, runbooks
+
+## Severity Matrix
+
+| Severity | Definition | Response SLA |
+|----------|------------|--------------|
+| Sev1 | Service down, users impacted | Respond within 15 min |
+| Sev2 | Degraded performance, partial impact | Respond within 1 hour |
+| Sev3 | Minor issue, no user impact | Next business day |
+| Sev4 | Internal tooling, non-critical | Per team schedule |
 
 ## Runbook Template
 
 ```
 ## Runbook: [Incident Type]
 
-### Severity
-Use this rubric:
-- Sev1: Service down, users impacted. Respond within 15 min.
-- Sev2: Degraded performance, partial impact. Respond within 1 hour.
-- Sev3: Minor issue, no user impact. Next business day.
-- Sev4: Internal tooling, non-critical. Timeline varies.
-
 ### Detection
 How this incident is typically discovered:
+- Alert: [Prometheus/Grafana/Datadog alert]
+- User symptom: [what users see or report]
+- Automated detection: [auto-remediation]
 
-- Alert source and name: [Prometheus/Grafana/Datadog alert]
-- User-facing symptom: [what users see or report]
-- Automated detection: [any auto-remediation that fires]
-
-### Initial Response (first 5 minutes)
-Time-boxed steps:
+### Initial Response (first 5 min)
 1. Acknowledge alert (PagerDuty/Opsgenie). Time: < 2 min
-2. Determine severity using rubric above. Time: < 1 min
+2. Determine severity. Time: < 1 min
 3. Assign owner. Create incident channel (#inc-sev1). Time: < 2 min
-4. Post initial assessment to status page:
-   ```
-   Investigating [issue] affecting [scope]. Will update in 15 min.
-   ```
+4. Post initial status:
+   "Investigating [issue] affecting [scope]. Will update in 15 min."
 5. Start diagnosis timer. Time: < 1 min
 
-### Diagnosis
-Decision tree, in order:
-
+### Diagnosis (decision tree)
 1. Check [primary dashboard]: expected [X], current [Y]
-2. Check logs:
-   ```bash
-   kubectl logs -n [namespace] -l app=[service] --tail 200
-   ```
-3. Check database health:
-   ```sql
-   SELECT count(*) FROM pg_stat_activity WHERE state = 'active';
-   ```
-4. Check cache/queue latency:
-   ```bash
-   redis-cli --latency
-   ```
-5. IF [specific error in logs] → Runbook A (below)
-6. IF [latency > threshold] → Runbook B (below)
+2. Check logs: `kubectl logs -n [ns] -l app=[service] --tail 200`
+3. Check database health: `SELECT count(*) FROM pg_stat_activity`
+4. Check cache/queue latency: `redis-cli --latency`
+5. IF [error in logs] → Runbook A
+6. IF [latency > threshold] → Runbook B
 7. IF unknown → Escalate
 
 ### Resolution Procedures
-Each procedure must be time-boxed with exact commands and verification.
+Each time-boxed with exact commands and verification:
 
-#### Runbook A: [Procedure Name] (10 min)
+#### Runbook A: [Name] (10 min)
 ```bash
 # Step 1 (2 min)
 kubectl rollout restart deployment/[service]
 
 # Verify (1 min)
 kubectl rollout status deployment/[service]
-
-# If failed (5 min):
-kubectl describe pod [pod-name] --tail=50
 ```
-Verification: `curl -f https://[service]/health`
 
-#### Runbook B: [Alternative Procedure]
-```bash
-# Step 1 (5 min)
-# ...
-```
+#### Runbook B: [Alternative]
 
 ### Verification Checklist
-- [ ] Service health endpoint returns 200:
-  ```bash
-  curl -f http://localhost:8080/health
-  ```
-- [ ] Alert resolved (check dashboard, should be green)
+- [ ] Service health endpoint returns 200
+- [ ] Alert resolved (dashboard green)
 - [ ] Error rate back to baseline (< 0.1%)
-- [ ] Latency back to p99 < [threshold]
+- [ ] Latency p99 < [threshold]
 
 ### Escalation
 | Timebox | Action | Contact |
 |---------|--------|---------|
-| 0-15 min | Primary on-call | @[name] / [phone] |
-| 15-30 min | Secondary on-call | @[name] / [phone] |
-| 30-60 min | Engineering manager | @[name] |
-| 60+ min | VP Engineering | @[name] |
+| 0-15 min | Primary on-call | @name / phone |
+| 15-30 min | Secondary on-call | @name / phone |
+| 30-60 min | Engineering manager | @name |
+| 60+ min | VP Engineering | @name |
 
 ### Post-Incident Recovery
-- [ ] Data integrity check (verify no data loss)
+- [ ] Data integrity check
 - [ ] Deploy fix to production
 - [ ] Monitor for 30 min post-fix
 - [ ] Update runbook with lessons learned
 ```
 
+## War Room Setup
+
+### Communications
+- **Slack channel**: `#inc-sev1-[incident-name]`
+- **Zoom bridge**: [link] (permanent war room)
+- **Shared doc**: Google Doc or Notion page for live notes
+- **Status page**: Update immediately on detection
+- **Customer comms**: Template below
+
+### Status Page Updates
+
+```
+Investigating: We're aware of [issue] affecting [scope]. Investigating root cause.
+
+Monitoring: Deployed fix for [root cause]. Monitoring closely.
+
+Resolved: [Issue] has been resolved. All systems operational.
+```
+
+### Customer Communication
+
+```
+Subject: [Service] incident — [date]
+
+We experienced [description] from [start] to [end] ([duration]).
+
+Root cause: [one sentence]
+
+Impact: [specific metrics]
+
+What we're doing:
+1. [Fix deployed]
+2. [Monitoring improvements]
+3. [Process changes]
+
+We apologize for the disruption.
+```
+
 ## Post-Mortem Template
 
 ```
-## Post-Mortem: [Date] - [Incident Title]
+## Post-Mortem: [Date] — [Title]
 
 Severity: Sev[1-4]
-Duration: [detection] to [resolution] ([total minutes])
-Impact: [users/customers affected] for [duration]
+Duration: [detection] → [resolution] ([total])
+Impact: [users/customers] for [time]
 
 ### Timeline (UTC)
 - [Time]: [What happened]
 - [Time]: [Detection]
 - [Time]: [Response started]
 - [Time]: [Resolution]
-- [Time]: [All-clear declared]
+- [Time]: [All-clear]
 
 ### Root Cause
 One paragraph. System-focused, not person-focused.
 
 ### Contributing Factors
-- Monitoring gaps (what we didn't see)
-- Process gaps (what we didn't do)
-- Knowledge gaps (what we didn't know)
+- Monitoring gaps
+- Process gaps
+- Knowledge gaps
 
 ### Action Items
 | Action | Owner | Due | Type |
 |--------|-------|-----|------|
-| [action] | @name | Date | prevent / detect / respond |
+| [action] | @name | Date | prevent/detect/respond |
 
 ### What Went Well
-[Honest assessment]
-
 ### What Went Wrong
-[Honest assessment — no blame. Focus on system and process.]
-
 ### What We'll Do Differently
-[Process, monitoring, or code changes]
 ```
 
 ## Runbook Quality Checklist
 
-- [ ] Every command is copy-paste ready with no placeholders
+- [ ] Every command copy-paste ready with no placeholders
 - [ ] Every step has time estimates
 - [ ] Multiple resolution paths for common failure modes
-- [ ] One runbook per incident type (not per component)
-- [ ] Verification step exists for every resolution
-- [ ] Escalation contacts include backup method (Slack + phone)
+- [ ] One runbook per incident type
+- [ ] Verification step for every resolution
+- [ ] Escalation contacts include backup (Slack + phone)
 - [ ] Decision tree is shallow (3-4 levels max)
 - [ ] Runbook tested in a drill within the last quarter
 
 ## Anti-Patterns
 
-| Anti-pattern | Why it fails |
-|--------------|-------------|
-| Steps that say "fix the issue" without telling how | On-call engineer under pressure guesses, wastes time |
-| Commands with unsubstituted variables | Copy-paste fails, stress increases |
-| No verification step | Engineer doesn't know if fix actually worked |
-| Outdated runbooks (>6 months old) | Commands rot, endpoints change, trust erodes |
-| Runbooks nobody has tested | First test is during the actual incident — worst time |
-| Too many steps (>15) | Engineer gets lost; simplify or split |
+| Anti-pattern | Fix |
+|-------------|-----|
+| Steps that say "fix the issue" | Tell HOW, not what |
+| Commands with unsubstituted variables | Copy-paste ready |
+| No verification step | How to know fix worked |
+| Outdated runbooks (>6 months) | Commands rot, trust erodes |
+| Runbooks nobody tested | First test is during the actual incident |
+| Too many steps (>15) | Split or simplify |
 | No time-boxes | Engineer doesn't know when to escalate |
 
 ## Sources
+
 - Google SRE Book: "Monitoring Distributed Systems"
+- Google SRE Workbook: Incident Response
 - PagerDuty incident response documentation
 - Atlassian post-mortem best practices
 - Microsoft SRE practices

@@ -1,91 +1,232 @@
 ﻿---
 name: auth-architect
-description: Implement auth with OWASP security standards
+description: Implement authentication and authorization with OWASP Top 10 standards, OAuth 2.0 + OIDC, WebAuthn/Passkeys, session management, and RBAC/ABAC. Use when user asks to implement login, signup, authentication, authorization, JWT, OAuth, SSO, passkeys, MFA, or role-based access. Do NOT use for API key management (use api-forge), encryption at rest, or network-level security (firewalls, WAF).
+license: MIT
+compatibility: opencode
+metadata:
+  workflow: backend
+  audience: developers
+  version: "2.0"
 ---
-
 
 # Auth Architect
 
-Generates authentication and authorization systems that follow OWASP Top 10, CWE/SANS guidelines, and production security patterns from AWS, Auth0, and OWASP Cheat Sheet Series.
+Production authentication and authorization systems following OWASP Top 10, NIST SP 800-63B, and patterns from Auth0, AWS Cognito, and OWASP Cheat Sheet Series.
 
-## Authentication Methods
+## Workflow
 
-| Method | Use Case | Security Level |
-|--------|----------|----------------|
-| Session-based (httpOnly cookies) | Traditional web apps | High (with CSRF) |
-| JWT access + refresh tokens | APIs, SPAs, mobile | Medium (token storage matters) |
-| OAuth 2.0 / OIDC | Third-party auth, SSO | High (delegated) |
-| API keys | Machine-to-machine, CLIs | Medium (key rotation needed) |
-| WebAuthn / Passkeys | Passwordless, high security | Very High |
+### Step 1: Choose auth method
 
-## Password Requirements
+| Method | Use Case | Security Level | Complexity |
+|--------|----------|----------------|------------|
+| Session-based (httpOnly cookies) | Server-rendered web apps | High | Low |
+| JWT access + refresh tokens | SPAs, mobile, APIs | High (with proper storage) | Medium |
+| OAuth 2.0 + OIDC | Third-party login, SSO | High | High |
+| API keys with HMAC | M2M, CLIs, integrations | Medium | Low |
+| WebAuthn / Passkeys | Passwordless, high-security | Very High | Medium |
+| Magic links / OTP | Low-friction, email-based | Medium | Low |
 
-- Minimum 12 characters (not 8)
-- No composition rules (uppercase, number, symbol required â€” these weaken security)
-- Check against known breached passwords (HaveIBeenPwned API)
-- BCrypt with cost factor 12 (or Argon2id)
-- Rate limit to 5 attempts per 15 minutes per IP/username
+### Step 2: Implement authentication
 
-## JWT Best Practices
+#### Password-based auth
+
+```
+1. Validate email format + length
+2. Check against breached passwords (HaveIBeenPwned API)
+3. Hash with Argon2id (preferred) or BCrypt (cost 12 minimum)
+4. Generate session/JWT
+5. Return user (never return password hash)
+```
+
+**Password requirements** (NIST SP 800-63B):
+- Minimum 12 characters
+- No composition rules (uppercase, number, symbol required — these weaken security)
+- Allow at least 64 characters max
+- Allow all printable ASCII + Unicode
+- Check against known breached passwords
+- Rate limit: 5 attempts per 15 minutes per IP/username
+
+#### JWT implementation
 
 ```json
 {
   "iss": "https://api.example.com",
   "sub": "user_abc123",
   "aud": ["web", "mobile"],
-  "exp": 900,        // 15 min for access
+  "exp": 900,
   "iat": 1700000000,
   "jti": "unique_id",
   "sid": "session_id"
 }
 ```
 
-- Access tokens: 15 min expiry
-- Refresh tokens: 7 day expiry, rotate on use
-- Store JWTs in httpOnly, Secure, SameSite=Strict cookies â€” NOT localStorage
-- Implement token revocation (deny-list for critical actions)
+- Access token: 15 min expiry
+- Refresh token: 7 day expiry, rotate on every use (token rotation)
+- Store in httpOnly, Secure, SameSite=Strict cookies
+- NEVER store in localStorage (XSS vulnerability)
+- Implement refresh token reuse detection (revoke all tokens if stolen)
+- Add `typ: "at+jwt"` or `typ: "rt+jwt"` header for explicit token type
 
-## Session Management
+#### OAuth 2.0 + OIDC
 
-- Generate session ID via crypto.randomUUID() â€” never sequential
-- Store sessions server-side (Redis with TTL)
-- Rotate session ID on privilege escalation
+See [references/oauth2-flow.md](references/oauth2-flow.md) for complete flow.
+
+**Authorization Code + PKCE** (mandatory for public clients):
+```
+1. Client generates code_verifier (random 43-128 octets)
+2. Client computes code_challenge = base64url(SHA256(code_verifier))
+3. Browser redirects to /authorize?response_type=code&code_challenge=...
+4. Server issues authorization code
+5. Client exchanges code + code_verifier for tokens
+6. Server verifies SHA256(code_verifier) === code_challenge
+```
+
+**Scopes**: Always use least-privilege scopes. Document each scope's access level.
+
+#### WebAuthn / Passkeys
+
+See [references/webauthn.md](references/webauthn.md) for ceremony details.
+
+**Registration ceremony:**
+```
+1. Server generates challenge (crypto.randomBytes(32))
+2. Server sends challenge + user info + relying party info
+3. Browser creates credential via navigator.credentials.create()
+4. Client sends credential ID, public key, attestation
+5. Server verifies attestation, stores public key
+```
+
+**Authentication ceremony:**
+```
+1. Server generates challenge
+2. Server sends challenge + allowCredentials (list of registered credential IDs)
+3. Browser gets assertion via navigator.credentials.get()
+4. Client sends credential ID, signature, authenticator data
+5. Server verifies signature against stored public key
+```
+
+### Step 3: Implement authorization
+
+#### Role-Based Access Control (RBAC)
+
+```
+User → Role(s) → Permission(s)
+```
+
+Define roles clearly:
+```json
+{
+  "admin": ["users:*", "orders:*", "settings:*"],
+  "manager": ["orders:read", "orders:write", "users:read"],
+  "support": ["orders:read", "tickets:*"],
+  "user": ["orders:read", "orders:write:own"]
+}
+```
+
+#### Attribute-Based Access Control (ABAC)
+
+For fine-grained access beyond RBAC:
+```
+Allow if user.department === resource.department AND user.clearance >= resource.classification
+```
+
+### Step 4: Secure the implementation
+
+#### Session management
+
+- Generate session ID via `crypto.randomUUID()` — never sequential or predictable
+- Store sessions server-side (Redis with TTL, or database)
+- Rotate session ID on privilege escalation (e.g., login)
 - Terminate all sessions on password change
-- Idle timeout: 30 min for sensitive apps
+- Idle timeout: 30 min for sensitive apps, 2h for standard
 - Absolute timeout: 24 hours
+- Implement "remember me" with separate, longer-lived token
 
-## CSRF Protection
+#### CSRF Protection
 
-- SameSite=Strict on cookies
-- CSRF tokens for state-changing requests
-- Double-submit cookie pattern as fallback
+| Layer | Implementation |
+|-------|---------------|
+| Cookie | SameSite=Strict on session cookie |
+| Token | CSRF token in state-changing forms |
+| Double-submit | Send CSRF token in cookie + header, compare server-side |
+| Header | Require custom header (X-Requested-By) for API calls |
 
-## API Security
+#### API Security
 
-- CORS: whitelist specific origins, never `*` with credentials
-- Rate limit by user ID + IP
-- Request size limits (1MB default)
-- Body parsing limits
-- SQL injection: parameterized queries only
-- No secrets in error messages
+| Protection | Implementation |
+|------------|---------------|
+| CORS | Whitelist specific origins. Never `*` with credentials |
+| Rate limit | By user ID + IP. Stricter on auth endpoints |
+| Request size | 1MB default, configurable per endpoint |
+| Body parsing | Limit nested depth, field count |
+| SQL injection | Parameterized queries only. Never string interpolation |
+| Secrets in errors | Never expose stack traces, token values, or internal state |
+| Password reset | Time-limited token, sent to verified email only |
 
-## Breach Response
+### Step 5: Add breach response
 
-- Log all auth events (login, logout, failure, password change)
-- Alert on anomalous patterns (multiple geo-locations, rapid attempts)
-- Support account recovery with out-of-band verification
-- Notify users on security changes (new device, password change)
+- Log all auth events: login, logout, failure, password change, token refresh, permission change
+- Alert on anomalous patterns: multiple geo-locations < 30min apart, rapid failed attempts, credential stuffing patterns
+- Support account recovery with out-of-band verification (email + SMS)
+- Notify users on: new device login, password change, email change, MFA change
+
+## MFA Implementation
+
+| Factor Type | Examples | Security |
+|-------------|----------|----------|
+| TOTP (Time-based OTP) | Authenticator apps (Google, Authy) | High |
+| SMS OTP | Phone-based codes | Medium (SIM swap risk) |
+| Backup codes | One-time use, generated at setup | High (as backup) |
+| Hardware key | YubiKey, SoloKey (FIDO2/WebAuthn) | Very High |
+| Passkeys | Platform authenticator (Face ID, Touch ID) | Very High |
+
+### MFA enrollment flow
+
+```
+1. Verify password
+2. Generate TOTP secret (32 bytes via crypto.randomBytes)
+3. Display QR code (otpauth:// protocol)
+4. Ask user to scan and enter code
+5. Verify code against secret
+6. Generate backup codes (10 codes, BCrypt-hashed, stored)
+7. Mark MFA as enabled
+```
+
+## Production Checklist
+
+- [ ] Password hashing with Argon2id or BCrypt cost >= 12
+- [ ] Rate limiting on login (5/15min), password reset (3/60min), MFA (3/15min)
+- [ ] Refresh token rotation with reuse detection
+- [ ] httpOnly + Secure + SameSite cookies for session/JWT
+- [ ] CORS whitelist, never `*` with credentials
+- [ ] SQL injection prevention (parameterized queries everywhere)
+- [ ] Session fixation prevention (rotate on login)
+- [ ] MFA available for all users
+- [ ] Account lockout after 5 failed attempts
+- [ ] Password breach check at registration and on change
+- [ ] Logging of all auth events
+- [ ] Rate limiting per endpoint, not globally
+
+## Anti-Patterns
+
+| Anti-pattern | Fix |
+|-------------|-----|
+| JWT in localStorage | httpOnly cookies with CSRF protection |
+| Refresh token without rotation | Rotate on every use. Reuse detection revokes all. |
+| Password composition rules | Long passwords (>12 chars) + breach check. No complexity rules. |
+| No rate limiting on login | 5 attempts per 15 min per username + IP |
+| MFA as optional (unprompted) | Encourage or require MFA for sensitive actions |
+| Session doesn't expire | Idle + absolute timeout. Rotate on privilege change. |
+| No audit logging | Log all auth events to secure, append-only store |
+| Hardcoded JWT secret | Environment variable, rotated periodically |
 
 ## Sources
+
 - OWASP Top 10 (2025)
-- OWASP Cheat Sheet Series
-- NIST SP 800-63B
-- IETF RFC 7519 (JWT)
-
-
-
-
-
-
-
-
+- OWASP Cheat Sheet Series — Authentication, Session Management, CSRF
+- NIST SP 800-63B — Digital Identity Guidelines
+- IETF RFC 7519 (JWT), RFC 6749 (OAuth 2.0), RFC 7636 (PKCE)
+- IETF RFC 9120 — OAuth 2.0 for Browser-Based Apps
+- WebAuthn Level 2 (W3C Recommendation)
+- Auth0 Security Architecture
+- FIDO2 Specification

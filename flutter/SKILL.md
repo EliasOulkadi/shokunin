@@ -1,21 +1,24 @@
 ---
 name: flutter
-description: Build production Flutter apps with clean architecture, Riverpod state management, GoRouter navigation, and platform-specific integration. Covers widget composition, state management (Riverpod > Bloc > Provider), Clean Architecture layering, GoRouter with deep linking, platform channels, theming, and App Store/Play Store deployment. Use when user asks to create a Flutter app, set up state management with Riverpod, design widget trees, implement navigation, or deploy to stores. Triggers on "flutter", "dart", "riverpod", "widget", "go_router", "flutter clean architecture", "mobile app flutter", "pubspec". Do NOT use for React Native, web-only React, or general mobile design.
+description: Build production Flutter apps with Clean Architecture, Riverpod (preferred over Bloc/Provider), GoRouter navigation, Impeller rendering engine, Dart 3.7+ patterns, platform channels via Pigeon, and App Store/Play Store deployment. Use when user asks to create a Flutter app, set up state management, design widgets, implement navigation, or deploy to stores. Do NOT use for React Native (use react-native), web-only React, or general mobile design.
 license: MIT
 compatibility: opencode
 metadata:
   workflow: mobile
   audience: developers
+  version: "2.0"
 ---
 
-Build production Flutter apps with Clean Architecture, Riverpod, GoRouter, and platform channels.
+# Flutter Architect
+
+Build production Flutter apps with Clean Architecture, Riverpod, GoRouter, Impeller, and platform channels.
 
 ## State Management Decision
 
 | Scenario | Recommended |
 |----------|-------------|
-| New project, most apps | Riverpod (async-first, testable, DI built-in) |
-| Large team, strict unidirectional flow | Bloc (explicit events/states, predictable) |
+| Most apps | Riverpod (async-first, testable, DI built-in) |
+| Large team, strict unidirectional | Bloc (explicit events/states, predictable) |
 | Legacy or tiny app | Provider (simple, but context-coupled) |
 
 ## Clean Architecture + Riverpod
@@ -28,9 +31,9 @@ lib/
 │   └ network/
 ├ features/
 │  ├ auth/
-│  │   ├ domain/          # Pure Dart — entities, use cases, repository contracts
+│  │   ├ domain/          # Pure Dart — entities, use cases, repo contracts
 │  │   │   ├ models/user.dart
-│  │   │   ├ repositories/auth_repository.dart    # abstract
+│  │   │   ├ repositories/auth_repository.dart
 │  │   │   └ usecases/login.dart
 │  │   ├ data/            # Implementation — API, DB, DTOs
 │  │   │   ├ repositories/auth_repository_impl.dart
@@ -46,6 +49,7 @@ lib/
 ```
 
 ### Domain Layer (pure Dart, no Flutter imports)
+
 ```dart
 // domain/models/user.dart
 class User {
@@ -66,13 +70,12 @@ abstract class AuthRepository {
 class Login {
   final AuthRepository repository;
   const Login(this.repository);
-  Future<User> call(String email, String password) async {
-    return repository.login(email, password);
-  }
+  Future<User> call(String email, String password) => repository.login(email, password);
 }
 ```
 
 ### Data Layer
+
 ```dart
 // data/repositories/auth_repository_impl.dart
 class AuthRepositoryImpl implements AuthRepository {
@@ -83,19 +86,17 @@ class AuthRepositoryImpl implements AuthRepository {
     final dto = await remote.login(email, password);
     return dto.toDomain();
   }
-  // ...
+  @override
+  Stream<User?> authStateChanges() => remote.authStateChanges();
 }
 ```
 
 ### Presentation Layer (Riverpod)
+
 ```dart
 // presentation/providers/auth_provider.dart
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
   return AuthRepositoryImpl(AuthRemoteSource());
-});
-
-final loginProvider = Provider<Login>((ref) {
-  return Login(ref.watch(authRepositoryProvider));
 });
 
 final authStateProvider = StreamProvider<User?>((ref) {
@@ -118,7 +119,6 @@ class LoginNotifier extends StateNotifier<AsyncValue<void>> {
 ```
 
 ```dart
-// presentation/screens/login_screen.dart
 class LoginScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -147,74 +147,105 @@ final router = GoRouter(
     return null;
   },
   routes: [
-    GoRoute(
-      path: '/',
-      builder: (_, __) => const HomeScreen(),
-    ),
-    GoRoute(
-      path: '/product/:id',
-      builder: (_, state) => ProductDetailScreen(
-        id: state.pathParameters['id']!,
-      ),
-    ),
-    GoRoute(
-      path: '/login',
-      builder: (_, __) => const LoginScreen(),
-    ),
+    GoRoute(path: '/', builder: (_, __) => const HomeScreen()),
+    GoRoute(path: '/product/:id', builder: (_, state) =>
+      ProductDetailScreen(id: state.pathParameters['id']!)),
+    GoRoute(path: '/login', builder: (_, __) => const LoginScreen()),
   ],
 );
+```
 
-// MaterialApp.router(routerConfig: router)
+## Impeller (rendering engine)
+
+Since Flutter 3.24+, Impeller is the default rendering engine on iOS and
+replaces Skia. On Android, opt in:
+
+```yaml
+# android/app/build.gradle
+android {
+  defaultConfig {
+    // Enable Impeller
+    renderingEngine = "impeller"
+  }
+}
+```
+
+Benefits:
+- Eliminates skia shader compilation jank (first-frame jank gone)
+- Faster frame rendering on multiple GPUs
+- Better memory usage on low-end devices
+
+## Dart 3.7+ Patterns
+
+```dart
+// Wildcard variables (Dart 3.7)
+final (result, _) = await api.fetchData();
+
+// Sealed classes for state (Dart 3.0+)
+sealed class AsyncState<T> {}
+class Loading<T> extends AsyncState<T> {}
+class Success<T> extends AsyncState<T> { final T data; Success(this.data); }
+class Error<T> extends AsyncState<T> { final String message; Error(this.message); }
+
+// Pattern matching
+switch (state) {
+  case Loading(): return const Spinner();
+  case Success(data: final d): return Text(d.toString());
+  case Error(message: final m): return Text('Error: $m');
+}
+
+// Records
+(User user, String token) loginResult = await authService.login(email, password);
+
+// Extension types (zero-cost wrappers)
+extension type Email._(String value) {
+  Email(this.value) : assert(value.contains('@'));
+}
+```
+
+## Platform Integration with Pigeon
+
+Use Pigeon for type-safe platform channels (instead of manual MethodChannel):
+
+```yaml
+# pubspec.yaml
+dev_dependencies:
+  pigeon: ^22.0.0
+```
+
+```dart
+// battery.dart (Pigeon input)
+@HostApi()
+abstract class BatteryApi {
+  int getBatteryLevel();
+  bool isCharging();
+}
+
+// Run: dart run pigeon --input battery.dart --dart_out lib/battery.dart --objc_header_out ios/Runner/battery.h --objc_source_out ios/Runner/battery.m
 ```
 
 ## Performance Rules
 
 | Rule | Implementation |
 |------|---------------|
-| Avoid rebuilding entire widget tree | `Consumer` at leaf level, not wrapping entire screen |
-| Use `const` constructors | Every widget that can be const should be const |
+| Use Consumer at leaf level | `Consumer` wrapping specific widget, not entire screen |
+| `const` constructors everywhere | Every widget that can be const should be const |
 | Lazy loading | `AutomaticKeepAliveClientMixin` only when needed |
-| Image optimization | `cached_network_image` with resize |
-| Avoid unnecessary RepaintBoundary | Only wrap heavy, isolated widgets |
-| Use `ListView.builder` over `Column`+`ListView` | Builder is lazy, Column renders all children |
+| Image optimization | `cached_network_image` or `expo-image` with resize |
+| ListView.builder over Column+ListView | Builder is lazy, Column renders all children |
 | Profile before optimizing | `flutter run --profile`, check DevTools |
+| Avoid RepaintBoundary overuse | Only wrap heavy, isolated widgets |
 
-## Platform Integration
-
-```dart
-// Method channel (iOS/Android native code)
-class BatteryPlugin {
-  static const _channel = MethodChannel('com.example/battery');
-  static Future<int> getBatteryLevel() async {
-    final level = await _channel.invokeMethod('getBatteryLevel');
-    return level as int;
-  }
-}
-
-// Platform-specific code
-if (defaultTargetPlatform == TargetPlatform.iOS) {
-  // iOS-specific
-} else if (defaultTargetPlatform == TargetPlatform.android) {
-  // Android-specific
-}
-```
-
-## Theming
+## Theming (Material 3)
 
 ```dart
 class AppTheme {
-  static const _primaryColor = Color(0xFF1B365D);
-
   static ThemeData light() {
     return ThemeData(
       useMaterial3: true,
       colorScheme: ColorScheme.fromSeed(
-        seedColor: _primaryColor,
+        seedColor: const Color(0xFF1B365D),
         brightness: Brightness.light,
-      ),
-      textTheme: const TextTheme(
-        headlineLarge: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
-        bodyLarge: TextStyle(fontSize: 16),
       ),
     );
   }
@@ -223,7 +254,7 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       colorScheme: ColorScheme.fromSeed(
-        seedColor: _primaryColor,
+        seedColor: const Color(0xFF1B365D),
         brightness: Brightness.dark,
       ),
     );
@@ -231,20 +262,44 @@ class AppTheme {
 }
 ```
 
+## Testing Patterns
+
+```dart
+// Unit test domain layer (fast, no Flutter)
+void main() {
+  group('Login use case', () {
+    test('returns User on success', () async {
+      final repo = MockAuthRepository();
+      when(() => repo.login(any(), any())).thenAnswer((_) async => testUser);
+      final login = Login(repo);
+      final result = await login('test@test.com', 'pass');
+      expect(result, isA<User>());
+    });
+  });
+}
+
+// Widget test
+void main() {
+  testWidgets('shows error on failed login', (tester) async {
+    await tester.pumpWidget(const LoginScreen());
+    await tester.enterText(find.byKey(const Key('email')), 'bad@test.com');
+    await tester.tap(find.text('Login'));
+    await tester.pump();
+    expect(find.text('Invalid credentials'), findsOneWidget);
+  });
+}
+```
+
 ## Deployment
 
 ```bash
-# Build
-flutter build ios --release
-flutter build appbundle --release  # Android
-flutter build ipa --release       # iOS
+flutter build appbundle --release   # Android
+flutter build ipa --release         # iOS
+flutter build web --release         # Web
 
-# Test before release
-flutter test
-flutter analyze
-
-# CI/CD with Codemagic or GitHub Actions
-# codemagic.yaml or .github/workflows/flutter.yml
+# CI/CD
+# eas build --platform all --profile production
+# fastlane deploy
 ```
 
 ## Production Checklist
@@ -253,13 +308,14 @@ flutter analyze
 - [ ] Domain layer has zero Flutter imports
 - [ ] GoRouter with auth redirect
 - [ ] Deep linking configured
-- [ ] `const` constructors everywhere possible
+- [ ] `const` constructors everywhere
 - [ ] Images use `cached_network_image`
 - [ ] `ListView.builder` / `GridView.builder` for lists
-- [ ] Dart `analyze` passes with zero errors
-- [ ] Tests for domain layer (fast, no Flutter)
+- [ ] Impeller enabled on Android
+- [ ] `dart analyze` passes with zero errors
+- [ ] Unit tests for domain layer
 - [ ] Widget tests for critical screens
-- [ ] Platform-specific code via method channels (not conditional imports)
+- [ ] Platform channels via Pigeon (not manual MethodChannel)
 - [ ] CI/CD configured (Codemagic / GitHub Actions)
 
 ## Anti-Patterns
@@ -267,10 +323,21 @@ flutter analyze
 | Anti-pattern | Fix |
 |-------------|-----|
 | Business logic in widgets | Extract to Riverpod notifiers / use cases |
-| Riverpod providers depending on BuildContext | Provider — no context needed |
+| Riverpod depending on BuildContext | Provider — no context needed |
 | `ref.watch` inside callbacks | `ref.read` for one-time, `ref.watch` only in build |
-| Giant Widget build methods | Extract into smaller widgets or methods |
+| Giant widgets > 200 lines | Extract into smaller widgets |
 | No error handling in AsyncValue | Handle loading/error/data states explicitly |
 | `setState` for global state | Riverpod providers |
-| Hardcoded strings and colors | Theme and constants |
-| `runApp` without error handling | `ErrorWidget.builder` and `PlatformDispatcher.onError` |
+| Manual MethodChannel without types | Pigeon for type-safe platform channels |
+| `runApp` without error handling | `ErrorWidget.builder` + `PlatformDispatcher.onError` |
+
+## Sources
+
+- Flutter Documentation (flutter.dev)
+- Dart 3.7 Language Tour (dart.dev)
+- Riverpod Documentation (riverpod.dev)
+- GoRouter Documentation
+- Impeller Rendering Engine (flutter.dev/go/impeller)
+- Pigeon Plugin (pub.dev/packages/pigeon)
+- Flutter Testing Documentation
+- Codemagic CI/CD for Flutter

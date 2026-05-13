@@ -1,44 +1,46 @@
 ---
 name: docker
-description: Optimize Docker images with multi-stage builds, distroless bases, BuildKit cache mounts, layer caching, security hardening, and docker-compose for local dev. Use when user asks to write a Dockerfile, optimize image size, set up docker-compose, debug containers, or harden container security. Triggers on "Dockerfile", "docker build", "docker-compose", "container", "multi-stage build", "image size", "distroless", "buildkit", "docker security". Do NOT use for Kubernetes deployments, Terraform infrastructure, or CI/CD pipeline design — those have their own skills.
+description: Optimize Docker images with multi-stage builds, distroless bases, BuildKit cache mounts, layer caching, multi-arch builds, security hardening (non-root, seccomp, capabilities), and docker-compose for local dev. Use when user asks to write a Dockerfile, optimize image size, set up docker-compose, debug containers, or harden container security. Do NOT use for Kubernetes deployments (use kubernetes), CI/CD pipeline design (use ci-cd), or Terraform infrastructure (use terraform).
 license: MIT
 compatibility: opencode
 metadata:
   workflow: infrastructure
-  audience: developers
+  audience: devops
+  version: "2.0"
 ---
 
-Expert guide to Docker containers: production-grade Dockerfiles, multi-stage builds, layer optimization, security hardening, and docker-compose for local development.
+# Docker Architect
+
+Production-grade Dockerfiles, multi-stage builds, cache optimization, security hardening, and local development with docker-compose.
 
 ## Workflow
 
-### Step 1: Determine the stack
+### Step 1: Identify stack
 
-Identify: language (Node.js, Go, Python, Rust, Java), build tools needed, runtime requirements.
+Language, build tools, runtime requirements, base image preference.
 
-### Step 2: Apply the golden template
+### Step 2: Apply golden template
 
-Use multi-stage builds with this structure:
+Use multi-stage builds:
 ```
-Stage 1 (dependencies): COPY package files → install
-Stage 2 (build): COPY source → compile
+Stage 1 (deps):   COPY lock files → install production deps
+Stage 2 (build):  COPY source → compile
 Stage 3 (runtime): minimal base → COPY artifacts from stages 1-2
 ```
 
-### Step 3: Optimize
+### Step 3: Optimize (in order)
 
-Apply in order:
-1. **Multi-stage**: Separate build from runtime. Never ship a compiler in production.
-2. **Base image**: Distroless > Alpine > Slim > Full. Match to runtime needs.
+1. **Multi-stage**: Separate build from runtime. Never ship a compiler.
+2. **Base image**: Distroless > Alpine > Slim. Match to runtime needs.
 3. **Layer order**: Dependencies before source code. Maximize cache hits.
-4. **BuildKit**: `RUN --mount=type=cache` for package managers. `--mount=type=secret` for secrets.
-5. **Security**: Non-root user, no shell in runtime, read-only rootfs, health checks.
+4. **BuildKit**: `RUN --mount=type=cache` for package managers, `--mount=type=secret` for secrets.
+5. **Security**: Non-root, no shell in runtime, read-only rootfs, healthchecks.
 
-## Production Dockerfile by Stack
+## Production Dockerfiles
 
 ### Node.js
+
 ```dockerfile
-# syntax=docker/dockerfile:1.4
 FROM node:22-slim AS deps
 WORKDIR /app
 COPY package.json package-lock.json ./
@@ -61,6 +63,7 @@ CMD ["dist/index.js"]
 ```
 
 ### Go
+
 ```dockerfile
 FROM golang:1.23-alpine AS builder
 WORKDIR /app
@@ -77,6 +80,7 @@ CMD ["/server"]
 ```
 
 ### Python
+
 ```dockerfile
 FROM python:3.12-slim AS builder
 WORKDIR /app
@@ -93,27 +97,66 @@ USER nobody
 CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0"]
 ```
 
+### Rust
+
+```dockerfile
+FROM rust:1.78-slim AS builder
+WORKDIR /app
+COPY Cargo.toml Cargo.lock ./
+RUN mkdir src && echo "fn main() {}" > src/main.rs
+RUN cargo build --release 2>/dev/null || true
+COPY src ./src
+RUN cargo build --release
+
+FROM gcr.io/distroless/cc-debian12
+COPY --from=builder /app/target/release/app /app
+CMD ["/app"]
+```
+
 ## Dockerfile Rules
 
 | Rule | Why |
 |------|-----|
-| Pin base image versions (`node:22-slim` not `node:latest`) | Reproducible builds |
-| COPY package files BEFORE source code | Layer caching — deps only rebuild when package.json changes |
+| Pin base image versions (`node:22-slim`, not `node:latest`) | Reproducible builds |
+| COPY package files BEFORE source code | Layer caching |
 | Combine `apt-get update && apt-get install` in one RUN | Avoids stale cache layers |
-| Use `--no-install-recommends` | Reduces image size 20-40% |
+| Use `--no-install-recommends` | 20-40% image size reduction |
 | Never put secrets in ENV or ARG | Leaks in `docker history` |
-| Add `HEALTHCHECK` | Orchestrators detect failures |
+| Add `HEALTHCHECK` | Orchestrator detects failures |
 | Set `USER nonroot` (not root) | Security best practice |
 | Use `.dockerignore` | Smaller build context, faster builds |
 
-## Docker Compose for Local Dev
+## Multi-Architecture Builds
+
+```bash
+# Create builder with QEMU support
+docker buildx create --name multiarch --use
+docker buildx inspect --bootstrap
+
+# Build for multiple platforms
+docker buildx build \
+  --platform linux/amd64,linux/arm64 \
+  --tag registry/app:latest \
+  --push .
+```
+
+## Docker Compose Watch (hot reload)
 
 ```yaml
 services:
   app:
     build: .
     ports: ["3000:3000"]
-    volumes: [".:/app", "/app/node_modules"]
+    develop:
+      watch:
+        - action: sync
+          path: ./src
+          target: /app/src
+          ignore:
+            - node_modules/
+            - "*.test.ts"
+        - action: rebuild
+          path: package.json
     environment:
       - DATABASE_URL=postgres://user:pass@db:5432/app
     depends_on: [db]
@@ -134,29 +177,42 @@ volumes:
   pgdata:
 ```
 
-## Debugging
+Run: `docker compose watch`
 
-| Problem | Command |
-|---------|---------|
-| Inspect layers | `docker history --no-trunc <image>` |
-| Check size | `docker system df` |
-| Shell into running container | `docker exec -it <container> /bin/sh` |
-| Inspect build cache | `docker builder prune --dry-run` |
-| Scan vulnerabilities | `docker scout cves <image>` |
-| View logs | `docker logs <container>` |
-| Copy file from container | `docker cp <container>:/path/file ./local` |
+## Security Hardening
 
-## Anti-Patterns
+### Reduce container capabilities
 
-| Anti-pattern | Fix |
-|-------------|-----|
-| Single-stage Dockerfile with full OS | Multi-stage + distroless/alpine |
-| `COPY . .` before `npm install` | COPY package files first, then `npm ci`, then source |
-| `latest` tag | Pin semantic version |
-| Running as root | `USER nonroot` |
-| Secrets in build args | `--mount=type=secret` |
-| No `.dockerignore` | Add one — exclude node_modules, .git, .env |
-| Multiple FROMs without names | Name each stage: `AS builder`, `AS deps`, `AS runtime` |
+```dockerfile
+# Deny all, then allow specific
+RUN setcap cap_net_bind_service=+ep /app/server
+USER nonroot
+```
+
+In Kubernetes:
+```yaml
+securityContext:
+  capabilities:
+    drop: [ALL]
+    add: [NET_BIND_SERVICE]
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+```
+
+### Debug and security scanning
+
+| Tool | Purpose | Command |
+|------|---------|---------|
+| `docker scout` | Vulnerability scanning | `docker scout cves <image>` |
+| `dive` | Layer inspection | `dive <image>` |
+| `trivy` | Comprehensive scanning | `trivy image <image>` |
+| `cosign` | Image signing and verification | `cosign sign --key cosign.key <image>` |
+
+### SLSA provenance
+
+```bash
+docker buildx build --attest type=provenance,mode=max --push -t registry/app:latest .
+```
 
 ## Image Size Reference
 
@@ -165,5 +221,38 @@ volumes:
 | Go | ~800MB | ~12-25MB (scratch) |
 | Node.js | ~1.2GB | ~90-180MB |
 | Python | ~1GB | ~120-200MB |
-| Rust | ~1.5GB | ~20-50MB |
+| Rust | ~1.5GB | ~20-50MB (cc) |
 | Java | ~700MB | ~150-250MB |
+
+## Debugging
+
+| Problem | Command |
+|---------|---------|
+| Inspect layers | `docker history --no-trunc <image>` |
+| Check disk usage | `docker system df` |
+| Shell into container | `docker exec -it <container> /bin/sh` |
+| Inspect build cache | `docker builder prune --dry-run` |
+| Scan CVEs | `docker scout cves <image>` |
+| View logs | `docker logs --tail 100 -f <container>` |
+| Copy file from container | `docker cp <container>:/path/file ./local` |
+
+## Anti-Patterns
+
+| Anti-pattern | Fix |
+|-------------|-----|
+| Single-stage with full OS | Multi-stage + distroless/alpine |
+| `COPY . .` before `npm install` | COPY package files first, then `npm ci`, then source |
+| `latest` tag | Pin semantic version or commit SHA |
+| Running as root | `USER nonroot` |
+| Secrets in build args | `--mount=type=secret` |
+| No `.dockerignore` | Add one — exclude node_modules, .git, .env, build cache |
+| Multiple FROMs without names | Name each stage: `AS builder`, `AS deps`, `AS runtime` |
+
+## Sources
+
+- Docker Documentation (docs.docker.com)
+- Docker Best Practices Guide
+- BuildKit Documentation
+- Google Distroless Base Images
+- Trivy Vulnerability Scanner (aquasecurity.github.io/trivy)
+- SLSA Framework (slsa.dev)
