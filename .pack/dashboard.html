@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Shokunin Ecosystem Dashboard</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:Charter,Georgia,Palatino,serif;background:#f5f4ed;color:#141413;padding:40px;max-width:900px;margin:0 auto;line-height:1.5}
+  h1{font-size:28px;color:#1B365D;border-left:3px solid #1B365D;padding-left:12px;margin-bottom:4px}
+  .sub{color:#504e49;font-size:14px;margin-bottom:24px}
+  h2{font-size:18px;color:#141413;margin:20px 0 10px 0;border-bottom:1px solid #e8e6dc;padding-bottom:4px}
+  .grid{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+  .card{background:#faf9f5;border:1px solid #e5e3d8;border-radius:4px;padding:12px 14px;flex:1;min-width:150px}
+  .card h3{font-size:13px;color:#1B365D;margin-bottom:4px}
+  .card p{font-size:11px;color:#504e49;margin:0}
+  .stat{font-size:24px;font-weight:500;color:#1B365D}
+  .green{color:#1B5D3A;font-weight:500}
+  table{width:100%;border-collapse:collapse;font-size:12px;margin:10px 0}
+  th{text-align:left;font-weight:500;color:#3d3d3a;padding:4px 8px;border-bottom:1px solid #e8e6dc;background:#faf9f5}
+  td{padding:4px 8px;border-bottom:1px solid #e5e3d8}
+  .tag{display:inline-block;background:#E4ECF5;color:#1B365D;font-size:10px;padding:1px 6px;border-radius:2px;margin:1px}
+  .footer{text-align:center;color:#6b6a64;font-size:11px;margin-top:40px;padding-top:20px;border-top:1px solid #e8e6dc}
+  a{color:#1B365D}
+</style>
+</head>
+<body>
+<h1>Shokunin Ecosystem</h1>
+<p class="sub" id="timestamp">Cargando...</p>
+
+<h2>Skills</h2>
+<div class="grid">
+  <div class="card"><h3>Infrastructure</h3><p>docker, kubernetes, terraform, ci-cd, db-admin</p></div>
+  <div class="card"><h3>Backend</h3><p>auth-architect, api-forge, db-sculptor, error-handler</p></div>
+  <div class="card"><h3>Frontend</h3><p>component-forge, responsive-engine, motion-craft, landing-craft, ui-ux-pro-max</p></div>
+  <div class="card"><h3>Mobile</h3><p>flutter, react-native</p></div>
+  <div class="card"><h3>Quality</h3><p>test-commander, performance-profiler</p></div>
+  <div class="card"><h3>Content</h3><p>communication, content-marketing, business-proposals, seo-geo, translate-craft</p></div>
+  <div class="card"><h3>Productivity</h3><p>git-workflow, strategy, design, documentation, runbook-gen, finance, legal-counsel, windows-powershell</p></div>
+  <div class="card"><h3>Documents</h3><p>kami, portfolio-auto</p></div>
+  <div class="card"><h3>System</h3><p>memory, chromadb, telegram-bot, whendone-plus</p></div>
+</div>
+<p style="text-align:right;font-size:13px;font-weight:500;color:#1B365D">Total: 36 skills</p>
+
+<h2>System Status</h2>
+<div class="grid">
+  <div class="card"><h3>Memory</h3><p>ChromaDB — ~400 KB en disco, backups semanales</p></div>
+  <div class="card"><h3>Telegram</h3><p class="green">@EliasOpenBot — Activo</p></div>
+  <div class="card"><h3>MCP Servers</h3><p>filesystem, fetch, playwright, memory</p></div>
+  <div class="card"><h3>Subagents</h3><p>code-review, writer, debugger</p></div>
+</div>
+
+<h2>Quick Links</h2>
+<table>
+  <tr><th>Recurso</th><th>Link / Ruta</th></tr>
+  <tr><td>GitHub Repo</td><td><a href="https://github.com/EliasOulkadi/shokunin">github.com/EliasOulkadi/shokunin</a></td></tr>
+  <tr><td>Telegram Bot</td><td><a href="https://t.me/EliasOpenBot">@EliasOpenBot</a></td></tr>
+  <tr><td>Skills</td><td>~/.config/opencode/skills/</td></tr>
+  <tr><td>Memory Data</td><td>~/.shokunin/memory/</td></tr>
+  <tr><td>This Dashboard</td><td>~/shokunin-dashboard.html</td></tr>
+  <tr><td>Bookmarklet</td><td>~/shokunin-bookmarklet.html</td></tr>
+</table>
+
+<div class="footer">
+  Shokunin v3.1 · Hecho con parchment y ink-blue · github.com/EliasOulkadi/shokunin
+</div>
+
+<script>document.getElementById('timestamp').textContent = 'Actualizado: ' + new Date().toLocaleString('es-ES')</script>
+</body>
+</html>

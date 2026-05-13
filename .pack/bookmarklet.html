@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="es">
+<head><meta charset="UTF-8"><title>Shokunin Bookmarklet</title>
+<style>body{font-family:Charter,Georgia,serif;background:#f5f4ed;color:#141413;max-width:600px;margin:80px auto;padding:0 20px;line-height:1.6}h1{color:#1B365D;border-left:3px solid #1B365D;padding-left:12px}.bookmarklet{display:inline-block;background:#1B365D;color:#fff;padding:12px 24px;border-radius:4px;font-size:18px;text-decoration:none;margin:20px 0;cursor:grab}.bookmarklet:hover{background:#2D5A8A}code{background:#faf9f5;padding:1px 4px;border-radius:2px;font-size:14px;color:#3d3d3a}.steps{background:#faf9f5;border-left:2px solid #1B365D;padding:12px 16px;border-radius:3px;margin:20px 0}</style></head>
+<body>
+<h1>Shokunin Bookmarklet</h1>
+<p>Arrastra este link a la barra de marcadores de tu navegador:</p>
+<a class="bookmarklet" href="javascript:(function(){var t=document.title,u=location.href,s=window.getSelection()?.toString()||'',c=document.body?.innerText?.substring(0,3000)||'';var msg='Titulo: '+t+'\nURL: '+u+'\nSeleccion: '+s+'\n\n'+c;fetch('http://localhost:5172/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:msg})}).then(function(r){return r.json()}).then(function(d){alert('Enviado a OpenCode')}).catch(function(){navigator.clipboard.writeText(msg).then(function(){alert('OpenCode no disponible.\n\nCopiado al portapapeles.\nPega en OpenCode cuando estes listo.')})})})()">Enviar a OpenCode</a>
+
+<div class="steps">
+<strong>Como usarlo:</strong><br>
+1. Arrastra el link rojo de arriba a la barra de marcadores<br>
+2. Navega a cualquier pagina web<br>
+3. Haz clic en el marcador<br>
+4. El contenido se envia a OpenCode (o se copia al portapapeles)
+</div>
+
+<p><small>No instala nada. No corre en background. Solo cuando haces clic.</small></p>
+</body>
+</html>

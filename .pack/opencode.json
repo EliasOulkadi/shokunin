@@ -1,0 +1,65 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "model": "nvidia/moonshotai/kimi-k2.6",
+  "provider": {
+    "nvidia": {
+      "name": "NVIDIA",
+      "api": "https://integrate.api.nvidia.com/v1",
+      "options": {
+        "baseURL": "https://integrate.api.nvidia.com/v1",
+        "apiKey": "YOUR_NVIDIA_API_KEY",
+        "timeout": 600000
+      },
+      "models": {
+        "moonshotai/kimi-k2.6": {
+          "name": "Kimi K2.6",
+          "reasoning": true,
+          "tool_call": true
+        }
+      }
+    },
+    "ollama": {
+      "name": "Ollama (local)",
+      "options": { "baseURL": "http://localhost:11434/v1" },
+      "models": {
+        "qwen3:14b": { "name": "Qwen3 14B" },
+        "deepseek-coder:6.7b": { "name": "DeepSeek Coder 6.7B" }
+      }
+    }
+  },
+  "plugin": [
+    "superpowers@git+https://github.com/obra/superpowers.git"
+  ],
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "C:\\Users\\{{USERNAME}}"]
+    },
+    "fetch": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-fetch"]
+    },
+    "playwright": {
+      "command": "npx",
+      "args": ["-y", "@playwright/mcp"]
+    },
+    "memory": {
+      "command": "python",
+      "args": ["C:\\Users\\{{USERNAME}}\\.shokunin\\memory\\mcp-server.py"]
+    }
+  },
+  "agents": {
+    "code-review": {
+      "model": "nvidia/moonshotai/kimi-k2.6",
+      "description": "Reviews code for bugs, security, quality"
+    },
+    "writer": {
+      "model": "nvidia/moonshotai/kimi-k2.6",
+      "description": "Drafts blogs, docs, and content"
+    },
+    "debugger": {
+      "model": "nvidia/moonshotai/kimi-k2.6",
+      "description": "Deep debugging for complex issues"
+    }
+  }
+}
