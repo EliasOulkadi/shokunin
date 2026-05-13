@@ -1,0 +1,30 @@
+name: check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  lint-and-test:
+    name: lint and test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Lint templates and check token sync
+        run: python3 scripts/build.py --check
+
+      - name: Run test suite
+        run: python3 scripts/tests/test_build.py
+
+      - name: Verify package script produces a clean archive
+        run: |
+          bash scripts/package-skill.sh /tmp/kami-ci.zip
+          unzip -l /tmp/kami-ci.zip | tail -3
