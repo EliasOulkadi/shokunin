@@ -1,5 +1,13 @@
 ﻿# 職人 · Shokunin
 
+[![CI](https://github.com/EliasOulkadi/shokunin/actions/workflows/ci.yml/badge.svg)](https://github.com/EliasOulkadi/shokunin/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+[![Windows](https://img.shields.io/badge/Windows-11-0078D6?logo=windows)](https://www.microsoft.com/windows)
+[![OpenCode](https://img.shields.io/badge/OpenCode-1.14-6B46C1?logo=openai)](https://opencode.ai)
+[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/EliasOulkadi/shokunin/graphs/commit-activity)
+
+
 **AI Engineering Ecosystem** — 35 skills, ChromaDB memory, MCP servers, and automations. Zero cost, open source.
 
 > *職人 (shokunin) means artisan in Japanese. These skills aim for that standard — every detail crafted, every edge case handled, every workflow automated.*
@@ -101,3 +109,4 @@ mkcd, touch, which, admin             # Utility aliases
 ## License
 
 MIT — free as in freedom, free as in zero cost.
+

@@ -1,0 +1,17 @@
+﻿---
+name: Feature request
+about: Sugiere una skill nueva o mejora
+labels: enhancement
+---
+**¿Qué skill o mejora?**
+Nombre claro y dominio.
+
+**¿Por qué es útil?**
+Qué problema resuelve.
+
+**¿Ya existe algo similar?**
+Skills parecidas que ya hayas visto.
+
+**¿Harías el PR?**
+- [ ] Sí, puedo contribuir la skill
+- [ ] No, solo sugiero la idea

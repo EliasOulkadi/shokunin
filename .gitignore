@@ -1,20 +1,22 @@
-# Python cache
+﻿# OS
+.DS_Store
+Thumbs.db
+
+# Env
+.env
+.env.local
+
+# Python
 __pycache__/
 *.pyc
+*.egg-info/
+.chroma/
 
 # Node
 node_modules/
 
-# OS files
-.DS_Store
-Thumbs.db
-
 # IDE
-.idea/
 .vscode/
+.idea/
 *.swp
 *.swo
-
-# Environment
-.env
-.env.local
