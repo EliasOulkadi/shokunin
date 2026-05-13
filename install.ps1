@@ -3,7 +3,7 @@
     Shokunin AI Ecosystem Installer v3.1
 .DESCRIPTION
     One-command installer for the complete Shokunin AI ecosystem:
-    36 skills, MCP servers, ChromaDB memory, Telegram bot, terminal configs
+    35 skills, MCP servers, ChromaDB memory, terminal configs
 .NOTES
     Requires: Windows 10/11, PowerShell 5.1+, Node.js 18+, Python 3.11+
     Run: irm https://raw.githubusercontent.com/EliasOulkadi/shokunin/master/install.ps1 | iex
@@ -85,7 +85,7 @@ function Test-Prerequisites {
 # ============================================================
 function Install-Dependencies {
     Write-Step "Instalando dependencias Python..."
-    pip install chromadb python-telegram-bot 2>&1 | Out-Null
+    pip install chromadb
     Write-OK
 
     Write-Step "Instalando MCP servers (npx)..."
@@ -138,7 +138,7 @@ function Install-MemorySystem {
     Write-Step "Instalando sistema de memoria (ChromaDB)..."
 
     # Create directories
-    @("memory","memory\chroma_db","memory\sessions","telegram","backups","scripts","logs") | ForEach-Object {
+    @("memory","memory\chroma_db","memory\sessions","backups","scripts","logs") | ForEach-Object {
         $d = Join-Path $script:installDir $_
         if (-not (Test-Path $d)) { New-Item -ItemType Directory -Path $d -Force | Out-Null }
     }
@@ -262,7 +262,7 @@ Set-PSReadLineKeyHandler -Key Ctrl+Space -Function MenuComplete
 # Telegram Bot auto-start
 $botJob = Get-Job -Name "ShokuninBot" -ErrorAction SilentlyContinue
 if (-not $botJob) {
-    $token = [Environment]::GetEnvironmentVariable('TELEGRAM_BOT_TOKEN', 'User')
+    $token = 
     if ($token) {
         $botScript = "$env:USERPROFILE\.shokunin\telegram\bot.py"
         if (Test-Path $botScript) {
@@ -395,11 +395,11 @@ function Show-Summary {
 
   Skills:       $((Get-ChildItem $script:skillsDir -Directory).Count) instaladas
   Memoria:      ChromaDB en $script:installDir\memory
-  Telegram:     $(if ([Environment]::GetEnvironmentVariable('TELEGRAM_BOT_TOKEN','User')) { 'Configurado' } else { 'PENDIENTE' })
+
   NVIDIA API:   $(if ([Environment]::GetEnvironmentVariable('NVIDIA_API_KEY','User')) { 'Configurada' } else { 'PENDIENTE' })
   PowerShell:   Perfil personalizado con aliases
   MCP:          filesystem, fetch, memory
-  Auto-start:   Telegram bot al iniciar Windows
+
   Mantenimiento: Domingos 21:00 (backup + limpieza)
   Bookmarklet:  $env:USERPROFILE\shokunin-bookmarklet.html
   Dashboard:    $env:USERPROFILE\shokunin-dashboard.html
@@ -416,9 +416,9 @@ function Show-Summary {
      [Environment]::SetEnvironmentVariable('NVIDIA_API_KEY','tu-key','User')
      y edita ~\.config\opencode\opencode.json con tu key
 
-  2. Si dejaste Telegram pendiente:
+
      Crea un bot en @BotFather y guarda el token:
-     [Environment]::SetEnvironmentVariable('TELEGRAM_BOT_TOKEN','tu-token','User')
+     
 
   3. Abre un NUEVO terminal para cargar el perfil
 
@@ -457,5 +457,6 @@ Install-Dependencies
 Install-Skills
 Install-MemorySystem
 Setup-OpenCodeConfig
+
 
 
