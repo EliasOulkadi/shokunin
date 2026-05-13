@@ -1,103 +1,96 @@
 ﻿---
 name: test-commander
-description: Generate unit, integration, and end-to-end tests following the Testing Trophy methodology. Covers Vitest/Jest, Testing Library, Playwright, MSW mocking, snapshot strategy, visual regression (Chromatic/Percy), and CI test sharding. Use when user asks to write tests, unit tests, integration tests, E2E tests, set up testing framework, mock dependencies, or improve test coverage. Do NOT use for production monitoring, load testing, or performance benchmarking (use dedicated tools).
+description: Generate unit, integration, E2E, and visual regression tests following the Testing Trophy methodology (80% integration). Covers Vitest/Jest, Testing Library, Playwright, MSW for API mocking, snapshot strategy, visual regression (Chromatic/Percy/Playwright), test factories with Faker, and CI sharding. Use when user asks to write tests, set up testing framework, mock API/dependencies, improve coverage, or add visual regression. Do NOT use for performance/load testing, production monitoring, or type testing (covered by TypeScript).
 license: MIT
 compatibility: opencode
 metadata:
   workflow: quality
   audience: developers
-  version: "2.0"
+  version: "3.0"
+  author: shokunin
+allowed-tools: Read Bash Write Grep Glob
 ---
 
 # Test Commander
 
-Write tests that catch real bugs, not just exercise code. Based on the Testing Trophy, Kent C. Dodds, and patterns from Playwright and Vitest.
-
-## The Testing Trophy
-
-Integration tests catch 80% of bugs with 20% of the maintenance cost. Focus here.
-
-| Level | Tool | Coverage Target | Speed | Catch Rate |
-|-------|------|----------------|-------|------------|
-| Static | TypeScript, ESLint | All code | Instant | Type errors, style |
-| Unit | Vitest / Jest | Business logic | Fast | Logic errors |
-| Integration | Testing Library | All features | Medium | Component interaction (most bugs) |
-| E2E | Playwright | Critical paths | Slow | System failures |
-| Visual | Storybook + Chromatic | UI components | Medium | Visual regressions |
+Write tests that catch real bugs. Follows the Testing Trophy (Kent C. Dodds): focus on integration tests, supplement with unit, E2E, and visual regression.
 
 ## Workflow
 
 ### Step 1: Determine test level
 
-| Question | Level |
-|----------|-------|
-| Does this test pure logic (utils, helpers, math)? | Unit |
-| Does this test how components work together? | Integration |
-| Does this test a critical user flow? | E2E |
-| Does this test visual appearance? | Visual |
+| Question | Level | Tool |
+|----------|-------|------|
+| Is this pure logic (util, helper, math)? | Unit | Vitest |
+| Does this combine components with API/store? | Integration | Testing Library + MSW |
+| Is this a critical user flow? | E2E | Playwright |
+| Does this check visual appearance? | Visual | Chromatic/Percy |
 
-### Step 2: Write unit tests
+**Default: Integration tests.** They catch 80% of bugs with 20% of the maintenance cost.
+
+### Step 2: Scaffold test files
+
+```bash
+# Generate a complete test suite for a component
+scripts/scaffold-test.sh src/components/Button.tsx --framework react
+
+# For an API endpoint
+scripts/scaffold-test.sh src/api/users.ts --type api
+```
+
+See [assets/test-component-template.tsx](assets/test-component-template.tsx) and [assets/test-api-template.ts](assets/test-api-template.ts) for complete rendered examples.
+
+### Step 3: Write tests by level
+
+#### Unit tests
 
 ```tsx
 describe('formatPrice', () => {
   it('formats USD correctly', () => {
     expect(formatPrice(29.99, 'USD')).toBe('$29.99')
   })
-
   it('handles zero', () => {
     expect(formatPrice(0, 'USD')).toBe('$0.00')
   })
-
-  it('handles large numbers with commas', () => {
-    expect(formatPrice(1234567.89, 'USD')).toBe('$1,234,567.89')
-  })
-
-  it('throws on negative values', () => {
+  it('throws on negative', () => {
     expect(() => formatPrice(-1, 'USD')).toThrow()
   })
 })
 ```
 
-### Step 3: Write integration tests
+#### Integration tests (highest priority)
+
+Cover every state: loading, empty, error, success, and edge cases:
 
 ```tsx
-describe('User profile', () => {
-  it('renders user data after loading', async () => {
+describe('UserProfile', () => {
+  it('shows loading state', async () => {
     render(<UserProfile userId="123" />)
     expect(screen.getByRole('status')).toHaveTextContent('Loading...')
-
-    await waitFor(() => {
-      expect(screen.getByText('Alice')).toBeInTheDocument()
-    })
   })
 
-  it('shows error state on API failure', async () => {
-    server.use(
-      http.get('/api/users/123', () => HttpResponse.error())
-    )
+  it('shows error with retry', async () => {
+    server.use(http.get('/api/users/123', () => HttpResponse.error()))
     render(<UserProfile userId="123" />)
     await waitFor(() => {
       expect(screen.getByRole('alert')).toHaveTextContent('Failed to load')
     })
+    await userEvent.click(screen.getByRole('button', { name: 'Retry' }))
   })
 
-  it('allows editing user name', async () => {
+  it('renders user data on success', async () => {
     render(<UserProfile userId="123" />)
-    await userEvent.click(screen.getByLabelText('Edit name'))
-    await userEvent.type(screen.getByLabelText('Name'), 'Bob')
-    await userEvent.click(screen.getByRole('button', { name: 'Save' }))
-
     await waitFor(() => {
-      expect(screen.getByText('Bob')).toBeInTheDocument()
+      expect(screen.getByText('Alice')).toBeInTheDocument()
     })
   })
 })
 ```
 
-### Step 4: Write E2E tests
+#### E2E tests
 
 ```tsx
-test('user can complete checkout flow', async ({ page }) => {
+test('checkout flow', async ({ page }) => {
   await page.goto('/products')
   await page.click('[data-testid="add-to-cart"]')
   await page.click('[data-testid="checkout"]')
@@ -107,19 +100,9 @@ test('user can complete checkout flow', async ({ page }) => {
 })
 ```
 
-E2E tests cover critical business flows only. Signup, login, purchase, core feature.
+### Step 4: Configure MSW for API mocking
 
-## Mocking Strategy
-
-| What to mock | How | What NOT to mock |
-|-------------|-----|-----------------|
-| Network | MSW (Mock Service Worker) | Business logic |
-| File system | Temp directories | Validation |
-| Date/UUID | Vitest mock functions | Data transformation |
-| Browser APIs | jsdom or Playwright | State management |
-| Third-party SDKs | Vitest mock or `__mocks__` | Your own API layer |
-
-### MSW (preferred over mocking fetch)
+See [references/msw-patterns.md](references/msw-patterns.md) for all patterns. Start with this setup:
 
 ```tsx
 import { http, HttpResponse } from 'msw'
@@ -136,85 +119,13 @@ afterEach(() => server.resetHandlers())
 afterAll(() => server.close())
 ```
 
-### Mocking modules (Vitest)
+### Step 5: Add visual regression
 
-```tsx
-import { vi } from 'vitest'
-
-// Mock entire module
-vi.mock('stripe', () => ({
-  default: {
-    charges: {
-      create: vi.fn().mockResolvedValue({ id: 'ch_123', status: 'succeeded' }),
-    },
-  },
-}))
-
-// Partial mock
-vi.mock('fs', async (importOriginal) => {
-  const actual = await importOriginal()
-  return {
-    ...actual,
-    readFile: vi.fn().mockResolvedValue('mocked content'),
-  }
-})
-
-// Spy on existing
-const spy = vi.spyOn(console, 'log').mockImplementation(() => {})
-```
-
-## Fixture Strategy
-
-- Realistic data that mirrors production shapes
-- Factory functions with sensible defaults (use Faker)
-- Override per test for specific scenarios
-- Version-controlled alongside tests
-
-```tsx
-import { faker } from '@faker-js/faker'
-
-export const buildUser = (overrides: Partial<User> = {}): User => ({
-  id: `user_${faker.string.uuid()}`,
-  email: faker.internet.email(),
-  name: faker.person.fullName(),
-  role: 'user',
-  createdAt: new Date(),
-  ...overrides,
-})
-```
-
-## Snapshot Testing Strategy
-
-### Use snapshots for:
-- MSW handler configs (small, stable)
-- SQL query outputs (detect unintended changes)
-- Error messages (prevent regressions in user-facing text)
-- CLI output formats
-
-### Don't use snapshots for:
-- Large React component trees (fragile, low signal)
-- API responses that change frequently
-- Generated CSS
-
-```tsx
-it('matches error snapshot', () => {
-  expect(formatValidationError({ field: 'email', code: 'required' }))
-    .toMatchInlineSnapshot(`"Email is required"`)
-})
-```
-
-## Visual Regression
-
-| Tool | Best for | Pricing |
-|------|----------|---------|
-| Chromatic | Storybook integration | Free for OSS |
-| Percy | Cross-browser visual diffs | Paid |
-| Loki | Screenshot comparison | Free, self-hosted |
-| Playwright Visual | Inline E2E screenshots | Included |
+See [references/visual-regression.md](references/visual-regression.md) for all tools and patterns.
 
 ```tsx
 // Playwright visual comparison
-test('homepage matches snapshot', async ({ page }) => {
+test('homepage matches', async ({ page }) => {
   await page.goto('/')
   await expect(page).toHaveScreenshot('homepage.png', {
     fullPage: true,
@@ -223,59 +134,67 @@ test('homepage matches snapshot', async ({ page }) => {
 })
 ```
 
-## CI Integration
+**Decision**: Use Playwright built-in for simple E2E + visual. Use Chromatic for Storybook-integrated visual review.
+
+### Step 6: Set up CI integration
 
 ```yaml
 # Unit + integration on every PR
 test:
-  runs-on: ubuntu-latest
   strategy:
     matrix:
       shard: [1/4, 2/4, 3/4, 4/4]
-  steps:
-    - uses: actions/checkout@v4
-    - run: npm ci
-    - run: npm test -- --shard=${{ matrix.shard }}
+  run: npm test -- --shard=${{ matrix.shard }}
 
 # E2E only on merge to main
 e2e:
   if: github.ref == 'refs/heads/main'
-  runs-on: ubuntu-latest
-  steps:
-    - run: npx playwright install --with-deps
-    - run: npm run test:e2e
+  run: npm run test:e2e
 ```
 
-## Test Maintenance
+## Error Handling
 
-| Task | Frequency |
-|------|-----------|
-| Review flaky tests | Weekly |
-| Remove orphaned tests | Monthly |
-| Update snapshots deliberately | On intentional output change |
-| Audit slow tests (>500ms) | Quarterly |
-| Check coverage trends | Monthly |
+| Error | Cause | Fix |
+|-------|-------|-----|
+| Test times out | Async not awaited | Add `await` to async operations, increase timeout |
+| MSW handler not matched | URL mismatch | Check exact path + method. Use `onUnhandledRequest: 'warn'` |
+| Snapshot mismatch | Intentional UI change | Run `vitest -u` to update (review diff first) |
+| Flaky test (race condition) | Shared mutable state | Reset in `beforeEach`, use `waitFor`/`findBy` |
+| E2E timeout | Slow CI runner | Increase Playwright timeout, tag heavy tests as `@slow` |
+
+## Production Checklist
+
+- [ ] Every data-fetching component has loading/empty/error/success tests
+- [ ] MSW setup with `onUnhandledRequest: 'warn'`
+- [ ] Factory functions for fixtures (Faker, sensible defaults)
+- [ ] Snapshot tests only for stable outputs (<10 lines)
+- [ ] E2E covers critical business flows only (3-5 max)
+- [ ] Test sharding on CI (4 shards minimum)
+- [ ] E2E runs on merge to main only (not every PR)
+- [ ] Visual regression on PR for changed components
+- [ ] Tests must pass before merge (blocking CI)
+- [ ] Flaky tests fixed or removed within 1 week
 
 ## Anti-Patterns
 
-| Anti-pattern | Why it fails | Fix |
-|-------------|-------------|-----|
-| Testing implementation details | Breaks on refactor | Test behavior (user sees / API returns) |
-| Large snapshots | Brittle, low signal | Snapshots for small, stable outputs |
-| Over-mocking | Tests verify mocks, not real code | Only mock network and I/O |
-| Testing the framework | Wastes time | Test YOUR logic |
-| Flaky tests (timing, ordering) | Erode trust | Use `waitFor`, `findBy` instead of timeouts |
-| Too many assertions per test | First failure hides rest | One assertion per `it()` |
-| Shared mutable state | Order-dependent failures | Reset in `beforeEach` |
-| Happy path only | 90% of bugs are edge cases | Every state gets a test |
+| Anti-pattern | Fix |
+|-------------|-----|
+| Testing implementation details | Test behavior (user sees / API returns) |
+| Large snapshots (>10 lines) | Snapshots only for stable, small outputs |
+| Over-mocking | Mock only network and I/O. Never business logic. |
+| Flaky tests | Fix or remove. Use `waitFor`/`findBy`. |
+| Too many assertions per test | One assertion per `it()` block |
+| Shared mutable state | Reset in `beforeEach` |
+| Happy path only | Every error/empty state gets a test |
+| No Playwright trace on failure | Always record traces in CI: `--trace on` |
 
 ## Sources
 
 - Kent C. Dodds "Testing Trophy" (kentcdodds.com)
 - Testing Library docs (testing-library.com)
-- Martin Fowler "TestCoverage"
-- Google Testing Blog "Just Say No to More End-to-End Tests"
 - Playwright docs "Best Practices"
 - Vitest documentation
-- MSW Documentation (mswjs.io)
-- Chromatic Visual Testing (chromatic.com)
+- MSW (mswjs.io)
+- Martin Fowler "TestCoverage"
+- Google Testing Blog
+- Chromatic visual testing (chromatic.com)

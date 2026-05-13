@@ -1,46 +1,50 @@
 ---
 name: docker
-description: Optimize Docker images with multi-stage builds, distroless bases, BuildKit cache mounts, layer caching, multi-arch builds, security hardening (non-root, seccomp, capabilities), and docker-compose for local dev. Use when user asks to write a Dockerfile, optimize image size, set up docker-compose, debug containers, or harden container security. Do NOT use for Kubernetes deployments (use kubernetes), CI/CD pipeline design (use ci-cd), or Terraform infrastructure (use terraform).
+description: Optimize Docker images with multi-stage builds, distroless bases, BuildKit cache mounts, multi-arch builds, compose watch, security hardening (non-root, seccomp, capabilities drop), and vulnerability scanning via docker scout/trivy. Use when user asks to write a Dockerfile, optimize image size, set up docker-compose, debug containers, harden container security, or scan for CVEs. Do NOT use for Kubernetes deployments (use kubernetes), CI/CD pipeline design (use ci-cd), or Terraform (use terraform).
 license: MIT
 compatibility: opencode
 metadata:
   workflow: infrastructure
   audience: devops
-  version: "2.0"
+  version: "3.0"
+  author: shokunin
+allowed-tools: Read Bash Write
 ---
 
 # Docker Architect
 
-Production-grade Dockerfiles, multi-stage builds, cache optimization, security hardening, and local development with docker-compose.
+Production-grade Dockerfiles, multi-stage builds, cache optimization, security scanning, and local development. Applies Google's distroless philosophy and Docker BuildKit best practices.
 
 ## Workflow
 
-### Step 1: Identify stack
+### Step 1: Identify stack and choose template
 
-Language, build tools, runtime requirements, base image preference.
+| Stack | Base image | Build stage | Runtime |
+|-------|-----------|-------------|---------|
+| Node.js | node:22-slim | Full SDK | gcr.io/distroless/nodejs |
+| Go | golang:1.23-alpine | Full SDK | scratch |
+| Python | python:3.12-slim | Full SDK | python:3.12-slim |
+| Rust | rust:1.78-slim | Full SDK | gcr.io/distroless/cc |
+
+**Decision**: If the stack is listed above, use the corresponding production Dockerfile below. If not, apply the golden template in Step 2.
 
 ### Step 2: Apply golden template
 
-Use multi-stage builds:
+Use multi-stage with this exact structure:
 ```
-Stage 1 (deps):   COPY lock files → install production deps
+Stage 1 (deps):   COPY lock files → install production deps (--mount=type=cache)
 Stage 2 (build):  COPY source → compile
-Stage 3 (runtime): minimal base → COPY artifacts from stages 1-2
+Stage 3 (runtime): minimal base → COPY artifacts from stages 1-2 → USER nonroot → HEALTHCHECK
 ```
 
-### Step 3: Optimize (in order)
+**If the project is a Go binary**, skip Stage 1 (Go has no runtime deps) and go straight to Stage 2.
 
-1. **Multi-stage**: Separate build from runtime. Never ship a compiler.
-2. **Base image**: Distroless > Alpine > Slim. Match to runtime needs.
-3. **Layer order**: Dependencies before source code. Maximize cache hits.
-4. **BuildKit**: `RUN --mount=type=cache` for package managers, `--mount=type=secret` for secrets.
-5. **Security**: Non-root, no shell in runtime, read-only rootfs, healthchecks.
+**If the project has native dependencies** (node-gyp, C extensions), use `apt-get` in the builder stage, NOT the runtime stage.
 
-## Production Dockerfiles
-
-### Node.js
+### Step 3: Apply BuildKit optimizations
 
 ```dockerfile
+# syntax=docker/dockerfile:1.4
 FROM node:22-slim AS deps
 WORKDIR /app
 COPY package.json package-lock.json ./
@@ -48,7 +52,7 @@ RUN --mount=type=cache,target=/root/.npm npm ci --omit=dev
 
 FROM node:22-slim AS builder
 WORKDIR /app
-COPY package.json package-lock.json tsconfig.json ./
+COPY package.json package-lock.json ./
 RUN --mount=type=cache,target=/root/.npm npm ci
 COPY src ./src
 RUN npm run build
@@ -59,88 +63,14 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
 EXPOSE 3000
 USER nonroot
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD ["node", "-e", "require('http').get('http://localhost:3000/health', r => process.exit(r.statusCode===200?0:1))"]
 CMD ["dist/index.js"]
 ```
 
-### Go
+Run `scripts/optimize-dockerfile.sh` on any existing Dockerfile to receive optimization suggestions.
 
-```dockerfile
-FROM golang:1.23-alpine AS builder
-WORKDIR /app
-COPY go.mod go.sum ./
-RUN go mod download
-COPY . .
-RUN CGO_ENABLED=0 GOOS=linux go build -o /app/server .
-
-FROM scratch
-COPY --from=builder /app/server /server
-COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
-EXPOSE 8080
-CMD ["/server"]
-```
-
-### Python
-
-```dockerfile
-FROM python:3.12-slim AS builder
-WORKDIR /app
-COPY requirements.txt ./
-RUN --mount=type=cache,target=/root/.cache/pip pip install --user -r requirements.txt
-
-FROM python:3.12-slim
-WORKDIR /app
-COPY --from=builder /root/.local /root/.local
-COPY src ./src
-ENV PATH=/root/.local/bin:$PATH
-EXPOSE 8000
-USER nobody
-CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0"]
-```
-
-### Rust
-
-```dockerfile
-FROM rust:1.78-slim AS builder
-WORKDIR /app
-COPY Cargo.toml Cargo.lock ./
-RUN mkdir src && echo "fn main() {}" > src/main.rs
-RUN cargo build --release 2>/dev/null || true
-COPY src ./src
-RUN cargo build --release
-
-FROM gcr.io/distroless/cc-debian12
-COPY --from=builder /app/target/release/app /app
-CMD ["/app"]
-```
-
-## Dockerfile Rules
-
-| Rule | Why |
-|------|-----|
-| Pin base image versions (`node:22-slim`, not `node:latest`) | Reproducible builds |
-| COPY package files BEFORE source code | Layer caching |
-| Combine `apt-get update && apt-get install` in one RUN | Avoids stale cache layers |
-| Use `--no-install-recommends` | 20-40% image size reduction |
-| Never put secrets in ENV or ARG | Leaks in `docker history` |
-| Add `HEALTHCHECK` | Orchestrator detects failures |
-| Set `USER nonroot` (not root) | Security best practice |
-| Use `.dockerignore` | Smaller build context, faster builds |
-
-## Multi-Architecture Builds
-
-```bash
-# Create builder with QEMU support
-docker buildx create --name multiarch --use
-docker buildx inspect --bootstrap
-
-# Build for multiple platforms
-docker buildx build \
-  --platform linux/amd64,linux/arm64 \
-  --tag registry/app:latest \
-  --push .
-```
-
-## Docker Compose Watch (hot reload)
+### Step 4: Configure compose for local dev
 
 ```yaml
 services:
@@ -149,110 +79,91 @@ services:
     ports: ["3000:3000"]
     develop:
       watch:
-        - action: sync
+        - action: sync+restart
           path: ./src
           target: /app/src
-          ignore:
-            - node_modules/
-            - "*.test.ts"
-        - action: rebuild
-          path: package.json
-    environment:
-      - DATABASE_URL=postgres://user:pass@db:5432/app
     depends_on: [db]
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
-      interval: 30s
-      retries: 3
-
   db:
     image: postgres:16-alpine
     volumes: ["pgdata:/var/lib/postgresql/data"]
-    environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: pass
-      POSTGRES_DB: app
-
-volumes:
-  pgdata:
+volumes: { pgdata: }
 ```
 
-Run: `docker compose watch`
+Run `docker compose watch` for hot-reload.
 
-## Security Hardening
+See [assets/docker-compose.template.yml](assets/docker-compose.template.yml) for the full template with all services.
 
-### Reduce container capabilities
-
-```dockerfile
-# Deny all, then allow specific
-RUN setcap cap_net_bind_service=+ep /app/server
-USER nonroot
-```
-
-In Kubernetes:
-```yaml
-securityContext:
-  capabilities:
-    drop: [ALL]
-    add: [NET_BIND_SERVICE]
-  readOnlyRootFilesystem: true
-  runAsNonRoot: true
-```
-
-### Debug and security scanning
-
-| Tool | Purpose | Command |
-|------|---------|---------|
-| `docker scout` | Vulnerability scanning | `docker scout cves <image>` |
-| `dive` | Layer inspection | `dive <image>` |
-| `trivy` | Comprehensive scanning | `trivy image <image>` |
-| `cosign` | Image signing and verification | `cosign sign --key cosign.key <image>` |
-
-### SLSA provenance
+### Step 5: Build for multiple platforms
 
 ```bash
-docker buildx build --attest type=provenance,mode=max --push -t registry/app:latest .
+docker buildx build \
+  --platform linux/amd64,linux/arm64 \
+  --cache-from=type=gha \
+  --cache-to=type=gha,mode=max \
+  --tag registry/app:latest \
+  --push .
 ```
 
-## Image Size Reference
+See [references/multi-arch.md](references/multi-arch.md) for QEMU setup and platform-specific optimizations.
 
-| Stack | Single-stage | Multi-stage + Distroless |
-|-------|-------------|-------------------------|
-| Go | ~800MB | ~12-25MB (scratch) |
-| Node.js | ~1.2GB | ~90-180MB |
-| Python | ~1GB | ~120-200MB |
-| Rust | ~1.5GB | ~20-50MB (cc) |
-| Java | ~700MB | ~150-250MB |
+### Step 6: Scan for vulnerabilities
 
-## Debugging
+```bash
+# Using the provided script
+scripts/scan-image.sh registry/app:latest
 
-| Problem | Command |
-|---------|---------|
-| Inspect layers | `docker history --no-trunc <image>` |
-| Check disk usage | `docker system df` |
-| Shell into container | `docker exec -it <container> /bin/sh` |
-| Inspect build cache | `docker builder prune --dry-run` |
-| Scan CVEs | `docker scout cves <image>` |
-| View logs | `docker logs --tail 100 -f <container>` |
-| Copy file from container | `docker cp <container>:/path/file ./local` |
+# Or manually:
+docker scout cves registry/app:latest
+trivy image registry/app:latest
+```
+
+**If critical CVEs are found**: either switch base image (e.g., distroless), or add apt-get to install patched deps in builder stage.
+
+## Error Handling
+
+| Error | Cause | Fix |
+|-------|-------|-----|
+| `failed to solve with frontend dockerfile.v0` | Missing syntax directive | Add `# syntax=docker/dockerfile:1.4` as first line |
+| `exec /usr/bin/node: exec format error` | Wrong platform | Build with `--platform linux/amd64` matching the target |
+| `permission denied` at runtime | Missing `USER nonroot` or wrong file permissions | Add `USER nonroot` and `COPY --chown=nonroot:nonroot` |
+| Layer cache miss every build | Changing files copied before lock files | Always `COPY package.json` BEFORE source code |
+| `docker compose watch` not working | Docker Engine < 24 | Upgrade Docker Engine or use `docker compose up --watch` |
+
+## Production Checklist
+
+- [ ] Multi-stage build (build deps ≠ runtime deps)
+- [ ] Distroless or scratch runtime (no shell, no package manager)
+- [ ] `# syntax=docker/dockerfile:1.4` for BuildKit features
+- [ ] `RUN --mount=type=cache` for package managers
+- [ ] `RUN --mount=type=secret` for build secrets
+- [ ] `USER nonroot` in runtime stage
+- [ ] `HEALTHCHECK` defined
+- [ ] `.dockerignore` excludes node_modules, .git, .env
+- [ ] Base image version pinned (not `latest`)
+- [ ] `docker scout cves` passes (zero critical)
+- [ ] Multi-arch build for amd64 + arm64
+- [ ] No secrets in `ARG` or `ENV` (use `--mount=type=secret`)
 
 ## Anti-Patterns
 
 | Anti-pattern | Fix |
 |-------------|-----|
-| Single-stage with full OS | Multi-stage + distroless/alpine |
-| `COPY . .` before `npm install` | COPY package files first, then `npm ci`, then source |
-| `latest` tag | Pin semantic version or commit SHA |
+| Single-stage with full OS | Multi-stage + distroless |
+| `COPY . .` before `npm install` | Lock files first, then source |
+| `latest` tag | Pin SHA or semantic version |
 | Running as root | `USER nonroot` |
 | Secrets in build args | `--mount=type=secret` |
-| No `.dockerignore` | Add one — exclude node_modules, .git, .env, build cache |
-| Multiple FROMs without names | Name each stage: `AS builder`, `AS deps`, `AS runtime` |
+| No `.dockerignore` | Add one — exclude dev files |
+| No healthcheck | Orchestrator can't detect failures |
+| pinning only major version | Pin full version tag (`22-slim` not `22`) |
 
 ## Sources
 
-- Docker Documentation (docs.docker.com)
-- Docker Best Practices Guide
-- BuildKit Documentation
-- Google Distroless Base Images
-- Trivy Vulnerability Scanner (aquasecurity.github.io/trivy)
-- SLSA Framework (slsa.dev)
+- Dockerfile best practices (docs.docker.com)
+- BuildKit documentation
+- Google distroless images
+- Trivy vulnerability scanner
+- Docker Scout documentation
+- SLSA framework (slsa.dev)

@@ -1,85 +1,47 @@
 ---
 name: kubernetes
-description: Deploy and manage Kubernetes in production — Deployments, Services, Gateway API, Service Mesh (Istio/Linkerd), eBPF observability (Cilium), security hardening (Pod Security Standards, OPA/Kyverno, seccomp), Helm, HPA, PDB, and debugging. Use when user asks to write K8s manifests, deploy to a cluster, debug pods, set up ingress/gateway, configure autoscaling, or harden cluster security. Do NOT use for Docker containers (use docker), CI/CD pipelines (use ci-cd), or Terraform infrastructure (use terraform).
+description: Deploy, manage, and debug Kubernetes in production — Deployments, Services, Gateway API, Service Mesh (Istio/Linkerd/Cilium), eBPF observability (Cilium Hubble), security hardening (Pod Security Standards, OPA/Kyverno, seccomp, runtime security with Falco/Tetragon), Helm, HPA, PDB, topology spread, and debugging. Use when user asks to write K8s manifests, deploy to a cluster, debug pods, set up Gateway API, configure autoscaling, or harden cluster security. Do NOT use for Dockerfiles (use docker), CI/CD pipeline design (use ci-cd), or Terraform infrastructure (use terraform).
 license: MIT
 compatibility: opencode
 metadata:
   workflow: infrastructure
   audience: devops
-  version: "2.0"
+  version: "3.0"
+  author: shokunin
+allowed-tools: Read Bash Write Grep Glob
 ---
 
 # Kubernetes Architect
 
-Production-grade Kubernetes: deployments, networking, security, observability, and service mesh.
+Production-grade Kubernetes: deployments, Gateway API, zero-trust networking, service mesh, eBPF observability, and debugging. Follows NSA/CISA hardening guidelines.
 
-## Core Resources
+## Workflow
 
-### Deployment
+### Step 1: Determine deployment type
 
-```yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: api
-  labels: { app: api, env: prod }
-spec:
-  replicas: 3
-  strategy:
-    type: RollingUpdate
-    rollingUpdate: { maxUnavailable: 1, maxSurge: 1 }
-  selector:
-    matchLabels: { app: api }
-  template:
-    metadata:
-      labels: { app: api }
-    spec:
-      containers:
-        - name: api
-          image: myregistry.com/api:1.0.0
-          ports: [{ containerPort: 3000, protocol: TCP }]
-          envFrom:
-            - configMapRef: { name: api-config }
-            - secretRef: { name: api-secrets }
-          resources:
-            requests: { cpu: "250m", memory: "256Mi" }
-            limits: { cpu: "500m", memory: "512Mi" }
-          livenessProbe:
-            httpGet: { path: /health, port: 3000 }
-            initialDelaySeconds: 10
-            periodSeconds: 15
-          readinessProbe:
-            httpGet: { path: /ready, port: 3000 }
-            initialDelaySeconds: 5
-            periodSeconds: 10
-          securityContext:
-            runAsNonRoot: true
-            runAsUser: 1001
-            readOnlyRootFilesystem: true
-            capabilities: { drop: ["ALL"] }
-      automountServiceAccountToken: false
+| Type | Kind | Use case |
+|------|------|----------|
+| Stateless | Deployment | Web APIs, workers |
+| Stateful | StatefulSet | Databases, queues (use with caution) |
+| Batch | Job/CronJob | Migrations, periodic tasks |
+| Daemon | DaemonSet | Logging, monitoring agents |
+
+If uncertain, start with a Deployment. See [assets/deployment-template.yaml](assets/deployment-template.yaml) for the full production template.
+
+### Step 2: Generate manifest
+
+Use the scaffold script:
+```bash
+scripts/generate-manifest.sh -n api -i myregistry.com/api:1.0.0 -p 3000 -r 3 -o manifests/
 ```
 
-### Service
+This creates: `deployment.yaml`, `service.yaml`, `hpa.yaml`, `pdb.yaml` with all security contexts, probes, resource requests/limits, and topology spread constraints pre-configured.
 
-```yaml
-apiVersion: v1
-kind: Service
-metadata:
-  name: api
-  labels: { app: api }
-spec:
-  selector: { app: api }
-  ports:
-    - port: 80
-      targetPort: 3000
-      protocol: TCP
-  type: ClusterIP
-```
+**If the service expects HTTP traffic**, also create a Gateway API HTTPRoute.
 
-### Gateway API (replaces Ingress)
+### Step 3: Configure networking
 
-Gateway API is the successor to Ingress, supporting HTTPRoute, GRPCRoute, TCPRoute.
+#### Gateway API (replaces Ingress)
 
 ```yaml
 apiVersion: gateway.networking.k8s.io/v1
@@ -114,7 +76,9 @@ spec:
           port: 80
 ```
 
-### NetworkPolicy (zero-trust)
+See [references/gateway-api.md](references/gateway-api.md) for HTTPRoute, GRPCRoute, TLSRoute, and cross-namespace patterns.
+
+#### Zero-trust networking
 
 ```yaml
 apiVersion: networking.k8s.io/v1
@@ -131,11 +95,24 @@ spec:
   podSelector: { matchLabels: { app: api } }
   ingress:
     - from:
-        - namespaceSelector: { matchLabels: { name: ingress-nginx } }
+        - namespaceSelector: { matchLabels: { name: gateway-system } }
       ports: [{ port: 3000 }]
 ```
 
-### HorizontalPodAutoscaler
+**Always start with a default-deny policy.** Then add explicit allow rules.
+
+### Step 4: Add service mesh (if needed)
+
+See [references/service-mesh.md](references/service-mesh.md) for the complete comparison and setup guide.
+
+**Decision matrix:**
+| Need | Recommendation |
+|------|---------------|
+| mTLS + observability | Istio (full-featured) |
+| Simple mTLS + lightweight | Linkerd (low resource overhead) |
+| eBPF-native networking + security | Cilium (no sidecar needed) |
+
+### Step 5: Configure autoscaling and resilience
 
 ```yaml
 apiVersion: autoscaling/v2
@@ -152,20 +129,12 @@ spec:
     - type: Resource
       resource:
         name: cpu
-        target:
-          type: Utilization
-          averageUtilization: 70
+        target: { type: Utilization, averageUtilization: 70 }
     - type: Resource
       resource:
         name: memory
-        target:
-          type: Utilization
-          averageUtilization: 80
-```
-
-### PodDisruptionBudget
-
-```yaml
+        target: { type: Utilization, averageUtilization: 80 }
+---
 apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata: { name: api-pdb }
@@ -175,158 +144,69 @@ spec:
     matchLabels: { app: api }
 ```
 
-## Critical Security Rules
+### Step 6: Debug issues
 
-| Rule | Implementation |
-|------|---------------|
-| No containers as root | `securityContext.runAsNonRoot: true` |
-| Drop all capabilities | `capabilities.drop: ["ALL"]` |
-| Read-only filesystem | `readOnlyRootFilesystem: true` |
-| No SA token by default | `automountServiceAccountToken: false` |
-| Default-deny NetworkPolicy per namespace | First policy in namespace |
-| Pod Security Standards | `pod-security.kubernetes.io/enforce: restricted` |
-| Image by digest, not tag | `image: repo/app@sha256:abc...` |
-| Resource limits on every container | `resources.limits.cpu/memory` |
-
-## Service Mesh (Istio)
-
-```yaml
-apiVersion: security.istio.io/v1
-kind: PeerAuthentication
-metadata: { name: default, namespace: istio-system }
-spec:
-  mtls:
-    mode: STRICT  # All traffic must be mTLS
----
-apiVersion: networking.istio.io/v1
-kind: VirtualService
-metadata: { name: api-canary }
-spec:
-  hosts: [api]
-  http:
-    - route:
-        - destination: { host: api, subset: stable }
-          weight: 90
-        - destination: { host: api, subset: canary }
-          weight: 10
+See the debugging script:
+```bash
+scripts/debug-pod.sh api-7d8f9c-abc  # describes pod, shows logs, checks events, diagnoses
 ```
 
-## eBPF Observability (Cilium)
+**Common diagnoses the script detects:**
+| Symptom | Likely cause |
+|---------|-------------|
+| `CrashLoopBackOff` with OOMKill | Out of memory — increase `resources.limits.memory` |
+| `CrashLoopBackOff` with ImagePullBackOff | Wrong image name or tag |
+| `Pending` with no node | Insufficient resources or PVC pending |
+| `Running` but not ready | Readiness probe failing — check `/ready` endpoint |
 
-```yaml
-# Install Cilium
-# cilium install
+## Error Handling
 
-# Hubble for network observability
-# cilium hubble enable
-# cilium hubble ui
-
-# Network policies with Cilium (L7-aware)
-apiVersion: cilium.io/v2
-kind: CiliumNetworkPolicy
-metadata: { name: allow-api-http }
-spec:
-  endpointSelector: { matchLabels: { app: api } }
-  ingress:
-    - fromEndpoints: [{ matchLabels: { app: frontend } }]
-      toPorts:
-        - ports: [{ port: "3000", protocol: TCP }]
-          rules:
-            http:
-              - method: "GET"
-                path: "/api/public/*"
-```
-
-## Helm Chart Structure
-
-```
-chart/
-├── Chart.yaml
-├── values.yaml
-├── templates/
-│   ├── deployment.yaml
-│   ├── service.yaml
-│   ├── ingress.yaml
-│   ├── configmap.yaml
-│   ├── _helpers.tpl
-│   └── tests/
-└── charts/
-```
-
-## Advanced Scheduling
-
-```yaml
-# Topology spread constraints
-spec:
-  topologySpreadConstraints:
-    - maxSkew: 1
-      topologyKey: topology.kubernetes.io/zone
-      whenUnsatisfiable: DoNotSchedule
-      labelSelector: { matchLabels: { app: api } }
-
-# Node affinity
-spec:
-  affinity:
-    nodeAffinity:
-      preferredDuringSchedulingIgnoredDuringExecution:
-        - weight: 100
-          preference:
-            matchExpressions:
-              - key: node-type
-                operator: In
-                values: [spot]
-```
-
-## Debugging Cheatsheet
-
-| Problem | Command |
-|---------|---------|
-| Pod stuck in Pending | `kubectl describe pod <pod>` |
-| Pod crashing | `kubectl logs <pod> --previous` |
-| Pod not ready | `kubectl get events --sort-by=.metadata.creationTimestamp` |
-| Service not reachable | `kubectl port-forward svc/<name> 8080:80` |
-| DNS resolution | `kubectl run dnsutils --image=registry.k8s.io/e2e-test-images/jessie-dnsutils:1.3 -- sleep 3600` |
-| Debug pod | `kubectl debug -it <pod> --image=ubuntu -- /bin/bash` |
-| Resource usage | `kubectl top pod` |
-| Watch events | `kubectl get events -w` |
+| Scenario | Diagnosis | Fix |
+|----------|-----------|-----|
+| Pod stuck in Pending | `kubectl describe pod` → events | Check node resources, PVC status |
+| Pod crash looping | `kubectl logs --previous` | Check app errors, OOMKill status |
+| Service unreachable | `kubectl port-forward svc/api 8080:80` | Check selector matches pod labels |
+| DNS not resolving | `kubectl exec -it dnsutils -- nslookup api` | Check CoreDNS pods and Service entries |
+| TLS cert invalid | `kubectl describe certificate` | Check cert-manager issuer and DNS |
 
 ## Production Checklist
 
 - [ ] Resource requests + limits on every container
 - [ ] Liveness + readiness probes
-- [ ] Pod Security Standards (restricted)
+- [ ] Pod Security Standards: `restricted` enforced
 - [ ] NetworkPolicy: default-deny + explicit allow
 - [ ] Containers run as non-root
 - [ ] Read-only root filesystem
-- [ ] Secrets via external provider (Vault, AWS Secrets Manager, CSI)
-- [ ] HPA configured for CPU + memory
+- [ ] Secrets via external provider (Vault, External Secrets, CSI)
+- [ ] HPA with CPU + memory metrics
 - [ ] PDB >= 1 for critical services
-- [ ] Helm chart with versioned releases
-- [ ] Image with digest (not tag)
-- [ ] mTLS between all services (service mesh)
-- [ ] Audit logging enabled
+- [ ] Image pinned by digest (not tag)
+- [ ] PodDisruptionBudget for HA
+- [ ] mTLS between all services
+- [ ] Audit logging shipped
 - [ ] RBAC: least privilege, no cluster-admin
 - [ ] Falco or Tetragon for runtime security
+- [ ] Gateway API (not legacy Ingress)
 
 ## Anti-Patterns
 
 | Anti-pattern | Fix |
 |-------------|-----|
-| `imagePullPolicy: Always` on prod | Pin digest, use `IfNotPresent` |
+| `imagePullPolicy: Always` | Pin digest, use `IfNotPresent` |
 | No resource limits | Always set requests + limits |
 | Running as root | `securityContext.runAsNonRoot: true` |
-| `latest` tag | Pin version or digest |
-| Single replica | Always >= 2 for production |
+| `latest` tag | Pin by digest |
+| Single replica | Always >= 2 for HA |
 | No probes | Liveness + readiness mandatory |
 | Hardcoded config in image | ConfigMap + Secret |
 | No NetworkPolicy | Default-deny per namespace |
+| Legacy Ingress resource | Migrate to Gateway API |
 
 ## Sources
 
-- Kubernetes Documentation (kubernetes.io/docs)
+- Kubernetes docs (kubernetes.io/docs)
 - Gateway API (gateway-api.sigs.k8s.io)
-- Istio Documentation (istio.io)
-- Cilium Documentation (docs.cilium.io)
-- Helm Documentation (helm.sh)
-- OWASP Kubernetes Security
+- Istio (istio.io), Linkerd (linkerd.io), Cilium (docs.cilium.io)
+- Helm (helm.sh)
 - NSA/CISA Kubernetes Hardening Guide
+- OWASP Kubernetes Security

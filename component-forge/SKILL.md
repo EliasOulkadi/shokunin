@@ -1,17 +1,19 @@
 ﻿---
 name: component-forge
-description: Build production-grade components for React, Vue, Svelte, and Web Components covering all states (loading, empty, error, success, idle), a11y, TypeScript strict, and tests. Use when user asks to create a component, UI element, or frontend module. Do NOT use for page layout, routing, state management architecture, or styling/theming systems.
+description: Build production-grade components for React, Vue 3, and Svelte 5 with all states (loading, empty, error, success, idle), TypeScript strict, WCAG 2.2 accessibility, server components (RSC), and compound component patterns. Includes scaffold script, reference patterns, and template files for React and Vue. Use when user asks to create a UI component, frontend module, or design system component. Do NOT use for page layouts (use landing-craft), routing, or state management architecture (global stores).
 license: MIT
 compatibility: opencode
 metadata:
   workflow: frontend
   audience: developers
-  version: "2.0"
+  version: "3.0"
+  author: shokunin
+allowed-tools: Read Bash Write Grep Glob
 ---
 
 # Component Forge
 
-Build frontend components that handle every state, are accessible by default, and follow framework-specific best practices.
+Build frontend components that handle every state, are accessible by default, TypeScript strict, and follow framework-specific best practices.
 
 ## Workflow
 
@@ -25,9 +27,27 @@ Build frontend components that handle every state, are accessible by default, an
 | Layout | Arranges children | Sidebar, Grid, Stack |
 | Form | Input + validation | LoginForm, SearchInput |
 
-### Step 2: Plan state coverage
+### Step 2: Scaffold component
 
-Every data-fetching component handles all states:
+```bash
+# React
+scripts/scaffold-component.sh Button react
+# Vue
+scripts/scaffold-component.sh Modal vue
+# Svelte
+scripts/scaffold-component.sh Accordion svelte
+```
+
+This creates the full directory structure:
+```
+Button/
+  Button.tsx       # See assets/react-component.template.tsx
+  Button.types.ts
+  Button.test.tsx
+  index.ts
+```
+
+### Step 3: Implement states with discriminated union
 
 ```tsx
 type State<T> =
@@ -36,181 +56,85 @@ type State<T> =
   | { status: 'empty' }
   | { status: 'error'; error: Error }
   | { status: 'success'; data: T }
-```
 
-Render each state explicitly. Never default to a blank screen.
+// Render every state explicitly:
+function Profile({ userId }: { userId: string }) {
+  const [state, setState] = useState<State<User>>({ status: 'idle' })
 
-### Step 3: Define props interface
-
-```tsx
-export interface ButtonProps extends ComponentPropsWithoutRef<'button'> {
-  variant: 'primary' | 'secondary' | 'ghost' | 'danger'
-  size?: 'sm' | 'md' | 'lg'
-  loading?: boolean
-  icon?: ReactNode
+  if (state.status === 'loading') return <LoadingSkeleton />
+  if (state.status === 'error') return <ErrorState error={state.error} onRetry={fetch} />
+  if (state.status === 'empty') return <EmptyState message="No user found" />
+  if (state.status === 'success') return <UserProfile user={state.data} />
+  return null
 }
 ```
 
-Rules:
-- Use `interface` over `type` for public component props
-- Extend native HTML attributes via framework-specific helpers
-- Use discriminated unions for variant props
-- Mark optional props with `?`
+### Step 4: Apply accessibility checklist
 
-### Step 4: Check accessibility
-
-- [ ] All interactive elements keyboard reachable (Tab, Enter, Escape)
+- [ ] All interactive elements keyboard reachable (Tab → Enter/Space)
 - [ ] ARIA labels on icon-only buttons
 - [ ] Focus trap in modals and dialogs
 - [ ] Loading state announced via `aria-live="polite"`
 - [ ] Error state has `role="alert"`
-- [ ] Color is not the only differentiator (add icon or text)
+- [ ] Color is not the only differentiator (add icon/text)
 - [ ] Proper heading hierarchy (h1 → h2 → h3, no skips)
 - [ ] Touch targets ≥ 44×44px
-- [ ] prefers-reduced-motion respected
+- [ ] `prefers-reduced-motion` respected
+
+See [references/a11y-patterns.md](references/a11y-patterns.md) for roving tabindex, focus management, screen reader testing, and contrast ratios.
 
 ### Step 5: Handle edge cases
 
-- Overflow: long text truncation, many items virtualization
-- Network retry on error with "Try again" button
-- Stale data while refreshing (show old data + loading indicator)
-- Race conditions: cancel in-flight requests on unmount
-- Empty arrays vs null vs undefined — all are different states
-- Floating promises: use framework-safe patterns
+| Edge case | Symptom | Fix |
+|-----------|---------|-----|
+| Long text | Layout break | `text-overflow: ellipsis`, `overflow-wrap: anywhere` |
+| Many items (100+) | Slow rendering | Virtualize (react-window, FlashList) |
+| Network retry | Stale data | Show old data + loading indicator |
+| Race condition | Wrong data after fast re-fetch | AbortController, cancel on unmount |
+| null vs undefined vs [] | Wrong empty check | Handle all three explicitly |
 
-## React Patterns
+See [references/react-patterns.md](references/react-patterns.md) for compound components, RSC patterns, error boundaries, and suspense.
 
-### Composition API
+## Error Handling
 
-```tsx
-// Compound component pattern
-function Select({ children }: { children: ReactNode }) {
-  const [value, setValue] = useState('')
-  return (
-    <SelectContext.Provider value={{ value, setValue }}>
-      <div role="listbox">{children}</div>
-    </SelectContext.Provider>
-  )
-}
+| Error | Cause | Fix |
+|-------|-------|-----|
+| Component crashes on missing prop | Missing default value | Add `defaultProps` or default parameter |
+| Infinite re-render | Missing dependency array | Add deps to useEffect/useMemo |
+| Flash of unstyled content | CSS not loaded | Inline critical CSS, use CSS-in-JS or preload |
+| ARIA live region not announcing | Wrong role/value | Use `role="status"` for loading, `role="alert"` for errors |
+| Focus trap not working | Missing focusable element | Ensure at least one focusable child in trap |
 
-Select.Option = function Option({ value, children }: { value: string; children: ReactNode }) {
-  const ctx = useSelectContext()
-  return (
-    <div
-      role="option"
-      aria-selected={ctx.value === value}
-      onClick={() => ctx.setValue(value)}
-    >
-      {children}
-    </div>
-  )
-}
-```
+## Production Checklist
 
-### Server Components (RSC)
-
-```tsx
-// Server Component — runs on server, no hooks, no state
-async function ProductList() {
-  const products = await db.product.findMany()
-  return (
-    <ul>
-      {products.map(p => (
-        <li key={p.id}>
-          {p.name} — <ProductPrice price={p.price} />
-        </li>
-      ))}
-    </ul>
-  )
-}
-
-// Client boundary — minimal, interactive wrapper
-'use client'
-function AddToCart({ productId }: { productId: string }) {
-  const [count, setCount] = useState(0)
-  return <button onClick={() => setCount(c => c + 1)}>Add to Cart ({count})</button>
-}
-```
-
-Put interactive leaf components in `'use client'`, keep the rest as RSC.
-
-## Vue Patterns (Composition API + `<script setup>`)
-
-```vue
-<script setup lang="ts">
-import { ref, computed } from 'vue'
-import type { PropType } from 'vue'
-
-const props = defineProps({
-  variant: { type: String as PropType<'primary' | 'secondary'>, default: 'primary' },
-  disabled: { type: Boolean, default: false },
-})
-
-const emit = defineEmits<{ click: [event: MouseEvent] }>()
-
-const classes = computed(() => [
-  'btn',
-  `btn--${props.variant}`,
-  { 'btn--disabled': props.disabled },
-])
-</script>
-
-<template>
-  <button :class="classes" :disabled="disabled" @click="emit('click', $event)">
-    <slot />
-  </button>
-</template>
-```
-
-## Svelte Patterns (Runes syntax)
-
-```svelte
-<script lang="ts">
-let { variant = 'primary', disabled = false, onclick }: {
-  variant?: 'primary' | 'secondary'
-  disabled?: boolean
-  onclick?: (e: MouseEvent) => void
-} = $props()
-
-let count = $state(0)
-</script>
-
-<button class="btn" class:btn--primary={variant === 'primary'} {disabled} {onclick}>
-  Clicked {count} times
-  <slot />
-</button>
-```
-
-## Component Structure
-
-```
-ComponentName/
-  ComponentName.tsx         # Implementation
-  ComponentName.types.tsx   # Type definitions
-  ComponentName.test.tsx    # Tests
-  ComponentName.stories.tsx # Storybook stories
-  useComponentName.ts      # Custom hook
-  index.ts                 # Re-export
-```
+- [ ] Every component has typed props (interface, not type)
+- [ ] All states rendered (loading, empty, error, success, idle)
+- [ ] Accessibility checklist passed
+- [ ] Edge cases handled (overflow, retry, race conditions)
+- [ ] Named exports only (no default exports)
+- [ ] Co-located tests in same directory
+- [ ] One component per file
+- [ ] Custom hook extracted for non-rendering logic
+- [ ] Tests for every state transition
 
 ## Anti-Patterns
 
 | Anti-pattern | Fix |
 |-------------|-----|
 | Default export | Named exports only |
-| Prop drilling > 3 levels | Context, composition, or state management |
 | `any` in props | Strict types, discriminated unions |
-| Missing loading state | Every data-fetching component has loading → error → success |
-| useEffect for derived state | `useMemo` or computed |
-| Giant component > 200 lines | Split into smaller components |
-| Inline handlers in render | Extract to `useCallback` or function declaration |
-| Mixing server/client in same file without boundary | Clear `'use client'` / `'use server'` separation |
+| Missing loading state | Every data-fetching component renders loading → error → success |
+| useEffect for derived state | `useMemo` or computed property |
+| Giant component > 200 lines | Split into sub-components |
+| Inline handlers in render | Extract to `useCallback` |
+| Mixing server/client without boundary | Clear `'use client'` / `'use server'` |
+| Prop drilling > 3 levels | Context or composition |
 
 ## Sources
 
-- React Documentation (react.dev) — Composition vs Inheritance
-- Vue 3 Composition API (vuejs.org)
-- Svelte 5 Runes (svelte.dev)
+- React docs (react.dev) — Composition vs Inheritance
+- Vue 3 docs (vuejs.org) — Composition API
+- Svelte 5 docs (svelte.dev) — Runes
 - MDN ARIA Authoring Practices Guide
-- Web Content Accessibility Guidelines (WCAG) 2.2
-- Inclusive Components by Heydon Pickering
+- WCAG 2.2 — Accessibility guidelines
+- Inclusive Components (Heydon Pickering)

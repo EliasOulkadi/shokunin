@@ -1,99 +1,63 @@
 ﻿---
 name: error-handler
-description: Design error handling and logging strategies with OpenTelemetry (traces, metrics, logs), error classification, structured logging, recovery patterns (retry, circuit breaker, bulkhead), and error budgets/SLOs. Use when user asks to implement error handling, logging, alerts, monitoring, observability, or incident response patterns. Do NOT use for incident runbooks (use runbook-gen), APM setup (vendor-specific), or Docker/K8s debugging.
+description: Design error handling, structured logging, and observability with OpenTelemetry (traces, metrics, logs), error classification, recovery patterns (retry with jitter, circuit breaker, bulkhead, timeout), error budgets/SLOs with burn rate alerts, and production incident triage. Use when user asks to implement error handling, logging, monitoring, observability, OpenTelemetry, error boundaries, circuit breakers, retry logic, or SLO tracking. Do NOT use for incident runbooks (use runbook-gen), vendor-specific APM setup (Datadog, Sentry agent config), or K8s debugging.
 license: MIT
 compatibility: opencode
 metadata:
   workflow: backend
   audience: developers
-  version: "2.0"
+  version: "3.0"
+  author: shokunin
+allowed-tools: Read Bash Write Grep
 ---
 
 # Error Handler
 
-Build observability systems that make debugging fast and production incidents manageable. Based on Google SRE, OpenTelemetry, and patterns from Sentry and Datadog.
+Build observability systems that make debugging fast and production incidents predictable. Based on Google SRE, OpenTelemetry semantic conventions, and production patterns from Sentry and Datadog.
 
 ## Workflow
 
 ### Step 1: Classify errors
 
-| Category | HTTP Code | Examples | Severity | Action |
-|----------|-----------|----------|----------|--------|
-| Validation | 400 | Missing field, invalid format | Low | Return details, log debug |
-| Authentication | 401 | Expired token, invalid credentials | Medium | Log warning, generic message |
-| Authorization | 403 | Insufficient permissions | Medium | Log with user context |
-| Not Found | 404 | Missing resource | Low | Log debug |
-| Conflict | 409 | Duplicate, stale version | Medium | Return details |
-| Rate Limit | 429 | Too many requests | Low | Retry-After header |
-| Internal | 500 | DB timeout, null ref | High | Alert, full context |
-| Downstream | 502/503 | External service failure | High | Circuit break, trace |
+| Category | HTTP | Severity | Log level | Alert? |
+|----------|------|----------|-----------|--------|
+| Validation | 400 | Low | debug | No |
+| Authentication | 401 | Medium | warn | No |
+| Authorization | 403 | Medium | warn | No |
+| Not Found | 404 | Low | debug | No |
+| Conflict | 409 | Medium | info | No |
+| Rate Limit | 429 | Low | warn | No |
+| Internal | 500 | High | error | Yes |
+| Downstream | 502/3 | High | error | Yes |
 
-### Step 2: Implement structured logging
+### Step 2: Set up OpenTelemetry
 
-```json
-{
-  "timestamp": "2026-05-12T10:30:00Z",
-  "level": "error",
-  "message": "Payment processing failed",
-  "service": "payment-service",
-  "trace_id": "trac_abc123",
-  "span_id": "span_def456",
-  "error": {
-    "type": "StripeAPIError",
-    "code": "card_declined",
-    "stack": "Error: ..."
-  },
-  "context": {
-    "order_id": "order_456",
-    "amount": 2999,
-    "currency": "USD"
-  },
-  "duration_ms": 452
-}
+Run the setup script to scaffold the instrumentation:
+```bash
+scripts/setup-opentelemetry.sh
 ```
 
-Rules:
-- Structured JSON only (never plain text)
-- Always include trace_id + span_id
-- Never log PII, passwords, tokens, or secrets
-- Use semantic conventions for field names
+This generates `src/telemetry/instrumentation.ts` with:
+- NodeSDK + OTLP exporter
+- Batch span processor
+- Resource attributes (service.name, deployment.environment)
+- Auto-instrumentations (http, express, grpc)
+- Graceful shutdown handler
 
-### Step 3: Add OpenTelemetry tracing
+See [references/opentelemetry-deep.md](references/opentelemetry-deep.md) for context propagation, sampling strategies, semantic conventions, and metrics types.
+
+### Step 3: Implement structured error middleware
 
 ```typescript
+// Use the provided template
+// See assets/error-middleware.template.ts for the complete middleware
+
 import { trace, SpanStatusCode } from '@opentelemetry/api'
 
-async function processPayment(orderId: string) {
-  const tracer = trace.getTracer('payment-service')
-  const span = tracer.startSpan('processPayment', {
-    attributes: { orderId, amount: 2999 },
-  })
-
-  try {
-    const result = await stripeClient.charges.create({ ... })
-    span.setStatus({ code: SpanStatusCode.OK })
-    return result
-  } catch (error) {
-    span.recordException(error)
-    span.setStatus({
-      code: SpanStatusCode.ERROR,
-      message: error.message,
-    })
-    throw error
-  } finally {
-    span.end()
-  }
-}
-```
-
-### Step 4: Implement error boundaries
-
-```typescript
-// Express middleware
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   const span = trace.getActiveSpan()
   span?.recordException(err)
-  span?.setStatus({ code: SpanStatusCode.ERROR })
+  span?.setStatus({ code: SpanStatusCode.ERROR, message: err.message })
 
   const requestId = req.headers['x-request-id'] || crypto.randomUUID()
 
@@ -111,12 +75,6 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
     })
   }
 
-  if (err instanceof AuthError) {
-    return res.status(401).json({
-      error: { code: 'UNAUTHORIZED', message: 'Invalid credentials', requestId },
-    })
-  }
-
   // Generic fallback — never leak internals
   res.status(500).json({
     error: { code: 'INTERNAL_ERROR', message: 'An unexpected error occurred', requestId },
@@ -124,144 +82,91 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
 })
 ```
 
-### Step 5: Apply recovery patterns
-
-| Pattern | Use | Implementation | Config |
-|---------|-----|----------------|--------|
-| Retry | Transient failures | Exponential backoff with jitter | Max 3 retries, base 100ms, cap 10s |
-| Circuit breaker | Downstream failures | Trip after 5 failures in 30s, half-open after 30s | 5 failures, 30s cooldown |
-| Fallback | Non-critical features | Return cached/default data | Cache TTL: 5 min |
-| Bulkhead | Resource isolation | Separate thread/connection pool per dependency | Pool size = 10 |
-| Timeout | Unresponsive services | Always set timeouts | Default: 10s, per-call configurable |
-
-#### Retry with exponential backoff + jitter
+### Step 4: Apply recovery patterns
 
 ```typescript
 async function withRetry<T>(
   fn: () => Promise<T>,
-  options: { maxRetries?: number; baseMs?: number; maxMs?: number } = {}
+  options = { maxRetries: 3, baseMs: 100 }
 ): Promise<T> {
-  const { maxRetries = 3, baseMs = 100, maxMs = 10000 } = options
-
-  for (let attempt = 0; attempt <= maxRetries; attempt++) {
-    try {
-      return await fn()
-    } catch (error) {
-      if (attempt === maxRetries) throw error
+  for (let attempt = 0; attempt <= options.maxRetries; attempt++) {
+    try { return await fn() }
+    catch (error) {
+      if (attempt === options.maxRetries) throw error
       if (!isRetryable(error)) throw error
-
-      const delay = Math.min(baseMs * Math.pow(2, attempt), maxMs)
+      const delay = Math.min(options.baseMs * Math.pow(2, attempt), 10000)
       const jitter = delay * (0.5 + Math.random() * 0.5)
-      await new Promise(resolve => setTimeout(resolve, jitter))
+      await new Promise(r => setTimeout(r, jitter))
     }
   }
   throw new Error('Unreachable')
 }
 
 function isRetryable(error: any): boolean {
-  const retryableStatuses = [408, 429, 502, 503, 504]
-  return retryableStatuses.includes(error?.status) || error?.code === 'ETIMEDOUT'
+  return [408, 429, 502, 503, 504].includes(error?.status) || error?.code === 'ETIMEDOUT'
 }
 ```
 
-#### Circuit breaker
+### Step 5: Define error budgets and alerts
 
-```typescript
-class CircuitBreaker {
-  private failures = 0
-  private lastFailureTime = 0
-  private state: 'closed' | 'open' | 'half-open' = 'closed'
+See [references/error-budgets.md](references/error-budgets.md) for complete SLO calculation, burn rate alerts, and dashboard setup.
 
-  constructor(
-    private threshold = 5,
-    private cooldownMs = 30000,
-    private halfOpenMaxRequests = 3
-  ) {}
+**Quick setup:**
+| Severity | Burn rate | Window | Response |
+|----------|-----------|--------|----------|
+| Critical | 6x (budget exhausted in 4.6d) | 5m | Page on-call |
+| Warning | 3x (budget exhausted in 9.3d) | 30m | Next-business-day |
 
-  async call<T>(fn: () => Promise<T>): Promise<T> {
-    if (this.state === 'open') {
-      if (Date.now() - this.lastFailureTime > this.cooldownMs) {
-        this.state = 'half-open'
-        this.failures = 0
-      } else {
-        throw new CircuitBreakerOpenError()
-      }
-    }
-
-    try {
-      const result = await fn()
-      if (this.state === 'half-open') {
-        this.state = 'closed'
-        this.failures = 0
-      }
-      return result
-    } catch (error) {
-      this.failures++
-      this.lastFailureTime = Date.now()
-      if (this.failures >= this.threshold) {
-        this.state = 'open'
-      }
-      throw error
-    }
-  }
-}
+```promql
+# Burn rate alert (critical)
+sum(rate(http_requests_total{status=~"5.."}[5m]))
+/
+sum(rate(http_requests_total[5m]))
+> 0.001 * 6  # 99.9% SLO, 6x burn rate
 ```
 
-### Step 6: Set up monitoring and alerting
+## Error Handling
 
-#### Error budgets (SLO-based)
+| Scenario | Cause | Fix |
+|----------|-------|-----|
+| No trace context in logs | Missing instrumentation | Add auto-instrumentation package |
+| Spans not appearing in backend | Wrong OTLP endpoint | Check `OTEL_EXPORTER_OTLP_ENDPOINT` env var |
+| Circuit breaker never opens | Threshold too high | Start with 5 failures in 30s window |
+| Retries not happening | isRetryable() too strict | Add 503, 504, ETIMEDOUT to retryable |
+| Error budget exhausted fast | SLO too tight | Review: is 99.9% needed for this service? |
 
-```yaml
-service: payment-api
-slo:
-  - name: availability
-    target: 99.9%       # ~43 min downtime per month
-    measurement: good_requests / total_requests
-    window: 28d
-  - name: latency
-    target: 99% under 500ms
-    measurement: p99 latency
-    window: 7d
+## Production Checklist
 
-error_budget:
-  burn_rate_alerts:
-    - name: critical
-      burn_rate: 6        # exhaust budget in 4.6 days
-      window: 5m
-    - name: warning
-      burn_rate: 3        # exhaust budget in 9.3 days
-      window: 30m
-```
-
-#### Alert rules
-
-| Condition | Severity | Response |
-|-----------|----------|----------|
-| 5xx rate > 1% over 5 min | Critical | Page on-call |
-| p99 latency > 2x p50 over 15 min | Warning | Investigate next business day |
-| Error budget consumed > 50% | Warning | Review during office hours |
-| Any 500 on critical endpoint | Critical | Page immediately |
-| Downstream dependency unavailable | High | Route traffic, page on-call |
+- [ ] OpenTelemetry SDK initialized at app startup
+- [ ] Auto-instrumentations for HTTP, DB, messaging
+- [ ] Every route handler wrapped in try/catch or middleware
+- [ ] Structured JSON logging (never plain text)
+- [ ] trace_id + span_id in every log line
+- [ ] Recovery patterns (retry + circuit breaker) on external calls
+- [ ] Timeouts on all external calls (default 10s)
+- [ ] SLOs defined for critical services
+- [ ] Burn rate alerts configured
+- [ ] No PII/tokens in logs
+- [ ] Error classification by type, not generic catch-all
 
 ## Anti-Patterns
 
 | Anti-pattern | Fix |
 |-------------|-----|
-| Logging in catch and throwing again | Log OR throw. Not both. Higher level catches once. |
-| Generic error messages | Include error code, request_id, and details |
-| No tracing in async flows | Propagate trace context across queues, events, and background jobs |
-| Silent catch with no logging | Every catch either handles, logs, or re-throws |
-| Retrying non-retryable errors (400, 401, 403) | Check status before retrying |
+| Log in catch AND rethrow | Log OR throw. Not both. |
+| Generic error messages | Include code, request_id, details |
+| No trace in async flows | Propagate context across queues/events |
+| Silent catch with no log | Every catch handles, logs, or rethrows |
+| Retry non-retryable (400, 401) | Check status before retry |
 | No timeout on external calls | Always set connection + read timeouts |
-| Monolithic error handler | Classify errors and handle by category |
-| No structured logging | Machine-parseable JSON with consistent fields |
+| No error classification | Classify and handle by category |
+| Plain text logs | Structured JSON with consistent fields |
 
 ## Sources
 
 - Google SRE Book — Monitoring Distributed Systems
-- OpenTelemetry Documentation (opentelemetry.io)
-- Sentry Error Handling Docs
-- Datadog Monitoring Best Practices
-- AWS Well-Architected Framework — Reliability Pillar
-- Microsoft Polly — Circuit breaker patterns
-- Burn Rate Alerts (Google SRE Workbook)
+- OpenTelemetry docs (opentelemetry.io)
+- Google SRE Workbook — Burn rate alerts
+- Sentry error handling docs
+- AWS Well-Architected — Reliability Pillar
+- Microsoft Polly — Circuit breaker
