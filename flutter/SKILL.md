@@ -1,17 +1,57 @@
 ---
 name: flutter
-description: Build production Flutter apps with Clean Architecture, Riverpod (preferred over Bloc/Provider), GoRouter navigation, Impeller rendering engine, Dart 3.7+ patterns, platform channels via Pigeon, and App Store/Play Store deployment. Use when user asks to create a Flutter app, set up state management, design widgets, implement navigation, or deploy to stores. Do NOT use for React Native (use react-native), web-only React, or general mobile design.
+description: Build production Flutter apps with Clean Architecture, Riverpod (preferred over Bloc/Provider), GoRouter navigation, Impeller rendering engine, Dart 3.7+ patterns, platform channels via Pigeon, and App Store/Play Store deployment.
+triggers:
+  - "create a Flutter app"
+  - "set up state management"
+  - "design widgets"
+  - "implement navigation"
+  - "deploy to stores"
+  - "flutter clean architecture"
+  - "riverpod"
+  - "go_router"
+  - "build flutter"
+  - "mobile app flutter"
+  - "pubspec.yaml"
+  - "flutter test"
+  - "flutter build"
+  - "platform channel"
+  - "pigeon"
+  - "impeller"
+negatives:
+  - "React Native"
+  - "web-only React"
+  - "general mobile design"
+  - "SwiftUI"
+  - "Jetpack Compose"
+  - "Xamarin"
+  - "Ionic"
+  - "Cordova"
 license: MIT
 compatibility: opencode
 metadata:
   workflow: mobile
   audience: developers
-  version: "2.0"
+  version: "3.0"
 ---
 
 # Flutter Architect
 
 Build production Flutter apps with Clean Architecture, Riverpod, GoRouter, Impeller, and platform channels.
+
+## Workflow
+
+1. **Scaffold** — `flutter create --org com.yourapp app_name`, add `riverpod`, `go_router`, `pigeon` to pubspec.yaml
+2. **Architecture** — Create folder structure: `core/`, `features/{auth,home,profile}/` each with `domain/`, `data/`, `presentation/`
+3. **Domain first** — Define entities (pure Dart), repository contracts, and use cases — zero Flutter imports
+4. **Riverpod providers** — Create `Provider`, `StreamProvider`, `StateNotifierProvider` for state
+5. **GoRouter** — Define routes, auth redirect guard, deep linking config, `ShellRoute` for tab navigation
+6. **Data layer** — Implement `*RepositoryImpl`, DTOs, remote/local data sources
+7. **Presentation** — `ConsumerWidget` / `ConsumerStatefulWidget` at leaf level, `const` constructors everywhere
+8. **Impeller** — Enable on Android (`renderingEngine = "impeller"` in build.gradle), verify on iOS (default since 3.24)
+9. **Platform channels** — Define Pigeon input, run generator, implement native side in Swift/Kotlin
+10. **Tests** — Unit tests for domain + data (fast), widget tests for critical screens, integration for key flows
+11. **Ship** — `flutter build appbundle --release`, `flutter build ipa --release`, CI/CD via Codemagic / GitHub Actions
 
 ## State Management Decision
 
@@ -224,6 +264,19 @@ abstract class BatteryApi {
 // Run: dart run pigeon --input battery.dart --dart_out lib/battery.dart --objc_header_out ios/Runner/battery.h --objc_source_out ios/Runner/battery.m
 ```
 
+## Error Handling
+
+| Scenario | Strategy | Implementation |
+|----------|----------|----------------|
+| Network failure | AsyncValue.guard with retry | `AsyncValue.guard(() => _login(email, password))` + retry notifier |
+| Auth token expired | Silent refresh + retry | Dio interceptor / Riverpod provider refresh |
+| Platform channel crash | Pigeon-generated typed errors | `@throws` annotation in Pigeon definition |
+| Widget build failure | ErrorWidget.builder | `ErrorWidget.builder = (details) => CustomErrorScreen(details)` |
+| Uncaught exception | PlatformDispatcher.onError | Log + crash reporting (Sentry / Firebase Crashlytics) |
+| Deep link malformed | GoRouter redirect with fallback | Redirect to `/404` in error handler |
+| State deserialization | Freezed union + fallback | `whenOrNull` / sealed class default |
+| Image load failure | `errorBuilder` on Image widget | Show placeholder / retry button |
+
 ## Performance Rules
 
 | Rule | Implementation |
@@ -317,6 +370,11 @@ flutter build web --release         # Web
 - [ ] Widget tests for critical screens
 - [ ] Platform channels via Pigeon (not manual MethodChannel)
 - [ ] CI/CD configured (Codemagic / GitHub Actions)
+- [ ] ErrorWidget.builder + PlatformDispatcher.onError configured
+- [ ] Retry logic on network failures
+- [ ] Freezed / sealed classes for state unions
+- [ ] App lifecycle handled (AppLifecycleListener)
+- [ ] Localization (l10n / ARB files)
 
 ## Anti-Patterns
 
@@ -330,6 +388,10 @@ flutter build web --release         # Web
 | `setState` for global state | Riverpod providers |
 | Manual MethodChannel without types | Pigeon for type-safe platform channels |
 | `runApp` without error handling | `ErrorWidget.builder` + `PlatformDispatcher.onError` |
+| One giant GoRouter file | Split routes into feature modules via route groups |
+| Directly using BuildContext after async gap | Use `mounted` check or Navigator state |
+| Ignoring AppLifecycle for state sync | `AppLifecycleListener` + `didChangeAppLifecycleState` |
+| `pod install` issues with Flutter plugins | Use `flutter clean`, `pod deintegrate`, `pod install` |
 
 ## Sources
 

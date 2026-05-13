@@ -1,12 +1,31 @@
 ﻿---
 name: translate-craft
-description: Professional translation and localization for 8 languages (ES, JA, FR, DE, PT, ZH, KO, AR) with cultural adaptation, tone matrix, formality levels, i18n framework patterns (react-intl, i18next, ICU), and RTL layout. Use when user asks to translate, localize, adapt tone for target language, or internationalize an app. Do NOT use for word-for-word dictionary lookups, machine translation without review, or code comments translation.
+description: Professional translation and localization for 8 languages (ES, JA, FR, DE, PT, ZH, KO, AR) with cultural adaptation, tone matrix, formality levels, i18n framework patterns (react-intl, i18next, ICU), and RTL layout.
+version: "3.0"
 license: MIT
 compatibility: opencode
+triggers:
+  - translate text from one language to another
+  - localize an app or website for a new market
+  - adapt tone/register for a target audience
+  - review an existing translation for quality
+  - add i18n support to a codebase
+  - set up RTL layout for Arabic or Hebrew
+  - internationalize a React/i18next project
+  - format dates, currencies, numbers per locale
+negatives:
+  - word-for-word dictionary lookups or glossaries
+  - raw machine translation without human review
+  - translating code comments or variable names
+  - generating locale files from scratch
 metadata:
   workflow: communication
-  audience: developers
-  version: "2.0"
+  audience: developers, translators
+  revision: 3
+  changelog:
+    "3.0": Added YAML frontmatter with triggers/negatives, numbered workflow, error handling table, production checklist, anti-patterns table
+    "2.0": Added Korean, Arabic, RTL layout, ICU patterns
+    "1.0": Initial release with 6 languages
 ---
 
 # Translate Craft
@@ -91,6 +110,31 @@ Translate meaning, not words. If the reader can tell it's a translation, it fail
 - **Length**: ~25% shorter than English. Text shrinks in UI.
 - **Numbers**: Written left-to-right within RTL text
 
+## Procedural Workflow
+
+1. **Identify scope** — source language, target language, audience profile, medium (web/app/print), tone tier (casual/polite/honorific/formal)
+2. **Analyze source** — flag idioms, cultural references, ambiguity, gender-dependent terms, text with expansion/shrinkage risk
+3. **Translate** — produce first pass applying language-specific rules from the section above. Keep placeholders intact
+4. **Adapt tone** — adjust register per audience. Use the Tone Adaptation Matrix as reference for formality level
+5. **Localize** — convert dates, times, currencies, units, phone numbers, addresses per Locale-Specific Formatting table
+6. **Restructure** — reflow sentences for natural target-language word order. Check for false friends, gender agreement, politeness consistency
+7. **Reverse review** — read only the target text. If you can mentally reconstruct the source English, the translation is too literal. Rewrite
+8. **UI verify** — for digital products, paste translated text into the layout. Check for truncation, overflow, RTL mirroring, line breaks
+9. **Final pass** — run the Production Checklist below. Confirm no placeholders broken, no segments left untranslated
+
+## Error Handling
+
+| Error type | Symptom | Root cause | Fix |
+|------------|---------|------------|-----|
+| Literalism | Translation sounds foreign, odd word choices | Translated words instead of meaning | Rewrite freely preserving intent, not form |
+| Register mismatch | Too formal/casual for context | Wrong politeness tier selected | Identify correct audience relationship, reapply formality rules |
+| False friend | Nonsensical or misleading word | Word looks similar in source/target but means different | Verify against known false friends list for the language pair |
+| Gender disagreement | Article/adjective doesn't match noun | Missed gender rule in target language | Ensure all modifiers agree with noun gender across sentence boundaries |
+| Broken placeholder | `{name}` or `%s` appears in output | Placeholder treated as translatable text | Wrap placeholders in skip markers, verify post-translation |
+| RTL breakage | Text overlaps, layout inverted, numbers reversed | RTL not handled at layout level | Apply CSS logical properties, test with long Arabic string |
+| UI overflow | Text truncated or overlapping | Length expansion/shrinkage not accounted for | Check source vs target character count ratios, request layout adjustment |
+| Honorific inconsistency | Mixed speech levels in same sentence | Switched between polite and casual mid-text | Normalize entire document to single honorific tier |
+
 ## i18n Framework Patterns
 
 ### ICU Message Syntax
@@ -163,40 +207,43 @@ function Welcome({ name, unreadCount }) {
 }
 ```
 
-## Localization Checklist
+## Production Checklist
 
 - [ ] Placeholders preserved and repositioned
-- [ ] Date formats converted
-- [ ] Time formats converted (AM/PM → 24h)
-- [ ] Currency adapted
-- [ ] Units converted (miles → km, °F → °C)
+- [ ] Date formats converted per locale
+- [ ] Time formats converted (AM/PM ↔ 24h)
+- [ ] Currency adapted with correct symbol placement
+- [ ] Units converted (miles → km, °F → °C, ft → m)
 - [ ] Phone number formats adapted
-- [ ] Address formats restructured
-- [ ] Cultural references explained or replaced
-- [ ] Idioms replaced with equivalent
-- [ ] Formality level consistent
-- [ ] Gender agreement checked
+- [ ] Address formats restructured (street → city → postcode order)
+- [ ] Cultural references explained or replaced with local equivalent
+- [ ] Idioms replaced with naturally equivalent expression
+- [ ] Formality level consistent across entire document
+- [ ] Gender agreement checked within and across sentences
 - [ ] UTF-8 encoding verified
-- [ ] Text expansion/shrinkage accounted for in UI
-
-## Workflow
-
-1. **Identify**: source, target, audience, medium
-2. **Translate**: apply language-specific rules
-3. **Adapt**: adjust tone, register, culture
-4. **Localize**: run localization checklist
-5. **Review**: read in target language only
+- [ ] Text expansion/shrinkage accounted for in UI layout
+- [ ] RTL layout tested with right-aligned text, mirrored UI, and mixed LTR numbers
+- [ ] Honorific/politeness tier applied uniformly
+- [ ] False friends checked for the language pair
+- [ ] Placeholders `{...}`, `%s`, `{{...}}` untouched by translation
+- [ ] Plurals, selectors, and ICU syntax preserved and re-validated
+- [ ] Read-aloud test passed: target text sounds natural when spoken
+- [ ] Round-trip test: back-translate a sample to catch meaning drift
 
 ## Anti-Patterns
 
-| Mistake | Fix |
-|---------|-----|
-| Literal idioms | "break a leg" ≠ "romper una pierna" |
-| False friends | "embarrassed" ≠ "embarazada" (pregnant) |
-| Inconsistent formality | Don't mix tú/usted in same document |
-| Word-for-word structure | "20 years old" → "Tengo 20 años" (not "Soy 20 años") |
-| No space adaptation | English is shorter than Spanish/French. UI breaks. |
-| Ignoring RTL | RTL needs layout mirroring, not just text direction |
+| Anti-pattern | Why it fails | Correct approach |
+|--------------|-------------|------------------|
+| Literal idiom translation | "break a leg" → "romper una pierna" makes no sense | Find equivalent idiom in target language or drop |
+| False friend blindness | "embarrassed" ≠ "embarazada" (pregnant) | Maintain a false friends list per language pair |
+| Mixed formality | Switching tú/usted in same paragraph feels schizophrenic | Pick one register and enforce it throughout |
+| Word-for-word structure | "20 years old" → "Soy 20 años" instead of "Tengo 20 años" | Restructure to target-language sentence patterns |
+| Ignoring expansion/shrinkage | German/Spanish text overflows buttons by 25% | Design UI with flexible containers, test with longest realistic string |
+| RTL as an afterthought | Arabic text aligned left, UI elements reversed | Use CSS logical properties from the start, test RTL early |
+| Leaking placeholders | Translating "{name}" as "{nombre}" | Mark placeholders as untranslatable, verify post-translation |
+| Dead string accumulation | Translated strings never deployed, code references removed | Track string usage, remove orphaned translations |
+| Homogeneous locale testing | Only tests with short English strings, assumes all locales fit | Test each locale with its longest representative string |
+| Honorific skipping | Japanese/Korean without politeness tier sounds rude | Default to polite (です/해요체), only use casual if audience is close |
 
 ## Sources
 

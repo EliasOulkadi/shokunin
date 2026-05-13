@@ -1,15 +1,80 @@
 ---
 name: finance
-description: Personal finance planning — 5-pillar framework (cash flow, net worth, debt, emergency fund, investing), tax optimization, insurance review, retirement planning (FIRE, 4% rule), Mega Backdoor Roth, and document retention. Use when user asks to create a budget, track spending, plan debt payoff, review investments, optimize taxes, organize financial documents, or get a financial plan. Do NOT use for stock trading advice, cryptocurrency speculation, or day trading. This is educational, not professional financial advice.
+description: >-
+  Personal finance planning — 5-pillar framework (cash flow, net worth, debt,
+  emergency fund, investing), tax optimization, insurance review, retirement
+  planning (FIRE, 4% rule, Mega Backdoor Roth), and document retention.
 license: MIT
 compatibility: opencode
 metadata:
   workflow: finance
   audience: personal
-  version: "2.0"
+  version: "3.0"
+triggers:
+  - create a budget
+  - track spending
+  - plan debt payoff
+  - review investments
+  - optimize taxes
+  - organize financial documents
+  - get a financial plan
+  - retirement planning
+  - how much to save
+  - emergency fund
+  - net worth
+negatives:
+  - stock trading advice
+  - cryptocurrency speculation
+  - day trading strategies
+  - options trading
+  - individual stock picks
 ---
 
 **Disclaimer**: Educational financial planning information. Not professional financial advice.
+
+---
+
+## Workflow
+
+Follow in order. Skip pillars already covered.
+
+### 1. Assess Cash Flow
+
+1. Calculate real monthly income (take-home after taxes, insurance, retirement)
+2. Track expenses for 30 days
+3. Classify into Needs (50%), Wants (30%), Savings (20%)
+4. Identify surplus or deficit
+
+### 2. Calculate Net Worth
+
+1. List all assets (cash, investments, property, retirement accounts)
+2. List all liabilities (credit cards, loans, mortgage, student debt)
+3. Net Worth = Total Assets - Total Liabilities
+4. Track monthly — direction matters more than the number
+
+### 3. Eliminate High-Interest Debt
+
+1. List all debts with balance, rate, minimum payment
+2. Choose avalanche (highest rate first) or snowball (smallest balance first)
+3. Attack with surplus from cash flow
+4. Debt is emergency if total > 6 months income OR rate > 10%
+
+### 4. Build Emergency Fund
+
+1. Phase 1: $1,000 or 1 month (starter)
+2. Phase 2: 3-6 months of essential expenses (full)
+3. Phase 3: 6-12 months (conservative / irregular income)
+4. Keep in HYSA only. Never invest it.
+
+### 5. Invest for Retirement
+
+1. 401(k) up to employer match → free money
+2. HSA (if eligible) → triple tax-advantaged
+3. IRA (Roth or Traditional) → $7,000/yr ($8,000 if 50+)
+4. 401(k) up to max ($23,500)
+5. Taxable brokerage → no limits
+
+---
 
 ## 5-Pillar Framework
 
@@ -17,23 +82,22 @@ metadata:
 1. Cash Flow      → Income - Expenses = Surplus
 2. Net Worth      → Assets - Liabilities = Net Worth
 3. Debt           → Avalanche or Snowball
-4. Emergency      → 3-6 months essential expenses
+4. Emergency      → 3-6 months essential expenses in HYSA
 5. Invest         → Tax-advantaged accounts first
 ```
 
 ## Pillar 1: Budgeting
 
-### Step 1: Calculate real income
-Take-home pay after taxes, insurance, retirement. Variable income: average last 3 months.
+### 50/30/20 Rule
 
-### Step 2: 50/30/20 Rule
-```
-Needs (50%):     Housing, utilities, groceries, insurance, minimum debt, transport
-Wants (30%):     Dining, entertainment, subscriptions, travel, shopping
-Savings (20%):   Emergency fund, retirement, investments, extra debt
-```
+| Category | % | Includes |
+|----------|---|----------|
+| Needs | 50% | Housing, utilities, groceries, insurance, minimum debt, transport |
+| Wants | 30% | Dining, entertainment, subscriptions, travel, shopping |
+| Savings | 20% | Emergency fund, retirement, investments, extra debt |
 
 ### Budgeting Methods
+
 | Method | Best for |
 |--------|----------|
 | 50/30/20 | Beginners |
@@ -43,42 +107,38 @@ Savings (20%):   Emergency fund, retirement, investments, extra debt
 
 ## Pillar 2: Net Worth
 
-```
-Net Worth = Total Assets - Total Liabilities
-```
-
-Track monthly. Direction matters more than the number.
+- Track monthly via spreadsheet or app
+- Direction > absolute number
+- Milestones: $0 → 3 months expenses → 1x income → 10x income
 
 ## Pillar 3: Debt Payoff
 
-| Strategy | How | Best for |
-|----------|-----|----------|
+| Strategy | Approach | Best for |
+|----------|----------|----------|
 | Avalanche | Extra to highest interest rate | Mathematically optimal |
 | Snowball | Extra to smallest balance | Psychological wins |
 
-Debt is emergency if: total > 6 months income OR interest rate > 10%.
+> **Debt is emergency if**: total > 6 months income OR interest rate > 10%
 
 ## Pillar 4: Emergency Fund
 
-```
-Phase 1: $1,000 or 1 month (starter)
-Phase 2: 3-6 months of essential expenses (full)
-Phase 3: 6-12 months (conservative, irregular income)
-```
+| Phase | Amount | When |
+|-------|--------|------|
+| Starter | $1,000 or 1 month | While paying off debt |
+| Full | 3-6 months essential expenses | After debt free |
+| Conservative | 6-12 months | Irregular income, self-employed |
 
-Keep in high-yield savings account (HYSA). Never invested.
+**Where**: High-yield savings account (HYSA). Never invested.
 
 ## Pillar 5: Investing & Retirement
 
-### Account priority
+### Account Contribution Hierarchy
 
-```
-1. 401(k) up to employer match          → Free money, do this first
-2. HSA (if eligible)                    → Triple tax-advantaged
-3. IRA (Roth or Traditional)            → $7,000/yr ($8,000 if 50+)
-4. 401(k) up to max                     → Tax-deferred growth
-5. Taxable brokerage                    → No limits, less tax-advantaged
-```
+1. 401(k) up to employer match → free money, do this first
+2. HSA (if eligible) → triple tax-advantaged
+3. IRA (Roth or Traditional) → $7,000/yr ($8,000 if 50+)
+4. 401(k) up to max → $23,500/yr
+5. Taxable brokerage → no limits, less tax-advantaged
 
 ### 2026 Contribution Limits
 
@@ -99,65 +159,70 @@ Keep in high-yield savings account (HYSA). Never invested.
 - US bonds (BND / FXNAX):           10-20% (age - 20 = bond %)
 ```
 
-Target: 0.03-0.07% expense ratio. Rebalance annually.
+Target expense ratio: 0.03-0.07%. Rebalance annually.
 
 ### Savings Benchmarks (Fidelity)
+
 | Age | 30 | 35 | 40 | 45 | 50 | 55 | 60 | 65 |
 |-----|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
 | 1x salary | 2x | 3x | 4x | 5x | 6x | 7x | 10x |
 
 ### Withdrawal Rules
+
 - 4% rule (25x annual expenses) — traditional retirement
 - 3-3.5% for early retirement / longer horizons
 - RMDs start at age 73 (SECURE 2.0)
 
 ### Mega Backdoor Roth
 
-```
 1. Check if 401(k) allows after-tax contributions + in-plan Roth rollover
 2. Contribute up to $69,000 - $23,500 (elective) - employer match = after-tax capacity
 3. Request in-plan Roth rollover (automatic if plan supports it)
 4. Growth on after-tax is taxable if not rolled over promptly
 
-Pro-rata rule does NOT apply to 401(k) after-tax → Roth conversions
-```
+> Pro-rata rule does NOT apply to 401(k) after-tax → Roth conversions
 
 ### Backdoor Roth IRA
 
-```
 1. Contribute $7,000 to Traditional IRA (non-deductible)
 2. Convert to Roth IRA
 3. Pay tax only on earnings between contribution and conversion
 
-Pro-rata rule: if you have other Traditional IRA balances, conversion is partially taxable
-→ Solution: roll Trad IRA into 401(k) before converting
-```
+> Pro-rata rule: if you have other Traditional IRA balances, conversion is partially taxable
+> **Fix**: roll Trad IRA into 401(k) before converting
+
+---
 
 ## Tax Optimization
 
 | Strategy | Impact |
 |----------|--------|
-| Max HSA ($4,300/$8,550) | Triple tax-free |
+| Max HSA ($4,300 / $8,550) | Triple tax-free |
 | Max Trad IRA deduction | Reduces AGI |
 | Tax-loss harvesting | Offset gains + $3,000/yr income |
 | Mega Backdoor Roth | After-tax → Roth, up to $69,000 |
 | Health insurance (self-employed) | Above-the-line deduction |
 
 ### 2026 Standard Deduction (estimated)
+
 - Single: ~$15,000
 - Married filing jointly: ~$30,000
 - Head of household: ~$22,500
 
 Itemize only if deductions exceed standard.
 
+---
+
 ## Insurance Check
 
 | Type | What to check |
-|------|-------------|
+|------|---------------|
 | Health | Deductible, OOP max, HSA eligibility |
 | Auto/Home | Liability ≥ $300K, umbrella if NW > $500K |
 | Life | Term only (never whole/universal). 10-12x income, 20-30yr term |
 | Disability | Own-occupation, covers 60% income |
+
+---
 
 ## Financial Document Retention
 
@@ -171,17 +236,57 @@ Itemize only if deductions exceed standard.
 | Estate docs (will, trust) | Permanent |
 | Loan documents | Until paid + 7 years |
 
+---
+
+## Error Handling
+
+| Scenario | Cause | Mitigation |
+|----------|-------|------------|
+| Negative cash flow | Budget > income | Cut wants first, then needs; increase income |
+| Emergency fund not growing | No budget surplus | Revisit 50/30/20; automate transfers on payday |
+| Debt increasing despite payments | Interest outpaces principal | Avalanche to highest rate; consider consolidation |
+| Investment losses panic | Market volatility | Rebalance annually, not on news; stay the course |
+| Backdoor Roth pro-rata tax | Traditional IRA balance exists | Roll Trad IRA into 401(k) before converting |
+| HSA ineligible | HDHP not satisfied | Verify HDHP minimums; switch plans at open enrollment |
+| Tax bill surprise | Underwithheld | Adjust W-4; make estimated quarterly payments |
+
+---
+
+## Production Checklist
+
+- [ ] **Income**: calculated take-home (not gross)
+- [ ] **Expenses**: tracked for ≥ 30 days
+- [ ] **50/30/20**: verified categories add up
+- [ ] **Net worth**: baseline recorded
+- [ ] **Debt**: all debts listed with rates and minimums
+- [ ] **Strategy**: avalanche or snowball chosen
+- [ ] **Emergency fund**: at least starter phase in HYSA
+- [ ] **Retirement**: 401(k) match captured
+- [ ] **HSA**: maxed if eligible
+- [ ] **IRA**: funded for current year
+- [ ] **Asset allocation**: 3-fund portfolio set
+- [ ] **Insurance**: life, health, disability, auto/home reviewed
+- [ ] **Tax**: withholding checked, prior year return reviewed
+- [ ] **Documents**: retention schedule applied
+
+---
+
 ## Anti-Patterns
 
 | Anti-pattern | Fix |
-|-------------|-----|
-| Budgeting every dollar without buffer | Leave 5-10% buffer |
+|--------------|-----|
+| Budgeting every dollar without buffer | Leave 5-10% buffer for variable expenses |
 | Investing before emergency fund | 3-6 months in HYSA first |
 | Whole life insurance | Term life only. Invest the difference. |
 | Timing the market | Time in market beats timing the market |
-| No tax diversification | Mix of pre-tax, after-tax (Roth), and taxable |
-| Credit card debt as normal | Pay in full monthly |
+| No tax diversification | Mix of pre-tax, Roth, and taxable accounts |
+| Credit card debt as normal | Pay in full every month |
 | No will / estate plan | Everyone needs will + healthcare directive + POA |
+| Chasing returns / stock picking | 3-fund index portfolio, rebalance annually |
+| Over-insuring (multiple whole life, annuities) | Term life + umbrella only |
+| Keeping too much cash (outside emergency fund) | Invest surplus beyond 6-12 months expenses |
+
+---
 
 ## Sources
 

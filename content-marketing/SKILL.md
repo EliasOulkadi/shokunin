@@ -1,17 +1,75 @@
 ---
 name: content-marketing
-description: Write blogs, newsletters, Twitter threads, case studies, and marketing copy that convert. Covers copywriting frameworks (AIDA, PAS, BAB, FAB), headline formulas, SEO/GEO for 2026 (AI Overviews, SGE), newsletter deliverability, Twitter thread hooks, Cialdini psychology, and cognitive biases. Use when user asks to write a blog post, newsletter, Twitter thread, case study, marketing copy, landing page copy, ad copy, or sales page. Do NOT use for sales outreach (use business-proposals), landing page design (use landing-craft), or translation (use translate-craft).
+description: >
+  Write blogs, newsletters, Twitter threads, case studies, and marketing copy
+  that convert. Covers copywriting frameworks (AIDA, PAS, BAB, FAB), headline
+  formulas, SEO/GEO for 2026 (AI Overviews, SGE), newsletter deliverability,
+  Twitter thread hooks, Cialdini psychology, and cognitive biases.
+  Triggers: write a blog post, newsletter, Twitter thread, case study,
+  marketing copy, landing page copy, ad copy, sales page.
+  Negative triggers: sales outreach (use business-proposals), landing page
+  design (use landing-craft), translation (use translate-craft).
 license: MIT
 compatibility: opencode
 metadata:
-  workflow: marketing
+  version: "3.0"
+  workflow: content-marketing
   audience: developers
-  version: "2.0"
+  allowed-tools:
+    - websearch
+    - webfetch
+    - read
+    - write
+    - edit
+    - glob
+    - grep
+    - bash
+    - skill
 ---
 
 # Content Marketing
 
 Write content that ranks, converts, and gets shared. Based on Ogilvy, Cialdini, and modern distribution strategies.
+
+## Workflow
+
+Follow these steps in order when asked to produce content.
+
+### Step 1: Brief & Research
+
+- Ask for (or infer): audience, goal, format, tone, key message, CTA
+- Search competitor content for gaps and angles
+- Collect 3-5 data points / quotes / studies to support claims
+- Define primary keyword + 2-3 related keywords
+
+### Step 2: Structure Outline
+
+- Choose framework (AIDA / PAS / BAB / FAB / 4Ps / QUEST — see below)
+- Draft headline (use Headline Formulas section)
+- Define sections with H2/H3 hierarchy
+- Place internal links and CTAs
+
+### Step 3: Draft
+
+- Write lead (choose from Lead Types table)
+- Expand each section with claims backed by data
+- Add code examples if relevant (runnable, annotated, wrong→right)
+- Keep paragraphs under 3 sentences
+
+### Step 4: Optimize
+
+- Apply SEO/GEO rules (keywords, schema, answer format)
+- Check headline against rules (under 15 words, keyword early, specific outcome)
+- Verify Cialdini principles applied (at least 3)
+- Validate against Anti-Patterns table
+
+### Step 5: Polish & Deliver
+
+- Read aloud for flow. Cut fluff.
+- Check all links work
+- Format for target platform (Markdown for blog, plain text for email, etc.)
+- Include preview text / subject line if newsletter
+- Submit or hand off
 
 ## Copywriting Frameworks
 
@@ -209,6 +267,40 @@ Rules: real numbers or don't publish. Include lagging and leading indicators.
 | No proof | Back every claim with data |
 | 20-tweet threads | Cut to 5-8 |
 | Selling in first 5 tweets | Build trust first |
+| Ignoring deliverability | Run checklist before send |
+| No A/B test on subject | Test 20% before full blast |
+
+## Error Handling
+
+| Scenario | Likely Cause | Fix |
+|----------|-------------|-----|
+| Content feels generic | No specific audience defined | Re-run Step 1, pick one persona |
+| Headline doesn't grab | Missing keyword or benefit | Rewrite with [outcome] + [audience] formula |
+| Low open rates | Subject line too long / weak | Trim to 30-50 chars, A/B test |
+| High unsubscribe | Wrong audience or too frequent | Audit content relevance, adjust cadence |
+| No conversions | CTA too vague or missing | Add single CTA with action verb + outcome |
+| SEO not ranking | Keyword not in H1 or first paragraph | Move primary keyword to H1 + first 100 words |
+| AI Overviews ignore content | No direct answer format | Restructure opening as direct Q&A |
+| Newsletter flagged as spam | Missing DKIM or spam trigger words | Run deliverability checklist |
+| Thread gets low engagement | No hook or too much selling | Rewrite first tweet as curiosity gap |
+| Case study feels weak | No quantified results | Remove or collect real metrics |
+
+## Production Checklist
+
+Before publishing any piece, verify:
+
+- [ ] Audience persona defined and reflected in language
+- [ ] Copywriting framework chosen (AIDA / PAS / BAB / etc.)
+- [ ] Headline under 15 words with keyword near start
+- [ ] At least 3 Cialdini principles applied
+- [ ] Every claim backed by data, quote, or source link
+- [ ] Primary keyword in H1, first paragraph, and one H2
+- [ ] Meta description under 155 chars (blog)
+- [ ] Direct answer format in first 2 paragraphs (GEO)
+- [ ] CTA is a single action verb with specific outcome
+- [ ] No anti-pattern violations (check table above)
+- [ ] Links tested and valid
+- [ ] Read aloud — flow is natural, no jargon
 
 ## Sources
 

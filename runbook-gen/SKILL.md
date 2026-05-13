@@ -1,19 +1,48 @@
 ﻿---
 name: runbook-gen
-description: Generate operations runbooks and post-mortems for incident response — severity matrix, decision trees, escalation paths, war room setup (Slack/Zoom), status page updates, customer comms templates, and blameless post-mortems with action items. Use when user asks to create a runbook, incident response plan, on-call guide, SRE procedure, escalation path, outage playbook, or post-mortem. Do NOT use for general documentation (use documentation), error handling patterns (use error-handler), or monitoring/alerting configuration (vendor-specific).
+description: Generate operations runbooks and post-mortems for incident response — severity matrix, decision trees, escalation paths, war room setup (Slack/Zoom), status page updates, customer comms templates, and blameless post-mortems with action items.
 license: MIT
 compatibility: opencode
 metadata:
   workflow: operations
   audience: sre
-  version: "2.0"
+  version: "3.0"
+triggers:
+  - "create a runbook"
+  - "incident response plan"
+  - "on-call guide"
+  - "SRE procedure"
+  - "escalation path"
+  - "outage playbook"
+  - "post-mortem"
+  - "war room"
+  - "sev1 procedure"
+negatives:
+  - "Use **documentation** for general project docs, READMEs, API docs"
+  - "Use **error-handler** for error handling patterns, retry logic, circuit breakers"
+  - "Use **error-handler** for logging and tracing configuration"
+  - "Use **ci-cd** for deployment pipeline runbooks"
+  - "Use **db-sculptor** for database-specific recovery procedures"
 ---
 
 # Runbook Generator
 
 Operation runbooks that on-call engineers can follow under pressure. Based on Google SRE practices, PagerDuty incident response, and post-mortem culture.
 
-## Required Discovery
+## 1. Procedural Workflow
+
+Follow these steps in order when generating a runbook:
+
+1. **Discover** — Ask the 5 Required Discovery questions (below) to scope the runbook
+2. **Classify** — Map the incident to the Severity Matrix; if unclear start at Sev2
+3. **Template** — Instantiate the Runbook Template with service-specific commands, time-boxes, and contacts
+4. **War Room** — Configure Slack channel, Zoom bridge, shared doc, status page, and customer comms
+5. **Verify** — Run through the Production Checklist before marking complete
+6. **Archive** — Store the runbook in the team's on-call repo, test in a drill within the quarter
+
+When the ask is a post-mortem (not a runbook), skip steps 3-4 and use the Post-Mortem Template instead.
+
+## 2. Required Discovery
 
 1. **Service/System**: What is the runbook about? (API, database, cache, queue)
 2. **Incident types**: What can go wrong? (down, degraded, slow, data loss)
@@ -21,7 +50,7 @@ Operation runbooks that on-call engineers can follow under pressure. Based on Go
 4. **Team structure**: Primary, secondary, escalation contacts
 5. **Existing monitoring**: Alerts, dashboards, runbooks
 
-## Severity Matrix
+## 3. Severity Matrix
 
 | Severity | Definition | Response SLA |
 |----------|------------|--------------|
@@ -30,7 +59,7 @@ Operation runbooks that on-call engineers can follow under pressure. Based on Go
 | Sev3 | Minor issue, no user impact | Next business day |
 | Sev4 | Internal tooling, non-critical | Per team schedule |
 
-## Runbook Template
+## 4. Runbook Template
 
 ```
 ## Runbook: [Incident Type]
@@ -93,7 +122,7 @@ kubectl rollout status deployment/[service]
 - [ ] Update runbook with lessons learned
 ```
 
-## War Room Setup
+## 5. War Room Setup
 
 ### Communications
 - **Slack channel**: `#inc-sev1-[incident-name]`
@@ -131,7 +160,7 @@ What we're doing:
 We apologize for the disruption.
 ```
 
-## Post-Mortem Template
+## 6. Post-Mortem Template
 
 ```
 ## Post-Mortem: [Date] — [Title]
@@ -165,30 +194,52 @@ One paragraph. System-focused, not person-focused.
 ### What We'll Do Differently
 ```
 
-## Runbook Quality Checklist
+## 7. Error Handling Table
 
-- [ ] Every command copy-paste ready with no placeholders
-- [ ] Every step has time estimates
-- [ ] Multiple resolution paths for common failure modes
-- [ ] One runbook per incident type
-- [ ] Verification step for every resolution
-- [ ] Escalation contacts include backup (Slack + phone)
-- [ ] Decision tree is shallow (3-4 levels max)
-- [ ] Runbook tested in a drill within the last quarter
+| Scenario | Behaviour | Guidance |
+|----------|-----------|----------|
+| User doesn't know the service/platform | Ask clarifying questions one at a time (not a list) | Start with "what service is this for?" |
+| User says "just give me a template" | Output a blank Runbook Template with placeholder brackets | Skip Discovery, fill later |
+| User asks for both runbook + post-mortem at once | Generate runbook first, then offer post-mortem | "I'll write the runbook now. Do you have an incident in mind for the post-mortem?" |
+| Service has no existing monitoring | Flag the gap, offer to add basic health-check instructions | Note alerts must be configured separately |
+| Runbook for a third-party/SaaS dependency | Include vendor status page check; mark resolution as "vendor fixes" | Focus on detection + escalation, not resolution |
+| User says "I don't know the escalation contacts" | Use generic roles (Primary on-call, Secondary, EM, VP Eng) | Leave bracketed placeholders |
+| Multiple teams involved | Add a RACI section to the runbook | Clarify who decides vs who executes |
+| Runbook already exists, user wants update | Treat as revision: read current, diff, propose changes | Flag deprecations, test outdated commands |
 
-## Anti-Patterns
+## 8. Production Checklist
 
-| Anti-pattern | Fix |
-|-------------|-----|
-| Steps that say "fix the issue" | Tell HOW, not what |
-| Commands with unsubstituted variables | Copy-paste ready |
-| No verification step | How to know fix worked |
-| Outdated runbooks (>6 months) | Commands rot, trust erodes |
-| Runbooks nobody tested | First test is during the actual incident |
-| Too many steps (>15) | Split or simplify |
-| No time-boxes | Engineer doesn't know when to escalate |
+Before marking a runbook complete, verify every item:
 
-## Sources
+- [ ] **Commands are copy-paste ready** — no unsubstituted variables (`[ns]` only in section headers/notes, never in commands)
+- [ ] **Every step has a time-box** — engineer knows when to escalate
+- [ ] **Decision tree is shallow** — max 3-4 levels; deeper means split into sub-runbooks
+- [ ] **Multiple resolution paths** — at least 2 common failure modes covered
+- [ ] **One runbook per incident type** — don't combine "DB failover" and "deployment rollback"
+- [ ] **Verification step after every resolution** — how to confirm the fix worked
+- [ ] **Escalation contacts listed** — primary + backup, both Slack and phone
+- [ ] **Status page templates included** — Investigating / Monitoring / Resolved
+- [ ] **Runbook tested in a drill** — within the current quarter, not when incident strikes
+- [ ] **README section added** — link to runbook from team's on-call repo
+- [ ] **Secrets checked** — no passwords, API keys, or tokens in commands; use env vars
+- [ ] **Reviewed by secondary on-call** — fresh eyes catch assumptions
+
+## 9. Anti-Patterns Table
+
+| Anti-pattern | Why It Fails | Fix |
+|-------------|-------------|-----|
+| Steps that say "fix the issue" | Too vague under pressure | Tell HOW, not what — exact commands |
+| Commands with unsubstituted variables | Copy-paste fails, engineer wastes time retyping | Every command must run as-is |
+| No verification step | Fix might not work, but nobody knows | Add check after every resolution |
+| Runbooks >6 months stale | Commands rot, trust erodes, people ignore them | Schedule quarterly review in team calendar |
+| Runbooks nobody tested | First test happens during the actual incident | Require one drill per quarter per runbook |
+| Too many steps (>15) | Cognitive overload during Sev1 | Split into sub-runbooks, keep shallow |
+| No time-boxes | Engineer doesn't know when to escalate | Every diagnosis/resolution step has a max time |
+| Single resolution path | Assumes first idea works | Always have Plan B in the same runbook |
+| Post-mortem blames people | Blame culture kills incident reporting | "What broke the system?" not "Who broke it?" |
+| Skipping customer comms | Stakeholders hear "we're down" from social media | Draft customer email as part of template |
+
+## 10. Sources
 
 - Google SRE Book: "Monitoring Distributed Systems"
 - Google SRE Workbook: Incident Response

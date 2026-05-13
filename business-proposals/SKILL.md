@@ -1,17 +1,45 @@
 ---
 name: business-proposals
-description: Generate sales outreach sequences, proposals, SOWs, investor pitch decks, and RFP responses. Covers cold email sequences, proposal structure, pricing tiers (Good-Better-Best), scope of work with exclusions, and 10-slide pitch deck. Use when user asks to write a proposal, cold email, pitch deck, investor deck, SOW, sales outreach, or respond to RFP. Do NOT use for general corporate communication (use communication), content marketing (use content-marketing), or brand design (use design).
+description: Generate sales outreach sequences, proposals, SOWs, investor pitch decks, and RFP responses. Covers cold email sequences, proposal structure, pricing tiers (Good-Better-Best), scope of work with exclusions, and 10-slide pitch deck.
+version: "3.0"
+triggers:
+  - "write a proposal"
+  - "cold email / outreach sequence"
+  - "pitch deck / investor deck"
+  - "SOW / statement of work"
+  - "sales outreach / prospecting"
+  - "respond to RFP"
+  - "scope of work"
+  - "client proposal"
+negatives:
+  - general corporate communication (use communication skill)
+  - content marketing / blog posts (use content-marketing skill)
+  - brand design / creative direction (use design skill)
+  - financial models / spreadsheets (use finance skill)
+  - legal contracts / terms of service (use legal-counsel skill)
 license: MIT
 compatibility: opencode
 metadata:
   workflow: sales
-  audience: consultants
-  version: "2.0"
+  audience: consultants, founders, freelancers
+  version: "3.0"
 ---
 
-# Business Proposals
+# Business Proposals v3.0
 
 Win deals and raise funding. Covers the full pipeline: outreach, proposals, and pitch decks.
+
+## Workflow
+
+When the user asks for any sales document, follow this process:
+
+1. **Clarify stage**: Outreach (cold) → Proposal (warm) → Pitch deck (investor)? Ask if unclear.
+2. **Gather context**: Run discovery questions for the specific stage (sections below).
+3. **Select template**: Match the deliverable to the appropriate structure below.
+4. **Draft**: Fill template with user-provided info. Use placeholders `[like this]` for unknowns.
+5. **Review**: Check against error handling table and production checklist.
+6. **Verify anti-patterns**: Scan the anti-patterns table — if any match, fix before delivery.
+7. **Output**: Return the completed document in the requested format (text, markdown, email body).
 
 ## Sales Outreach
 
@@ -147,20 +175,52 @@ Use of funds:
 Milestones 18 months: [metrics from → to]
 ```
 
+## Error Handling
+
+| Situation | Resolution |
+|-----------|------------|
+| User gives no prospect info | Ask: "Who is the target? Company, person, role?" |
+| User gives no budget | Use "investment" language: "Typical engagements $X-$Y" |
+| User has no case studies | Use "we've helped similar companies achieve [generic result]" |
+| User has no traction data | Focus on problem validation: interviews, surveys, waitlist |
+| User wants pricing without scope | Ask: "What deliverables do you need?" then tier pricing |
+| User provides 5-year projections pre-revenue | Cap at 12-18 months. "That's our credible horizon." |
+| User's RFP is vague or contradictory | Flag contradictions back. "I see X and Y — which takes priority?" |
+| Multiple decision-makers with conflicting needs | Ask: "Who has final authority? I'll address their concern first." |
+| User wants one price (no tiers) | Explain Good-Better-Best creates reference frame and increases close rate |
+| User wants to pitch without problem slide | "No problem = no reason to invest. Always lead with pain." |
+
+## Production Checklist
+
+Before delivering any document, verify:
+
+- [ ] Personalization: company + person + specific reason (outreach)
+- [ ] Exclusions listed in scope (proposals)
+- [ ] Pricing has at least 3 tiers (proposals)
+- [ ] Cover letter or intro paragraph written (proposals, RFP)
+- [ ] Slides: one idea per slide, ≤20 words, ≥24pt font (decks)
+- [ ] Ask slide: specific amount + use of funds + milestones (decks)
+- [ ] Traction or validation data present (decks)
+- [ ] Contact info and CTA included (all)
+- [ ] PDF export ≤5MB (decks)
+- [ ] Proofread for placeholder tokens — no `[unknown]` left in final
+
 ## Anti-Patterns
 
 | Mistake | Fix |
 |---------|-----|
-| No personalization beyond [Name] | Don't send |
+| No personalization beyond `[Name]` | Don't send. Requires company + person + fit level |
 | No exclusions in proposal | Client assumes everything included → scope creep |
-| Single pricing option | No frame of reference, client demands discount |
-| No traction in deck | "We just launched" is not traction |
-| No clear ask | "We're raising a round" without specifics |
-| Too many words on slides | Investor stops reading |
-| 5-year projections pre-revenue | 12-18 months is credible |
+| Single pricing option | No frame of reference → client demands discount |
+| No traction in deck | "We just launched" is not traction. Use validation data. |
+| No clear ask | "We're raising a round" without specifics → no urgency |
+| Too many words on slides | Investor stops reading. 20 words max per slide. |
+| 5-year projections pre-revenue | 12-18 months is credible. Beyond that is fiction. |
+| Sending outreach without trigger | "Why now?" missing → immediate delete |
+| Pricing before value explained | Always state problem + solution + outcome before price |
+| Generic subject lines | "Let's connect" / "Partnership opportunity" → spam folder |
 
 ## Sources
-
 - Sequoia Capital pitch deck template
 - Y Combinator Startup School
 - DocSend "Pitch Deck Study"

@@ -1,17 +1,69 @@
 ---
 name: react-native
-description: Build production React Native apps with Expo SDK 53+, Expo Router (file-based navigation), New Architecture (Fabric + TurboModules), FlashList, Reanimated 4, Zustand for state, Hermes, EAS Build, and App Store/Play Store deployment. Use when user asks to create a React Native app, set up navigation, optimize list performance, handle deep links, configure push notifications, or deploy to stores. Do NOT use for Flutter (use flutter), web React, PWA, or mobile web.
+description: Build production React Native apps with Expo SDK 53+, Expo Router (file-based navigation), New Architecture (Fabric + TurboModules), FlashList, Reanimated 4, Zustand for state, Hermes, EAS Build, and App Store/Play Store deployment.
+triggers:
+  - "create a React Native app"
+  - "set up navigation"
+  - "optimize list performance"
+  - "handle deep links"
+  - "configure push notifications"
+  - "deploy to stores"
+  - "Expo Router"
+  - "FlashList"
+  - "Reanimated"
+  - "Zustand"
+  - "React Navigation"
+  - "EAS Build"
+  - "react native"
+  - "expo"
+  - "mobile app"
+  - "iOS"
+  - "Android"
+  - "react-navigation"
+  - "expo router"
+  - "native module"
+negatives:
+  - "Flutter"
+  - "web-only React"
+  - "PWA"
+  - "mobile web"
+  - "Ionic"
+  - "Cordova"
+  - "Capacitor"
+  - "Xamarin"
 license: MIT
 compatibility: opencode
 metadata:
   workflow: mobile
   audience: developers
-  version: "2.0"
+  version: "3.0"
+allowed-tools:
+  - bash
+  - edit
+  - glob
+  - grep
+  - read
+  - write
+  - websearch
+  - webfetch
 ---
 
 # React Native Architect
 
 Build production React Native apps with Expo, New Architecture, and modern navigation.
+
+## Workflow
+
+1. **Scaffold** — `npx create-expo-app@latest MyApp --template blank-typescript`, configure SDK 53+
+2. **Navigation** — Choose between Expo Router (greenfield Expo) or React Navigation v7 (bare RN / brownfield). Set up layouts, typed routes, deep linking
+3. **State management** — Zustand for local client state, TanStack Query for server state. Avoid Redux unless dealing with massive synchronous state trees
+4. **New Architecture** — Ensure Fabric + TurboModules enabled (default in SDK 53+). Verify third-party lib compatibility
+5. **Lists** — Replace all FlatLists with FlashList from Shopify. Configure `estimatedItemSize`. Optimize `renderItem` with `React.memo`
+6. **Animations** — Reanimated 4 for gesture-driven animations. Use `useSharedValue` + `useAnimatedStyle` instead of `Animated` API
+7. **Images** — `expo-image` with cached, resized variants. Never bare `<Image>` without dimensions
+8. **Notifications** — `expo-notifications` for push. Handle foreground, background, tap-to-navigate
+9. **Performance** — Enable Hermes, lazy-load tab screens, freeze inactive screens via `react-native-screens`, `InteractionManager.runAfterInteractions` for heavy ops
+10. **Ship** — `eas build --platform all --profile production`, `eas submit`, configure CI/CD with GitHub Actions
 
 ## Navigation Decision
 
@@ -237,6 +289,21 @@ eas submit --platform ios
 eas submit --platform android
 ```
 
+## Error Handling
+
+| Scenario | Cause | Fix |
+|----------|-------|-----|
+| White screen on launch | Unhandled JS exception | Wrap root with `ErrorBoundary`, add Sentry |
+| Deep link opens wrong screen | Missing or incorrect route config | Verify `app.json` scheme + linking config match |
+| Push notification tap does nothing | No notification response listener | Register `addNotificationResponseReceivedListener` |
+| FlashList blank / slow | Missing `estimatedItemSize` | Measure or estimate item height, pass to prop |
+| Hermes crash on third-party lib | Lib not Hermes-compatible | Check lib docs, use Hermes-compatible version |
+| EAS build fails on iOS | Missing provisioning profile | Run `eas credentials`, `eas device:create` |
+| AsyncStorage 64KB limit on Android | Storage exceeds limit | Migrate to MMKV (react-native-mmkv) |
+| Reanimated 4 worklet error | Using non-worklet code inside `useAnimatedStyle` | Only use Reanimated compatible functions inside worklets |
+| TurboModule returns undefined | Fabric/TM not enabled | Verify `newArchEnabled: true` in app.json |
+| Navigation state lost on restart | No persistence | Use `persistNavigationState` from expo-router or React Navigation v7 storage |
+
 ## Production Checklist
 
 - [ ] Hermes engine enabled
@@ -250,7 +317,10 @@ eas submit --platform android
 - [ ] Error boundary wrapping root navigator
 - [ ] Sentry or similar crash reporting
 - [ ] EAS Build for CI/CD
+- [ ] New Architecture verified (no TurboModule issues)
 - [ ] App Store / Play Store screenshots and metadata
+- [ ] `InteractionManager.runAfterInteractions` for heavy operations
+- [ ] `expo-constants` env segregation (dev / staging / prod)
 
 ## Anti-Patterns
 
@@ -264,6 +334,12 @@ eas submit --platform android
 | No error boundary | Unhandled JS error = white screen |
 | `navigation.getParent()` chains | Restructure to flat navigation hierarchy |
 | `setState` in navigation handlers | Navigate first, fetch on screen mount |
+| Using bare `<Image>` without dimensions | `expo-image` with explicit width/height |
+| Zustand store split across 10 files | Keep logically cohesive, use slices pattern |
+| New Architecture disabled by default | Enable `newArchEnabled: true` in app.json |
+| Manual MethodChannel for native | Use Expo Modules API (typed, modern) |
+| Ignoring platform-specific safe areas | `useSafeAreaInsets` from react-native-safe-area-context |
+| `console.log` in production builds | Strip via babel plugin (`transform-remove-console`) |
 
 ## Sources
 
@@ -272,6 +348,8 @@ eas submit --platform android
 - Expo Router Documentation
 - React Navigation v7 Documentation
 - Shopify FlashList (shopify.github.io/flash-list)
-- Reanimated 4 Documentation
+- Reanimated 4 Documentation (docs.swmansion.com/react-native-reanimated)
 - Hermes Engine Documentation
 - EAS Build Documentation
+- Zustand Documentation (github.com/pmndrs/zustand)
+- TanStack Query Documentation (tanstack.com/query/latest)

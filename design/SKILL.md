@@ -1,17 +1,70 @@
 ---
 name: design
-description: Generate brand guidelines, design systems with design tokens (W3C format), creative direction (SCAMPER, Design Thinking, TRIZ), design briefs with scope and success criteria, and design system audit checklist. Use when user asks to create brand guidelines, style guide, design brief, creative brief, campaign concept, brand identity, visual identity, or design system. Do NOT use for UI component design patterns (use ui-ux-pro-max), landing page layout (use landing-craft), or responsive design (use responsive-engine).
+description: Generate brand guidelines, design systems with design tokens (W3C format), creative direction (SCAMPER, Design Thinking, TRIZ), and design briefs with scope and success criteria.
+version: "3.0"
 license: MIT
 compatibility: opencode
+triggers:
+  - "brand guidelines"
+  - "style guide"
+  - "design brief"
+  - "creative brief"
+  - "campaign concept"
+  - "brand identity"
+  - "visual identity"
+  - "design system"
+  - "creative direction"
+  - "brand strategy"
+negatives:
+  - "UI component design patterns" -> use ui-ux-pro-max
+  - "landing page layout" -> use landing-craft
+  - "responsive design" -> use responsive-engine
+  - "icon set creation" -> use component-forge
+  - "color palette generation" -> use ui-ux-pro-max
 metadata:
   workflow: design
   audience: designers
-  version: "2.0"
+  previous_version: "2.0"
 ---
 
-# Design
+# Design Skill v3.0
 
 Brand identity, design systems, creative direction, and project briefs.
+
+---
+
+## Workflow: Brand / Design System Creation
+
+Follow this numbered process. Do not skip steps.
+
+| Step | Action | Output |
+|------|--------|--------|
+| 1 | Gather inputs: brand story, competitors, audience research, technical constraints | Brief document |
+| 2 | Define brand strategy: positioning, personality (3-5 adjectives), tone of voice | Brand strategy doc |
+| 3 | Build color system: primary, neutral, semantic palettes + WCAG AA checks | Color tokens + palette |
+| 4 | Select typography: headline/body pairing, scale, line-height, responsive sizing | Typography tokens |
+| 5 | Define spacing, radius, shadow, motion tokens (W3C format) | Design tokens JSON |
+| 6 | Create logo variations + usage guidelines | Logo guidelines |
+| 7 | Apply to 3+ touchpoints: web, print, social, or environmental | Application mockups |
+| 8 | Run design system audit (see checklist below) | Audit report |
+| 9 | Document anti-patterns and error states | Error + anti-pattern docs |
+| 10 | Stakeholder review + alignment sign-off | Approved design system v1.0 |
+
+---
+
+## Error Handling
+
+| Error | Cause | Fix |
+|-------|-------|-----|
+| Color contrast fails WCAG AA | Luminance ratio < 4.5:1 for text | Darken or lighten until ratio passes. Use `contrastRatio` in tokens. |
+| Token mismatch across platforms | Figma tokens != code tokens | Single source of truth: W3C JSON. Export from design tool. |
+| Typography scale gaps | Missing intermediate sizes | Build scale with modular scale (1.25 or 1.333 ratio). |
+| Logo illegible at min size | Too much detail in icon | Use simplified lockup or separate wordmark + icon variants. |
+| Design brief scope creep | Unclear out-of-scope list | Explicit "what's NOT included" section. Reference during reviews. |
+| Stakeholder disagreement | No clear decision authority | Identify single approver in brief. Escalate to DRI. |
+| Campaign fails originality axis | Cliché or derivative idea | Force 5+ directions. Run through SCAMPER/TRIZ. Reference culture, not competitors. |
+
+---
 
 ## Brand Guidelines
 
@@ -92,6 +145,8 @@ Body text minimum 16px. Line length 45-75 chars. Contrast min 4.5:1 (WCAG AA).
 | Formality | Casual for social, formal for investor comms |
 | Humor | In social/email. Never in legal, support, or crisis |
 
+---
+
 ## Design System Audit Checklist
 
 - [ ] All colors have hex/RGB/HSL values and usage guidelines
@@ -106,6 +161,27 @@ Body text minimum 16px. Line length 45-75 chars. Contrast min 4.5:1 (WCAG AA).
 - [ ] Form elements: all states (default, hover, focus, error, disabled)
 - [ ] Breakpoints match design tool
 - [ ] Figma component properties mapped to code props
+
+---
+
+## Production Checklist
+
+Before shipping any design system or brand guidelines:
+
+| Check | Criteria | Owner |
+|-------|----------|-------|
+| Color parity | Hex values match exactly between Figma + code + docs | Design + Dev |
+| Token export | W3C JSON exported and imported into codebase | Design |
+| Font licensing | All typefaces have valid web + print licenses | Prod Mgr |
+| Logo rasterization | Vector + PNG + favicon exported at all required sizes | Design |
+| Accessibility audit | Automated + manual passes (axe, color contrast, keyboard nav) | QA |
+| Dark mode | All colors have dark mode variants, no hardcoded values | Design |
+| Responsive breakpoints | Layout tested at mobile, tablet, desktop | Dev |
+| Motion reduced | `prefers-reduced-motion` respected for all animations | Dev |
+| Component states | All interactive elements defined: default, hover, focus, active, error, disabled | Design |
+| Figma dev handoff | Components published with props, variants, and descriptions | Design |
+
+---
 
 ## Creative Direction
 
@@ -140,6 +216,8 @@ Body text minimum 16px. Line length 45-75 chars. Contrast min 4.5:1 (WCAG AA).
 
 Score min 3 axes at 7+ to proceed.
 
+---
+
 ## Design Brief
 
 ### Structure
@@ -160,18 +238,24 @@ Score min 3 axes at 7+ to proceed.
 4. Who are we NOT designing for?
 5. What are the non-negotiables (legal, brand, technical)?
 
+---
+
 ## Anti-Patterns
 
-| Mistake | Fix |
-|---------|-----|
-| No single-minded proposition | Force one idea. Kill the rest. |
-| Problem stated as solution | Describe the problem, not the fix |
-| Vague success criteria | Define specific, testable criteria |
-| No constraints given | Design that can't be built |
-| Too many stakeholders | Design by committee |
-| Skipping audience insight | Research first, find non-obvious truth |
-| Chasing trends | Reference culture, not competitors |
-| Falling in love with first idea | Force 5+ directions before selecting |
+| Anti-Pattern | Why It Fails | Fix |
+|--------------|-------------|-----|
+| No single-minded proposition | Message dilutes, audience confused | Force one idea. Kill the rest. |
+| Problem stated as solution | Brief prescribes fix instead of framing the real issue | Describe the problem, not the fix |
+| Vague success criteria | Cannot measure success or failure | Define specific, testable criteria with targets |
+| No constraints given | Design that looks great but can't be built or shipped | Add budget, tech, timeline constraints upfront |
+| Too many stakeholders | Design by committee produces mediocrity | Identify single DRI per decision type |
+| Skipping audience insight | Design solves wrong problem | Research first. Find a non-obvious truth. |
+| Chasing trends | Looks dated in 6 months, no differentiation | Reference culture, not competitors |
+| Falling in love with first idea | Biased evaluation, better solutions missed | Force 5+ directions before selecting |
+| Designing for yourself | End-user needs subordinated to designer preferences | User test with real audience segments |
+| No error states defined | UI breaks silently, bad UX | Define error, empty, loading states for every component |
+
+---
 
 ## Sources
 

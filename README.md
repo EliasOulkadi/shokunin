@@ -45,9 +45,9 @@ irm https://raw.githubusercontent.com/EliasOulkadi/shokunin/master/install.ps1 |
 | **Infrastructure** | docker, kubernetes, terraform, ci-cd, db-admin | v3.0 |
 | **Backend** | auth-architect, api-forge, db-sculptor, error-handler | v3.0 |
 | **Frontend** | component-forge, responsive-engine, motion-craft, landing-craft, ui-ux-pro-max | v3.0 |
-| **Mobile** | flutter, react-native | v2.0 |
+| **Mobile** | flutter, react-native | v3.0 |
 | **Quality** | test-commander, performance-profiler | v3.0 |
-| **Content & Business** | communication, content-marketing, business-proposals, seo-geo, translate-craft | v2.0 |
+| **Content & Business** | communication, content-marketing, business-proposals, seo-geo, translate-craft | v3.0 |
 | **Documents** | kami (PDF generator), portfolio-auto | v3.0 |
 | **Productivity** | git-workflow, windows-powershell, strategy, design, documentation, runbook-gen, finance, legal-counsel | v3.0 |
 | **System** | memory, chromadb, whendone-plus | v1.0 |
@@ -109,4 +109,5 @@ mkcd, touch, which, admin             # Utility aliases
 ## License
 
 MIT — free as in freedom, free as in zero cost.
+
 
