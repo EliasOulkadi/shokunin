@@ -50,6 +50,7 @@ Or symlink: `ln -s $(pwd)/shokunin/* ~/.config/opencode/skills/`
 | **strategy** | v2.0 | ~180 | — | — | — | Brainstorming, prompts, ICE/pre-mortem |
 | **translate-craft** | v2.0 | ~190 | — | — | — | 8 languages, i18n, ICU messages, RTL |
 | **windows-powershell** | v3.0 | ~180 | 3 | 1 | 1 | Windows 11 sysadmin, system info, cleanup, profile |
+| **kami** | v3.0 | ~410 | 5 | 9 | 18 | Professional PDFs with parchment design system |
 | **portfolio-auto** | v1.0 | ~120 | — | — | — | GitHub → portfolio sync |
 | **ui-ux-pro-max** | v1.0 | ~100 | — | — | — | Python DB: UI patterns, colors, typography |
 | **whendone-plus** | v1.0 | ~80 | — | — | — | Auto-notify when commands complete |
