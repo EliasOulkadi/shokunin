@@ -3,6 +3,7 @@
   "model": "nvidia/moonshotai/kimi-k2.6",
   "provider": {
     "nvidia": {
+      "npm": "@ai-sdk/openai-compatible",
       "name": "NVIDIA",
       "api": "https://integrate.api.nvidia.com/v1",
       "options": {
@@ -14,52 +15,49 @@
         "moonshotai/kimi-k2.6": {
           "name": "Kimi K2.6",
           "reasoning": true,
-          "tool_call": true
+          "tool_call": true,
+          "temperature": true
         }
       }
     },
     "ollama": {
+      "npm": "@ai-sdk/openai-compatible",
       "name": "Ollama (local)",
       "options": { "baseURL": "http://localhost:11434/v1" },
       "models": {
         "qwen3:14b": { "name": "Qwen3 14B" },
-        "deepseek-coder:6.7b": { "name": "DeepSeek Coder 6.7B" }
+        "deepseek-coder:6.7b": { "name": "DeepSeek Coder 6.7B" },
+        "qwen2.5-coder:7b": { "name": "Qwen2.5 Coder 7B" }
       }
     }
   },
   "plugin": [
     "superpowers@git+https://github.com/obra/superpowers.git"
   ],
-  "mcpServers": {
+  "mcp": {
     "filesystem": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-filesystem", "C:\\Users\\{{USERNAME}}"]
+      "type": "local",
+      "command": ["npx", "-y", "@modelcontextprotocol/server-filesystem", "C:\\Users\\{{USERNAME}}"]
     },
     "fetch": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-fetch"]
-    },
-    "playwright": {
-      "command": "npx",
-      "args": ["-y", "@playwright/mcp"]
+      "type": "local",
+      "command": ["npx", "-y", "@modelcontextprotocol/server-fetch"]
     },
     "memory": {
-      "command": "python",
-      "args": ["C:\\Users\\{{USERNAME}}\\.shokunin\\memory\\mcp-server.py"]
+      "type": "local",
+      "command": ["python", "C:\\Users\\{{USERNAME}}\\.shokunin\\memory\\mcp-server.py"]
     }
   },
-  "agents": {
+  "agent": {
     "code-review": {
       "model": "nvidia/moonshotai/kimi-k2.6",
-      "description": "Reviews code for bugs, security, quality"
-    },
-    "writer": {
-      "model": "nvidia/moonshotai/kimi-k2.6",
-      "description": "Drafts blogs, docs, and content"
+      "description": "Review code for bugs and security",
+      "mode": "subagent"
     },
     "debugger": {
       "model": "nvidia/moonshotai/kimi-k2.6",
-      "description": "Deep debugging for complex issues"
+      "description": "Deep debugging specialist",
+      "mode": "subagent"
     }
   }
 }
