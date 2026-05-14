@@ -150,6 +150,31 @@ dps, dlog                               # Docker aliases
 mkcd, which                           # Utility functions
 ```
 
+## Compatibility
+
+The ecosystem works across multiple AI coding runtimes. The core (skills, memory, scripts) is runtime-agnostic. Only MCP server configuration and instruction files differ.
+
+| Runtime | Skills | Memory | MCP | Scripts | Config template |
+|---------|--------|--------|-----|---------|-----------------|
+| **OpenCode** | ✅ Native | ✅ Native | ✅ .pack/opencode.json | ✅ .ps1 + .sh | Built-in |
+| **Claude Code** | ✅ Reads SKILL.md | ✅ Via MCP | ✅ .pack/templates/claude-code.json | ✅ .ps1 + .sh | Copy template |
+| **Cline** (VS Code) | ✅ Reads SKILL.md | ✅ Via MCP | ✅ .pack/templates/cline-settings.json | ✅ .ps1 + .sh | Add to settings.json |
+| **Cursor** | ✅ Reads SKILL.md | ✅ Via rules | ✅ .pack/templates/cursor-mcp.json | ✅ .ps1 + .sh | Copy to .cursor/ |
+| **Continue.dev** | ✅ Reads SKILL.md | ✅ Via rules | ✅ .pack/templates/continue-config.yaml | ✅ .ps1 + .sh | Copy to .continue/ |
+| **Windsurf** | ✅ Reads SKILL.md | ✅ Via rules | ⬜ Via UI only | ✅ .sh | Add .windsurf/rules/ |
+
+### Setup per runtime
+
+**Claude Code:** Copy `.pack/templates/claude-code.json` to project root as `claude.json` or configure via CLAUDE.md.
+
+**Cline:** Add the `mcpServers` block from `.pack/templates/cline-settings.json` to VS Code's `settings.json`. Copy `.pack/rules/cline-memory.md` as `.clinerules`.
+
+**Cursor:** Configure MCP servers in Cursor Settings > MCP using `.pack/templates/cursor-mcp.json`. Copy `.pack/rules/cursor-memory.mdc` to `.cursor/rules/memory.mdc`.
+
+**Continue.dev:** Copy `.pack/templates/continue-config.yaml` to `.continue/config.yaml`. Add `.pack/rules/continue-memory.md` to `.continue/rules/`.
+
+**Windsurf:** Configure MCP servers in Settings > Cascade > MCP Servers. Copy `.pack/rules/windsurf-memory.md` to `.windsurf/rules/memory.md`.
+
 ## Links
 
 - **GitHub** github.com/EliasOulkadi/shokunin
