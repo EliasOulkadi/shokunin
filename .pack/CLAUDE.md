@@ -165,10 +165,28 @@ El session_id lo genera el wrapper al iniciar. Formato: session-YYYYMMDD-HHMMSS-
 
 ### IMPORTANTE
 
-- NUNCA te saltes search_context al inicio.
+- NUNCA te saltes search_context al inicio. Es obligatorio.
 - NUNCA termines sin store_context type session_end.
 - Los checkpoints periÃ³dicos son OBLIGATORIOS â€" si la sesiÃ³n se corta, son lo Ãºnico que queda.
 - Incluye suficiente contexto en cada save para que futuras sesiones entiendan el QUÃ‰, POR QUÃ‰ y RESULTADO.
+
+### Session ID automÃ¡tico
+
+El wrapper setea estas variables de entorno:
+- `$env:SHOKUNIN_SESSION_ID` â€" ID de la sesiÃ³n actual
+- `$env:SHOKUNIN_PROJECT` â€" directorio del proyecto
+- `$env:SHOKUNIN_MCP_HEALTHY` â€" "1" si MCP server funciona, "0" si no
+
+TambiÃ©n escribe `~/.shokunin/current-session.json` con la info de sesiÃ³n.
+
+### Si el MCP server no responde
+
+Si `store_context` via MCP falla, guarda manualmente a un archivo markdown:
+```
+New-Item -ItemType Directory -Path ~/.shokunin/memory/sessions/ -Force
+"checkpoint info" | Out-File -FilePath "~/.shokunin/memory/sessions/$sessionId.md" -Append
+```
+O usa el script: `python ~/.shokunin/scripts/chroma-helper.py save "text" "session_id" "type" "tags" "project"`
 
 
 

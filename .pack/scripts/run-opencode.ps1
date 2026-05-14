@@ -8,11 +8,41 @@ $sessionId = Get-SessionId
 $logDir = "$env:USERPROFILE\.shokunin\memory\sessions"
 $helperPy = "$env:USERPROFILE\.shokunin\scripts\chroma-helper.py"
 $readerPs1 = "$env:USERPROFILE\.shokunin\scripts\read-transcript.ps1"
+$shokuninDir = "$env:USERPROFILE\.shokunin"
+$realOpencode = "$env:USERPROFILE\AppData\Roaming\npm\opencode.ps1"
 
 New-Item -ItemType Directory -Path $logDir -Force | Out-Null
 
+# === SET ENV VARS FOR THE AGENT ===
+$env:SHOKUNIN_SESSION_ID = $sessionId
+$env:SHOKUNIN_PROJECT = (Get-Location).Path
+
+# === WRITE SESSION FILE (agent can read via filesystem MCP) ===
+$sessionInfo = @{
+    session_id = $sessionId
+    project = $env:SHOKUNIN_PROJECT
+    start_time = (Get-Date -Format 'yyyy-MM-dd HH:mm:ss')
+    pid = $PID
+} | ConvertTo-Json
+$sessionInfo | Out-File -FilePath "$shokuninDir\current-session.json" -Encoding UTF8 -Force
+
+# === MCP HEALTH CHECK ===
+$mcpHealthy = $false
+try {
+    $mcpRequest = '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}'
+    $mcpResponse = $mcpRequest | python "$env:USERPROFILE\.shokunin\memory\mcp-server.py" 2>&1
+    if ($mcpResponse -match "store_context") { $mcpHealthy = $true }
+} catch {}
+$env:SHOKUNIN_MCP_HEALTHY = if ($mcpHealthy) { "1" } else { "0" }
+
 Write-Host "==========================================" -ForegroundColor Cyan
 Write-Host "  Shokunin - Session: $sessionId" -ForegroundColor Cyan
+if ($mcpHealthy) {
+    Write-Host "  MCP Server: OK" -ForegroundColor Green
+} else {
+    Write-Host "  MCP Server: UNAVAILABLE (markdown fallback)" -ForegroundColor Yellow
+}
+Write-Host "  Project: $($env:SHOKUNIN_PROJECT)" -ForegroundColor DarkGray
 Write-Host "==========================================" -ForegroundColor Cyan
 
 $oldBufferSize = $host.UI.RawUI.BufferSize
@@ -22,14 +52,16 @@ try {
 } catch {}
 
 $startTime = Get-Date
-opencode
+
+# Call the real opencode binary (not alias)
+& $realOpencode
+
 $endTime = Get-Date
 $duration = $endTime - $startTime
 
 Write-Host "`n==========================================" -ForegroundColor Cyan
 Write-Host "  Saving session context..." -ForegroundColor Cyan
 
-# Read console buffer
 $bufferText = ""
 try {
     $cursor = $host.UI.RawUI.CursorPosition
@@ -56,15 +88,13 @@ try {
     }
 } catch {}
 
-# Restore buffer
 try { $host.UI.RawUI.BufferSize = $oldBufferSize } catch {}
 
-# Build summary
 $summaryText = @"
 Session: $sessionId
 Duration: $($duration.ToString())
 Date: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')
-Project: $(Get-Location)
+Project: $($env:SHOKUNIN_PROJECT)
 "@
 
 if ($bufferText.Length -gt 100) {
@@ -76,18 +106,16 @@ if ($bufferText.Length -gt 100) {
     }
 }
 
-# Save raw log
 $bufferText | Out-File -FilePath "$logDir\$sessionId.log" -Encoding UTF8
 
-# Save to ChromaDB
 try {
-    $result = python $helperPy save "$summaryText" $sessionId "session_end" "auto-save,session-end" "$(Get-Location)" 2>$null
+    $result = python $helperPy save "$summaryText" $sessionId "session_end" "auto-save,session-end" "$($env:SHOKUNIN_PROJECT)" 2>$null
     $result | Out-Null
-    Write-Host "  Memory saved (ChromaDB + md)" -ForegroundColor Green
+    Write-Host "  Memory saved (ChromaDB)" -ForegroundColor Green
 } catch {
     $textFile = "$logDir\$sessionId-summary.md"
     $summaryText | Out-File -FilePath $textFile -Encoding UTF8
-    Write-Host "  Saved to: $textFile" -ForegroundColor Yellow
+    Write-Host "  Memory saved to: $textFile" -ForegroundColor Yellow
 }
 
 Write-Host "  Duration: $($duration.ToString())" -ForegroundColor DarkGray

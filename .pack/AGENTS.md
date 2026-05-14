@@ -85,6 +85,19 @@ Despues de CADA evento importante (decision, archivo, comando, preferencia) guar
 ### 3. AL FINAL DE LA SESION - resumen completo (OBLIGATORIO)
 store_context con type session_end y resumen estructurado de la sesion.
 
+### Session ID automÃ¡tico
+El wrapper setea estas variables de entorno:
+- `$env:SHOKUNIN_SESSION_ID` â€" ID de la sesiÃ³n actual
+- `$env:SHOKUNIN_PROJECT` â€" directorio del proyecto
+- `$env:SHOKUNIN_MCP_HEALTHY` â€" "1" si MCP server funciona, "0" si no
+TambiÃ©n escribe `~/.shokunin/current-session.json` con la info de sesiÃ³n.
+
+### Si el MCP server no responde
+Si `store_context` via MCP falla, guarda manualmente a un archivo markdown:
+```
+python ~/.shokunin/scripts/chroma-helper.py save "text" "session_id" "type" "tags" "project"
+```
+
 ### IMPORTANTE
 - NUNCA te saltes search_context al inicio
 - NUNCA termines sin store_context type session_end
