@@ -75,29 +75,31 @@ Se activan automaticamente segun lo que pidas. No necesitas nombrarlas.
 ## MEMORY SYSTEM - INSTRUCCIONES OBLIGATORIAS
 
 ### 1. AL INICIAR SESION - buscar contexto previo (OBLIGATORIO)
-Ejecuta search_context con el proyecto actual y el tema que pide el usuario.
+Ejecuta el script chroma-helper.py para buscar contexto relevante:
+```powershell
+python ~/.shokunin/scripts/chroma-helper.py search "[proyecto]" "[nombre_proyecto]"
+```
 Muestra los resultados al usuario.
 
 ### 2. DURANTE LA SESION - guardar periodicamente (OBLIGATORIO)
-Cada 3-5 intercambios, guarda un checkpoint con store_context (type: checkpoint).
-Despues de CADA evento importante (decision, archivo, comando, preferencia) guarda con store_context.
+Cada 3-5 intercambios, guarda un checkpoint ejecutando:
+```powershell
+python ~/.shokunin/scripts/chroma-helper.py save "texto" "[session_id]" "checkpoint" "tags" "[proyecto]"
+```
+Despues de CADA evento importante (decision, archivo, comando, preferencia) guarda con chroma-helper.py.
 
 ### 3. AL FINAL DE LA SESION - resumen completo (OBLIGATORIO)
-store_context con type session_end y resumen estructurado de la sesion.
+Guarda un resumen estructurado con chroma-helper.py type session_end.
 
-### Session ID automÃ¡tico
-El wrapper setea estas variables de entorno:
-- `$env:SHOKUNIN_SESSION_ID` â€" ID de la sesiÃ³n actual
-- `$env:SHOKUNIN_PROJECT` â€" directorio del proyecto
-- `$env:SHOKUNIN_MCP_HEALTHY` â€" "1" si MCP server funciona, "0" si no
-TambiÃ©n escribe `~/.shokunin/current-session.json` con la info de sesiÃ³n.
-
-### Si el MCP server no responde
-Si `store_context` via MCP falla, guarda manualmente a un archivo markdown:
-```
-python ~/.shokunin/scripts/chroma-helper.py save "text" "session_id" "type" "tags" "project"
-```
+### Session ID automatico
+El wrapper setea estas variables:
+- `$env:SHOKUNIN_SESSION_ID` - ID de la sesion actual
+- `$env:SHOKUNIN_PROJECT` - directorio del proyecto
+- `$env:SHOKUNIN_MCP_HEALTHY` - "1" si MCP funciona, "0" si no
+Tambien escribe `~/.shokunin/current-session.json` con la info de sesion.
 
 ### IMPORTANTE
 - NUNCA te saltes search_context al inicio
-- NUNCA termines sin store_context type session_end
+- NUNCA termines sin guardar session_end
+- Usa `python chroma-helper.py` mediante Bash tool. Esto funciona SIEMPRE, independientemente del MCP server.
+- Si el comando chroma-helper.py falla, escribe manualmente a un archivo markdown en `~/.shokunin/memory/sessions/`.

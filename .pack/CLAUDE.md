@@ -103,72 +103,55 @@ Este sistema usa ChromaDB para memoria persistente entre sesiones. Sigue estas i
 
 ### 1. AL INICIAR SESIÃ"N â€" buscar contexto previo (OBLIGATORIO)
 
-Ejecuta search_context con el proyecto actual y el tema de lo que pide el usuario:
+Ejecuta el script chroma-helper.py para buscar contexto relevante:
 
-```json
-{
-  "query": "context about [proyecto_actual]",
-  "project": "[nombre_proyecto]",
-  "n_results": 10
-}
+```powershell
+python ~/.shokunin/scripts/chroma-helper.py search "[proyecto_actual]" "[nombre_proyecto]"
 ```
 
 AdemÃ¡s, busca sin filtro de proyecto:
-```json
-{
-  "query": "[lo_primero_que_pide_el_usuario]",
-  "n_results": 5
-}
+```powershell
+python ~/.shokunin/scripts/chroma-helper.py search "[lo_primero_que_pide_el_usuario]"
 ```
 
 **Muestra los resultados al usuario.** Si encuentras sesiones previas relevantes, di algo como "RecuperÃ© contexto de [nÃºmero] sesiones anteriores. Lo mÃ¡s relevante: [resumen breve]".
 
 ### 2. DURANTE LA SESIÃ"N â€" guardar periÃ³dicamente (OBLIGATORIO)
 
-Cada 3-5 intercambios con el usuario, guarda un checkpoint usando store_context:
+Cada 3-5 intercambios con el usuario, guarda un checkpoint ejecutando:
 
-```json
-{
-  "text": "Checkpoint: [resumen de lo Ãºltimo que se hizo]",
-  "type": "checkpoint",
-  "tags": ["checkpoint", "[proyecto]", "[tema]"],
-  "project": "[nombre_proyecto]",
-  "session_id": "[session_id_actual]"
-}
+```powershell
+python ~/.shokunin/scripts/chroma-helper.py save "[texto del checkpoint]" "[session_id]" "checkpoint" "checkpoint,[proyecto],[tema]" "[proyecto]"
 ```
 
 AdemÃ¡s, despuÃ©s de CADA evento importante:
-- **DecisiÃ³n** â†' store_context con type: "decision"
-- **Archivo creado/modificado** â†' store_context con type: "file" + ruta
-- **Comando ejecutado** â†' store_context con type: "command" + comando y resultado  
-- **Preferencia del usuario descubierta** â†' store_context con type: "preference"
+- **DecisiÃ³n** â†' python chroma-helper.py save "DecisiÃ³n: ..." "[session_id]" "decision" "decision,[proyecto]" "[proyecto]"
+- **Archivo creado/modificado** â†' python chroma-helper.py save "Archivo: [ruta] - [cambio]" "[session_id]" "file" "file,[proyecto]" "[proyecto]"
+- **Comando ejecutado** â†' python chroma-helper.py save "Comando: [cmd] -> [resultado]" "[session_id]" "command" "command,[proyecto]" "[proyecto]"
+- **Preferencia del usuario descubierta** â†' python chroma-helper.py save "Pref: [clave]=[valor]" "[session_id]" "preference" "preference,[proyecto]" "[proyecto]"
 
 El text debe ser descriptivo: QUÃ‰ se hizo, POR QUÃ‰ y RESULTADO.
 
 ### 3. AL FINAL DE LA SESIÃ"N â€" resumen completo (OBLIGATORIO)
 
-store_context con type "session_end" y un resumen estructurado:
+Guarda un resumen completo ejecutando:
 
-```json
-{
-  "text": "Session: [session_id]\n## Decisions\n- ...\n## Files\n- ...\n## Commands\n- ...\n## Next Steps\n- ...",
-  "type": "session_end",
-  "tags": ["session-end", "[proyecto]"],
-  "project": "[proyecto]",
-  "session_id": "[session_id]"
-}
+```powershell
+python ~/.shokunin/scripts/chroma-helper.py save "SESSION SUMMARY\n## Decisions\n- ...\n## Files\n- ...\n## Commands\n- ...\n## Next Steps\n- ..." "[session_id]" "session_end" "session-end,[proyecto]" "[proyecto]"
 ```
 
 ### Session ID
 
-El session_id lo genera el wrapper al iniciar. Formato: session-YYYYMMDD-HHMMSS-NNNN. Si no estÃ¡ disponible, usa auto-YYYYMMDD-HHMMSS.
+El session_id lo genera el wrapper al iniciar. Formato: session-YYYYMMDD-HHMMSS-NNNN. Si no estÃ¡ disponible, usa auto-YYYYMMDD-HHMMSS. Lee el session_id actual desde `~/.shokunin/current-session.json`.
 
 ### IMPORTANTE
 
-- NUNCA te saltes search_context al inicio. Es obligatorio.
-- NUNCA termines sin store_context type session_end.
+- NUNCA te saltes el search al inicio. Es obligatorio.
+- NUNCA termines sin guardar session_end.
 - Los checkpoints periÃ³dicos son OBLIGATORIOS â€" si la sesiÃ³n se corta, son lo Ãºnico que queda.
 - Incluye suficiente contexto en cada save para que futuras sesiones entiendan el QUÃ‰, POR QUÃ‰ y RESULTADO.
+- **Usa `python chroma-helper.py` mediante la herramienta Bash.** Esto funciona SIEMPRE, independientemente de si el MCP server estÃ¡ corriendo o no.
+- Si el comando chroma-helper.py falla, escribe manualmente a un archivo markdown en `~/.shokunin/memory/sessions/`.
 
 ### Session ID automÃ¡tico
 
@@ -178,15 +161,6 @@ El wrapper setea estas variables de entorno:
 - `$env:SHOKUNIN_MCP_HEALTHY` â€" "1" si MCP server funciona, "0" si no
 
 TambiÃ©n escribe `~/.shokunin/current-session.json` con la info de sesiÃ³n.
-
-### Si el MCP server no responde
-
-Si `store_context` via MCP falla, guarda manualmente a un archivo markdown:
-```
-New-Item -ItemType Directory -Path ~/.shokunin/memory/sessions/ -Force
-"checkpoint info" | Out-File -FilePath "~/.shokunin/memory/sessions/$sessionId.md" -Append
-```
-O usa el script: `python ~/.shokunin/scripts/chroma-helper.py save "text" "session_id" "type" "tags" "project"`
 
 
 
