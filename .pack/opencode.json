@@ -1,23 +1,19 @@
-{
+﻿{
   "$schema": "https://opencode.ai/config.json",
-  "model": "nvidia/moonshotai/kimi-k2.6",
+  "model": "opencode-go/deepseek-v4-flash",
   "provider": {
-    "nvidia": {
+    "opencode-go": {
       "npm": "@ai-sdk/openai-compatible",
-      "name": "NVIDIA",
-      "api": "https://integrate.api.nvidia.com/v1",
-      "options": {
-        "baseURL": "https://integrate.api.nvidia.com/v1",
-        "apiKey": "YOUR_NVIDIA_API_KEY",
-        "timeout": 600000
-      },
+      "name": "OpenCode Go",
+      "api": "https://opencode.ai/zen/go/v1",
       "models": {
-        "moonshotai/kimi-k2.6": {
-          "name": "Kimi K2.6",
-          "reasoning": true,
-          "tool_call": true,
-          "temperature": true
-        }
+        "kimi-k2.6": { "name": "Kimi K2.6", "reasoning": true, "tool_call": true, "temperature": true },
+        "deepseek-v4-pro": { "name": "DeepSeek V4 Pro", "reasoning": true, "tool_call": true, "temperature": true },
+        "deepseek-v4-flash": { "name": "DeepSeek V4 Flash", "reasoning": true, "tool_call": true, "temperature": true },
+        "glm-5": { "name": "GLM-5", "reasoning": true, "tool_call": true, "temperature": true },
+        "glm-5.1": { "name": "GLM-5.1", "reasoning": true, "tool_call": true, "temperature": true },
+        "mimo-v2.5": { "name": "MiMo-V2.5", "reasoning": true, "tool_call": true, "temperature": true },
+        "mimo-v2.5-pro": { "name": "MiMo-V2.5-Pro", "reasoning": true, "tool_call": true, "temperature": true }
       }
     },
     "ollama": {
@@ -49,13 +45,23 @@
     }
   },
   "agent": {
+    "code-review-local": {
+      "model": "ollama/qwen3:14b",
+      "description": "Code review using local Ollama (offline fallback)",
+      "mode": "subagent"
+    },
+    "debugger-local": {
+      "model": "ollama/qwen3:14b",
+      "description": "Deep debugging using local Ollama (offline fallback)",
+      "mode": "subagent"
+    },
     "code-review": {
-      "model": "nvidia/moonshotai/kimi-k2.6",
+      "model": "opencode-go/deepseek-v4-flash",
       "description": "Review code for bugs and security",
       "mode": "subagent"
     },
     "debugger": {
-      "model": "nvidia/moonshotai/kimi-k2.6",
+      "model": "opencode-go/deepseek-v4-flash",
       "description": "Deep debugging specialist",
       "mode": "subagent"
     }
