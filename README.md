@@ -31,7 +31,7 @@ irm https://raw.githubusercontent.com/EliasOulkadi/shokunin/master/install.ps1 |
 │  MCP (filesystem, fetch, memory) · ChromaDB     │
 ├─────────────────────────────────────────────────┤
 │  AI PROVIDERS                                   │
-│  NVIDIA Kimi K2.6 (free) · Ollama local         │
+│  NVIDIA · OpenAI · Anthropic · Ollama (any model)         │
 ├─────────────────────────────────────────────────┤
 │  SYSTEM (Windows 11)                            │
 │  PowerShell profile · Task Scheduler · Cleanup  │
@@ -109,6 +109,7 @@ mkcd, touch, which, admin             # Utility aliases
 ## License
 
 MIT — free as in freedom, free as in zero cost.
+
 
 
 
