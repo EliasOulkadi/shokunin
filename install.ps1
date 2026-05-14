@@ -317,6 +317,16 @@ if (Test-Path $ompPath) {
     try { & $ompPath init pwsh --config "$env:POSH_THEMES_PATH\atomic.omp.json" | Invoke-Expression } catch {}
 }
 
+# Shadow opencode to always use run-opencode.ps1 wrapper
+function global:opencode {
+    $wrapper = "$env:USERPROFILE\.shokunin\scripts\run-opencode.ps1"
+    if (Test-Path $wrapper) {
+        & $wrapper
+    } else {
+        & "$env:USERPROFILE\AppData\Roaming\npm\opencode.ps1"
+    }
+}
+
 Write-Host "Shokunin AI Ecosystem loaded" -ForegroundColor Cyan
 '@
 
