@@ -1,4 +1,4 @@
-param(
+﻿param(
     [switch]$Scan,
     [string[]]$Clean,
     [string]$LogDir = "$env:USERPROFILE\.shokunin\logs"
@@ -121,8 +121,8 @@ function Do-Cleanup {
         if (Test-Path $path) {
             try {
                 $item = Get-Item -LiteralPath $path
-                $shell = New-Object -ComObject "Shell.Application"
-                $shell.Namespace(0).MoveHere($path)
+                Add-Type -AssemblyName Microsoft.VisualBasic
+                [Microsoft.VisualBasic.FileIO.FileSystem]::DeleteFile($path, "OnlyErrorDialogs", "SendToRecycleBin")
                 $entry = "$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') | MOVED | $path | $($item.Length) | $reason"
                 Add-Content -Path $logFile -Value $entry
                 $moved = $moved + 1
@@ -168,3 +168,4 @@ if ($Clean.Count -gt 0) {
 }
 
 Write-Host "Usage: scan-cleanup.ps1 -Scan | -Clean id1,id2,..." -ForegroundColor Yellow
+

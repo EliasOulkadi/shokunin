@@ -58,3 +58,27 @@ Include:
 | Breaking exit codes | Pass through original exit code |
 | Notifications for interactive commands | Skip if TUI detected |
 | Notify and then continue working | Wait for notifcation confirmation or user acknowledgment |
+
+## Error Handling
+
+| Scenario | Cause | Fix |
+|----------|-------|-----|
+| Notification not showing | OS notifications disabled | Check system notification settings |
+| Wrong threshold triggering | Threshold too low for this command type | Increase threshold per command type |
+| Piped command not detected | Pipe breaks execution tracking | Use `; command` instead of `| command` |
+| TUI detected incorrectly | Some CLIs look like TUIs | Add to exclude list |
+
+## Production Checklist
+
+- [ ] **Threshold**: set per command type (default 10s)
+- [ ] **Notifications**: test on target OS (Windows Action Center, Linux notify-send, macOS Notification Center)
+- [ ] **No breakage**: verify pipes and exit codes pass through correctly
+- [ ] **TUI exclusion**: confirm opencode, vim, less, htop are excluded
+- [ ] **Logging**: notification events logged for debugging
+
+## Sources
+
+- Windows Toast Notifications API (learn.microsoft.com)
+- Linux notify-send documentation (man.archlinux.org)
+- macOS Notification Center docs (developer.apple.com)
+- PowerShell background job docs (learn.microsoft.com)

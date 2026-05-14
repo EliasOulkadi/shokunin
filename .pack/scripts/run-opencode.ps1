@@ -4,7 +4,7 @@ param()
 $CHECKPOINT_INTERVAL_MS = 300000
 $BUFFER_MAX_LINES = 9999
 $BUFFER_READ_LINES = 5000
-$REAL_OPENCODE = "$env:USERPROFILE\AppData\Roaming\npm\opencode.ps1"
+$REAL_OPENCODE = if (Get-Command opencode -ErrorAction SilentlyContinue) { (Get-Command opencode).Source } else { "opencode" }
 $SHOKUNIN_DIR = "$env:USERPROFILE\.shokunin"
 $LOG_DIR = "$SHOKUNIN_DIR\memory\sessions"
 $HELPER_PY = "$SHOKUNIN_DIR\scripts\chroma-helper.py"
@@ -177,7 +177,7 @@ if ($chromaOk) {
 } else {
     Write-Host "fallback to file..." -NoNewline
     try {
-        "$LOG_DIR\$sessionId-summary.md" | Out-File -FilePath "$LOG_DIR\$sessionId-summary.md" -Encoding UTF8
+        $summaryText | Out-File -FilePath "$LOG_DIR\$sessionId-summary.md" -Encoding UTF8
         Write-Host "done" -ForegroundColor Green
     } catch { Write-Host "fail" -ForegroundColor Red }
 }
@@ -190,3 +190,5 @@ Write-Host "  ChromaDB: $(if ($chromaOk) { 'saved' } else { 'failed' })" -Foregr
 Write-Host "------------------------------------------" -ForegroundColor Cyan
 
 $env:SHOKUNIN_LAST_SESSION = $sessionId
+
+

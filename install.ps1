@@ -89,8 +89,8 @@ function Install-Dependencies {
     Write-OK
 
     Write-Step "Instalando MCP servers (npx)..."
-    npx -y @modelcontextprotocol/server-filesystem --version 2>&1 | Out-Null
-    npx -y @modelcontextprotocol/server-fetch --version 2>&1 | Out-Null
+    npm install -g @modelcontextprotocol/server-filesystem @modelcontextprotocol/server-fetch 2>&1 | Out-Null
+     2>&1 | Out-Null
     Write-OK
 }
 
@@ -266,24 +266,24 @@ function Setup-PowerShellProfile {
 # Documentation: https://github.com/EliasOulkadi/shokunin
 
 # Aliases â€” Git
-Set-Alias -Name gst -Value "git status"
-Set-Alias -Name ga -Value "git add -A"
-Set-Alias -Name gc -Value "git commit -m"
-Set-Alias -Name gp -Value "git push"
-Set-Alias -Name gl -Value "git pull --ff-only"
-Set-Alias -Name gb -Value "git branch"
-Set-Alias -Name gco -Value "git checkout"
+function gst { git status }
+function ga { git add -A }
+function gc { param($m) git commit -m $m }
+function gp { git push }
+function gl { git pull --ff-only }
+function gb { git branch }
+function gco { git checkout }
 
 # Aliases â€” npm
-Set-Alias -Name ni -Value "npm install"
-Set-Alias -Name nrd -Value "npm run dev"
-Set-Alias -Name nrb -Value "npm run build"
-Set-Alias -Name nt -Value "npm test"
+function ni { npm install }
+function nrd { npm run dev }
+function nrb { npm run build }
+function nt { npm test }
 
 # Aliases â€” Docker
-Set-Alias -Name dps -Value "docker ps"
-Set-Alias -Name dlog -Value "docker logs -f"
-Set-Alias -Name dstop -Value "docker stop"
+function dps { docker ps }
+function dlog { docker logs -f }
+function dstop { docker stop }
 
 # Aliases â€” Utils
 Set-Alias -Name ll -Value "Get-ChildItem"
@@ -512,6 +512,8 @@ Setup-Instructions
 Setup-ScheduledTasks
 Setup-Extras
 Show-Summary
+
+
 
 
 

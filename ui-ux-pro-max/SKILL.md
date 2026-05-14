@@ -102,3 +102,23 @@ python3 skills/search.py "form validation" --stack html-tailwind
 - [ ] No horizontal scroll on mobile
 - [ ] Alt text on all images
 - [ ] `prefers-reduced-motion` respected
+
+## Anti-Patterns
+
+| Anti-Pattern | Why It Fails | Fix |
+|--------------|--------------|-----|
+| Relying solely on UI data without user context | Patterns without context mislead | Combine DB results with user's specific audience |
+| Over-engineering the first iteration | Blocks shipping | Start with one pattern, iterate |
+| Ignoring accessibility recommendations | Excludes users | Always check contrast, touch targets, reduced motion |
+| Using trends over proven patterns | Trend may not have conversion data | Prefer patterns with A/B test results |
+| Not considering platform conventions | Feels foreign on the target platform | Check platform-specific guidelines (HIG, Material) |
+
+## Sources
+
+- Refactoring UI (Adam Wathan, Steve Schoger)
+- NN Group usability research (nngroup.com)
+- Human Interface Guidelines (Apple, developer.apple.com)
+- Material Design 3 (Google, m3.material.io)
+- WCAG 2.2 Guidelines (w3.org)
+- GoodUI.org A/B tested patterns
+- Laws of UX (lawsofux.com)

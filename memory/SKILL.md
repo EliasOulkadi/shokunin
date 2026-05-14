@@ -83,6 +83,28 @@ The agent should automatically:
 /forget [id]         → Remove a specific memory entry
 ```
 
+## Production Checklist
+
+Before saving context, verify:
+- [ ] **Text**: descriptive, includes what was done, why, and result
+- [ ] **Tags**: project-relevant tags applied
+- [ ] **Type**: correct type used (decision, file, command, checkpoint, session_end)
+- [ ] **Project**: project name set for filtering
+- [ ] **Session ID**: current session ID used
+- [ ] **Redundancy**: saved via chroma-helper.py AND wrote markdown fallback
+- [ ] **Cleanup**: test entries removed from production collection
+
+## Anti-Patterns
+
+| Anti-Pattern | Why It Fails | Fix |
+|--------------|--------------|-----|
+| Saving raw terminal output without structure | Useless for semantic search | Summarize with type, tags, project context |
+| No tags on entries | Impossible to filter later | Always add at least project + content tags |
+| Saving everything indiscriminately | Noise drowns signal | Only save decisions, file changes, key commands |
+| Relying only on MCP server | Fails when MCP not connected | Always use chroma-helper.py as primary |
+| Never cleaning old sessions | DB grows unbounded | Archive sessions older than 90 days |
+| Mixed project entries | Cross-project pollution | Always set project field |
+
 ## Sources
 
 - ChromaDB documentation (docs.trychroma.com)

@@ -1,4 +1,4 @@
-# Tarea semanal: Sunday Health Check
+﻿# Tarea semanal: Sunday Health Check
 # Corre cada domingo a las 21:00 via Task Scheduler
 
 Write-Host "=== Shokunin Sunday Health Check ===" -ForegroundColor Cyan
@@ -8,11 +8,11 @@ $date = Get-Date -Format "yyyy-MM-dd HH:mm"
 $disks = Get-PSDrive -PSProvider FileSystem | Where-Object { $_.Used -gt 0 }
 Write-Host "`n[STORAGE]" -ForegroundColor Yellow
 foreach ($d in $disks) {
-    $pct = [math]::Round($d.Used / $d.Used * 100 / ($d.Used / $d.Used), 0)
+    $pct = [math]::Round($d.Used / ($d.Used + $d.Free) * 100, 0)
     $freeGB = [math]::Round($d.Free / 1GB, 1)
     $totalGB = [math]::Round(($d.Used + $d.Free) / 1GB, 1)
     Write-Host "  $($d.Name) $freeGB GB free / $totalGB GB total"
-    if ($freeGB -lt 10) { Write-Host "    ⚠️ Low disk space!" -ForegroundColor Red }
+    if ($freeGB -lt 10) { Write-Host "    âš ï¸ Low disk space!" -ForegroundColor Red }
 }
 
 # 2. Memory backup
@@ -57,3 +57,4 @@ Write-Host "`n=== Health check complete: $date ===" -ForegroundColor Cyan
 $logDir = "$env:USERPROFILE\.shokunin\logs"
 New-Item -ItemType Directory -Path $logDir -Force | Out-Null
 $log = Get-Date -Format "yyyy-MM-dd HH:mm:ss" | Out-File -FilePath "$logDir\healthcheck.log" -Append
+
