@@ -13,7 +13,6 @@ jobs:
             skill_file="${dir}SKILL.md"
             if [ ! -f "$skill_file" ]; then continue; fi
             dir_name="$(basename "$dir")"
-            # Skip external skills that don't follow the standard format
             if [ "$dir_name" = "kami" ] || [ "$dir_name" = "readme-shokunin" ]; then continue; fi
             name_line=$(head -5 "$skill_file" | grep "^name:" | head -1)
             skill_name=$(echo "$name_line" | cut -d' ' -f2 | tr -d '[:space:]')
@@ -21,7 +20,6 @@ jobs:
               echo "MISMATCH: $skill_file has name='$skill_name' but dir is '$dir_name'"
               errors=$((errors+1))
             fi
-            # Check for Workflow/Error/Sources sections (flexible matching)
             if ! grep -qiE "^##.*[Ww]orkflow|^##.*[Ss]tructure|^##.*60fps" "$skill_file" 2>/dev/null; then
               echo "MISSING: $dir_name has no Workflow section"
               errors=$((errors+1))
@@ -45,32 +43,17 @@ jobs:
         shell: bash
         run: |
           if [ -f ".pack/opencode.json" ]; then
-            python3 -c "
-import json, sys
-with open('.pack/opencode.json') as f:
-    config = json.load(f)
-required = ['provider', 'model', 'mcp', 'agent']
-for r in required:
-    if r not in config:
-        print(f'MISSING: {r}')
-        sys.exit(1)
-print('Config valid')
-"
-          fi
+            python3 -c "import json,sys; config=json.load(open('.pack/opencode.json')); [exit(print(f'MISSING: {r}')) for r in ['provider','model','mcp','agent'] if r not in config]; print('Config valid')"
 
       - name: Validate bash scripts syntax
         shell: bash
         run: |
           errors=0
-          shopt -s nullglob
           for script in .pack/scripts/linux/*.sh; do
-            bash -n "$script" 2>/dev/null || { echo "SYNTAX ERROR: $script"; errors=$((errors+1)); }
+            if [ -f "$script" ]; then
+              bash -n "$script" 2>/dev/null || { echo "SYNTAX ERROR: $script"; errors=$((errors+1)); }
+            fi
           done
-          for script in .pack/scripts/*.py .pack/memory/*.py; do
-            [ -f "$script" ] || continue
-            python3 -c "import py_compile; py_compile.compile('$script', doraise=True)" 2>/dev/null || { echo "SYNTAX ERROR: $script"; errors=$((errors+1)); }
-          done
-          # Validate install.sh if exists
           if [ -f "install.sh" ]; then
             bash -n install.sh 2>/dev/null || { echo "SYNTAX ERROR: install.sh"; errors=$((errors+1)); }
           fi

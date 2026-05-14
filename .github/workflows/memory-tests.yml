@@ -75,13 +75,7 @@ jobs:
           done
       - name: Validate chroma-helper cross-platform paths
         run: |
-          python3 -c "
-import os, platform
-_HOME = os.getenv('USERPROFILE') or os.getenv('HOME') or os.path.expanduser('~')
-BASE_DIR = os.path.join(_HOME, '.shokunin', 'memory')
-assert os.path.basename(BASE_DIR) == 'memory', 'Path should end with memory'
-print(f'Cross-platform path on Linux: {BASE_DIR}')
-"
+          python3 -c "import os; H=os.getenv('USERPROFILE') or os.getenv('HOME') or os.path.expanduser('~'); B=os.path.join(H,'.shokunin','memory'); assert os.path.basename(B)=='memory'; print('Cross-platform path on Linux:', B)"
       - name: Test install.sh parses
         run: bash -n install.sh
 
