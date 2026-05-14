@@ -135,6 +135,7 @@ All data stored at `~/.shokunin/memory/`. No cloud, no telemetry, no subscriptio
 - **Quick Start**: github.com/EliasOulkadi/shokunin/blob/master/docs/Shokunin-Quickstart.pdf
 - **Ecosystem Guide**: github.com/EliasOulkadi/shokunin/blob/master/docs/Shokunin-Ecosystem-Guide.pdf
 - **v4.0 Changelog**: github.com/EliasOulkadi/shokunin/blob/master/docs/Shokunin-v4.0-Changelog.pdf
+- **v4.2 Linux Port**: github.com/EliasOulkadi/shokunin/blob/master/docs/Shokunin-v4.2-Linux-Port.pdf
 
 ## Commands
 
