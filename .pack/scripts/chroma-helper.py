@@ -70,7 +70,26 @@ if __name__ == "__main__":
         project = sys.argv[3] if len(sys.argv) > 3 else None
         result = search(query, project)
         print(json.dumps(result))
+    elif cmd == "recent":
+        n_results = int(sys.argv[2]) if len(sys.argv) > 2 else 10
+        try:
+            all_results = collection.get(limit=n_results)
+            entries = []
+            if all_results.get("ids"):
+                for i in range(len(all_results["ids"])):
+                    meta = all_results["metadatas"][i]
+                    entries.append({
+                        "text": all_results["documents"][i][:500],
+                        "type": meta.get("type", "general"),
+                        "tags": json.loads(meta.get("tags", "[]")),
+                        "project": meta.get("project", ""),
+                        "session_id": meta.get("session_id", ""),
+                        "timestamp": meta.get("timestamp", ""),
+                    })
+            print(json.dumps(entries))
+        except Exception as e:
+            print(json.dumps({"error": str(e)}))
     elif cmd == "count":
         print(json.dumps({"count": collection.count()}))
     else:
-        print(json.dumps({"error": "Usage: save|search|count"}))
+        print(json.dumps({"error": "Usage: save|search|count|recent"}))

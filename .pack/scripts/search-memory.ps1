@@ -7,38 +7,53 @@ param(
 $HELPER = "$env:USERPROFILE\.shokunin\scripts\chroma-helper.py"
 $RESULTS = @()
 
-function Add-Result($Source, $Text, $Type, $Session, $Project, $Tags, $Score, $Timestamp) {
-    $exists = $RESULTS | Where-Object { $_.Session -eq $Session }
-    if (-not $exists) {
-        $RESULTS += [PSCustomObject]@{
-            Source = $Source; Text = $Text; Type = $Type; Session = $Session
-            Project = $Project; Tags = $Tags; Score = $Score; Timestamp = $Timestamp
-        }
-    }
-}
-
-# 1. ChromaDB semantic search
+# 1. Try ChromaDB semantic search
 if (-not [string]::IsNullOrEmpty($Query)) {
     try {
         $json = python $HELPER search "$Query" $Project 2>$null
         if ($json) {
             $parsed = $json | ConvertFrom-Json
             foreach ($e in $parsed) {
-                Add-Result "ChromaDB" $e.text $e.type $e.session_id $e.project ($e.tags -join ", ") [double]$e.similarity $e.timestamp
+                $exists = $RESULTS | Where-Object { $_.Session -eq $e.session_id }
+                if (-not $exists) {
+                    $obj = New-Object PSObject -Property @{
+                        Source = "ChromaDB"
+                        Text = $e.text
+                        Type = $e.type
+                        Session = $e.session_id
+                        Project = $e.project
+                        Tags = $e.tags -join ", "
+                        Score = [double]$e.similarity
+                        Timestamp = $e.timestamp
+                    }
+                    $RESULTS += $obj
+                }
             }
         }
     } catch {}
 }
 
-# 2. If no results, show recent entries as context
+# 2. Fallback to recent entries if nothing found
 if ($RESULTS.Count -eq 0) {
     try {
-        $json = python $HELPER search "session_end OR checkpoint OR decision" "" $Limit 2>$null
-        if (-not $json -or $json -eq "[]") { $json = python $HELPER search "shokunin" "" $Limit 2>$null }
+        $json = python $HELPER recent $Limit 2>$null
         if ($json -and $json -ne "[]") {
             $parsed = $json | ConvertFrom-Json
             foreach ($e in $parsed) {
-                Add-Result "Recent" $e.text $e.type $e.session_id $e.project ($e.tags -join ", ") 0 $e.timestamp
+                $exists = $RESULTS | Where-Object { $_.Session -eq $e.session_id }
+                if (-not $exists) {
+                    $obj = New-Object PSObject -Property @{
+                        Source = "Recent"
+                        Text = $e.text
+                        Type = $e.type
+                        Session = $e.session_id
+                        Project = $e.project
+                        Tags = $e.tags -join ", "
+                        Score = 0
+                        Timestamp = $e.timestamp
+                    }
+                    $RESULTS += $obj
+                }
             }
         }
     } catch {}
