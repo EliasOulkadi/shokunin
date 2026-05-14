@@ -84,20 +84,91 @@ Auto-apply on every web UI:
 
 ## Skills Ecosystem
 
-Tengo 34 skills instaladas en `~/.config/opencode/skills/`. Se activan solas segÃºn lo que pida:
+Tengo 35+ skills instaladas en `~/.config/opencode/skills/`. Se activan solas segÃºn lo que pida:
 
-- **docker/kubernetes/terraform/ci-cd/db-admin** â†’ infraestructura
-- **auth-architect/api-forge/db-sculptor/error-handler** â†’ backend
-- **component-forge/responsive-engine/motion-craft/landing-craft** â†’ frontend
-- **flutter/react-native** â†’ mobile
-- **test-commander/performance-profiler** â†’ calidad
-- **communication/content-marketing/business-proposals/seo-geo** â†’ contenido y negocio
-- **git-workflow/windows-powershell/runbook-gen/strategy** â†’ productividad
-- **kami/portfolio-auto** â†’ documentos
+- **docker/kubernetes/terraform/ci-cd/db-admin** â†' infraestructura
+- **auth-architect/api-forge/db-sculptor/error-handler** â†' backend
+- **component-forge/responsive-engine/motion-craft/landing-craft** â†' frontend
+- **flutter/react-native** â†' mobile
+- **test-commander/performance-profiler** â†' calidad
+- **communication/content-marketing/business-proposals/seo-geo** â†' contenido y negocio
+- **git-workflow/windows-powershell/runbook-gen/strategy** â†' productividad
+- **kami/portfolio-auto** â†' documentos
 - **use subagente code-review** para PRs, **writer** para escribir, **debugger** para bugs
-- **MEMORY OBLIGATORIO: al INICIAR cada sesiÃ³n, USA la herramienta search_context para buscar contexto relevante de sesiones pasadas. NO te saltes este paso.
-- **MEMORY OBLIGATORIO: al TERMINAR cada sesiÃ³n, USA la herramienta store_context para guardar un resumen con tags + proyecto + session_id. Esto es crÃ­tico para que futuras sesiones tengan contexto.
 - **telegram-bot** para interactuar desde el mÃ³vil vÃ­a Telegram
+
+## MEMORY SYSTEM â€" INSTRUCCIONES OBLIGATORIAS
+
+Este sistema usa ChromaDB para memoria persistente entre sesiones. Sigue estas instrucciones ESTRICTAMENTE.
+
+### 1. AL INICIAR SESIÃ"N â€" buscar contexto previo (OBLIGATORIO)
+
+Ejecuta search_context con el proyecto actual y el tema de lo que pide el usuario:
+
+```json
+{
+  "query": "context about [proyecto_actual]",
+  "project": "[nombre_proyecto]",
+  "n_results": 10
+}
+```
+
+AdemÃ¡s, busca sin filtro de proyecto:
+```json
+{
+  "query": "[lo_primero_que_pide_el_usuario]",
+  "n_results": 5
+}
+```
+
+**Muestra los resultados al usuario.** Si encuentras sesiones previas relevantes, di algo como "RecuperÃ© contexto de [nÃºmero] sesiones anteriores. Lo mÃ¡s relevante: [resumen breve]".
+
+### 2. DURANTE LA SESIÃ"N â€" guardar periÃ³dicamente (OBLIGATORIO)
+
+Cada 3-5 intercambios con el usuario, guarda un checkpoint usando store_context:
+
+```json
+{
+  "text": "Checkpoint: [resumen de lo Ãºltimo que se hizo]",
+  "type": "checkpoint",
+  "tags": ["checkpoint", "[proyecto]", "[tema]"],
+  "project": "[nombre_proyecto]",
+  "session_id": "[session_id_actual]"
+}
+```
+
+AdemÃ¡s, despuÃ©s de CADA evento importante:
+- **DecisiÃ³n** â†' store_context con type: "decision"
+- **Archivo creado/modificado** â†' store_context con type: "file" + ruta
+- **Comando ejecutado** â†' store_context con type: "command" + comando y resultado  
+- **Preferencia del usuario descubierta** â†' store_context con type: "preference"
+
+El text debe ser descriptivo: QUÃ‰ se hizo, POR QUÃ‰ y RESULTADO.
+
+### 3. AL FINAL DE LA SESIÃ"N â€" resumen completo (OBLIGATORIO)
+
+store_context con type "session_end" y un resumen estructurado:
+
+```json
+{
+  "text": "Session: [session_id]\n## Decisions\n- ...\n## Files\n- ...\n## Commands\n- ...\n## Next Steps\n- ...",
+  "type": "session_end",
+  "tags": ["session-end", "[proyecto]"],
+  "project": "[proyecto]",
+  "session_id": "[session_id]"
+}
+```
+
+### Session ID
+
+El session_id lo genera el wrapper al iniciar. Formato: session-YYYYMMDD-HHMMSS-NNNN. Si no estÃ¡ disponible, usa auto-YYYYMMDD-HHMMSS.
+
+### IMPORTANTE
+
+- NUNCA te saltes search_context al inicio.
+- NUNCA termines sin store_context type session_end.
+- Los checkpoints periÃ³dicos son OBLIGATORIOS â€" si la sesiÃ³n se corta, son lo Ãºnico que queda.
+- Incluye suficiente contexto en cada save para que futuras sesiones entiendan el QUÃ‰, POR QUÃ‰ y RESULTADO.
 
 
 
