@@ -103,15 +103,21 @@ Este sistema usa ChromaDB para memoria persistente entre sesiones. Sigue estas i
 
 ### 1. AL INICIAR SESIÃ"N â€" buscar contexto previo (OBLIGATORIO)
 
-Ejecuta el script chroma-helper.py para buscar contexto relevante:
+Ejecuta el script search-memory que combina ChromaDB + grep en markdown:
 
+**Windows:**
 ```powershell
-python ~/.shokunin/scripts/chroma-helper.py search "[proyecto_actual]" "[nombre_proyecto]"
+& "$env:USERPROFILE\.shokunin\scripts\search-memory.ps1" -Query "[proyecto_actual]" -Project "[nombre_proyecto]"
+```
+
+**Linux:**
+```bash
+python3 "$HOME/.shokunin/scripts/chroma-helper.py" search "[proyecto_actual]" "[nombre_proyecto]"
 ```
 
 AdemÃ¡s, busca sin filtro de proyecto:
 ```powershell
-python ~/.shokunin/scripts/chroma-helper.py search "[lo_primero_que_pide_el_usuario]"
+& "$env:USERPROFILE\.shokunin\scripts\search-memory.ps1" -Query "[lo_primero_que_pide_el usuario]"
 ```
 
 **Muestra los resultados al usuario.** Si encuentras sesiones previas relevantes, di algo como "RecuperÃ© contexto de [nÃºmero] sesiones anteriores. Lo mÃ¡s relevante: [resumen breve]".
