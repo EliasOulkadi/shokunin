@@ -107,9 +107,10 @@ All data stored at `~/.shokunin/memory/`. No cloud, no telemetry, no subscriptio
 ```powershell
 # Test the memory system
 .\test-memory.ps1
-```
 
-## PDF Guides
+# Validate all memory components
+.\memory-healthcheck.ps1
+```
 
 - **Quick Start**: github.com/EliasOulkadi/shokunin/blob/master/docs/Shokunin-Quickstart.pdf
 - **Ecosystem Guide**: github.com/EliasOulkadi/shokunin/blob/master/docs/Shokunin-Ecosystem-Guide.pdf
@@ -122,6 +123,7 @@ After installation, run `.\run-opencode.ps1` (with memory capture) or `opencode`
 ```powershell
 .\run-opencode.ps1                    # Start AI session (with memory capture)
 opencode                              # Start AI session (simple mode)
+.\memory-healthcheck.ps1              # Validate all memory components
 gst, ga, gc "msg", gp, gl            # Git aliases
 ni, nrd, nrb, nt                       # npm aliases
 dps, dlog                               # Docker aliases
