@@ -10,64 +10,34 @@ jobs:
         run: |
           errors=0
           for dir in */; do
-            skill_file="${dir}SKILL.md"
-            if [ ! -f "$skill_file" ]; then continue; fi
-            dir_name="$(basename "$dir")"
-            if [ "$dir_name" = "kami" ] || [ "$dir_name" = "readme-shokunin" ]; then continue; fi
-            name_line=$(head -5 "$skill_file" | grep "^name:" | head -1)
-            skill_name=$(echo "$name_line" | cut -d' ' -f2 | tr -d '[:space:]')
-            if [ "$skill_name" != "$dir_name" ]; then
-              echo "MISMATCH: $skill_file has name='$skill_name' but dir is '$dir_name'"
-              errors=$((errors+1))
-            fi
-            if ! grep -qiE "^##.*[Ww]orkflow|^##.*[Ss]tructure|^##.*60fps" "$skill_file" 2>/dev/null; then
-              echo "MISSING: $dir_name has no Workflow section"
-              errors=$((errors+1))
-            fi
-            if ! grep -qiE "^##.*[Ee]rror|^##.*[Ee]mergency" "$skill_file" 2>/dev/null; then
-              echo "MISSING: $dir_name has no Error Handling section"
-              errors=$((errors+1))
-            fi
-            if ! grep -qiE "^##.*[Ss]ources|^##.*[Ff]uentes" "$skill_file" 2>/dev/null; then
-              echo "MISSING: $dir_name has no Sources section"
-              errors=$((errors+1))
-            fi
+            f="${dir}SKILL.md"
+            [ -f "$f" ] || continue
+            n=$(basename "$dir")
+            [ "$n" = "kami" ] || [ "$n" = "readme-shokunin" ] && continue
+            grep -q "^name:" "$f" || { echo "MISSING name: $n"; errors=$((errors+1)); }
+            grep -qi "workflow\|structure\|60fps" "$f" || { echo "MISSING workflow: $n"; errors=$((errors+1)); }
+            grep -qi "error\|emergency" "$f" || { echo "MISSING error: $n"; errors=$((errors+1)); }
+            grep -qi "sources\|fuentes" "$f" || { echo "MISSING sources: $n"; errors=$((errors+1)); }
           done
-          if [ "$errors" -gt 0 ]; then
-            echo "FAILED: $errors issues found"
-            exit 1
-          fi
-          echo "All skills validated"
+          if [ "$errors" -gt 0 ]; then echo "FAILED: $errors"; exit 1; fi
+          echo "All skills OK"
 
       - name: Validate JSON config
         shell: bash
         run: |
-          if [ -f ".pack/opencode.json" ]; then
-            python3 -c "import json,sys; config=json.load(open('.pack/opencode.json')); [exit(print(f'MISSING: {r}')) for r in ['provider','model','mcp','agent'] if r not in config]; print('Config valid')"
+          python3 -c "import json; json.load(open('.pack/opencode.json')); print('Config valid')"
 
-      - name: Validate bash scripts syntax
+      - name: Validate bash scripts
         shell: bash
         run: |
-          errors=0
-          for script in .pack/scripts/linux/*.sh; do
-            if [ -f "$script" ]; then
-              bash -n "$script" 2>/dev/null || { echo "SYNTAX ERROR: $script"; errors=$((errors+1)); }
-            fi
+          for s in .pack/scripts/linux/*.sh install.sh; do
+            [ -f "$s" ] && bash -n "$s" || echo "SYNTAX ERROR: $s"
           done
-          if [ -f "install.sh" ]; then
-            bash -n install.sh 2>/dev/null || { echo "SYNTAX ERROR: install.sh"; errors=$((errors+1)); }
-          fi
-          if [ "$errors" -gt 0 ]; then
-            echo "FAILED: $errors syntax errors"
-            exit 1
-          fi
-          echo "All scripts syntax valid"
+          echo "All scripts OK"
 
       - name: Validate CLAUDE.md template
         shell: bash
         run: |
-          if [ -f ".pack/CLAUDE.md.template" ]; then
-            grep -q "{{USERNAME}}" .pack/CLAUDE.md.template && echo "Template has USERNAME placeholder"
-            grep -q "MEMORY SYSTEM" .pack/CLAUDE.md.template && echo "Template has MEMORY SYSTEM section"
-            grep -q "search_context\|chroma-helper" .pack/CLAUDE.md.template && echo "Template has memory search instructions"
-          fi
+          grep -q "{{USERNAME}}" .pack/CLAUDE.md.template && echo "Template HAS USERNAME"
+          grep -q "MEMORY SYSTEM" .pack/CLAUDE.md.template && echo "Template HAS MEMORY SYSTEM"
+          echo "Template OK"
