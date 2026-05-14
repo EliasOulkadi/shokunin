@@ -10,8 +10,8 @@
 #>
 
 $ErrorActionPreference = "Stop"
-$Host.UI.RawUI.WindowTitle = "Shokunin AI Ecosystem Installer v3.1"
-$script:version = "3.1.0"
+$Host.UI.RawUI.WindowTitle = "Shokunin AI Ecosystem Installer v4.0"
+$script:version = "4.0.0"
 $script:installDir = "$env:USERPROFILE\.shokunin"
 $script:skillsDir = "$env:USERPROFILE\.config\opencode\skills"
 $script:startupDir = [Environment]::GetFolderPath('Startup')
@@ -46,13 +46,13 @@ function Test-Prerequisites {
         Write-Log "Node.js $nodeVer" Green
     } catch { Write-Log "Node.js 18+ requerido (https://nodejs.org)" Red; $allOk = $false }
 
-    # Python
+    # Python (check python first, then py)
     try {
-        $pyVer = python3 --version 2>$null
-        if (-not $pyVer) { $pyVer = python --version 2>$null }
+        $pyVer = python --version 2>&1
+        if (-not ($pyVer -match '(\d+)\.(\d+)')) { $pyVer = py --version 2>&1 }
         if ($pyVer -match '(\d+)\.(\d+)') {
             $major = [int]$Matches[1]; $minor = [int]$Matches[2]
-            if ($major -ge 3 -and $minor -ge 11) { Write-Log "Python $major.$minor+" Green }
+            if ($major -ge 3 -and $minor -ge 11) { Write-Log "Python $major.$minor+ encontrado" Green }
             else { throw "version too low" }
         } else { throw "not found" }
     } catch { Write-Log "Python 3.11+ requerido (https://python.org)" Red; $allOk = $false }
@@ -173,7 +173,45 @@ function Install-MemorySystem {
 }
 
 # ============================================================
-# SECTION 6: TELEGRAM BOT SETUP
+# SECTION 6: NEW SCRIPTS (v4.0)
+# ============================================================
+function Install-NewScripts {
+    Write-Step "Instalando scripts v4.0..."
+
+    $scriptsDir = Join-Path $script:installDir "scripts"
+    New-Item -ItemType Directory -Path $scriptsDir -Force | Out-Null
+
+    $newScripts = @(
+        "chroma-helper.py",
+        "run-opencode.ps1",
+        "save-memory.ps1",
+        "search-memory.ps1",
+        "read-transcript.ps1",
+        "test-memory.ps1"
+    )
+
+    $count = 0
+    foreach ($script in $newScripts) {
+        $src = Join-Path $PSScriptRoot ".pack\scripts\$script"
+        if (Test-Path $src) {
+            Copy-Item $src (Join-Path $scriptsDir $script) -Force
+            $count++
+        } else {
+            $url = "https://raw.githubusercontent.com/EliasOulkadi/shokunin/master/.pack/scripts/$script"
+            try {
+                Invoke-WebRequest -Uri $url -OutFile (Join-Path $scriptsDir $script) -ErrorAction SilentlyContinue
+                $count++
+            } catch {
+                Write-Log "  No se pudo descargar $script" Yellow
+            }
+        }
+    }
+
+    Write-Log "$count scripts instalados en $scriptsDir" Green
+}
+
+# ============================================================
+# SECTION 7: OPencode CONFIG
 # ============================================================
 function Setup-OpenCodeConfig {
     Write-Step "Configurando OpenCode..."
@@ -262,7 +300,7 @@ Set-PSReadLineKeyHandler -Key Ctrl+Space -Function MenuComplete
 # Telegram Bot auto-start
 $botJob = Get-Job -Name "ShokuninBot" -ErrorAction SilentlyContinue
 if (-not $botJob) {
-    $token = 
+    $token = [Environment]::GetEnvironmentVariable('TELEGRAM_BOT_TOKEN','User')
     if ($token) {
         $botScript = "$env:USERPROFILE\.shokunin\telegram\bot.py"
         if (Test-Path $botScript) {
@@ -394,7 +432,8 @@ function Show-Summary {
 â•šâ•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
   Skills:       $((Get-ChildItem $script:skillsDir -Directory).Count) instaladas
-  Memoria:      ChromaDB en $script:installDir\memory
+  Memoria:      ChromaDB v4.0 (3 capas de captura)
+  Scripts:      run-opencode, chroma-helper, test-memory
 
   NVIDIA API:   $(if ([Environment]::GetEnvironmentVariable('NVIDIA_API_KEY','User')) { 'Configurada' } else { 'PENDIENTE' })
   PowerShell:   Perfil personalizado con aliases
@@ -422,7 +461,7 @@ function Show-Summary {
 
   3. Abre un NUEVO terminal para cargar el perfil
 
-  4. Ejecuta: opencode
+  4. Ejecuta: .\run-opencode.ps1 (o solo opencode para sesion simple)
 
   Mas informacion: https://github.com/EliasOulkadi/shokunin
 "@ -ForegroundColor Cyan
@@ -456,7 +495,13 @@ Test-Prerequisites
 Install-Dependencies
 Install-Skills
 Install-MemorySystem
+Install-NewScripts
 Setup-OpenCodeConfig
+Setup-PowerShellProfile
+Setup-Instructions
+Setup-ScheduledTasks
+Setup-Extras
+Show-Summary
 
 
 
