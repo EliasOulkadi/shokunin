@@ -1,4 +1,4 @@
-﻿# Shokunin AI Ecosystem Installer v4.0
+# Shokunin AI Ecosystem Installer v4.0
 # One-command installer for the complete Shokunin AI ecosystem
 # Requires: Windows 10/11, PowerShell 5.1+, Node.js 18+, Python 3.11+
 

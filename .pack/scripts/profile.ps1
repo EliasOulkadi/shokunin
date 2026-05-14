@@ -1,4 +1,4 @@
-﻿# Shokunin AI Ecosystem â€” PowerShell Profile
+# Shokunin AI Ecosystem â€” PowerShell Profile
 # Documentation: https://github.com/EliasOulkadi/shokunin
 
 # Aliases â€” Git

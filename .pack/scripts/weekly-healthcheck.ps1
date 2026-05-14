@@ -1,4 +1,4 @@
-﻿# Tarea semanal: Sunday Health Check
+# Tarea semanal: Sunday Health Check
 # Corre cada domingo a las 21:00 via Task Scheduler
 
 Write-Host "=== Shokunin Sunday Health Check ===" -ForegroundColor Cyan

@@ -1,4 +1,4 @@
-﻿param(
+param(
     [switch]$Scan,
     [string[]]$Clean,
     [string]$LogDir = "$env:USERPROFILE\.shokunin\logs"

@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env pwsh
+#!/usr/bin/env pwsh
 param()
 
 $CHECKPOINT_INTERVAL_MS = 300000
