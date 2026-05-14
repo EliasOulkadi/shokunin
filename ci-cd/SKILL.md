@@ -128,10 +128,20 @@ See [references/self-hosted-runners.md](references/self-hosted-runners.md) for K
 | No healthcheck after deploy | Auto-rollback on failure |
 | Deploy on every main push | Gated approval + environment protection |
 
+## Error Handling
+
+| Scenario | Cause | Fix |
+|----------|-------|-----|
+| Pipeline fails on lint | Code style violations | Add lint fix step before lint check |
+| Tests timeout | Tests too slow or hanging | Add timeout per test, split into parallel shards |
+| Docker build fails | Layer cache corrupted | Clear cache with `docker builder prune`, rebuild |
+| Deploy fails | Healthcheck not passing | Verify deployment target is healthy, check rollout status |
+| OIDC auth fails | Wrong role ARN or trust policy | Verify IAM role exists, check trust policy conditions |
+| Cache miss on every run | Wrong cache key | Use lockfile hash (package-lock.json, yarn.lock) as cache key |
+| Self-hosted runner offline | Runner VM stopped or network issue | Add auto-scaling group, set up monitoring alert |
+
 ## Sources
 
-- GitHub Actions docs (docs.github.com/actions)
-- GitLab CI docs (docs.gitlab.com/ee/ci)
 - CircleCI docs (circleci.com/docs)
 - DORA metrics (Google Cloud DevOps)
 - Docker BuildKit cache type

@@ -14,7 +14,7 @@ function Test-Step {
         Write-Host "  [PASS] $Name" -ForegroundColor Green
         return $true
     } catch {
-        Write-Host "  [FAIL] $Name: $_" -ForegroundColor Red
+        Write-Host "  [FAIL] $($Name): $_" -ForegroundColor Red
         return $false
     }
 }

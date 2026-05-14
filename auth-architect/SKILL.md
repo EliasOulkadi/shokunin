@@ -220,11 +220,19 @@ Allow if user.department === resource.department AND user.clearance >= resource.
 | No audit logging | Log all auth events to secure, append-only store |
 | Hardcoded JWT secret | Environment variable, rotated periodically |
 
+## Error Handling
+
+| Scenario | Cause | Fix |
+|----------|-------|-----|
+| Token validation fails | Wrong algorithm or expired key | Verify JWT alg matches expected, check key rotation schedule |
+| OAuth callback fails | Mismatched redirect URI or state | Check exact URI match (including trailing slash), validate state parameter |
+| Rate limit hit | Too many login attempts | Apply exponential backoff, increase throttling per IP |
+| Session fixation | Session ID not rotated on login | Always regenerate session ID after authentication |
+| CORS error on auth endpoint | Wrong origin allowed | Restrict to specific origins, never use wildcard in production |
+| Password reset token expired | Token TTL too short | Set reasonable expiry (15-30 min), send new link on expiry |
+
 ## Sources
 
-- OWASP Top 10 (2025)
-- OWASP Cheat Sheet Series — Authentication, Session Management, CSRF
-- NIST SP 800-63B — Digital Identity Guidelines
 - IETF RFC 7519 (JWT), RFC 6749 (OAuth 2.0), RFC 7636 (PKCE)
 - IETF RFC 9120 — OAuth 2.0 for Browser-Based Apps
 - WebAuthn Level 2 (W3C Recommendation)

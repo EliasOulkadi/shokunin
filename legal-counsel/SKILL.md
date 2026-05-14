@@ -194,12 +194,28 @@ When asked a legal compliance question, follow these steps:
 | "One privacy program fits all states" | California, Colorado, and Connecticut have material differences (opt-out, profiling, sensitive data) | Build CA-level as baseline, then diff for CO/CT unique obligations |
 | "We don't process health data, HIPAA doesn't apply" | HIPAA also covers payment, treatment, operations data from covered entities — including apps that receive ePHI from providers | Sign BAA before receiving any data from covered entity |
 
+## Error Handling
+
+| Scenario | Cause | Fix |
+|----------|-------|-----|
+| Missing jurisdiction | User didn't specify location | Ask for jurisdiction before proceeding |
+| Outdated regulation | Law changed since last update | Check effective dates table in each section |
+| Overlapping laws | Multiple jurisdictions apply | Apply strictest requirement per data category |
+| Contract clause unclear | Ambiguous language | Flag for qualified attorney review |
+| Enforcement trend unclear | No recent cases | Reference regulator guidance, note uncertainty |
+
+## Anti-Patterns
+
+| Anti-Pattern | Why It Fails | Fix |
+|--------------|--------------|-----|
+| Applying GDPR logic to US healthcare | Different frameworks, HIPAA is more specific | Map each law's scope separately |
+| Assuming one privacy law covers everything | Most companies need 3-5 laws | Check EU, UK, US federal, US state(s) |
+| Ignoring state-level laws | US has 15+ state privacy laws | Check each state where users reside |
+| Using AI Act compliance date without phased approach | Phased enforcement starts 2025 | Check specific obligations by tier and date |
+| No data mapping before compliance | Can't assess what you don't know | Start with data inventory + processing map |
+
 ## Sources
 
-- GDPR: Regulation EU 2016/679
-- EU AI Act: Regulation EU 2024/1689
-- DSA: Regulation EU 2022/2065
-- DMCA: 17 U.S.C. § 512
 - HIPAA: 45 CFR Parts 160, 164
 - ICO guidance (ico.org.uk)
 - EDPB guidelines
