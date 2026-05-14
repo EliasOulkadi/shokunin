@@ -1,9 +1,10 @@
-import os, sys, json, uuid
+import os, sys, json, uuid, platform
 from datetime import datetime, timezone
 import chromadb
 from chromadb.config import Settings
 
-BASE_DIR = os.path.join(os.environ["USERPROFILE"], ".shokunin", "memory")
+_HOME = os.getenv("USERPROFILE") or os.getenv("HOME") or os.path.expanduser("~")
+BASE_DIR = os.path.join(_HOME, ".shokunin", "memory")
 CHROMA_PATH = os.path.join(BASE_DIR, "chroma_db")
 SESSIONS_PATH = os.path.join(BASE_DIR, "sessions")
 COLLECTION_NAME = "shokunin_memory"

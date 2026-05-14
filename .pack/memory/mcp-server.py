@@ -1,4 +1,4 @@
-﻿import os
+﻿import os, platform
 import json
 import sys
 import uuid
@@ -8,7 +8,8 @@ from datetime import datetime, timezone
 import chromadb
 from chromadb.config import Settings
 
-BASE_DIR = os.path.join(os.environ["USERPROFILE"], ".shokunin", "memory")
+_HOME = os.getenv("USERPROFILE") or os.getenv("HOME") or os.path.expanduser("~")
+BASE_DIR = os.path.join(_HOME, ".shokunin", "memory")
 CHROMA_PATH = os.path.join(BASE_DIR, "chroma_db")
 SESSIONS_PATH = os.path.join(BASE_DIR, "sessions")
 LOG_PATH = os.path.join(BASE_DIR, "mcp-server.log")

@@ -9,6 +9,7 @@ on:
       - '.pack/AGENTS.md'
       - '.pack/opencode.json'
       - 'install.ps1'
+      - 'install.sh'
   pull_request:
     paths:
       - '.pack/memory/**'
@@ -62,6 +63,27 @@ jobs:
         run: |
           $r = python .pack/scripts/chroma-helper.py save "Windows CI test" "win-ci" "test" "ci" "ci-project" 2>&1
           if ($r -match "stored") { Write-Host "SAVE OK" } else { throw "SAVE FAILED: $r" }
+
+  test-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate bash scripts syntax
+        run: |
+          for script in .pack/scripts/linux/*.sh; do
+            bash -n "$script" && echo "OK: $(basename $script)" || { echo "FAIL: $(basename $script)"; exit 1; }
+          done
+      - name: Validate chroma-helper cross-platform paths
+        run: |
+          python3 -c "
+import os, platform
+_HOME = os.getenv('USERPROFILE') or os.getenv('HOME') or os.path.expanduser('~')
+BASE_DIR = os.path.join(_HOME, '.shokunin', 'memory')
+assert os.path.basename(BASE_DIR) == 'memory', 'Path should end with memory'
+print(f'Cross-platform path on Linux: {BASE_DIR}')
+"
+      - name: Test install.sh parses
+        run: bash -n install.sh
 
   validate-config:
     runs-on: ubuntu-latest

@@ -4,17 +4,23 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 [![Windows](https://img.shields.io/badge/Windows-11-0078D6?logo=windows)](https://www.microsoft.com/windows)
+[![Linux](https://img.shields.io/badge/Linux-FCC624?logo=linux&logoColor=black)](https://github.com/EliasOulkadi/shokunin)
 [![OpenCode](https://img.shields.io/badge/OpenCode-1.14-6B46C1?logo=openai)](https://opencode.ai)
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/EliasOulkadi/shokunin/graphs/commit-activity)
 
 
-**AI Engineering Ecosystem** — 35 skills, ChromaDB memory, MCP servers, and automations. Zero cost, open source.
+**AI Engineering Ecosystem** — 37 skills, ChromaDB memory, MCP servers, and automations. Zero cost, open source.
 
 > *職人 (shokunin) means artisan in Japanese. These skills aim for that standard — every detail crafted, every edge case handled, every workflow automated.*
 
 ```powershell
 # One-command install (Windows)
 irm https://raw.githubusercontent.com/EliasOulkadi/shokunin/master/install.ps1 | iex
+```
+
+```bash
+# One-command install (Linux)
+bash <(curl -sL https://raw.githubusercontent.com/EliasOulkadi/shokunin/master/install.sh)
 ```
 
 ## Ecosystem
@@ -58,7 +64,7 @@ Each skill includes: trigger-optimized descriptions, procedural workflows, error
 
 | Component | Purpose |
 |-----------|---------|
-| **35 SKILL.md files** | Domain expertise that auto-activates |
+| **37 SKILL.md files** | Domain expertise that auto-activates |
 | **OpenCode config** | MCP servers, subagents, superpowers plugin |
 | **ChromaDB memory** | Persistent context across sessions (v4.0: 3-layer capture, structured data) |
 | **CLAUDE.md + AGENTS.md** | Mandatory memory instructions: context search on every start |
@@ -73,13 +79,14 @@ Each skill includes: trigger-optimized descriptions, procedural workflows, error
 
 ## Requirements
 
-- Windows 10/11
+- **Windows 10/11** or **Linux** (bash 4+)
 - Node.js 18+
 - Python 3.11+
 - Git
 
 ## Quick Start
 
+**Windows:**
 ```powershell
 # 1. Install
 irm https://raw.githubusercontent.com/EliasOulkadi/shokunin/master/install.ps1 | iex
@@ -91,6 +98,19 @@ irm https://raw.githubusercontent.com/EliasOulkadi/shokunin/master/install.ps1 |
 .\run-opencode.ps1
 
 # Or without memory capture (simple mode):
+opencode
+```
+
+**Linux:**
+```bash
+# 1. Install
+bash <(curl -sL https://raw.githubusercontent.com/EliasOulkadi/shokunin/master/install.sh)
+
+# 2. Get a free NVIDIA API key
+#    https://build.nvidia.com/
+
+# 3. Reload shell and start OpenCode
+source ~/.bashrc
 opencode
 ```
 
@@ -118,8 +138,9 @@ All data stored at `~/.shokunin/memory/`. No cloud, no telemetry, no subscriptio
 
 ## Commands
 
-After installation, run `.\run-opencode.ps1` (with memory capture) or `opencode` (simple mode) in any project directory. The AI agent loads your skills, searches memory from past sessions, and is ready to work.
+After installation, run `opencode` in any project directory. The AI agent loads your skills, searches memory from past sessions, and is ready to work.
 
+**Windows:**
 ```powershell
 .\run-opencode.ps1                    # Start AI session (with memory capture)
 opencode                              # Start AI session (simple mode)
@@ -128,6 +149,16 @@ gst, ga, gc "msg", gp, gl            # Git aliases
 ni, nrd, nrb, nt                       # npm aliases
 dps, dlog                               # Docker aliases
 mkcd, touch, which, admin             # Utility aliases
+```
+
+**Linux:**
+```bash
+opencode                              # Start AI session (with memory capture)
+./memory-healthcheck.sh               # Validate all memory components
+gst, ga, gc "msg", gp, gl            # Git aliases
+ni, nrd, nrb, nt                       # npm aliases
+dps, dlog                               # Docker aliases
+mkcd, which                           # Utility functions
 ```
 
 ## Links
