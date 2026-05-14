@@ -178,6 +178,29 @@ Achievement checklist:
 | Auto-playing video | User-initiated playback only |
 | No A/B testing plan | Identify highest-impact element, test one change |
 
+## Workflow
+
+| Phase | Action | Tools/Metrics |
+|-------|--------|---------------|
+| 1. Research | Understand audience, identify pain points, analyze competitors | User interviews, analytics, competitor pages |
+| 2. Structure | Choose CRO framework, map sections, outline headlines | LIFT Model, PAS, section template |
+| 3. Design | Build with target palette, typography, spacing, grain texture | Design Palette table, Core Web Vitals targets |
+| 4. Build | Implement sections in order: Hero → Social Proof → Problem → Solution → Features → Testimonials → Pricing → FAQ → CTA | Section structure, form optimization rules |
+| 5. Test | A/B test one element at a time, min 1000 visitors per variant | High-impact test elements list |
+| 6. Optimize | Iterate on metrics: INP < 200ms, LCP < 2.5s, CLS < 0.1, Lighthouse > 90 | Performance checklist, mobile rules |
+
+## Error Handling
+
+| Scenario | Cause | Fix |
+|----------|-------|-----|
+| Low conversion rate (under 1%) | Weak headline or no social proof above fold | Restructure hero with specific benefit headline + logos/metrics |
+| High bounce rate (>70%) | Page load too slow or value prop unclear | Check Core Web Vitals, simplify hero message |
+| No A/B test winner | Sample too small or changes too subtle | Run until 1000 visitors per variant; test bigger changes |
+| Form drop-off >50% | Too many fields or no trust signals | Reduce to email-only; add privacy note |
+| Mobile conversions low | Poor mobile experience | Run mobile checklist: 44px targets, 16px min font, single column |
+| Pricing page not converting | No clear "best value" tier | Highlight middle tier as "Most popular" with badge |
+| Testimonials look fake | No photo or real attribution | Add real photo + full name + title + company |
+
 ## Sources
 
 - Refactoring UI by Adam Wathan and Steve Schoger

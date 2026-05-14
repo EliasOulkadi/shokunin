@@ -58,3 +58,32 @@ Backup automático cada domingo con el cleanup semanal (ya configurado en Task S
 - Base de datos: `~/.shokunin/memory/chroma_db/`
 - Backups: `~/.shokunin/backups/`
 - Tamaño típico: ~400 KB (crece ~1 KB por entrada)
+
+## Error Handling
+
+| Error | Causa | Solución |
+|-------|-------|----------|
+| ChromaDB no instalado | Falta `pip install chromadb` | Ejecutar `pip install chromadb` |
+| Colección no existe | Primera ejecución | Se crea automáticamente al primer store |
+| Query lenta | Primera ejecución, descarga modelo ONNX (~79 MB) | Esperar, siguientes ejecuciones son instantáneas |
+| Memoria vacía | Sin datos guardados | Normal al inicio, guarda algo primero |
+| Puerto ocupado | MCP server conflict | Solo un proceso MCP a la vez |
+| Embedding falla | Modelo corrupto | Borrar caché y reintentar |
+
+## Anti-Patterns
+
+| Anti-Patrón | Problema | Solución |
+|-------------|----------|----------|
+| Buscar sin filtro de proyecto | Resultados irrelevantes de otros proyectos | Siempre filtrar por `project` |
+| Guardar texto sin contexto | Difícil de entender después | Incluir qué, por qué, resultado |
+| Tags inconsistentes | Difícil de filtrar | Usar siempre los mismos tags por proyecto |
+| No hacer backup | ChromaDB es sqlite, puede corromperse | Backup semanal automático |
+| Guardar datos sensibles | ChromaDB no está encriptado | No guardar passwords/keys en memoria |
+| No limpiar entradas de prueba | Contaminan búsquedas | Borrar entradas test después de validar |
+
+## Fuentes
+
+- ChromaDB documentation (docs.trychroma.com)
+- MCP Protocol spec (modelcontextprotocol.io)
+- OpenAI text-embedding-ada-002 docs
+- SQLite documentation (sqlite.org)

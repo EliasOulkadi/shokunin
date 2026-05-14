@@ -151,10 +151,22 @@ The scanner groups files into these categories:
 | Recycle Bin unavailable | Network location | Skip, mark as manual |
 | Scan returns nothing | All clean | Report "Nothing to clean" |
 
-## Logging
+## Anti-Patterns
 
-Every cleanup action is logged:
-```powershell
-$logEntry = "$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') | $action | $file | $size bytes | $category"
-Add-Content -Path "$env:USERPROFILE\.shokunin\logs\cleanup.log" -Value $logEntry
-```
+| Anti-Pattern | Why It Fails | Fix |
+|--------------|--------------|-----|
+| Deleting files permanently | User loses data they wanted | Always use Recycle Bin via Shell.Application or Microsoft.VisualBasic |
+| Scanning system directories | Can break Windows | Exclude Windows, Program Files, System32 |
+| Deleting by age only | Ignores file importance | AI must analyze content before classifying |
+| No confirmation step | User feels unsafe | Always summarize categories before acting |
+| Scanning without exclusion paths | Memory data could be deleted | Hardcode exclusion for chroma_db, sessions, .git |
+| Processing files one by one via COM | Slow, shows progress dialogs | Batch with silent flags or permanent delete for TEMP |
+| Using Remove-Item -Force | Permanent data loss | Never use for user-visible files; only for TEMP |
+| Classifying PDFs solely by extension | Important docs get deleted | Check name for AI-generation patterns |
+
+## Sources
+
+- Microsoft Shell.Application documentation (learn.microsoft.com)
+- Microsoft.VisualBasic.FileIO documentation (learn.microsoft.com)
+- PowerShell scripting best practices (learn.microsoft.com)
+- Windows Temp directory management best practices

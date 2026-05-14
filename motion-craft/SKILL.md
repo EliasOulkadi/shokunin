@@ -196,6 +196,30 @@ Use sparingly. Each `will-change` creates a new compositor layer, consuming GPU 
 - JS scroll listeners for scroll effects — use ViewTimeline/IntersectionObserver
 - Animating in from off-screen without `will-change` — avoid re-layout on entrance
 
+## Workflow
+
+| Step | Task | Technique |
+|------|------|-----------|
+| 1 | Identify animation purpose | Feedback, attention, hierarchy, or delight |
+| 2 | Choose property | Only `transform` and `opacity` for GPU compositing |
+| 3 | Set timing | Duration from Duration Guide table |
+| 4 | Apply easing | Custom cubic-bezier, never CSS default `ease` |
+| 5 | Implement method | CSS transition, WAAPI, or Scroll-Driven |
+| 6 | Add accessibility | `prefers-reduced-motion: reduce` fallback |
+| 7 | Profile performance | Chrome DevTools Performance tab, verify 60fps |
+
+## Error Handling
+
+| Scenario | Cause | Fix |
+|----------|-------|-----|
+| Animation jank (dropped frames) | Animating non-GPU property | Switch to `transform` and `opacity` only |
+| Scroll animation not working | Browser doesn't support ScrollTimeline | Fallback to IntersectionObserver |
+| FLIP animation flashes | Invert transform calculated before layout | Use `requestAnimationFrame` or double-check rect timing |
+| Reduced motion not respected | No `prefers-reduced-motion` media query | Add the standard block (see section above) |
+| Too many compositor layers | Excessive `will-change` or `translateZ(0)` | Remove `will-change` after animation; use only where needed |
+| Animation too slow | Duration > 500ms for UI feedback | Reduce to 150-300ms; save long durations for scroll reveals |
+| Layout thrashing in JS | Reading then writing layout in same frame | Batch reads first, writes second; or use FLIP pattern |
+
 ## Sources
 
 - MDN "CSS and JavaScript animation performance"

@@ -193,6 +193,30 @@ Use the minimum number of breakpoints. Never add one "just in case."
 | No :has() fallback | `@supports selector(:has(*))` guard |
 | Deeply nested media queries | Container Queries eliminate most media queries |
 
+## Workflow
+
+| Step | Task | Method |
+|------|------|--------|
+| 1 | Set up containment | `container-type: inline-size` on section/components |
+| 2 | Design mobile layout | Single column, full-width, 44px touch targets |
+| 3 | Add container queries | `@container (min-width: ...)` before media queries |
+| 4 | Apply fluid sizing | `clamp()` for typography, spacing, widths |
+| 5 | Handle edge cases | `:has()` for parent-aware layouts, subgrid for aligned grids |
+| 6 | Test breakpoints | 320px, 640px, 768px, 1024px, 1280px |
+| 7 | Verify no overflow | No horizontal scroll, no clipped content at any width |
+
+## Error Handling
+
+| Scenario | Cause | Fix |
+|----------|-------|-----|
+| Horizontal scroll at 320px | Element wider than viewport | Check for fixed widths, overflow: hidden, or large margins |
+| Container query not firing | Container missing `container-type` | Add `container-type: inline-size` to parent |
+| :has() not working | Old browser | Add `@supports selector(:has(*))` guard with fallback |
+| Subgrid items misaligned | Parent grid row count mismatch | Ensure all subgrid items have matching `grid-row: span N` |
+| Mobile tap target too small | Button under 44px | Increase to min 48px height, full-width on mobile |
+| Fluid text too large on desktop | clamp() max value excessive | Cap at reasonable max (e.g., 5rem for display) |
+| dvh unit jumps on mobile scroll | Browser recalculates URL bar height | Use `100dvh` with `100svh` as min-height fallback |
+
 ## Sources
 
 - CSS Container Queries (MDN)

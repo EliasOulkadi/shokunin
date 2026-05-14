@@ -111,3 +111,31 @@ Sync complete:
 - Screenshots require Playwright + valid URL. Skip if no homepage.
 - Never change `featured: true` on existing projects — only user can promote.
 - Schedule via cron/GitHub Actions for weekly sync.
+
+## Error Handling
+
+| Scenario | Cause | Fix |
+|----------|-------|-----|
+| Screenshot fails | Playwright not installed | Run `npx playwright install chromium` |
+| GitHub API rate limited | Too many requests | Wait 1 hour or use a token with higher limits |
+| Repo not found | Private repo or deleted | Check repo visibility and existence |
+| No homepage URL | Repo has no website field | Skip screenshot, use placeholder |
+| Featured flag wrong | Manual edit by user | Never auto-change `featured: true` |
+| Sync conflicts | Branch outdated | Rebase on latest main before push |
+
+## Anti-Patterns
+
+| Anti-Pattern | Why It Fails | Fix |
+|--------------|--------------|-----|
+| Screenshot every repo | Wastes time, most don't have a homepage | Skip repos without homepage field |
+| Overwriting project descriptions | User may have customized them | Add new projects, never edit existing descriptions |
+| Auto-promoting projects | Featured flag is user intent | Only user can set `featured: true` |
+| Batch sync without review | Can push unwanted changes | Always review diff before commit |
+| Syncing too frequently | GitHub API limits | Max once per day, use webhooks for critical repos |
+
+## Sources
+
+- Playwright documentation (playwright.dev)
+- GitHub REST API docs (docs.github.com)
+- GitHub GraphQL API docs (docs.github.com)
+- Google Lighthouse scoring guide (web.dev)
