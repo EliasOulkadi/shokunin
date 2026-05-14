@@ -1,13 +1,6 @@
-﻿<#
-.SYNOPSIS
-    Shokunin AI Ecosystem Installer v3.1
-.DESCRIPTION
-    One-command installer for the complete Shokunin AI ecosystem:
-    35 skills, MCP servers, ChromaDB memory, terminal configs
-.NOTES
-    Requires: Windows 10/11, PowerShell 5.1+, Node.js 18+, Python 3.11+
-    Run: irm https://raw.githubusercontent.com/EliasOulkadi/shokunin/master/install.ps1 | iex
-#>
+﻿# Shokunin AI Ecosystem Installer v4.0
+# One-command installer for the complete Shokunin AI ecosystem
+# Requires: Windows 10/11, PowerShell 5.1+, Node.js 18+, Python 3.11+
 
 $ErrorActionPreference = "Stop"
 $Host.UI.RawUI.WindowTitle = "Shokunin AI Ecosystem Installer v4.0"
