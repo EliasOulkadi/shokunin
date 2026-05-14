@@ -8,10 +8,9 @@
 [![OpenCode](https://img.shields.io/badge/OpenCode-1.14-6B46C1?logo=openai)](https://opencode.ai)
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/EliasOulkadi/shokunin/graphs/commit-activity)
 
+**AI Engineering Ecosystem** 37 skills, ChromaDB memory, MCP servers, automations. Zero cost, open source.
 
-**AI Engineering Ecosystem** — 37 skills, ChromaDB memory, MCP servers, and automations. Zero cost, open source.
-
-> *職人 (shokunin) means artisan in Japanese. These skills aim for that standard — every detail crafted, every edge case handled, every workflow automated.*
+> *職人 (shokunin) means artisan in Japanese. These skills aim for that standard: every detail crafted, every edge case handled, every workflow automated.*
 
 ```powershell
 # One-command install (Windows)
@@ -26,22 +25,11 @@ bash <(curl -sL https://raw.githubusercontent.com/EliasOulkadi/shokunin/master/i
 ## Ecosystem
 
 ```
-┌─────────────────────────────────────────────────┐
-│  TERMINAL / EDITOR                              │
-│  OpenCode · VS Code + Cline · WezTerm           │
-├─────────────────────────────────────────────────┤
-│  AGENT LAYER                                    │
-│  35 skills · superpowers plugin · subagents     │
-├─────────────────────────────────────────────────┤
-│  INFRASTRUCTURE                                 │
-│  MCP (filesystem, fetch, memory) · ChromaDB     │
-├─────────────────────────────────────────────────┤
-│  AI PROVIDERS                                   │
-│  NVIDIA · OpenAI · Anthropic · Ollama (any model)         │
-├─────────────────────────────────────────────────┤
-│  SYSTEM (Windows 11)                            │
-│  PowerShell profile · Task Scheduler · Cleanup  │
-└─────────────────────────────────────────────────┘
+OpenCode + VS Code + WezTerm
+  37 skills + superpowers plugin + 4 subagents
+  MCP servers: filesystem, fetch, memory + ChromaDB
+  AI: NVIDIA, OpenAI, Anthropic, Ollama
+  Windows (PowerShell) + Linux (bash/zsh)
 ```
 
 ## Skills
@@ -58,7 +46,7 @@ bash <(curl -sL https://raw.githubusercontent.com/EliasOulkadi/shokunin/master/i
 | **Productivity** | git-workflow, windows-powershell, strategy, design, documentation, runbook-gen, finance, legal-counsel | v3.0 |
 | **System** | memory, chromadb, whendone-plus, session-logger | v4.0 |
 
-Each skill includes: trigger-optimized descriptions, procedural workflows, error handling, production checklists, anti-patterns, and cited sources. Advanced skills also include executable scripts, reference files, and reusable templates.
+Each skill includes: trigger-optimized descriptions, procedural workflows, error handling, production checklists, anti-patterns, cited sources. Advanced skills also include executable scripts, reference files, and reusable templates.
 
 ## What You Get
 
@@ -66,12 +54,12 @@ Each skill includes: trigger-optimized descriptions, procedural workflows, error
 |-----------|---------|
 | **37 SKILL.md files** | Domain expertise that auto-activates |
 | **OpenCode config** | MCP servers, subagents, superpowers plugin |
-| **ChromaDB memory** | Persistent context across sessions (v4.0: 3-layer capture, structured data) |
+| **ChromaDB memory** | Persistent context across sessions (v4.0, 3-layer capture, structured data) |
 | **CLAUDE.md + AGENTS.md** | Mandatory memory instructions: context search on every start |
 | **Auto-save wrapper** | Console buffer capture on exit, saves to ChromaDB + markdown |
 | **Memory test suite** | One-command validation of all memory components |
 | **PowerShell profile** | 20+ aliases, oh-my-posh, autocomplete |
-| **Windows scheduler** | Weekly cleanup & memory backup |
+| **Windows scheduler** | Weekly cleanup and memory backup |
 | **Bookmarklet** | Send web pages to OpenCode |
 | **Dashboard** | Local ecosystem status viewer |
 | **WezTerm config** | GPU terminal with Catppuccin theme |
@@ -118,9 +106,9 @@ opencode
 
 Three layers ensure no context is lost between sessions:
 
-1. **Agent-driven saves** — CLAUDE.md forces checkpoints every 3-5 turns, and after each decision, file change, or command.
-2. **Console buffer capture** — The wrapper expands the buffer to 9999 lines and reads it when OpenCode exits.
-3. **Dual storage** — ChromaDB (semantic search) + markdown files (grep-able text backups).
+1. **Agent-driven saves** CLAUDE.md forces checkpoints every 3-5 turns, and after each decision, file change, or command.
+2. **Console buffer capture** The wrapper expands the buffer to 9999 lines and reads it when OpenCode exits.
+3. **Dual storage** ChromaDB (semantic search) + markdown files (grep-able text backups).
 
 All data stored at `~/.shokunin/memory/`. No cloud, no telemetry, no subscriptions.
 
@@ -132,10 +120,10 @@ All data stored at `~/.shokunin/memory/`. No cloud, no telemetry, no subscriptio
 .\memory-healthcheck.ps1
 ```
 
-- **Quick Start**: github.com/EliasOulkadi/shokunin/blob/master/docs/Shokunin-Quickstart.pdf
-- **Ecosystem Guide**: github.com/EliasOulkadi/shokunin/blob/master/docs/Shokunin-Ecosystem-Guide.pdf
-- **v4.0 Changelog**: github.com/EliasOulkadi/shokunin/blob/master/docs/Shokunin-v4.0-Changelog.pdf
-- **v4.2 Linux Port**: github.com/EliasOulkadi/shokunin/blob/master/docs/Shokunin-v4.2-Linux-Port.pdf
+- **Quick Start** github.com/EliasOulkadi/shokunin/blob/master/docs/Shokunin-Quickstart.pdf
+- **Ecosystem Guide** github.com/EliasOulkadi/shokunin/blob/master/docs/Shokunin-Ecosystem-Guide.pdf
+- **v4.0 Changelog** github.com/EliasOulkadi/shokunin/blob/master/docs/Shokunin-v4.0-Changelog.pdf
+- **v4.2 Linux Port** github.com/EliasOulkadi/shokunin/blob/master/docs/Shokunin-v4.2-Linux-Port.pdf
 
 ## Commands
 
@@ -164,14 +152,9 @@ mkcd, which                           # Utility functions
 
 ## Links
 
-- **GitHub**: github.com/EliasOulkadi/shokunin
-- **Docs**: github.com/EliasOulkadi/shokunin#readme
+- **GitHub** github.com/EliasOulkadi/shokunin
+- **Docs** github.com/EliasOulkadi/shokunin#readme
 
 ## License
 
-MIT — free as in freedom, free as in zero cost.
-
-
-
-
-
+MIT free as in freedom, free as in zero cost.
