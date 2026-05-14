@@ -4,70 +4,80 @@ param(
     [int]$Limit = 5
 )
 
-$helperPy = "$env:USERPROFILE\.shokunin\scripts\chroma-helper.py"
-$sessionDir = "$env:USERPROFILE\.shokunin\memory\sessions"
+$HELPER_PY = "$env:USERPROFILE\.shokunin\scripts\chroma-helper.py"
+$SESSION_DIR = "$env:USERPROFILE\.shokunin\memory\sessions"
+$RESULTS = @()
+$EMPTY_SCORE = 0.5
 
-$results = @()
-
-if ($Query -ne "") {
-    try {
-        $json = python $helperPy search "$Query" $Project 2>$null
-        if ($json) {
-            $parsed = $json | ConvertFrom-Json
-            foreach ($entry in $parsed) {
-                $results += [PSCustomObject]@{
-                    Source = "ChromaDB"
-                    Text = $entry.text
-                    Type = $entry.type
-                    Session = $entry.session_id
-                    Project = $entry.project
-                    Tags = $entry.tags -join ", "
-                    Score = $entry.similarity
-                    Timestamp = $entry.timestamp
-                }
-            }
-        }
-    } catch {}
+if ([string]::IsNullOrEmpty($Query)) {
+    Write-Host "Usage: search-memory.ps1 -Query 'what you want to find' [-Project 'name'] [-Limit N]" -ForegroundColor Cyan
+    return
 }
 
-if (Test-Path $sessionDir) {
-    $files = Get-ChildItem "$sessionDir\*.md" -ErrorAction SilentlyContinue
+try {
+    $json = python $HELPER_PY search "$Query" $Project 2>$null
+    if ($json) {
+        $parsed = $json | ConvertFrom-Json
+        foreach ($entry in $parsed) {
+            $RESULTS += [PSCustomObject]@{
+                Source = "ChromaDB"
+                Text = $entry.text
+                Type = $entry.type
+                Session = $entry.session_id
+                Project = $entry.project
+                Tags = $entry.tags -join ", "
+                Score = [double]$entry.similarity
+                Timestamp = $entry.timestamp
+            }
+        }
+    }
+} catch {
+    Write-Host "ChromaDB search failed, trying markdown fallback..." -ForegroundColor DarkGray
+}
+
+if (Test-Path $SESSION_DIR) {
+    $files = Get-ChildItem "$SESSION_DIR\*.md" -ErrorAction SilentlyContinue
     foreach ($file in $files) {
-        $content = Get-Content $file.FullName -Raw
-        if ($Query -ne "" -and $content -match $Query) {
-            $exists = $results | Where-Object { $_.Session -eq $file.BaseName }
-            if (-not $exists) {
-                $lines = $content -split "`n"
-                $firstLine = ($lines | Where-Object { $_.Trim() -ne "" } | Select-Object -First 1).Trim()
-                $results += [PSCustomObject]@{
-                    Source = "Markdown"
-                    Text = $firstLine
-                    Type = ""
-                    Session = $file.BaseName
-                    Project = ""
-                    Tags = ""
-                    Score = 0.5
-                    Timestamp = $file.LastWriteTime.ToString("yyyy-MM-ddTHH:mm:ss")
+        try {
+            $content = Get-Content $file.FullName -Raw
+            if ($content -match $Query) {
+                $existing = $RESULTS | Where-Object { $_.Session -eq $file.BaseName }
+                if (-not $existing) {
+                    $firstLine = ($content -split "`n" | Where-Object { $_.Trim() -ne "" } | Select-Object -First 1).Trim()
+                    $RESULTS += [PSCustomObject]@{
+                        Source = "Markdown"
+                        Text = $firstLine
+                        Type = ""
+                        Session = $file.BaseName
+                        Project = ""
+                        Tags = ""
+                        Score = $EMPTY_SCORE
+                        Timestamp = $file.LastWriteTime.ToString("yyyy-MM-ddTHH:mm:ss")
+                    }
                 }
             }
+        } catch {
+            Write-Host "  (skipping unreadable: $($file.Name))" -ForegroundColor DarkGray
         }
     }
 }
 
-$results = $results | Sort-Object Score -Descending | Select-Object -First $Limit
+$RESULTS = $RESULTS | Sort-Object Score -Descending | Select-Object -First $Limit
 
-if ($results.Count -eq 0) {
-    Write-Host "No memory results found." -ForegroundColor Yellow
-} else {
-    Write-Host "Found $($results.Count) results:" -ForegroundColor Cyan
-    foreach ($r in $results) {
-        $sourceColor = if ($r.Source -eq "ChromaDB") { "Green" } else { "DarkYellow" }
-        Write-Host ""
-        Write-Host "[$($r.Source)] $($r.Session)" -ForegroundColor $sourceColor
-        if ($r.Type) { Write-Host "  Type: $($r.Type)" -ForegroundColor DarkGray }
-        if ($r.Tags) { Write-Host "  Tags: $($r.Tags)" -ForegroundColor DarkGray }
-        $preview = $r.Text
-        if ($preview.Length -gt 200) { $preview = $preview.Substring(0, 200) + "..." }
-        Write-Host "  $preview" -ForegroundColor White
-    }
+if ($RESULTS.Count -eq 0) {
+    Write-Host "No memory results found for: $Query" -ForegroundColor Yellow
+    return
+}
+
+Write-Host "Found $($RESULTS.Count) results:" -ForegroundColor Cyan
+foreach ($r in $RESULTS) {
+    $sourceColor = if ($r.Source -eq "ChromaDB") { "Green" } else { "DarkYellow" }
+    Write-Host ""
+    Write-Host "[$($r.Source)] $($r.Session)" -ForegroundColor $sourceColor
+    if ($r.Type) { Write-Host "  Type: $($r.Type)" -ForegroundColor DarkGray }
+    if ($r.Tags) { Write-Host "  Tags: $($r.Tags)" -ForegroundColor DarkGray }
+    if ($r.Score) { Write-Host "  Score: $($r.Score)" -ForegroundColor DarkGray }
+    $preview = $r.Text
+    if ($preview.Length -gt 200) { $preview = $preview.Substring(0, 200) + "..." }
+    Write-Host "  $preview" -ForegroundColor White
 }

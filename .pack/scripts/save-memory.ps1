@@ -6,21 +6,41 @@ param(
     [string]$Type = "general"
 )
 
-$helperPy = "$env:USERPROFILE\.shokunin\scripts\chroma-helper.py"
+$HELPER_PY = "$env:USERPROFILE\.shokunin\scripts\chroma-helper.py"
+$LOG_DIR = "$env:USERPROFILE\.shokunin\memory\sessions"
+$MAX_RETRIES = 2
 
 if ([string]::IsNullOrEmpty($SessionId)) {
     $SessionId = "manual-$(Get-Date -Format 'yyyyMMdd-HHmmss')"
 }
+if ([string]::IsNullOrEmpty($Text)) {
+    Write-Host "Nothing to save (empty text)" -ForegroundColor Yellow
+    return
+}
 
 $tagsStr = ($Tags -join ",")
 
-try {
-    $result = python $helperPy save "$Text" $SessionId $Type $tagsStr $Project 2>&1
+$saved = $false
+for ($attempt = 0; $attempt -le $MAX_RETRIES; $attempt++) {
+    try {
+        $result = python $HELPER_PY save "$Text" $SessionId $Type $tagsStr $Project 2>&1
+        if ($result -match "stored") {
+            $saved = $true
+            break
+        }
+    } catch {
+        if ($attempt -lt $MAX_RETRIES) { Start-Sleep -Milliseconds 500 }
+    }
+}
+
+if ($saved) {
     Write-Host "Memory saved (ChromaDB + md)" -ForegroundColor Green
-} catch {
-    $logDir = "$env:USERPROFILE\.shokunin\memory\sessions"
-    New-Item -ItemType Directory -Path $logDir -Force | Out-Null
-    $file = "$logDir\manual-$(Get-Date -Format 'yyyy-MM-dd_HHmmss').md"
+    return
+}
+
+try {
+    New-Item -ItemType Directory -Path $LOG_DIR -Force | Out-Null
+    $file = "$LOG_DIR\manual-$(Get-Date -Format 'yyyy-MM-dd_HHmmss').md"
     $content = @"
 # Session: $SessionId
 - Date: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')
@@ -32,4 +52,6 @@ $Text
 "@
     $content | Out-File -FilePath $file -Encoding UTF8
     Write-Host "Saved to: $file" -ForegroundColor Yellow
+} catch {
+    Write-Host "FAILED to save memory: $_" -ForegroundColor Red
 }

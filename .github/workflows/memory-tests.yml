@@ -1,0 +1,83 @@
+name: Memory System Tests
+on:
+  push:
+    branches: [master]
+    paths:
+      - '.pack/memory/**'
+      - '.pack/scripts/**'
+      - '.pack/CLAUDE.md'
+      - '.pack/AGENTS.md'
+      - '.pack/opencode.json'
+      - 'install.ps1'
+  pull_request:
+    paths:
+      - '.pack/memory/**'
+      - '.pack/scripts/**'
+  workflow_dispatch:
+
+jobs:
+  test-python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install chromadb
+      - name: Test chroma-helper save/search
+        run: |
+          python .pack/scripts/chroma-helper.py save "CI test $(date)" "ci-$(date +%s)" "test" "ci" "ci-project"
+          SEARCH_RESULT=$(python .pack/scripts/chroma-helper.py search "CI test" "ci-project")
+          if echo "$SEARCH_RESULT" | grep -q "ci-"; then echo "SEARCH OK"; else echo "SEARCH FAILED"; exit 1; fi
+      - name: Test MCP server lists tools
+        run: |
+          echo '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}' | python .pack/memory/mcp-server.py | grep -q "store_context" && echo "MCP OK" || { echo "MCP FAILED"; exit 1; }
+      - name: Test MCP store and search
+        run: |
+          SID="ci-session-$(date +%s)"
+          echo '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"store_context","arguments":{"text":"CI integration test","session_id":"'$SID'","type":"test","tags":["ci"]}}}' | python .pack/memory/mcp-server.py | grep -q "stored" && echo "MCP store OK" || { echo "MCP store FAILED"; exit 1; }
+          echo '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"search_context","arguments":{"query":"CI integration test"}}}' | python .pack/memory/mcp-server.py | grep -q "$SID" && echo "MCP search OK" || { echo "MCP search FAILED"; exit 1; }
+
+  test-scripts:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install chromadb
+      - name: Validate all PS1 scripts parse
+        shell: pwsh
+        run: |
+          $errors = 0
+          Get-ChildItem .pack/scripts/*.ps1 | ForEach-Object {
+            $e = $null
+            $null = [System.Management.Automation.PSParser]::Tokenize((Get-Content $_.FullName -Raw), [ref]$e)
+            if ($e.Count -gt 0) { Write-Host "FAIL: $_"; $errors++ }
+            else { Write-Host "OK: $_" }
+          }
+          if ($errors -gt 0) { exit 1 }
+      - name: Test chroma-helper on Windows
+        shell: pwsh
+        run: |
+          $r = python .pack/scripts/chroma-helper.py save "Windows CI test" "win-ci" "test" "ci" "ci-project" 2>&1
+          if ($r -match "stored") { Write-Host "SAVE OK" } else { throw "SAVE FAILED: $r" }
+
+  validate-config:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate opencode.json is valid JSON
+        run: python -c "import json; json.load(open('.pack/opencode.json')); print('JSON OK')"
+      - name: Validate all SKILL.md have required fields
+        run: |
+          for dir in */; do
+            if [ -f "${dir}SKILL.md" ]; then
+              head -5 "${dir}SKILL.md" | grep -q "name:" || echo "MISSING name: $dir"
+              head -5 "${dir}SKILL.md" | grep -q "description:" || echo "MISSING description: $dir"
+            fi
+          done
+      - name: Validate CLAUDE.md has memory section
+        run: |
+          grep -q "MEMORY SYSTEM" .pack/CLAUDE.md && echo "CLAUDE.md OK" || { echo "CLAUDE.md missing MEMORY SYSTEM"; exit 1; }
+          grep -q "SHOKUNIN_SESSION_ID" .pack/CLAUDE.md && echo "CLAUDE.md has env var docs" || { echo "CLAUDE.md missing env var docs"; exit 1; }
