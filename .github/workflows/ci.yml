@@ -5,7 +5,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Validate SKILL.md frontmatter
+      - name: Validate SKILL.md frontmatter + required sections
         shell: bash
         run: |
           errors=0
@@ -13,18 +13,32 @@ jobs:
             skill_file="${dir}SKILL.md"
             if [ -f "$skill_file" ]; then
               dir_name="$(basename "$dir")"
-              skill_name="$(head -5 "$skill_file" | grep "^name:" | cut -d' ' -f2 | tr -d '[:space:]')"
+              name_line=$(head -5 "$skill_file" | grep "^name:" | head -1)
+              skill_name=$(echo "$name_line" | cut -d' ' -f2 | tr -d '[:space:]')
               if [ "$skill_name" != "$dir_name" ]; then
                 echo "MISMATCH: $skill_file has name='$skill_name' but dir is '$dir_name'"
+                errors=$((errors+1))
+              fi
+              if ! grep -q "## Workflow\|## Procedural Workflow\|## The Structure\|## The 60fps" "$skill_file" 2>/dev/null; then
+                echo "MISSING: $dir_name has no Workflow section"
+                errors=$((errors+1))
+              fi
+              if ! grep -q "## Error" "$skill_file" 2>/dev/null; then
+                echo "MISSING: $dir_name has no Error Handling section"
+                errors=$((errors+1))
+              fi
+              if ! grep -q "## Sources\|## Fuentes" "$skill_file" 2>/dev/null; then
+                echo "MISSING: $dir_name has no Sources section"
                 errors=$((errors+1))
               fi
             fi
           done
           if [ "$errors" -gt 0 ]; then
-            echo "FAILED: $errors mismatches found"
+            echo "FAILED: $errors issues found"
             exit 1
           fi
-          echo "All skills validated"
+          echo "All 38 skills validated"
+
       - name: Validate JSON config
         shell: bash
         run: |
@@ -40,4 +54,33 @@ for r in required:
         sys.exit(1)
 print('Config valid')
 "
+          fi
+
+      - name: Validate bash scripts syntax
+        shell: bash
+        run: |
+          errors=0
+          for script in .pack/scripts/linux/*.sh install.sh; do
+            if [ -f "$script" ]; then
+              bash -n "$script" 2>/dev/null || { echo "SYNTAX ERROR: $script"; errors=$((errors+1)); }
+            fi
+          done
+          for script in .pack/scripts/*.py .pack/memory/*.py; do
+            if [ -f "$script" ]; then
+              python3 -c "import py_compile; py_compile.compile('$script', doraise=True)" 2>/dev/null || { echo "SYNTAX ERROR: $script"; errors=$((errors+1)); }
+            fi
+          done
+          if [ "$errors" -gt 0 ]; then
+            echo "FAILED: $errors syntax errors"
+            exit 1
+          fi
+          echo "All scripts syntax valid"
+
+      - name: Validate CLAUDE.md template
+        shell: bash
+        run: |
+          if [ -f ".pack/CLAUDE.md.template" ]; then
+            grep -q "{{USERNAME}}" .pack/CLAUDE.md.template && echo "Template has USERNAME placeholder"
+            grep -q "MEMORY SYSTEM" .pack/CLAUDE.md.template && echo "Template has MEMORY SYSTEM section"
+            grep -q "search_context\|chroma-helper" .pack/CLAUDE.md.template && echo "Template has memory search instructions"
           fi
