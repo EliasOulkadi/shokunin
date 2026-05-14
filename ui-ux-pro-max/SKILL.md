@@ -113,12 +113,16 @@ python3 skills/search.py "form validation" --stack html-tailwind
 | Using trends over proven patterns | Trend may not have conversion data | Prefer patterns with A/B test results |
 | Not considering platform conventions | Feels foreign on the target platform | Check platform-specific guidelines (HIG, Material) |
 
+## Error Handling
+
+| Scenario | Cause | Fix |
+|----------|-------|-----|
+| Search returns no relevant results | Query too specific or database empty | Broaden search terms, try synonyms |
+| Color palette not found | Filter combination too restrictive | Relax filters, check hex format |
+| Font pairing algorithm slow | Large font database | Use local font cache, limit to system fonts |
+| Pattern description unclear | Terminology mismatch | Use common UX terms, not academic jargon |
+| WCAG contrast calculation wrong | Updated WCAG 2.2 thresholds | Reference latest WCAG contrast guidelines |
+
 ## Sources
 
-- Refactoring UI (Adam Wathan, Steve Schoger)
-- NN Group usability research (nngroup.com)
-- Human Interface Guidelines (Apple, developer.apple.com)
-- Material Design 3 (Google, m3.material.io)
-- WCAG 2.2 Guidelines (w3.org)
-- GoodUI.org A/B tested patterns
 - Laws of UX (lawsofux.com)
