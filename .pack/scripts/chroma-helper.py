@@ -1,4 +1,4 @@
-import os, sys, json, uuid, platform
+import os, sys, json, uuid
 from datetime import datetime, timezone
 import chromadb
 from chromadb.config import Settings
@@ -13,6 +13,8 @@ client = chromadb.PersistentClient(path=CHROMA_PATH, settings=Settings(anonymize
 collection = client.get_or_create_collection(name=COLLECTION_NAME)
 
 def save(text, session_id, entry_type="general", tags=None, project=""):
+    if not text or not session_id:
+        return {"error": "text and session_id required", "stored": False}
     tags = tags or []
     entry_id = str(uuid.uuid4())
     timestamp = datetime.now(timezone.utc).isoformat()
@@ -35,7 +37,7 @@ def search(query, project=None, n_results=10):
     where_filter = {"project": project} if project else None
     try:
         results = collection.query(query_texts=[query], n_results=n_results, where=where_filter)
-    except Exception:
+    except Exception as e:
         return []
     entries = []
     if results.get("ids") and results["ids"][0]:

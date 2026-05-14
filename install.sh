@@ -74,7 +74,10 @@ ok
 step_msg "Installing skills..."
 REPO_DIR="/tmp/shokunin-repo"
 if [ -d "$REPO_DIR" ]; then rm -rf "$REPO_DIR"; fi
-git clone --depth 1 https://github.com/EliasOulkadi/shokunin.git "$REPO_DIR" 2>/dev/null
+for retry in 1 2 3; do
+    git clone --depth 1 https://github.com/EliasOulkadi/shokunin.git "$REPO_DIR" 2>/dev/null && break
+    sleep 1
+done
 
 COUNT=0
 for dir in "$REPO_DIR"/*/; do
@@ -127,9 +130,9 @@ if [ -z "$NVIDIA_KEY" ]; then
 fi
 
 if [ -f "$CONFIG_SRC" ]; then
-    sed "s/YOUR_NVIDIA_API_KEY/$NVIDIA_KEY/g" "$CONFIG_SRC" > "$CONFIG_DIR/opencode.json" 2>/dev/null || cp "$CONFIG_SRC" "$CONFIG_DIR/opencode.json"
+    sed "s|YOUR_NVIDIA_API_KEY|$NVIDIA_KEY|g" "$CONFIG_SRC" > "$CONFIG_DIR/opencode.json" 2>/dev/null || cp "$CONFIG_SRC" "$CONFIG_DIR/opencode.json"
 fi
-if [ -n "$NVIDIA_KEY" ]; then
+if [ -n "$NVIDIA_KEY" ] && ! grep -q "NVIDIA_API_KEY" "$HOME/.bashrc" 2>/dev/null; then
     echo "export NVIDIA_API_KEY='$NVIDIA_KEY'" >> "$HOME/.bashrc"
 fi
 log "Config generated"

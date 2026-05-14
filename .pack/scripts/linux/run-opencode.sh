@@ -15,9 +15,7 @@ export SHOKUNIN_MCP_HEALTHY="0"
 
 echo "{\"session_id\":\"$SESSION_ID\",\"project\":\"$(pwd)\",\"start_time\":\"$(date -Iseconds)\",\"pid\":$$}" > "$CORES_DIR/current-session.json"
 
-if python3 "$CORES_DIR/memory/mcp-server.py" <<< '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}' 2>/dev/null | grep -q store_context; then
-    SHOKUNIN_MCP_HEALTHY="1"
-fi
+timeout 3 python3 "$CORES_DIR/memory/mcp-server.py" <<< '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}' 2>/dev/null | grep -q store_context && SHOKUNIN_MCP_HEALTHY="1" || true
 
 echo "=========================================="
 echo "  Shokunin - Session: $SESSION_ID"
@@ -85,7 +83,15 @@ if [ -n "$BUFFER_TEXT" ]; then
     echo "$BUFFER_TEXT" > "$LOG_DIR/$SESSION_ID.log" 2>/dev/null || true
 fi
 
-if python3 "$HELPER" save "$SUMMARY" "$SESSION_ID" "session_end" "auto-save,session-end" "$(pwd)" 2>/dev/null | grep -q stored; then
+SAVED=false
+for attempt in 1 2; do
+    if python3 "$HELPER" save "$SUMMARY" "$SESSION_ID" "session_end" "auto-save,session-end" "$(pwd)" 2>/dev/null | grep -q stored; then
+        SAVED=true; break
+    fi
+    sleep 0.5
+done
+
+if $SAVED; then
     echo "  Memory saved (ChromaDB)"
 else
     echo "$SUMMARY" > "$LOG_DIR/$SESSION_ID-summary.md" 2>/dev/null || true
