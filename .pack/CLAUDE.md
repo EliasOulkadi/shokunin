@@ -1,4 +1,4 @@
-﻿# Claude Global Instructions â€” swagger
+# Claude Global Instructions â€” swagger
 
 ## Identity
 

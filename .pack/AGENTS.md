@@ -1,4 +1,4 @@
-﻿# AGENTS.md Shokunin AI Ecosystem
+# AGENTS.md Shokunin AI Ecosystem
 
 ## Profile
 Senior full-stack dev / indie-hacker. Construyo backend, frontend, mobile, contenido, negocio. Windows 11.
