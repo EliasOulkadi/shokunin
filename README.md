@@ -5,10 +5,10 @@
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 [![Windows](https://img.shields.io/badge/Windows-11-0078D6?logo=windows)](https://www.microsoft.com/windows)
 [![Linux](https://img.shields.io/badge/Linux-FCC624?logo=linux&logoColor=black)](https://github.com/EliasOulkadi/shokunin)
-[![OpenCode](https://img.shields.io/badge/OpenCode-1.14-6B46C1?logo=openai)](https://opencode.ai)
+[![OpenCode](https://img.shields.io/badge/OpenCode-1.15-6B46C1?logo=openai)](https://opencode.ai)
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/EliasOulkadi/shokunin/graphs/commit-activity)
 
-**AI Engineering Ecosystem** 37 skills, ChromaDB memory, MCP servers, automations. Zero cost, open source.
+**Persistent AI memory for developers.** 38 skills, multi-strategy recall (vector + BM25 + temporal), ChromaDB memory, MCP servers, declarative self-updates. Zero servers, zero API costs, fully offline.
 
 > *職人 (shokunin) means artisan in Japanese. These skills aim for that standard: every detail crafted, every edge case handled, every workflow automated.*
 
@@ -26,10 +26,11 @@ bash <(curl -sL https://raw.githubusercontent.com/EliasOulkadi/shokunin/master/i
 
 ```
 OpenCode + VS Code + WezTerm
-  37 skills + superpowers plugin + 4 subagents
+  38 skills + superpowers plugin + 4 subagents
   MCP servers: filesystem, fetch, memory + ChromaDB
-  AI: NVIDIA, OpenAI, Anthropic, Ollama
-  Windows (PowerShell) + Linux (bash/zsh)
+  AI: OpenCode Go (default) + Ollama (local fallback)
+  Update system: declarative manifest with drift detection
+  Windows (PowerShell) + Linux (bash)
 ```
 
 ## Skills
@@ -44,7 +45,7 @@ OpenCode + VS Code + WezTerm
 | **Content & Business** | communication, content-marketing, business-proposals, seo-geo, translate-craft | v3.0 |
 | **Documents** | kami (PDF generator), portfolio-auto | v3.0 |
 | **Productivity** | git-workflow, windows-powershell, strategy, design, documentation, runbook-gen, finance, legal-counsel | v3.0 |
-| **System** | memory, chromadb, whendone-plus, session-logger | v4.0 |
+| **System** | memory, chromadb, shokunin-update, whendone-plus | v4.2 |
 
 Each skill includes: trigger-optimized descriptions, procedural workflows, error handling, production checklists, anti-patterns, cited sources. Advanced skills also include executable scripts, reference files, and reusable templates.
 
@@ -80,7 +81,6 @@ Each skill includes: trigger-optimized descriptions, procedural workflows, error
 |------------|-----|---------|
 | `python3-pip` | Required for ChromaDB. Not included by default on Ubuntu/Debian. | `sudo apt-get install -y python3-pip` |
 | `build-essential` + `python3-dev` | Needed to compile ChromaDB native wheels on some systems. | `sudo apt-get install -y build-essential python3-dev` |
-| `python-is-python3` | Some config files use `python` but Debian/Ubuntu only ship `python3`. | `sudo apt-get install -y python-is-python3` |
 | `cron` daemon | Required for automated weekly maintenance (optional). | `sudo systemctl enable --now cron` |
 
 > **Ubuntu 24.04+:** PEP 668 blocks global `pip install` by default. The installer handles this automatically with `--break-system-packages`. If you run into issues, see the Troubleshooting section below.
@@ -96,7 +96,7 @@ Each skill includes: trigger-optimized descriptions, procedural workflows, error
 # 1. Install
 irm https://raw.githubusercontent.com/EliasOulkadi/shokunin/master/install.ps1 | iex
 
-# 2. Get a free NVIDIA API key
+# 2. (Optional) Free NVIDIA API key — or skip, OpenCode Go works without it
 #    https://build.nvidia.com/
 
 # 3. Start OpenCode (with memory capture)
@@ -111,21 +111,20 @@ opencode
 # 1. Install
 bash <(curl -sL https://raw.githubusercontent.com/EliasOulkadi/shokunin/master/install.sh)
 
-# 2. Get a free NVIDIA API key
+# 2. (Optional) Free NVIDIA API key — or skip, OpenCode Go works without it
 #    https://build.nvidia.com/
+
+# Quick Start (non-interactive):
+bash <(curl -sL https://raw.githubusercontent.com/EliasOulkadi/shokunin/master/install.sh) -y
 
 # 3. Reload shell and start OpenCode
 source ~/.bashrc
 opencode
 ```
 
-## Memory System v4.0
+## Memory System v4.2.1
 
-Three layers ensure no context is lost between sessions:
-
-1. **Agent-driven saves** CLAUDE.md forces checkpoints every 3-5 turns, and after each decision, file change, or command.
-2. **Console buffer capture** The wrapper expands the buffer to 9999 lines and reads it when OpenCode exits.
-3. **Dual storage** ChromaDB (semantic search) + markdown files (grep-able text backups).
+Multi-strategy recall (vector similarity, BM25 keyword search, temporal filtering, reciprocal rank fusion). Falls back to markdown files if ChromaDB is unavailable.
 
 All data stored at `~/.shokunin/memory/`. No cloud, no telemetry, no subscriptions.
 
@@ -137,20 +136,16 @@ All data stored at `~/.shokunin/memory/`. No cloud, no telemetry, no subscriptio
 .\memory-healthcheck.ps1
 ```
 
-- [Enterprise White Paper](docs/Shokunin-Enterprise-White-Paper.pdf) - Full ecosystem overview and architecture
-- [Ecosystem Guide](docs/Shokunin-Ecosystem-Guide.pdf) - Complete ecosystem walkthrough
-- [v4.0 Changelog](docs/Shokunin-v4.0-Changelog.pdf) - What's new in version 4.0
-- [v4.2 Linux Port](docs/Shokunin-v4.2-Linux-Port.pdf) - Linux porting notes
+- [Enterprise White Paper v2.1](docs/Shokunin-Enterprise-White-Paper.pdf) - Full ecosystem overview, multi-strategy recall, Hindsight comparison
 
 ## Troubleshooting
 
 | Problem | Cause | Solution |
 |---------|-------|----------|
-| Installer hangs on `Continue? (y/n)` | `read -p` blocks in non-interactive mode | Use `printf 'y\n\n' \| bash install.sh` or run directly in a terminal |
+| Installer hangs on `Continue? (y/n)` | `read -p` blocks in non-interactive mode | Use `bash install.sh -y` or run directly in a terminal |
 | `pip3: command not found` | `python3-pip` not installed | `sudo apt-get install python3-pip` |
 | `externally-managed-environment` | PEP 668 on Ubuntu 24.04+ | The installer applies `--break-system-packages` automatically. If it fails, run manually: `python3 -m pip install chromadb --break-system-packages` |
 | `Cannot uninstall typing_extensions` | Debian-packaged package missing RECORD file | `python3 -m pip install chromadb --break-system-packages --ignore-installed typing-extensions` |
-| MCP memory: `"python" not found` | System uses `python3`, not `python` | `sudo apt-get install python-is-python3` or `sudo ln -s $(which python3) /usr/local/bin/python` |
 | MCP fetch/filesystem: `Connection closed` | OpenCode runtime config issue | Verify `node` is in PATH and check `~/.config/opencode/opencode.json` |
 | `npm install -g opencode` fails | Missing npm or insufficient permissions | Install npm first, or run `sudo npm install -g opencode` |
 | ChromaDB fails to install | Missing build dependencies | `sudo apt-get install -y build-essential python3-dev` |
