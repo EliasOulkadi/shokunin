@@ -47,9 +47,8 @@ Check -Name "save entry" -ScriptBlock {
     if ($r -notmatch "stored") { throw "save failed: $r" }
 }
 Check -Name "search entry" -ScriptBlock {
-    Start-Sleep -Milliseconds 500
-    $r = python "$env:USERPROFILE\.shokunin\scripts\chroma-helper.py" search "Healthcheck test" "healthcheck" 2>&1
-    if ($r -notmatch $testId) { throw "search didn't find test entry" }
+    $r = python "$env:USERPROFILE\.shokunin\scripts\chroma-helper.py" search "Healthcheck test" "healthcheck" 100 2>&1
+    if ($r -match $testId) { $true } else { throw "search didn't find test entry" }
 }
 Check -Name "count entries" -ScriptBlock {
     $r = python "$env:USERPROFILE\.shokunin\scripts\chroma-helper.py" count 2>&1

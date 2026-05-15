@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
+import os
 import re
 import sys
-import os
 from datetime import datetime
 
 MAX_PREVIEW = 200
@@ -25,7 +25,7 @@ def extract_sections(lines):
 
 def parse_transcript(raw_text, session_id):
     clean = strip_ansi(raw_text)
-    lines = [l for l in clean.split('\n') if l.strip()]
+    lines = [line for line in clean.split('\n') if line.strip()]
     sections = extract_sections(lines)
     decisions = []
     commands = []

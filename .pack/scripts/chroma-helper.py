@@ -1,8 +1,10 @@
 import json
 import math
 import os
+import re
 import sys
 import uuid
+from collections import Counter
 from datetime import datetime, timezone
 
 from chromadb.config import Settings
@@ -60,11 +62,6 @@ def search(query, project=None, n_results=10):
                 "similarity": round(1.0 - dist, 4),
             })
     return entries
-
-
-import re
-from collections import Counter
-
 
 def _tokenize(text):
     return re.findall(r'\w+', text.lower())
@@ -389,7 +386,8 @@ if __name__ == "__main__":
     elif cmd == "search" and len(sys.argv) >= 3:
         query = sys.argv[2]
         project = sys.argv[3] if len(sys.argv) > 3 else None
-        result = search(query, project)
+        n_results = int(sys.argv[4]) if len(sys.argv) > 4 else 10
+        result = search(query, project, n_results)
         print(json.dumps(result))
     elif cmd == "recall" and len(sys.argv) >= 3:
         query = sys.argv[2]
