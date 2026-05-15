@@ -1,7 +1,13 @@
-import os, sys, json, uuid, math
+import json
+import math
+import os
+import sys
+import uuid
 from datetime import datetime, timezone
-import chromadb
+
 from chromadb.config import Settings
+
+import chromadb
 
 _HOME = os.getenv("USERPROFILE") or os.getenv("HOME") or os.path.expanduser("~")
 BASE_DIR = os.path.join(_HOME, ".shokunin", "memory")
@@ -37,7 +43,7 @@ def search(query, project=None, n_results=10):
     where_filter = {"project": project} if project else None
     try:
         results = collection.query(query_texts=[query], n_results=n_results, where=where_filter)
-    except Exception as e:
+    except Exception:
         return []
     entries = []
     if results.get("ids") and results["ids"][0]:
@@ -58,6 +64,7 @@ def search(query, project=None, n_results=10):
 
 import re
 from collections import Counter
+
 
 def _tokenize(text):
     return re.findall(r'\w+', text.lower())

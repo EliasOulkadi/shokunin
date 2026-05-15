@@ -10,6 +10,8 @@ on:
       - '.pack/opencode.json'
       - 'install.ps1'
       - 'install.sh'
+      - 'tests/**'
+      - 'ruff.toml'
   pull_request:
     paths:
       - '.pack/memory/**'
@@ -17,14 +19,25 @@ on:
   workflow_dispatch:
 
 jobs:
+  lint-python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+      - run: pip install ruff
+      - name: Lint Python scripts
+        run: ruff check --output-format=github .pack/scripts/ .pack/memory/ tests/
+
   test-python:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.11'
-      - run: pip install chromadb
+      - run: pip install chromadb pytest
       - name: Test chroma-helper save/search
         run: |
           python .pack/scripts/chroma-helper.py save "CI test $(date)" "ci-$(date +%s)" "test" "ci" "ci-project"
@@ -38,12 +51,14 @@ jobs:
           SID="ci-session-$(date +%s)"
           echo '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"store_context","arguments":{"text":"CI integration test","session_id":"'$SID'","type":"test","tags":["ci"]}}}' | python .pack/memory/mcp-server.py | grep -q "stored" && echo "MCP store OK" || { echo "MCP store FAILED"; exit 1; }
           echo '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"search_context","arguments":{"query":"CI integration test"}}}' | python .pack/memory/mcp-server.py | grep -q "$SID" && echo "MCP search OK" || { echo "MCP search FAILED"; exit 1; }
+      - name: Run pytest integration tests
+        run: python -m pytest tests/ -v
 
   test-scripts:
-    runs-on: windows-latest
+    runs-on: windows-2025
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.11'
       - run: pip install chromadb
@@ -67,7 +82,7 @@ jobs:
   test-linux:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Validate bash scripts syntax
         run: |
           for script in .pack/scripts/linux/*.sh; do
@@ -82,7 +97,7 @@ jobs:
   validate-config:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Validate opencode.json is valid JSON
         run: python -c "import json; json.load(open('.pack/opencode.json')); print('JSON OK')"
       - name: Validate all SKILL.md have required fields
