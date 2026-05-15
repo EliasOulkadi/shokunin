@@ -124,7 +124,18 @@ opencode
 
 ## Memory System v4.2.1
 
-Multi-strategy recall (vector similarity, BM25 keyword search, temporal filtering, reciprocal rank fusion). Falls back to markdown files if ChromaDB is unavailable.
+Multi-strategy recall (vector + BM25 + temporal + reciprocal rank fusion). Session management with explicit continue (no guessing which session to resume).
+
+```bash
+# List recent sessions
+python ~/.shokunin/scripts/chroma-helper.py session list 5
+
+# Continue a specific session (loads full context)
+python ~/.shokunin/scripts/chroma-helper.py session continue <session_id>
+
+# Search across all memory
+python ~/.shokunin/scripts/chroma-helper.py recall "topic"
+```
 
 All data stored at `~/.shokunin/memory/`. No cloud, no telemetry, no subscriptions.
 
