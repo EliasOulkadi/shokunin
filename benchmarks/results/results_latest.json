@@ -1,0 +1,19 @@
+{
+  "timestamp": "2026-05-15T22:13:51.441552",
+  "total_queries": 5,
+  "dataset_size": "119 existing + 5 seeded entries",
+  "embedding_model": "all-MiniLM-L6-v2",
+  "bm25_index": "in-memory Python TF-IDF",
+  "rrf_k": 60,
+  "vector_only": {
+    "found": 5,
+    "recall_at_5_pct": 100.0
+  },
+  "multi_strategy": {
+    "found": 5,
+    "recall_at_5_pct": 100.0
+  },
+  "delta": 0,
+  "verdict": "Vector-only search performs at parity with multi-strategy on this dataset.",
+  "note": "This benchmark tests recall accuracy: 'does the correct entry appear in the top 5 results?'. It does not measure end-user productivity or task completion speed."
+}
