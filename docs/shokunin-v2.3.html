@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Shokunin v4.2.2 · Technical Reference</title>
+<meta name="author" content="swagger">
+<meta name="description" content="Shokunin AI Engineering Ecosystem v4.2.2 — multi-strategy recall, session management, auto-log MCP, CI/CD maturity, 38 skills.">
+<meta name="keywords" content="shokunin, AI ecosystem, OpenCode, ChromaDB, memory, BM25, session management, MCP auto-log, pytest, ruff, hindsight">
+<meta name="generator" content="Kami">
+<style>
+  @font-face { font-family: "JetBrains Mono"; src: url("../assets/fonts/JetBrainsMono.woff2") format("woff2"); font-weight: 400; }
+  @page { size: A4; margin: 20mm 22mm 22mm 22mm; background: #f5f4ed; }
+  @page:first { @bottom-center { content: ""; } }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root { --parchment: #f5f4ed; --ivory: #faf9f5; --near-black:#141413; --dark-warm: #3d3d3a; --olive: #504e49; --stone: #6b6a64; --brand: #1B365D; --border: #e8e6dc; --border-soft:#e5e3d8; --tag-bg: #E4ECF5; --serif: Charter, Georgia, Palatino, "Times New Roman", serif; --sans: var(--serif); --mono: "JetBrains Mono", "SF Mono", "Fira Code", Consolas, Monaco, monospace; }
+  html, body { background: var(--parchment); }
+  @media screen { body { max-width: 210mm; margin: 0 auto; padding: 20mm 22mm 22mm 22mm; } }
+  body { color: var(--near-black); font-family: var(--serif); font-size: 10.5pt; line-height: 1.55; widows: 3; orphans: 3; }
+  .cover { min-height: 240mm; display: flex; flex-direction: column; justify-content: space-between; padding: 40mm 0 0 0; break-after: page; }
+  .cover-eyebrow { font-family: var(--sans); font-size: 10pt; color: var(--brand); letter-spacing: 2pt; text-transform: uppercase; font-weight: 500; margin-bottom: 18pt; }
+  .cover-title { font-size: 38pt; font-weight: 500; color: var(--near-black); line-height: 1.12; letter-spacing: -0.5pt; margin-bottom: 16pt; }
+  .cover-sub { font-family: var(--sans); font-size: 14pt; color: var(--olive); line-height: 1.45; max-width: 85%; margin-bottom: 30pt; }
+  .cover-meta { font-family: var(--sans); font-size: 10pt; color: var(--stone); line-height: 1.55; }
+  .toc { break-after: page; }
+  .toc h2 { font-size: 22pt; font-weight: 500; margin-bottom: 14pt; border-left: 2.5pt solid var(--brand); border-radius: 1.5pt; padding-left: 8pt; }
+  .toc-item { display: flex; justify-content: space-between; align-items: baseline; padding: 6pt 0; border-bottom: 0.3pt dotted var(--border); font-size: 11pt; }
+  .toc-num { color: var(--brand); font-weight: 500; min-width: 30pt; }
+  .toc-title { flex: 1; color: var(--near-black); padding-left: 6pt; }
+  .toc-page { color: var(--stone); }
+  h1 { font-size: 24pt; font-weight: 500; line-height: 1.15; margin: 0 0 10pt 0; border-left: 2.5pt solid var(--brand); border-radius: 1.5pt; padding-left: 8pt; color: var(--near-black); break-after: avoid; }
+  h2 { font-size: 16pt; font-weight: 500; line-height: 1.25; margin: 22pt 0 8pt 0; color: var(--near-black); break-after: avoid; }
+  h3 { font-size: 12pt; font-weight: 500; line-height: 1.3; margin: 16pt 0 6pt 0; color: var(--dark-warm); break-after: avoid; }
+  .chapter-num { font-family: var(--sans); font-size: 10pt; color: var(--brand); letter-spacing: 1pt; text-transform: uppercase; font-weight: 500; margin-bottom: 6pt; }
+  p { margin: 0 0 10pt 0; line-height: 1.55; color: var(--near-black); widows: 2; orphans: 2; }
+  .lead { font-size: 12pt; line-height: 1.55; color: var(--dark-warm); margin-bottom: 14pt; }
+  .hl { color: var(--brand); font-weight: 500; }
+  strong { font-weight: 500; }
+  ul, ol { margin: 6pt 0 10pt 0; padding-left: 20pt; line-height: 1.55; }
+  ul li::marker { color: var(--brand); }
+  ol li::marker { color: var(--brand); font-weight: 500; }
+  code { font-family: var(--mono); font-size: 9pt; background: var(--ivory); padding: 1pt 4pt; border-radius: 2pt; color: var(--dark-warm); }
+  pre { font-family: var(--mono); font-size: 9pt; line-height: 1.5; background: var(--ivory); border-radius: 4pt; padding: 10pt 14pt; margin: 10pt 0; white-space: pre-wrap; color: var(--near-black); break-inside: avoid; }
+  pre code { background: transparent; padding: 0; font-size: inherit; }
+  table { width: 100%; border-collapse: collapse; font-size: 9.5pt; margin: 12pt 0; break-inside: avoid; }
+  table th { text-align: left; font-family: var(--sans); font-weight: 500; color: var(--dark-warm); padding: 6pt 8pt; border-bottom: 1pt solid var(--border); background: var(--ivory); }
+  table td { padding: 5pt 8pt; border-bottom: 0.3pt solid var(--border-soft); vertical-align: top; }
+  table.compact th { padding: 3pt 6pt; font-size: 8pt; }
+  table.compact td { padding: 2pt 6pt; font-size: 8pt; line-height: 1.4; }
+  .callout { background: var(--ivory); border-left: 2pt solid var(--brand); padding: 10pt 14pt; border-radius: 3pt; margin: 12pt 0; line-height: 1.55; break-inside: avoid; }
+  .tag { display: inline-block; background: var(--tag-bg); color: var(--brand); font-family: var(--sans); font-size: 9pt; font-weight: 500; padding: 1pt 6pt; border-radius: 3pt; letter-spacing: 0.4pt; text-transform: uppercase; margin-right: 4pt; }
+  .chapter { break-before: page; }
+</style>
+</head>
+<body>
+
+<section class="cover">
+  <div>
+    <div class="cover-eyebrow">Technical Reference v2.3</div>
+    <div class="cover-title">Shokunin<br>The AI Engineering Ecosystem</div>
+    <div class="cover-sub">Multi-strategy recall, explicit session management, MCP auto-logging, and CI/CD maturity. v4.2.2 released with 99 ChromaDB entries, 25/25 healthcheck, 5 pytest tests passing.</div>
+  </div>
+  <div class="cover-meta">
+    <strong>swagger</strong><br>
+    Version 4.2.2 · 2026.05<br>
+    github.com/EliasOulkadi/shokunin
+  </div>
+</section>
+
+<section class="toc">
+  <h2>Contents</h2>
+  <div class="toc-item"><span class="toc-num">01</span><span class="toc-title">Executive Summary</span><span class="toc-page">03</span></div>
+  <div class="toc-item"><span class="toc-num">02</span><span class="toc-title">Architecture</span><span class="toc-page">04</span></div>
+  <div class="toc-item"><span class="toc-num">03</span><span class="toc-title">Memory System</span><span class="toc-page">06</span></div>
+  <div class="toc-item"><span class="toc-num">04</span><span class="toc-title">Session Management</span><span class="toc-page">08</span></div>
+  <div class="toc-item"><span class="toc-num">05</span><span class="toc-title">MCP Tools & Auto-Logging</span><span class="toc-page">09</span></div>
+  <div class="toc-item"><span class="toc-num">06</span><span class="toc-title">Hindsight Comparison</span><span class="toc-page">10</span></div>
+  <div class="toc-item"><span class="toc-num">07</span><span class="toc-title">Commands & CI/CD Maturity</span><span class="toc-page">12</span></div>
+  <div class="toc-item"><span class="toc-num">08</span><span class="toc-title">Skills Ecosystem</span><span class="toc-page">13</span></div>
+</section>
+
+<section class="chapter">
+  <div class="chapter-num">01 · Executive Summary</div>
+  <h1>Executive Summary</h1>
+  <p class="lead">Shokunin is a local-first AI engineering ecosystem. It gives your agent persistent memory across sessions, 38 skills, MCP auto-logging, and a self-healing update system. Version 4.2.2 introduces session management with explicit continue, MCP server auto-logging (every tool call recorded in sessions/<id>.jsonl), and CI/CD maturity with ruff linting and pytest integration tests.</p>
+
+  <p>The ecosystem has been battle-tested across 5 real days of development. 99 ChromaDB entries, 25/25 healthcheck, 5 passing pytest tests. A declarative manifest tracks 24 components with drift detection. The entire system installs with a single shell script.</p>
+
+  <h2>Key Metrics</h2>
+  <table class="compact">
+    <thead><tr><th>Metric</th><th>Value</th></tr></thead>
+    <tbody>
+      <tr><td>Core scripts</td><td>17 (13 PowerShell + 4 Bash)</td></tr>
+      <tr><td>Python scripts</td><td>4 (chroma-helper, mcp-server, stub, read-transcript)</td></tr>
+      <tr><td>Managed components</td><td>24 (manifested, hash-tracked)</td></tr>
+      <tr><td>Skills</td><td>38 (across 8 domains)</td></tr>
+      <tr><td>MCP tools</td><td>8 (store, search, multi_search, consolidate, summary, list, continue, save)</td></tr>
+      <tr><td>LLM providers</td><td>OpenCode Go (default) + Ollama (local fallback) + NVIDIA (optional)</td></tr>
+      <tr><td>Memory entries</td><td>99 (growing, ~5 per session)</td></tr>
+      <tr><td>Healthcheck</td><td>25/25 all passing</td></tr>
+      <tr><td>Python tests</td><td>5 pytest (save/search, BM25 recall, date filter, session list, session continue)</td></tr>
+      <tr><td>CI</td><td>Ruff lint + ChromaDB + MCP + PowerShell + pytest + bash validation</td></tr>
+      <tr><td>Runtimes</td><td>6 (OpenCode, Claude Code, Cursor, Cline, Continue, Windsurf)</td></tr>
+      <tr><td>Install size</td><td>Under 200 MB (including ChromaDB + embedding model)</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section class="chapter">
+  <div class="chapter-num">02 · Architecture</div>
+  <h1>Architecture</h1>
+  <p class="lead">Seven layers. Each with clear boundaries. No layer depends on the layer above it. The MCP server is the single capture point for all runtimes.</p>
+
+  <table>
+    <thead><tr><th>Layer</th><th>Path</th><th>Responsibility</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Config</strong></td><td><code>~/.config/opencode/</code></td><td>Provider setup, MCP servers, agent definitions, custom commands (/save /load /status)</td></tr>
+      <tr><td><strong>Instructions</strong></td><td><code>~/AGENTS.md</code> + <code>~/.claude/CLAUDE.md</code></td><td>Global rules, session startup workflow, memory system instructions</td></tr>
+      <tr><td><strong>Update</strong></td><td><code>~/.shokunin/</code></td><td>Declarative manifest, drift detection, template-based file generation</td></tr>
+      <tr><td><strong>Orchestration</strong></td><td><code>~/.shokunin/scripts/</code></td><td>Session wrapping, memory persistence, healthchecks, cleanup, update engine</td></tr>
+      <tr><td><strong>Memory</strong></td><td><code>~/.shokunin/memory/</code></td><td>ChromaDB vector store, MCP server (auto-logs every tool call), dual-interface CLI + JSON-RPC</td></tr>
+      <tr><td><strong>Skills</strong></td><td><code>~/.config/opencode/skills/</code> + <code>~/.agents/skills/</code></td><td>38 SKILL.md files, automatic activation via OpenCode</td></tr>
+      <tr><td><strong>Infrastructure</strong></td><td><code>~/.shokunin/backups/</code> + <code>~/.shokunin/logs/</code></td><td>Automatic pre-update backups, operational logs, ChromaDB database</td></tr>
+    </tbody>
+  </table>
+
+  <h2>MCP Auto-Logging</h2>
+  <p>Every call to <code>store_context</code>, <code>search_context</code>, <code>multi_search_context</code>, or <code>save_message</code> is automatically logged to <code>sessions/&lt;id&gt;.jsonl</code>. This is the single capture point for all runtimes. The agent does not need to explicitly save anything. The MCP server handles it transparently.</p>
+
+  <p>When <code>session continue</code> is called, it reads both ChromaDB entries and JSONL messages, giving the user complete context including individual conversation turns.</p>
+
+  <div class="callout">The MCP server runs on demand (stdin/stdout). It never runs as a persistent daemon. Resource usage is minimal when not actively in a session.</div>
+</section>
+
+<section class="chapter">
+  <div class="chapter-num">03 · Memory System</div>
+  <h1>Memory System</h1>
+  <p class="lead">Multi-strategy recall with vector similarity, BM25 keyword search, temporal filtering, and reciprocal rank fusion. Auto-logged via MCP. Browseable via session list and continue.</p>
+
+  <h2>How Recall Works</h2>
+  <p>Four strategies combined when you call <code>recall</code> with a query:</p>
+  <ol>
+    <li><strong>Vector search</strong> (ChromaDB query, semantic similarity)</li>
+    <li><strong>BM25 keyword search</strong> (inverted index on session markdown files, pure Python, zero dependencies)</li>
+    <li><strong>Temporal filter</strong> (ISO date range, applied to both result sets)</li>
+    <li><strong>Reciprocal Rank Fusion</strong> (RRF at k=60, merges and reorders combined results)</li>
+  </ol>
+
+  <pre><code># Basic recall (vector + BM25 + RRF)
+python ~/.shokunin/scripts/chroma-helper.py recall "Q3 budget" "shokunin" 5
+
+# With date filter
+python ~/.shokunin/scripts/chroma-helper.py recall "memory" "" 10 2026-05-14 2026-05-15</code></pre>
+
+  <h2>Memory Consolidation</h2>
+  <p>The <code>consolidate</code> command groups old entries by project and extracts key terms by frequency. No LLM needed. TF-based keyword extraction.</p>
+  <pre><code>python ~/.shokunin/scripts/chroma-helper.py consolidate "shokunin"</code></pre>
+
+  <h2>Dual Interface</h2>
+  <p>Two interfaces share the same ChromaDB database. Both write to the same markdown fallback files. If ChromaDB is unavailable, session data persists.</p>
+
+  <table class="compact">
+    <thead><tr><th>Interface</th><th>Protocol</th><th>Best For</th></tr></thead>
+    <tbody>
+      <tr><td><code>chroma-helper.py</code></td><td>CLI (stdin/stdout)</td><td>Scripting, batch operations, healthchecks, session management</td></tr>
+      <tr><td><code>mcp-server.py</code></td><td>JSON-RPC (stdin/stdout)</td><td>AI agent tool calls via MCP protocol, auto-logging</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout">Three-tier fallback: ChromaDB (primary), markdown files (backup), console buffer logs (emergency). If any tier fails, the next takes over silently.</div>
+</section>
+
+<section class="chapter">
+  <div class="chapter-num">04 · Session Management</div>
+  <h1>Session Management</h1>
+  <p class="lead">Version 4.2.2 introduces explicit session control: list recent sessions, continue any session with full context, see decisions, files, and commands parsed automatically.</p>
+
+  <h2>Commands</h2>
+
+  <pre><code># List recent sessions (date, project, entry count, summary)
+python ~/.shokunin/scripts/chroma-helper.py session list 5
+
+# Continue a specific session (loads all entries + decisions/files/commands)
+python ~/.shokunin/scripts/chroma-helper.py session continue <session_id>
+
+# Save a message to session transcript
+python ~/.shokunin/scripts/chroma-helper.py session save "message" session-xxx "user"</code></pre>
+
+  <h2>Session Continue Parsing</h2>
+  <p>When loading a session via <code>session continue</code>, the system parses session_end text automatically, extracting decisions, files modified, commands executed, and checkpoints. This means even if entries were saved as a single blob, the system can still return structured data.</p>
+
+  <table class="compact">
+    <thead><tr><th>Field</th><th>Source</th><th>Example</th></tr></thead>
+    <tbody>
+      <tr><td><code>decisions_list</code></td><td>Parsed from ## Decisions section</td><td>["Add BM25 search", "Fix healthcheck timing"]</td></tr>
+      <tr><td><code>files_list</code></td><td>Parsed from ## Files section</td><td>["chroma-helper.py: +recall function"]</td></tr>
+      <tr><td><code>commands_list</code></td><td>Parsed from ## Commands section</td><td>["git push to master"]</td></tr>
+      <tr><td><code>jsonl_count</code></td><td>Read from sessions/<id>.jsonl</td><td>42 auto-logged messages</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Session List Filtering</h2>
+  <p>The session list automatically filters out healthcheck, test, MCP-test, and consolidated entries. Only real sessions with session_end types are shown by default. Sessions are sorted by most recent first, with session_end entries prioritized.</p>
+</section>
+
+<section class="chapter">
+  <div class="chapter-num">05 · MCP Tools</div>
+  <h1>MCP Tools &amp; Auto-Logging</h1>
+  <p class="lead">8 MCP tools across 6 runtimes. The MCP server auto-logs every tool call to JSONL. No agent coordination needed.</p>
+
+  <h2>MCP Tools</h2>
+  <table class="compact">
+    <thead><tr><th>Tool</th><th>Description</th><th>Since</th><th>Auto-Log</th></tr></thead>
+    <tbody>
+      <tr><td><code>store_context</code></td><td>Save text with type, tags, project, session_id</td><td>v4.0</td><td>✅</td></tr>
+      <tr><td><code>search_context</code></td><td>Vector similarity search with filters</td><td>v4.0</td><td>✅</td></tr>
+      <tr><td><code>multi_search_context</code></td><td>Vector + BM25 + temporal + RRF fusion</td><td>v4.2.1</td><td>✅</td></tr>
+      <tr><td><code>get_session_summary</code></td><td>Summarize all entries in a session</td><td>v4.0</td><td>—</td></tr>
+      <tr><td><code>consolidate_memories</code></td><td>Group old entries by project</td><td>v4.2.1</td><td>—</td></tr>
+      <tr><td><code>list_sessions</code></td><td>List recent sessions with metadata</td><td>v4.2.2</td><td>—</td></tr>
+      <tr><td><code>continue_session</code></td><td>Load full session context</td><td>v4.2.2</td><td>—</td></tr>
+      <tr><td><code>save_message</code></td><td>Record message in session transcript</td><td>v4.2.2</td><td>✅</td></tr>
+    </tbody>
+  </table>
+
+  <h2>6 Supported Runtimes</h2>
+  <table class="compact">
+    <thead><tr><th>Runtime</th><th>MCP</th><th>Config</th></tr></thead>
+    <tbody>
+      <tr><td>OpenCode</td><td>Native via .pack/opencode.json</td><td>Built-in + /save /load /status commands</td></tr>
+      <tr><td>Claude Code</td><td>Via .pack/templates/claude-code.json</td><td>Copy template</td></tr>
+      <tr><td>Cursor</td><td>Via .pack/templates/cursor-mcp.json</td><td>Copy to .cursor/</td></tr>
+      <tr><td>Cline</td><td>Via .pack/templates/cline-settings.json</td><td>Add to VS Code settings.json</td></tr>
+      <tr><td>Continue.dev</td><td>Via .pack/templates/continue-config.yaml</td><td>Copy to .continue/</td></tr>
+      <tr><td>Windsurf</td><td>Via .pack/templates/windsurf-mcp.json</td><td>Copy template</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section class="chapter">
+  <div class="chapter-num">06 · Hindsight Comparison</div>
+  <h1>Hindsight Comparison</h1>
+  <p class="lead">Hindsight (vectorize-io/hindsight) is the most accurate agent memory system on benchmarks (91.4% LongMemEval). We evaluated it after community feedback. Some ideas directly improved Shokunin. Others we chose not to adopt, for reasons grounded in our design goals.</p>
+
+  <h2>What We Adopted</h2>
+  <table>
+    <thead><tr><th>Hindsight Feature</th><th>Shokunin Implementation</th></tr></thead>
+    <tbody>
+      <tr><td>Multi-strategy recall</td><td>BM25 + vector search + temporal filter + RRF fusion</td></tr>
+      <tr><td>Reciprocal Rank Fusion</td><td>RRF at k=60 for merging result sets</td></tr>
+      <tr><td>Memory consolidation</td><td>TF-based keyword extraction, no LLM</td></tr>
+    </tbody>
+  </table>
+
+  <h2>What We Skipped</h2>
+  <table>
+    <thead><tr><th>Feature</th><th>Why</th></tr></thead>
+    <tbody>
+      <tr><td>LLM per retain() call</td><td>Adds cost, latency, external API dependency. Shokunin stores raw text instantly without any LLM step.</td></tr>
+      <tr><td>PostgreSQL + pgvector</td><td>Server requirement. ChromaDB gives file-based vector storage at zero configuration.</td></tr>
+      <tr><td>Graph retrieval</td><td>Human-scale session memory doesn't benefit from graph traversal the way enterprise workloads do.</td></tr>
+      <tr><td>Cross-encoder reranking</td><td>Low priority at current scale (~100 entries). Will be added when entry count exceeds 500.</td></tr>
+      <tr><td>Docker / Helm / K8s</td><td>Single shell script install. Container orchestration is opposite of our design goal.</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Side-by-Side</h2>
+  <table class="compact">
+    <thead><tr><th>Aspect</th><th>Shokunin v4.2.2</th><th>Hindsight v0.6.2</th></tr></thead>
+    <tbody>
+      <tr><td>Vector storage</td><td>ChromaDB (file-based, 30 MB)</td><td>PostgreSQL + pgvector</td></tr>
+      <tr><td>Keyword search</td><td>BM25 (in-memory, zero deps)</td><td>BM25 (PostgreSQL FTS)</td></tr>
+      <tr><td>Retrieval strategies</td><td>2 (vector + BM25) + temporal</td><td>4 (semantic, BM25, graph, temporal)</td></tr>
+      <tr><td>Result fusion</td><td>Reciprocal Rank Fusion</td><td>RRF + cross-encoder reranking</td></tr>
+      <tr><td>Entity extraction</td><td>Manual tags</td><td>LLM-based, automatic</td></tr>
+      <tr><td>LLM dependency</td><td>None for memory operations</td><td>Required per retain</td></tr>
+      <tr><td>Install complexity</td><td>1 shell script</td><td>Docker or pip + PostgreSQL</td></tr>
+      <tr><td>Offline capability</td><td>Full (no network needed)</td><td>Partial (needs LLM)</td></tr>
+      <tr><td>MCP auto-logging</td><td>Built-in (every tool call logged)</td><td>Not available</td></tr>
+      <tr><td>Session management</td><td>list/continue/save with text parsing</td><td>Not available</td></tr>
+      <tr><td>Testing</td><td>5 pytest + 25/25 healthcheck</td><td>Self-reported</td></tr>
+      <tr><td>Python linting</td><td>ruff (E/F/W/I checks)</td><td>ruff (via pyproject.toml)</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout">Hindsight is better for enterprise agents needing state-of-the-art accuracy at scale. Shokunin is better for individual developers wanting persistent AI memory without servers, API costs, or setup friction.</div>
+</section>
+
+<section class="chapter">
+  <div class="chapter-num">07 · Commands &amp; CI/CD</div>
+  <h1>Commands &amp; CI/CD Maturity</h1>
+
+  <h2>OpenCode Custom Commands</h2>
+  <p>Three commands available via the TUI. They trigger the agent to perform specific memory operations.</p>
+
+  <table>
+    <thead><tr><th>Command</th><th>What it does</th></tr></thead>
+    <tbody>
+      <tr><td><code>/save</code></td><td>Lists recent sessions, then saves the current session as a structured session_end (with ## Decisions, ## Files, ## Commands sections)</td></tr>
+      <tr><td><code>/load</code></td><td>Lists recent sessions with metadata, asks which to continue, loads full context with decisions/files/commands</td></tr>
+      <tr><td><code>/status</code></td><td>Runs full healthcheck (25/25) and ecosystem drift detection (24 components)</td></tr>
+    </tbody>
+  </table>
+
+  <h2>CI/CD Pipeline</h2>
+  <p>Three GitHub Actions workflows run on every push to master:</p>
+
+  <table>
+    <thead><tr><th>Workflow</th><th>Jobs</th><th>What it validates</th></tr></thead>
+    <tbody>
+      <tr><td><strong>ci.yml</strong></td><td>validate</td><td>SKILL.md structure, JSON config, bash scripts, CLAUDE.md template</td></tr>
+      <tr><td><strong>memory-tests.yml</strong></td><td>lint, test-python, test-scripts, test-linux, validate-config</td><td>Ruff lint, ChromaDB save/search, MCP tools, PowerShell parse, bash syntax, JSON validity, pytest integration tests, CLAUDE.md contents</td></tr>
+      <tr><td><strong>release.yml</strong></td><td>release (on tag push)</td><td>Generates GitHub Release with changelog and archive</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Python Test Suite</h2>
+  <p>5 pytest integration tests verify core functionality:</p>
+  <table class="compact">
+    <thead><tr><th>Test</th><th>What it verifies</th></tr></thead>
+    <tbody>
+      <tr><td><code>test_save_search</code></td><td>Save entry to ChromaDB, then search and find it by session_id</td></tr>
+      <tr><td><code>test_recall_bm25</code></td><td>Save with unique keyword, then BM25 recall finds it via literal match</td></tr>
+      <tr><td><code>test_recall_date_filter</code></td><td>Save and verify date-filtered recall returns recent entries</td></tr>
+      <tr><td><code>test_session_list</code></td><td>Session list returns valid JSON array</td></tr>
+      <tr><td><code>test_session_continue</code></td><td>Session continue returns context with decisions field</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Python Linting (ruff)</h2>
+  <p>All Python code is checked with rules E (pycodestyle errors), F (pyflakes), W (warning), I (import ordering). Current status: 0 errors across all .pack/scripts/, .pack/memory/, and tests/ files.</p>
+
+  <h2>Release Process</h2>
+  <p>Create a new version with a single command:</p>
+  <pre><code>git tag v4.2.3 -m "description"
+git push origin v4.2.3</code></pre>
+  <p>This triggers <code>release.yml</code> which generates a GitHub Release with changelog from commit messages and a tar.gz archive of skills + .pack/ + installers.</p>
+</section>
+
+<section class="chapter">
+  <div class="chapter-num">08 · Skills</div>
+  <h1>Skills Ecosystem</h1>
+  <p class="lead">38 skills across 8 domains. Each is a self-contained SKILL.md file validated by CI.</p>
+
+  <table class="compact">
+    <thead><tr><th>Domain</th><th>Count</th><th>Skills</th></tr></thead>
+    <tbody>
+      <tr><td>Infrastructure</td><td>5</td><td>docker, kubernetes, terraform, ci-cd, db-admin</td></tr>
+      <tr><td>Backend</td><td>4</td><td>api-forge, auth-architect, db-sculptor, error-handler</td></tr>
+      <tr><td>Frontend</td><td>6</td><td>component-forge, responsive-engine, motion-craft, landing-craft, ui-ux-pro-max, aesthetic-web</td></tr>
+      <tr><td>Mobile</td><td>2</td><td>flutter, react-native</td></tr>
+      <tr><td>Quality</td><td>3</td><td>test-commander, performance-profiler, code-review</td></tr>
+      <tr><td>Content</td><td>6</td><td>communication, content-marketing, business-proposals, seo-geo, translate-craft, documentation</td></tr>
+      <tr><td>Productivity</td><td>8</td><td>git-workflow, windows-powershell, runbook-gen, strategy, design, finance, legal-counsel, whendone-plus</td></tr>
+      <tr><td>Documents</td><td>4</td><td>kami, portfolio-auto, shokunin-update, chromadb</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Skill Discovery</h2>
+  <p>OpenCode discovers skills from <code>~/.config/opencode/skills/</code>, <code>~/.agents/skills/</code>, and <code>~/.claude/skills/</code>. The CI validates that every SKILL.md has YAML frontmatter (name and description), workflow, error handling, and sources sections.</p>
+</section>
+
+</body>
+</html>
