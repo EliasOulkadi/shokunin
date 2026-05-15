@@ -78,14 +78,14 @@ Se activan automaticamente segun lo que pidas. No necesitas nombrarlas.
 ## MEMORY SYSTEM - INSTRUCCIONES OBLIGATORIAS
 
 ### 1. AL INICIAR SESION - buscar contexto previo (OBLIGATORIO)
-Ejecuta el script chroma-helper.py para buscar contexto relevante:
+Usa `search_context` (MCP tool) o ejecuta el script chroma-helper.py para buscar contexto relevante:
 ```powershell
 python ~/.shokunin/scripts/chroma-helper.py search "[proyecto]" "[nombre_proyecto]"
 ```
 Muestra los resultados al usuario.
 
 ### 2. DURANTE LA SESION - guardar periodicamente (OBLIGATORIO)
-Cada 3-5 intercambios, guarda un checkpoint ejecutando:
+Usa `store_context` (MCP tool) para guardar. Tambien puedes hacerlo via script:
 ```powershell
 python ~/.shokunin/scripts/chroma-helper.py save "texto" "[session_id]" "checkpoint" "tags" "[proyecto]"
 ```

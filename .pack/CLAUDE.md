@@ -96,6 +96,7 @@ Tengo 35+ skills instaladas en `~/.config/opencode/skills/`. Se activan solas se
 - **kami/portfolio-auto** â†' documentos
 - **shokunin-update** â†' mantenimiento declarativo del ecosistema
 - **use subagente code-review** para PRs, **writer** para escribir, **debugger** para bugs
+- **telegram-bot** (en desarrollo)
 
 ## MEMORY SYSTEM â€" INSTRUCCIONES OBLIGATORIAS
 
@@ -103,7 +104,7 @@ Este sistema usa ChromaDB para memoria persistente entre sesiones. Sigue estas i
 
 ### 1. AL INICIAR SESIÃ"N â€" buscar contexto previo (OBLIGATORIO)
 
-Ejecuta el script search-memory que combina ChromaDB + grep en markdown:
+Usa `search_context` (MCP tool) o ejecuta el script search-memory que combina ChromaDB + grep en markdown:
 
 **Windows:**
 ```powershell
@@ -124,10 +125,10 @@ AdemÃ¡s, busca sin filtro de proyecto:
 
 ### 2. DURANTE LA SESIÃ"N â€" guardar periÃ³dicamente (OBLIGATORIO)
 
-Cada 3-5 intercambios con el usuario, guarda un checkpoint ejecutando:
+Usa `store_context` (MCP tool) para guardar. TambiÃ©n puedes hacerlo via script:
 
 ```powershell
-python ~/.shokunin/scripts/chroma-helper.py save "[texto del checkpoint]" "[session_id]" "checkpoint" "checkpoint,[proyecto],[tema]" "[proyecto]"
+python {{SHOKUNIN_DIR}}/scripts/chroma-helper.py save "[texto del checkpoint]" "[session_id]" "checkpoint" "checkpoint,[proyecto],[tema]" "[proyecto]"
 ```
 
 AdemÃ¡s, despuÃ©s de CADA evento importante:
