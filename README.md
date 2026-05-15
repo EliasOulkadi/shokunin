@@ -67,10 +67,35 @@ Each skill includes: trigger-optimized descriptions, procedural workflows, error
 
 ## Requirements
 
-- **Windows 10/11** or **Linux** (bash 4+)
-- Node.js 18+
-- Python 3.11+
-- Git
+### Minimum
+| Dependency | Version | Notes |
+|------------|---------|-------|
+| **OS** | Windows 10/11 or Linux | **Linux:** requires `bash` 4+, not `sh`. Run `bash --version` to verify. |
+| **Node.js** | ≥ 18 | Includes `npm`. Run `node --version` to verify. |
+| **Python** | ≥ 3.11 | Run `python3 --version` to verify. |
+| **Git** | ≥ 2.x | Run `git --version` to verify. |
+
+### Linux — additional dependencies
+| Dependency | Why | Install |
+|------------|-----|---------|
+| `python3-pip` | Required for ChromaDB. Not included by default on Ubuntu/Debian. | `sudo apt-get install -y python3-pip` |
+| `build-essential` + `python3-dev` | Needed to compile ChromaDB native wheels on some systems. | `sudo apt-get install -y build-essential python3-dev` |
+| `python-is-python3` | Some config files use `python` but Debian/Ubuntu only ship `python3`. | `sudo apt-get install -y python-is-python3` |
+| `cron` daemon | Required for automated weekly maintenance (optional). | `sudo systemctl enable --now cron` |
+
+> **Ubuntu 24.04+:** PEP 668 blocks global `pip install` by default. The installer handles this automatically with `--break-system-packages`. If you run into issues, see the Troubleshooting section below.
+
+### Windows — additional notes
+- PowerShell 5.1+ required. Run `$PSVersionTable.PSVersion` to verify.
+- Execution policy must allow scripts: `Set-ExecutionPolicy RemoteSigned -Scope CurrentUser`
+
+### Demos (skill kami)
+| Preview | Description |
+|---------|-------------|
+| [📊 Equity Report](assets/demos/demo-tesla.pdf) | Tesla Q1 2026 financial report |
+| [📽️ Slides](assets/demos/demo-agent-slides.pdf) | "The Agent You Don't Know" keynote |
+| [📄 Resume](assets/demos/demo-musk-resume.pdf) | Executive resume example |
+| [📁 Portfolio](assets/demos/demo-kaku.pdf) | Project portfolio |
 
 ## Quick Start
 
@@ -120,10 +145,25 @@ All data stored at `~/.shokunin/memory/`. No cloud, no telemetry, no subscriptio
 .\memory-healthcheck.ps1
 ```
 
-- **Quick Start** github.com/EliasOulkadi/shokunin/blob/master/docs/Shokunin-Quickstart.pdf
-- **Ecosystem Guide** github.com/EliasOulkadi/shokunin/blob/master/docs/Shokunin-Ecosystem-Guide.pdf
-- **v4.0 Changelog** github.com/EliasOulkadi/shokunin/blob/master/docs/Shokunin-v4.0-Changelog.pdf
-- **v4.2 Linux Port** github.com/EliasOulkadi/shokunin/blob/master/docs/Shokunin-v4.2-Linux-Port.pdf
+| Document | Description |
+|----------|-------------|
+| [📘 Enterprise White Paper](docs/Shokunin-Enterprise-White-Paper.pdf) | Full ecosystem overview and architecture |
+| [📗 Ecosystem Guide](docs/Shokunin-Ecosystem-Guide.pdf) | Complete ecosystem walkthrough |
+| [📕 v4.0 Changelog](docs/Shokunin-v4.0-Changelog.pdf) | What's new in version 4.0 |
+| [📙 v4.2 Linux Port](docs/Shokunin-v4.2-Linux-Port.pdf) | Linux porting notes |
+
+## Troubleshooting
+
+| Problem | Cause | Solution |
+|---------|-------|----------|
+| Installer hangs on `Continue? (y/n)` | `read -p` blocks in non-interactive mode | Use `printf 'y\n\n' \| bash install.sh` or run directly in a terminal |
+| `pip3: command not found` | `python3-pip` not installed | `sudo apt-get install python3-pip` |
+| `externally-managed-environment` | PEP 668 on Ubuntu 24.04+ | The installer applies `--break-system-packages` automatically. If it fails, run manually: `python3 -m pip install chromadb --break-system-packages` |
+| `Cannot uninstall typing_extensions` | Debian-packaged package missing RECORD file | `python3 -m pip install chromadb --break-system-packages --ignore-installed typing-extensions` |
+| MCP memory: `"python" not found` | System uses `python3`, not `python` | `sudo apt-get install python-is-python3` or `sudo ln -s $(which python3) /usr/local/bin/python` |
+| MCP fetch/filesystem: `Connection closed` | OpenCode runtime config issue | Verify `node` is in PATH and check `~/.config/opencode/opencode.json` |
+| `npm install -g opencode` fails | Missing npm or insufficient permissions | Install npm first, or run `sudo npm install -g opencode` |
+| ChromaDB fails to install | Missing build dependencies | `sudo apt-get install -y build-essential python3-dev` |
 
 ## Commands
 
