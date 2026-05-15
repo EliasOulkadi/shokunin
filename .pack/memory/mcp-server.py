@@ -3,6 +3,7 @@ import json
 import sys
 import uuid
 import logging
+import importlib.util
 from datetime import datetime, timezone
 
 import chromadb
@@ -27,6 +28,16 @@ client = chromadb.PersistentClient(
     settings=Settings(anonymized_telemetry=False),
 )
 collection = client.get_or_create_collection(name=COLLECTION_NAME)
+
+_ch_stub = None
+def _get_ch():
+    global _ch_stub
+    if _ch_stub is None:
+        stub_path = os.path.join(os.path.dirname(BASE_DIR), "scripts", "chroma_helper_stub.py")
+        spec = importlib.util.spec_from_file_location("chroma_helper_stub", stub_path)
+        _ch_stub = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(_ch_stub)
+    return _ch_stub
 
 VALID_TYPES = {"decision", "file", "command", "preference", "checkpoint", "session_end", "general"}
 
@@ -84,6 +95,66 @@ def handle_tools_list():
                     "required": ["session_id"],
                     "properties": {
                         "session_id": {"type": "string", "description": "Session identifier to summarize"},
+                    },
+                },
+            },
+            {
+                "name": "multi_search_context",
+                "description": "Search memory using vector + BM25 + temporal filtering with result fusion",
+                "inputSchema": {
+                    "type": "object",
+                    "required": ["query"],
+                    "properties": {
+                        "query": {"type": "string", "description": "Search query text"},
+                        "project": {"type": "string", "description": "Filter by project"},
+                        "n_results": {"type": "integer", "description": "Number of results (default 10)"},
+                        "from_date": {"type": "string", "description": "Filter from ISO date (YYYY-MM-DD)"},
+                        "to_date": {"type": "string", "description": "Filter to ISO date (YYYY-MM-DD)"},
+                    },
+                },
+            },
+            {
+                "name": "consolidate_memories",
+                "description": "Consolidate old memory entries into summarized entries per project",
+                "inputSchema": {
+                    "type": "object",
+                    "properties": {
+                        "project": {"type": "string", "description": "Project to consolidate (all if empty)"},
+                    },
+                },
+            },
+            {
+                "name": "list_sessions",
+                "description": "List recent sessions with metadata (project, entry count, summary)",
+                "inputSchema": {
+                    "type": "object",
+                    "properties": {
+                        "limit": {"type": "integer", "description": "Max sessions to list (default 5)"},
+                        "project": {"type": "string", "description": "Filter by project"},
+                    },
+                },
+            },
+            {
+                "name": "continue_session",
+                "description": "Load full context from a specific session to continue where it left off",
+                "inputSchema": {
+                    "type": "object",
+                    "required": ["session_id"],
+                    "properties": {
+                        "session_id": {"type": "string", "description": "Session identifier to continue"},
+                    },
+                },
+            },
+            {
+                "name": "save_message",
+                "description": "Record an individual message exchange (user or assistant) into the session transcript",
+                "inputSchema": {
+                    "type": "object",
+                    "required": ["text", "session_id"],
+                    "properties": {
+                        "text": {"type": "string", "description": "Message content"},
+                        "session_id": {"type": "string", "description": "Session identifier"},
+                        "role": {"type": "string", "description": "user or assistant"},
                     },
                 },
             },
@@ -243,10 +314,69 @@ def handle_get_session_summary(args):
     }
 
 
+def handle_multi_search_context(args):
+    query = args.get("query", "")
+    project = args.get("project")
+    n_results = min(args.get("n_results", 10), 50)
+    from_date = args.get("from_date")
+    to_date = args.get("to_date")
+    try:
+        ch = _get_ch()
+        results = ch.recall(query, project, n_results, from_date, to_date)
+        return {"entries": results, "count": len(results)}
+    except Exception as e:
+        logging.exception("multi_search_context failed")
+        return {"error": str(e), "entries": []}
+
+def handle_consolidate_memories(args):
+    project = args.get("project")
+    try:
+        ch = _get_ch()
+        result = ch.consolidate(project)
+        return result
+    except Exception as e:
+        logging.exception("consolidate_memories failed")
+        return {"error": str(e), "consolidated": 0}
+
+def handle_list_sessions(args):
+    limit = min(args.get("limit", 5), 20)
+    project = args.get("project")
+    try:
+        ch = _get_ch()
+        return {"sessions": ch.session_list(limit, project)}
+    except Exception as e:
+        logging.exception("list_sessions failed")
+        return {"error": str(e), "sessions": []}
+
+def handle_continue_session(args):
+    session_id = args.get("session_id", "")
+    try:
+        ch = _get_ch()
+        return ch.session_continue(session_id)
+    except Exception as e:
+        logging.exception("continue_session failed")
+        return {"error": str(e), "entries": []}
+
+def handle_save_message(args):
+    text = args.get("text", "")
+    session_id = args.get("session_id", "")
+    role = args.get("role", "user")
+    try:
+        ch = _get_ch()
+        return ch.session_save(text, session_id, role)
+    except Exception as e:
+        logging.exception("save_message failed")
+        return {"error": str(e), "stored": False}
+
 TOOL_HANDLERS = {
     "store_context": handle_store_context,
     "search_context": handle_search_context,
     "get_session_summary": handle_get_session_summary,
+    "multi_search_context": handle_multi_search_context,
+    "consolidate_memories": handle_consolidate_memories,
+    "list_sessions": handle_list_sessions,
+    "continue_session": handle_continue_session,
+    "save_message": handle_save_message,
 }
 
 
@@ -266,7 +396,19 @@ def main():
         method = request.get("method", "")
         params = request.get("params", {})
 
-        if method == "tools/list":
+        if method == "initialize":
+            response = {
+                "jsonrpc": "2.0",
+                "id": req_id,
+                "result": {
+                    "protocolVersion": "2024-11-05",
+                    "capabilities": {"tools": {}},
+                    "serverInfo": {"name": "shokunin-memory", "version": "1.0.0"},
+                },
+            }
+        elif method == "notifications/initialized":
+            continue
+        elif method == "tools/list":
             result = handle_tools_list()
             response = {"jsonrpc": "2.0", "id": req_id, "result": result}
 

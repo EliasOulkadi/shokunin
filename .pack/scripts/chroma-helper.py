@@ -1,4 +1,4 @@
-import os, sys, json, uuid
+import os, sys, json, uuid, math
 from datetime import datetime, timezone
 import chromadb
 from chromadb.config import Settings
@@ -55,6 +55,300 @@ def search(query, project=None, n_results=10):
             })
     return entries
 
+
+import re
+from collections import Counter
+
+def _tokenize(text):
+    return re.findall(r'\w+', text.lower())
+
+def _bm25(query_tokens, doc_tokens, avgdl, N, df, k1=1.5, b=0.75):
+    score = 0.0
+    for qt in set(query_tokens):
+        if qt not in df or df[qt] == 0:
+            continue
+        idf = math.log((N - df[qt] + 0.5) / (df[qt] + 0.5) + 1.0)
+        tf = doc_tokens.count(qt)
+        score += idf * (tf * (k1 + 1)) / (tf + k1 * (1 - b + b * len(doc_tokens) / max(avgdl, 1)))
+    return score
+
+def _build_bm25_index(entries):
+    index = []
+    N = len(entries)
+    df = Counter()
+    all_tokens = []
+    for e in entries:
+        tokens = _tokenize(e.get("text", ""))
+        index.append(tokens)
+        all_tokens.extend(tokens)
+        for t in set(tokens):
+            df[t] += 1
+    avgdl = len(all_tokens) / max(N, 1)
+    return index, df, avgdl, N
+
+def _in_date_range(entry, from_date=None, to_date=None):
+    ts = entry.get("timestamp", "")
+    if not ts:
+        return True
+    date_part = ts[:10]
+    if from_date and date_part < from_date:
+        return False
+    if to_date and date_part > to_date:
+        return False
+    return True
+
+def _rrf_fuse(ranked_lists, k=60):
+    scores = {}
+    all_items = {}
+    for rank_list, source in ranked_lists:
+        for rank, item in enumerate(rank_list):
+            sid = item.get("session_id") or item.get("session", "")
+            scores[sid] = scores.get(sid, 0) + 1.0 / (k + rank)
+            all_items[sid] = item
+    ranked = sorted(scores.items(), key=lambda x: -x[1])
+    result = []
+    seen = set()
+    for sid, _ in ranked:
+        if sid and sid not in seen:
+            result.append(all_items[sid])
+            seen.add(sid)
+    return result
+
+def recall(query, project=None, n_results=10, from_date=None, to_date=None):
+    vector_results = search(query, project, n_results * 2)
+
+    vector_results = [e for e in vector_results if _in_date_range(e, from_date, to_date)]
+
+    sessions_dir = SESSIONS_PATH
+    md_entries = []
+    if os.path.isdir(sessions_dir):
+        for fname in sorted(os.listdir(sessions_dir)):
+            if fname.endswith(".md") and not fname.endswith("-parsed.md"):
+                fpath = os.path.join(sessions_dir, fname)
+                try:
+                    with open(fpath, "r", encoding="utf-8", errors="replace") as f:
+                        content = f.read()
+                    if content.strip():
+                        md_entries.append({"text": content, "session": fname.replace(".md", "")})
+                except Exception:
+                    pass
+
+    bm25_results = []
+    if md_entries:
+        index, df, avgdl, N = _build_bm25_index(md_entries)
+        qt = _tokenize(query)
+        scored = []
+        for i, tokens in enumerate(index):
+            score = _bm25(qt, tokens, avgdl, N, df)
+            if score > 0:
+                scored.append({"text": md_entries[i]["text"][:500], "session_id": md_entries[i]["session"], "bm25_score": round(score, 4)})
+        scored.sort(key=lambda x: -x["bm25_score"])
+        bm25_results = scored[:n_results]
+
+    fused = _rrf_fuse([(vector_results, "vector"), (bm25_results, "bm25")], k=60)
+    return fused[:n_results]
+
+
+def consolidate(project=None, max_entries=100):
+    try:
+        where_filter = {"project": project} if project else None
+        all_data = collection.get(limit=max_entries, where=where_filter)
+    except Exception:
+        return {"consolidated": 0, "message": "query failed"}
+
+    if not all_data.get("ids"):
+        return {"consolidated": 0, "message": "no entries"}
+
+    projects = {}
+    for i in range(len(all_data["ids"])):
+        meta = all_data["metadatas"][i]
+        p = meta.get("project", "unknown")
+        if p not in projects:
+            projects[p] = []
+        projects[p].append(all_data["documents"][i][:300])
+
+    consolidated = 0
+    for proj, texts in projects.items():
+        tokens = []
+        for t in texts:
+            tokens.extend(_tokenize(t))
+        common = [w for w, _ in Counter(tokens).most_common(10) if len(w) > 3][:5]
+        word_count = sum(len(t.split()) for t in texts)
+        summary = (
+            f"Consolidated: {len(texts)} entries, ~{word_count} words total.\n"
+            f"Project: {proj}\n"
+            f"Key terms: {', '.join(common)}"
+        )
+        save(summary, f"consolidated-{proj}", "consolidated", ["consolidated", proj], proj)
+        consolidated += 1
+
+    return {"consolidated": consolidated}
+
+
+def session_list(limit=5, project=None, page=1, per_page=10):
+    try:
+        where_filter = {"project": project} if project else None
+        all_data = collection.get(limit=500, where=where_filter)
+    except Exception:
+        return []
+
+    session_ids = {}
+    if all_data.get("ids"):
+        for i in range(len(all_data["ids"])):
+            meta = all_data["metadatas"][i]
+            sid = meta.get("session_id", "")
+            proj = meta.get("project", "")
+            if not sid or sid == "unknown":
+                continue
+            if proj in ("healthcheck", "healthcheck-project", "test-project", "ci-project"):
+                continue
+            if sid not in session_ids:
+                session_ids[sid] = {
+                    "session_id": sid,
+                    "first_ts": meta.get("timestamp", ""),
+                    "last_ts": meta.get("timestamp", ""),
+                    "project": proj,
+                    "entry_count": 0,
+                    "types": set(),
+                    "summary": all_data["documents"][i][:300],
+                }
+            session_ids[sid]["last_ts"] = meta.get("timestamp", "")
+            session_ids[sid]["entry_count"] += 1
+            session_ids[sid]["types"].add(meta.get("type", ""))
+
+    sessions = list(session_ids.values())
+    sessions = [s for s in sessions if not (
+        s["session_id"].startswith("healthcheck-") or
+        s["session_id"].startswith("mcp-test-") or
+        s["session_id"].startswith("test-") or
+        s["session_id"] == "entries" or
+        s["session_id"] == "file" or
+        (set(s["types"]) <= {"test", "general"} and s["entry_count"] <= 2)
+    )]
+    sessions.sort(key=lambda s: s["first_ts"] or "", reverse=True)
+    sessions.sort(key=lambda s: "session_end" in s["types"], reverse=True)
+    for s in sessions:
+        s["types"] = sorted(list(s["types"]))
+    start = (page - 1) * per_page
+    return sessions[start:start + per_page][:limit]
+
+
+def _parse_section(text, header):
+    lines = text.split("\n")
+    in_section = False
+    items = []
+    for line in lines:
+        stripped = line.strip()
+        if stripped.lower().startswith(header.lower()):
+            in_section = True
+            continue
+        if in_section and not stripped:
+            in_section = False
+            continue
+        if in_section and (stripped.startswith("-") or stripped.startswith("*")) and len(stripped) > 3:
+            items.append(stripped.lstrip("- * ")[:300])
+    return items
+
+def _parse_session_text(text):
+    extracted = {"decisions": [], "files": [], "commands": [], "checkpoints": []}
+    for pattern_name, patterns in [
+        ("decisions", ["## decisions", "## decisiones", "decisions:", "decisiones:", "## what we decided"]),
+        ("files", ["## files", "## archivos", "files changed:", "archivos cambiados:", "archivos modificados:", "files modified:"]),
+        ("commands", ["## commands", "## comandos", "commands:", "comandos:"]),
+        ("checkpoints", ["## checkpoints"]),
+    ]:
+        for p in patterns:
+            extracted[pattern_name].extend(_parse_section(text, p))
+    for line in text.split("\n"):
+        stripped = line.strip()
+        if stripped.lower().startswith("archivo:") or stripped.lower().startswith("file:"):
+            extracted["files"].append(stripped[:300])
+        if stripped.lower().startswith("decision") and ":" in stripped[:20]:
+            extracted["decisions"].append(stripped[:300])
+        if stripped.lower().startswith("comando:") or stripped.lower().startswith("command:"):
+            extracted["commands"].append(stripped[:300])
+    in_files = False
+    for line in text.split("\n"):
+        stripped = line.strip()
+        if re.match(r'^\d+\.\s*files?\s*(changed|modif|creat|touched)', stripped, re.IGNORECASE):
+            in_files = True
+            continue
+        if in_files and not stripped:
+            in_files = False
+        if in_files and (stripped.startswith("-") or stripped.startswith("*")):
+            extracted["files"].append(stripped.lstrip("- * ")[:300])
+    return extracted
+
+def session_continue(session_id):
+    if not session_id:
+        return {"error": "session_id required", "entries": []}
+    all_data = collection.get(where={"session_id": session_id})
+    if not all_data.get("ids"):
+        return {"session_id": session_id, "entry_count": 0, "entries": []}
+
+    entries = []
+    full_decisions = []
+    full_files = []
+    full_commands = []
+
+    for i in range(len(all_data["ids"])):
+        meta = all_data["metadatas"][i]
+        text = all_data["documents"][i]
+        etype = meta.get("type", "")
+        entry = {
+            "text": text[:2000],
+            "type": etype,
+            "tags": json.loads(meta.get("tags", "[]")),
+            "project": meta.get("project", ""),
+            "timestamp": meta.get("timestamp", ""),
+        }
+        entries.append(entry)
+
+        if etype == "session_end":
+            parsed = _parse_session_text(text)
+            full_decisions.extend(parsed["decisions"])
+            full_files.extend(parsed["files"])
+            full_commands.extend(parsed["commands"])
+        elif etype == "decision":
+            full_decisions.append(text[:300])
+        elif etype == "file":
+            full_files.append(text[:300])
+        elif etype == "command":
+            full_commands.append(text[:300])
+
+    session_end_entries = [e for e in entries if e["type"] == "session_end"]
+    checkpoints = [e for e in entries if e["type"] == "checkpoint"]
+
+    return {
+        "session_id": session_id,
+        "entry_count": len(entries),
+        "entries": entries,
+        "context": {
+            "session_ends": len(session_end_entries),
+            "decisions": len(full_decisions),
+            "decisions_list": full_decisions[:10],
+            "files_modified": len(full_files),
+            "files_list": full_files[:10],
+            "commands": len(full_commands),
+            "commands_list": full_commands[:5],
+            "checkpoints": len(checkpoints),
+        },
+    }
+
+
+def session_save(text, session_id, role="user"):
+    if not text or not session_id:
+        return {"error": "text and session_id required", "stored": False}
+    ts = datetime.now(timezone.utc).isoformat()
+    entry = json.dumps({"t": "msg", "ts": ts, "role": role, "content": text}, ensure_ascii=False)
+    safe_id = session_id.replace(":", "-").replace("/", "-")
+    filepath = os.path.join(SESSIONS_PATH, f"{safe_id}.jsonl")
+    os.makedirs(SESSIONS_PATH, exist_ok=True)
+    with open(filepath, "a", encoding="utf-8") as f:
+        f.write(entry + "\n")
+    return {"stored": True, "file": filepath}
+
+
 if __name__ == "__main__":
     cmd = sys.argv[1] if len(sys.argv) > 1 else ""
     if cmd == "save" and len(sys.argv) >= 4:
@@ -69,6 +363,18 @@ if __name__ == "__main__":
         query = sys.argv[2]
         project = sys.argv[3] if len(sys.argv) > 3 else None
         result = search(query, project)
+        print(json.dumps(result))
+    elif cmd == "recall" and len(sys.argv) >= 3:
+        query = sys.argv[2]
+        project = sys.argv[3] if len(sys.argv) > 3 else None
+        n_results = int(sys.argv[4]) if len(sys.argv) > 4 else 10
+        from_date = sys.argv[5] if len(sys.argv) > 5 else None
+        to_date = sys.argv[6] if len(sys.argv) > 6 else None
+        result = recall(query, project, n_results, from_date, to_date)
+        print(json.dumps(result))
+    elif cmd == "consolidate":
+        project = sys.argv[2] if len(sys.argv) > 2 else None
+        result = consolidate(project)
         print(json.dumps(result))
     elif cmd == "recent":
         n_results = int(sys.argv[2]) if len(sys.argv) > 2 else 10
@@ -91,5 +397,17 @@ if __name__ == "__main__":
             print(json.dumps({"error": str(e)}))
     elif cmd == "count":
         print(json.dumps({"count": collection.count()}))
+    elif cmd == "session" and len(sys.argv) >= 3:
+        sub = sys.argv[2]
+        if sub == "list":
+            limit = int(sys.argv[3]) if len(sys.argv) > 3 else 5
+            project = sys.argv[4] if len(sys.argv) > 4 else None
+            print(json.dumps(session_list(limit, project)))
+        elif sub == "continue" and len(sys.argv) >= 4:
+            print(json.dumps(session_continue(sys.argv[3])))
+        elif sub == "save" and len(sys.argv) >= 5:
+            print(json.dumps(session_save(sys.argv[3], sys.argv[4], sys.argv[5] if len(sys.argv) > 5 else "user")))
+        else:
+            print(json.dumps({"error": "session list|continue|save"}))
     else:
-        print(json.dumps({"error": "Usage: save|search|count|recent"}))
+        print(json.dumps({"error": "Usage: save|search|recall|consolidate|count|recent|session"}))
