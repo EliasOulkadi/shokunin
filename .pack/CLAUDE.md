@@ -94,8 +94,8 @@ Tengo 35+ skills instaladas en `~/.config/opencode/skills/`. Se activan solas se
 - **communication/content-marketing/business-proposals/seo-geo** â†' contenido y negocio
 - **git-workflow/windows-powershell/runbook-gen/strategy** â†' productividad
 - **kami/portfolio-auto** â†' documentos
+- **shokunin-update** â†' mantenimiento declarativo del ecosistema
 - **use subagente code-review** para PRs, **writer** para escribir, **debugger** para bugs
-- **telegram-bot** para interactuar desde el mÃ³vil vÃ­a Telegram
 
 ## MEMORY SYSTEM â€" INSTRUCCIONES OBLIGATORIAS
 

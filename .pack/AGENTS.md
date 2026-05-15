@@ -56,6 +56,9 @@ Se activan automaticamente segun lo que pidas. No necesitas nombrarlas.
 - **kami**: Generacion de PDFs profesionales con sistema de diseno parchment.
 - **portfolio-auto**: Sincronizacion automatica de repos GitHub a portfolio.
 
+### Update System
+- **shokunin-update**: Mantenimiento declarativo del ecosistema.
+
 ## MCP Servers
 - **filesystem**: Acceso a archivos con validacion de rutas.
 - **fetch**: Descarga de URLs, scraping, APIs.

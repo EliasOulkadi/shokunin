@@ -8,11 +8,26 @@ CONFIG_DIR="$HOME/.config/opencode"
 CLAUDE_DIR="$HOME/.claude"
 LOG_FILE="/tmp/shokunin-install-$(date +%Y%m%d-%H%M%S).log"
 
+NONINTERACTIVE=false
+
 step=1
 log() { echo "  $1" | tee -a "$LOG_FILE"; }
 step_msg() { echo ""; echo "[$step] $1"; step=$((step + 1)); }
 ok() { echo "    OK"; }
 skip() { echo "    SKIP (already exists)"; }
+fail() { echo "    FAIL: $1" | tee -a "$LOG_FILE"; }
+
+for arg in "$@"; do
+  case "$arg" in
+    -y|--yes) NONINTERACTIVE=true ;;
+  esac
+done
+
+if [ -z "${BASH_VERSION:-}" ]; then
+  echo "ERROR: This script must be run with bash, not sh."
+  echo "  Correct: bash install.sh"
+  exit 1
+fi
 
 echo ""
 echo "=========================================="
@@ -24,8 +39,10 @@ echo ""
 echo "  Requires: bash 4+, Node.js 18+, Python 3.11+"
 echo ""
 
-read -r -p "  Continue? (y/n): " CONFIRM
-if [ "$CONFIRM" != "y" ]; then echo "  Cancelled."; exit 0; fi
+if [ "$NONINTERACTIVE" = false ] && [ -t 0 ]; then
+  read -r -p "  Continue? (y/n): " CONFIRM
+  if [ "$CONFIRM" != "y" ]; then echo "  Cancelled."; exit 0; fi
+fi
 
 # === PREREQUISITES ===
 step_msg "Verifying prerequisites..."
@@ -46,7 +63,7 @@ if command -v python3 &>/dev/null; then
     PY_MINOR=$(echo "$PY_VER" | cut -d. -f2)
     if [ "$PY_MAJOR" -ge 3 ] && [ "$PY_MINOR" -ge 11 ]; then log "Python $PY_VER"; else log "Python 3.11+ required"; ALL_OK=false; fi
 else
-    log "Python 3.11+ required (apt install python3 python3-pip)"; ALL_OK=false
+    log "Python 3.11+ required (apt install python3)"; ALL_OK=false
 fi
 
 if command -v git &>/dev/null; then log "Git $(git --version | cut -d' ' -f3)"; else log "Git required (apt install git)"; ALL_OK=false; fi
@@ -55,14 +72,52 @@ if command -v opencode &>/dev/null; then
     log "OpenCode detected"
 else
     log "Installing OpenCode..."
-    npm install -g opencode 2>/dev/null && log "OpenCode installed" || { log "npm install -g opencode failed"; ALL_OK=false; }
+    if command -v npm &>/dev/null; then
+      if npm install -g opencode >> "$LOG_FILE" 2>&1; then
+        log "OpenCode installed"
+      else
+        fail "npm install -g opencode failed. Try: sudo npm install -g opencode"
+        ALL_OK=false
+      fi
+    else
+      fail "npm not found. Install Node.js first: https://nodejs.org"
+      ALL_OK=false
+    fi
 fi
 
 $ALL_OK || { echo "  Install missing requirements and re-run."; exit 1; }
 
-# === DEPENDENCIES ===
+# === PYTHON DEPENDENCIES ===
 step_msg "Installing Python dependencies..."
-pip3 install chromadb 2>/dev/null && ok || log "pip install chromadb failed (try: pip install chromadb)"
+
+if ! python3 -m pip --version &>/dev/null; then
+  log "Installing python3-pip..."
+  if command -v apt-get &>/dev/null; then
+    apt-get install -y python3-pip >> "$LOG_FILE" 2>&1 || {
+      fail "Could not install python3-pip. Try: sudo apt-get install python3-pip"
+      exit 1
+    }
+  else
+    fail "pip3 not found. Install python3-pip for your distro."
+    exit 1
+  fi
+fi
+
+PIP_FLAGS=""
+if python3 -m pip install --dry-run chromadb 2>&1 | grep -q "externally-managed"; then
+  log "Detected PEP 668, using --break-system-packages"
+  PIP_FLAGS="$PIP_FLAGS --break-system-packages"
+fi
+
+if python3 -m pip install chromadb $PIP_FLAGS 2>&1 | grep -q "RECORD"; then
+  log "Detected typing-extensions conflict, ignoring"
+  PIP_FLAGS="$PIP_FLAGS --ignore-installed typing-extensions"
+fi
+
+python3 -m pip install chromadb $PIP_FLAGS >> "$LOG_FILE" 2>&1 && ok || {
+  fail "pip install chromadb failed. Try: python3 -m pip install chromadb $PIP_FLAGS"
+  exit 1
+}
 
 # === DIRECTORIES ===
 step_msg "Creating directories..."
@@ -119,33 +174,29 @@ if [ -f "$CONFIG_DIR/opencode.json" ]; then
 fi
 
 NVIDIA_KEY="${NVIDIA_API_KEY:-}"
-if [ -z "$NVIDIA_KEY" ]; then
+if [ -z "$NVIDIA_KEY" ] && [ "$NONINTERACTIVE" = false ] && [ -t 0 ]; then
     echo ""
-    echo "  For AI you need a free NVIDIA API key:"
-    echo "  1. Go to https://build.nvidia.com/ (free signup)"
-    echo "  2. Generate an API key"
-    echo "  3. Paste it below (or leave empty to configure later)"
+    echo "  Optional: NVIDIA API key for NVIDIA models"
+    echo "  Leave empty to skip — OpenCode Go works without it."
+    echo "  Get a key: https://build.nvidia.com/ (free signup)"
     echo ""
-    read -r -p "  NVIDIA API Key: " NVIDIA_KEY
+    read -r -p "  NVIDIA API Key (optional): " NVIDIA_KEY
 fi
 
 if [ -f "$CONFIG_SRC" ]; then
-    # Detect Python binary (python3 on Debian/Ubuntu, python on others)
     PYTHON_BIN="python3"
     command -v python3 &>/dev/null || PYTHON_BIN="python"
 
-    # Generate config with all substitutions
-    sed "s|YOUR_NVIDIA_API_KEY|$NVIDIA_KEY|g; \
-         s|{{MCP_ROOT_PATH}}|$HOME|g; \
+    sed "s|{{MCP_ROOT_PATH}}|$HOME|g; \
          s|{{PYTHON_BIN}}|$PYTHON_BIN|g; \
          s|{{MCP_MEMORY_PATH}}|$CORES_DIR/memory/mcp-server.py|g" \
       "$CONFIG_SRC" > "$CONFIG_DIR/opencode.json" 2>/dev/null || cp "$CONFIG_SRC" "$CONFIG_DIR/opencode.json"
 
-    # Validate no unsubstituted placeholders remain
     if grep -q "{{MCP_\|{{PYTHON_BIN}}" "$CONFIG_DIR/opencode.json" 2>/dev/null; then
-        log "WARNING: MCP placeholders not substituted. Check opencode.json"
+        log "WARNING: Placeholders remain in opencode.json. Check the file."
     fi
 fi
+
 if [ -n "$NVIDIA_KEY" ] && ! grep -q "NVIDIA_API_KEY" "$HOME/.bashrc" 2>/dev/null; then
     echo "export NVIDIA_API_KEY='$NVIDIA_KEY'" >> "$HOME/.bashrc"
 fi
@@ -190,11 +241,21 @@ fi
 
 # === CRONTAB ===
 step_msg "Setting up weekly maintenance..."
-if crontab -l 2>/dev/null | grep -q "shokunin"; then
-    log "Crontab already configured"
+if command -v crontab &>/dev/null; then
+  if crontab -l 2>/dev/null | grep -q "shokunin"; then
+      log "Crontab already configured"
+  else
+      (crontab -l 2>/dev/null; echo "0 21 * * 0 \$HOME/.shokunin/scripts/linux/weekly-maintenance.sh") | crontab -
+      log "Crontab added (Sunday 21:00)"
+  fi
 else
-    (crontab -l 2>/dev/null; echo "0 21 * * 0 \$HOME/.shokunin/scripts/linux/weekly-maintenance.sh") | crontab -
-    log "Crontab added (Sunday 21:00)"
+  log "crontab not available — weekly maintenance won't auto-schedule"
+fi
+
+# === VERIFICATION ===
+step_msg "Verifying installation..."
+if [ -f "$CORES_DIR/scripts/linux/memory-healthcheck.sh" ]; then
+  bash "$CORES_DIR/scripts/linux/memory-healthcheck.sh" && ok || fail "Some checks failed"
 fi
 
 # === CLEANUP ===
@@ -214,7 +275,7 @@ echo ""
 echo "  NEXT STEPS:"
 echo "  1. Reload your shell: source ~/.bashrc"
 echo "  2. Start coding: opencode"
-echo "  3. Test memory: ./memory-healthcheck.sh"
+echo "  3. Test memory: ~/.shokunin/scripts/linux/memory-healthcheck.sh"
 echo ""
 echo "  Repo: https://github.com/EliasOulkadi/shokunin"
 echo "=========================================="
