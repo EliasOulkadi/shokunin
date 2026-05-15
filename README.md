@@ -214,6 +214,7 @@ The ecosystem works across multiple AI coding runtimes. The core (skills, memory
 ## Links
 
 - **GitHub** github.com/EliasOulkadi/shokunin
+- **Website** eliasoulkadi.github.io/shokunin
 - **Docs** github.com/EliasOulkadi/shokunin#readme
 
 ## License
