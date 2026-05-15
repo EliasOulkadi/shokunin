@@ -120,7 +120,6 @@ def _rrf_fuse(ranked_lists, k=60):
 
 def recall(query, project=None, n_results=10, from_date=None, to_date=None):
     vector_results = search(query, project, n_results * 2)
-
     vector_results = [e for e in vector_results if _in_date_range(e, from_date, to_date)]
 
     sessions_dir = SESSIONS_PATH
@@ -137,15 +136,29 @@ def recall(query, project=None, n_results=10, from_date=None, to_date=None):
                 except Exception:
                     pass
 
+    try:
+        where_filter = {"project": project} if project else None
+        chroma_data = collection.get(limit=500, where=where_filter)
+        chroma_entries = []
+        if chroma_data.get("ids"):
+            for i in range(len(chroma_data["ids"])):
+                sid = chroma_data["metadatas"][i].get("session_id", "")
+                if sid and sid != "unknown":
+                    chroma_entries.append({"text": chroma_data["documents"][i], "session_id": sid})
+    except Exception:
+        chroma_entries = []
+
     bm25_results = []
-    if md_entries:
-        index, df, avgdl, N = _build_bm25_index(md_entries)
+    all_entries = md_entries + chroma_entries
+    if all_entries:
+        index, df, avgdl, N = _build_bm25_index(all_entries)
         qt = _tokenize(query)
         scored = []
         for i, tokens in enumerate(index):
             score = _bm25(qt, tokens, avgdl, N, df)
             if score > 0:
-                scored.append({"text": md_entries[i]["text"][:500], "session_id": md_entries[i]["session"], "bm25_score": round(score, 4)})
+                entry = all_entries[i]
+                scored.append({"text": entry["text"][:500], "session_id": entry.get("session_id") or entry.get("session", ""), "bm25_score": round(score, 4)})
         scored.sort(key=lambda x: -x["bm25_score"])
         bm25_results = scored[:n_results]
 
