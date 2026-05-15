@@ -1,12 +1,15 @@
 ﻿# Security Policy
 
-## Reportar vulnerabilidades
+## Reporting vulnerabilities
 
-Si encuentras una vulnerabilidad de seguridad (API keys expuestas, credenciales en el repo, etc.):
-1. No abras un issue público
-2. Envia un email a oulkadielias8@icloud.com
-3. Te responderemos en 48h
+If you find a security vulnerability (exposed API keys, credentials in the repo, etc.):
 
-## API Keys
+1. **Do not** open a public issue
+2. Email **oulkadielias8@icloud.com** directly
+3. Include a description of the issue and steps to reproduce
 
-El repo nunca debe contener API keys reales. El opencode.json usa placeholders YOUR_NVIDIA_API_KEY que el usuario debe reemplazar.
+We will respond within 48 hours and work on a fix before public disclosure.
+
+## Responsible disclosure
+
+We ask that you give us reasonable time to address any security issue before sharing it publicly.

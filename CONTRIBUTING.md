@@ -1,39 +1,37 @@
-# Contribuyendo a Shokunin
+# Contributing to Shokunin
 
-Gracias por interesarte en contribuir. Esto es lo que necesitas saber.
+Thanks for your interest in contributing. Here's what you need to know.
 
-## Cómo contribuir skills
+## How to contribute skills
 
-1. Crea un directorio con el nombre de tu skill
-2. Dentro, un `SKILL.md` con frontmatter YAML:
+Each skill lives in its own directory with a `SKILL.md` file at the root.
 
-```yaml
----
-name: tu-skill
-description: Qué hace y cuándo usarla. Incluye "Use when" y "Do NOT use for".
-license: MIT
-compatibility: opencode
-metadata:
-  workflow: backend|frontend|devops|marketing|productivity
-  audience: developers|designers|devops
-  version: "1.0"
-  author: tu-nombre
----
-```
+1. Create a new directory under the repo root with a descriptive name (e.g. `my-skill/`)
+2. Write a `SKILL.md` following the existing format:
+   - YAML frontmatter with `name` and `description`
+   - Section-based workflow with steps
+   - Clear examples and anti-patterns
+3. Submit a Pull Request
 
-3. Si aplica, añade `scripts/`, `references/`, `assets/`
-4. El `name` debe coincidir con el nombre del directorio
-5. Haz un PR
+## How to report issues
 
-## Estándares
+Open a GitHub issue with:
+- A clear title
+- Steps to reproduce (if bug)
+- Expected vs actual behavior
+- Environment details (OS, runtime versions)
 
-- Descripción con trigger phrases conversacionales
-- Workflow numerado paso a paso
-- Tabla de errores (escenario → causa → fix)
-- Production checklist
-- Anti-patterns
-- Fuentes reales citadas
+## Pull request process
 
-## Código de conducta
+1. Fork the repo and create a branch
+2. Make your changes
+3. Test that the install script still works
+4. Open a PR with a clear description of what and why
 
-Sé respetuoso. Las contribuciones tóxicas serán rechazadas.
+## Code style
+
+- Markdown: 80 char lines, ATX headings, fenced code blocks
+- Shell scripts: `set -euo pipefail`, error messages, portable syntax
+- Python: type hints, f-strings, 3.10+ syntax
+
+Questions? Open an issue or reach out to oulkadielias8@icloud.com.
