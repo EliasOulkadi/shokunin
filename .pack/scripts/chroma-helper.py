@@ -223,8 +223,10 @@ def session_list(limit=5, project=None, page=1, per_page=10, brief=False):
         s["session_id"].startswith("mcp-test-") or
         s["session_id"].startswith("test-") or
         s["session_id"].startswith("consolidated-") or
+        s["session_id"].startswith("sesion-") or
         s["session_id"] in ("entries", "file", "session_end") or
-        (set(s["types"]) <= {"test", "general"} and s["entry_count"] <= 2)
+        (set(s["types"]) <= {"test", "general"} and s["entry_count"] <= 2) or
+        not any(t for t in s["types"] if t)
     )]
     sessions.sort(key=lambda s: s["first_ts"] or "", reverse=True)
     sessions.sort(key=lambda s: "session_end" in s["types"], reverse=True)

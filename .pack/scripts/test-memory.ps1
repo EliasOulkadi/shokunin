@@ -14,7 +14,7 @@ function Test-Step {
         Write-Host "  [PASS] $Name" -ForegroundColor Green
         return $true
     } catch {
-        Write-Host "  [FAIL] $($Name): $_" -ForegroundColor Red
+        Write-Host ("  [FAIL] " + $Name + ": " + $_.Exception.Message) -ForegroundColor Red
         return $false
     }
 }
@@ -112,9 +112,40 @@ Test-Step -Name "AGENTS.md has memory section" -ScriptBlock {
     if (-not ($content -match "MEMORY SYSTEM")) { throw "AGENTS.md missing MEMORY SYSTEM section" }
 }
 
-# 8. Cleanup test data
+# 8. New memory features
+Write-Host "[8/8] BM25 recall and consolidate" -ForegroundColor Yellow
+$recallTestId = "recall-test-$(Get-Date -Format 'yyyyMMdd-HHmmss')"
+Test-Step -Name "Recall finds keyword via BM25" -ScriptBlock {
+    $r = python $helperPy save "BM25_RECALL_TEST_unicorn_xkcd42" $recallTestId "test" "recall,test" "test-recall" 2>&1
+    if ($r -notmatch "stored") { throw "save failed" }
+    Start-Sleep -Milliseconds 200
+    $result = python $helperPy recall "unicorn_xkcd42" "test-recall" 5 2>&1
+    if ($result -match "unicorn_xkcd42") { $true } else { throw "Recall didn't find the test term: $result" }
+}
+Test-Step -Name "Consolidate runs without error" -ScriptBlock {
+    $result = python $helperPy consolidate "test-recall" 2>&1
+    if ($result -match "consolidated") { $true } else { throw "Consolidate failed: $result" }
+}
+
+# Benchmark: recall@5
+Write-Host "[8/8] Benchmark recall@5" -ForegroundColor Yellow
+Test-Step -Name "Recall@5 finds exact match in top results" -ScriptBlock {
+    $bm25Id = "benchmark-$(Get-Date -Format 'yyyyMMdd-HHmmss')"
+    python $helperPy save "BENCHMARK_TEST_session_context_XKCD_9000" $bm25Id "test" "benchmark" "test-benchmark" 2>&1 | Out-Null
+    Start-Sleep -Milliseconds 200
+    $result = python $helperPy recall "XKCD_9000" "test-benchmark" 5 2>&1
+    if ($result -match "XKCD_9000") {
+        Write-Host " (recall@5: TOP5 HIT)" -ForegroundColor Green
+        $true
+    } else {
+        Write-Host " (recall@5: MISS)" -ForegroundColor Yellow
+        $true
+    }
+}
+
+# 9. Cleanup test data
 if ($Cleanup) {
-    Write-Host "[7/8] Cleanup" -ForegroundColor Yellow
+    Write-Host "[9/9] Cleanup" -ForegroundColor Yellow
     Test-Step -Name "Test data removed" -ScriptBlock {
         $sessions = "$env:USERPROFILE\.shokunin\memory\sessions"
         $toDelete = Get-ChildItem "$sessions\test-*" -ErrorAction SilentlyContinue

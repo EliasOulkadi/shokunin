@@ -77,35 +77,35 @@ Se activan automaticamente segun lo que pidas. No necesitas nombrarlas.
 
 ## MEMORY SYSTEM - INSTRUCCIONES OBLIGATORIAS
 
-### 1. AL INICIAR SESION - buscar contexto previo (OBLIGATORIO)
-Primero, lista las sesiones recientes para que el usuario elija cual continuar:
+### 1. AL INICIAR SESIÓN - buscar contexto previo (OBLIGATORIO)
+Primero, lista las sesiones recientes para que el usuario elija cuál continuar:
 ```powershell
 python ~/.shokunin/scripts/chroma-helper.py session list 3
 ```
-Luego pregunta: "Sesiones recientes. Quieres continuar alguna (numero), buscar en todas (b) o empezar nueva (n)?"
-Si elige un numero, usa `session continue <session_id>` para cargar el contexto completo.
+Luego pregunta: "Sesiones recientes. ¿Quieres continuar alguna (número), buscar en todas (b) o empezar una nueva (n)?"
+Si elige un número, usa `session continue <session_id>` para cargar el contexto completo y muestra las decisiones, archivos y comandos encontrados.
 Si elige buscar, usa `search_context` (MCP tool) o ejecuta chroma-helper.py search para buscar contexto relevante.
 Muestra los resultados al usuario.
 
-### 2. DURANTE LA SESION - guardado automatico
-El MCP server guarda automaticamente cada interaccion en sessions/<id>.jsonl.
+### 2. DURANTE LA SESIÓN - guardado automático
+El MCP server guarda automáticamente cada interacción en sessions/<id>.jsonl.
 No necesitas hacer nada manualmente. El sistema captura:
 - Cada `store_context` (checkpoints, decisiones, archivos)
-- Cada busqueda (`search_context`, `multi_search_context`)
+- Cada búsqueda (`search_context`, `multi_search_context`)
 - Cada mensaje guardado con `save_message`
 
-### 3. AL FINAL DE LA SESION - resumen completo
-Usa `/save` si estas en OpenCode, o ejecuta:
+### 3. AL FINAL DE LA SESIÓN - resumen completo
+Usa `/save` si estás en OpenCode, o ejecuta:
 ```powershell
 python ~/.shokunin/scripts/chroma-helper.py save "SESSION SUMMARY\n## Decisions\n- ...\n## Files\n- ...\n## Commands\n- ..." "[session_id]" "session_end" "session-end,[proyecto]" "[proyecto]"
 ```
 
-### Session ID automatico
+### Session ID automático
 El wrapper setea estas variables:
-- `$env:SHOKUNIN_SESSION_ID` - ID de la sesion actual
+- `$env:SHOKUNIN_SESSION_ID` - ID de la sesión actual
 - `$env:SHOKUNIN_PROJECT` - directorio del proyecto
 - `$env:SHOKUNIN_MCP_HEALTHY` - "1" si MCP funciona, "0" si no
-Tambien escribe `~/.shokunin/current-session.json` con la info de sesion.
+También escribe `~/.shokunin/current-session.json` con la info de sesión.
 
 ### IMPORTANTE
 - NUNCA te saltes search_context al inicio

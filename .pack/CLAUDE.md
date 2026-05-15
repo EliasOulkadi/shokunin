@@ -104,12 +104,12 @@ Este sistema usa ChromaDB para memoria persistente entre sesiones. Sigue estas i
 
 ### 1. AL INICIAR SESIÃ"N â€" buscar contexto previo (OBLIGATORIO)
 
-Primero, lista las sesiones recientes para que el usuario elija cual continuar:
+Primero, lista las sesiones recientes para que el usuario elija cuÃ¡l continuar:
 ```powershell
 python ~/.shokunin/scripts/chroma-helper.py session list 3
 ```
-Luego pregunta: "Sesiones recientes. Quieres continuar alguna (numero), buscar en todas (b) o empezar nueva (n)?"
-Si elige un numero, usa `session continue <session_id>` para cargar el contexto completo.
+Luego pregunta: "Sesiones recientes. Â¿Quieres continuar alguna (nÃºmero), buscar en todas (b) o empezar una nueva (n)?"
+Si elige un nÃºmero, usa `session continue <session_id>` para cargar el contexto completo y muestra las decisiones, archivos y comandos encontrados.
 Si elige buscar, usa `search_context` (MCP tool) o ejecuta chroma-helper.py search para buscar contexto relevante.
 Muestra los resultados al usuario.
 
