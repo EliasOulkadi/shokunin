@@ -90,12 +90,10 @@ Each skill includes: trigger-optimized descriptions, procedural workflows, error
 - Execution policy must allow scripts: `Set-ExecutionPolicy RemoteSigned -Scope CurrentUser`
 
 ### Demos (skill kami)
-| Preview | Description |
-|---------|-------------|
-| [📊 Equity Report](assets/demos/demo-tesla.pdf) | Tesla Q1 2026 financial report |
-| [📽️ Slides](assets/demos/demo-agent-slides.pdf) | "The Agent You Don't Know" keynote |
-| [📄 Resume](assets/demos/demo-musk-resume.pdf) | Executive resume example |
-| [📁 Portfolio](assets/demos/demo-kaku.pdf) | Project portfolio |
+- [Equity Report](assets/demos/demo-tesla.pdf) - Tesla Q1 2026 financial report
+- [Slides](assets/demos/demo-agent-slides.pdf) - "The Agent You Don't Know" keynote
+- [Resume](assets/demos/demo-musk-resume.pdf) - Executive resume example
+- [Portfolio](assets/demos/demo-kaku.pdf) - Project portfolio
 
 ## Quick Start
 
@@ -145,12 +143,10 @@ All data stored at `~/.shokunin/memory/`. No cloud, no telemetry, no subscriptio
 .\memory-healthcheck.ps1
 ```
 
-| Document | Description |
-|----------|-------------|
-| [📘 Enterprise White Paper](docs/Shokunin-Enterprise-White-Paper.pdf) | Full ecosystem overview and architecture |
-| [📗 Ecosystem Guide](docs/Shokunin-Ecosystem-Guide.pdf) | Complete ecosystem walkthrough |
-| [📕 v4.0 Changelog](docs/Shokunin-v4.0-Changelog.pdf) | What's new in version 4.0 |
-| [📙 v4.2 Linux Port](docs/Shokunin-v4.2-Linux-Port.pdf) | Linux porting notes |
+- [Enterprise White Paper](docs/Shokunin-Enterprise-White-Paper.pdf) - Full ecosystem overview and architecture
+- [Ecosystem Guide](docs/Shokunin-Ecosystem-Guide.pdf) - Complete ecosystem walkthrough
+- [v4.0 Changelog](docs/Shokunin-v4.0-Changelog.pdf) - What's new in version 4.0
+- [v4.2 Linux Port](docs/Shokunin-v4.2-Linux-Port.pdf) - Linux porting notes
 
 ## Troubleshooting
 
