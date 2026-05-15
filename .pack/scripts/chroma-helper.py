@@ -336,6 +336,21 @@ def session_continue(session_id, summary_only=False):
     }
     if not summary_only:
         result["entries"] = entries
+    safe_id = session_id.replace(":", "-").replace("/", "-")
+    jsonl_path = os.path.join(SESSIONS_PATH, f"{safe_id}.jsonl")
+    jsonl_messages = []
+    if os.path.isfile(jsonl_path):
+        try:
+            with open(jsonl_path, "r", encoding="utf-8") as f:
+                for line in f:
+                    line = line.strip()
+                    if line:
+                        jsonl_messages.append(json.loads(line))
+        except Exception:
+            pass
+    result["jsonl_count"] = len(jsonl_messages)
+    if not summary_only and jsonl_messages:
+        result["jsonl_messages"] = jsonl_messages[-20:]
     return result
 
 

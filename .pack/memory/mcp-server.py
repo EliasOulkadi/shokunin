@@ -1,4 +1,4 @@
-import os
+﻿import os
 import json
 import sys
 import uuid
@@ -38,6 +38,29 @@ def _get_ch():
         _ch_stub = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(_ch_stub)
     return _ch_stub
+
+def _safe_id(sid):
+    return sid.replace(":", "-").replace("/", "-").replace("\\", "-")
+
+def _log_jsonl(session_id, entry_type, content, role=None):
+    if not session_id:
+        return
+    safe = _safe_id(session_id)
+    fpath = os.path.join(SESSIONS_PATH, f"{safe}.jsonl")
+    try:
+        os.makedirs(SESSIONS_PATH, exist_ok=True)
+        record = {
+            "t": entry_type,
+            "ts": datetime.now(timezone.utc).isoformat(),
+            "session_id": session_id,
+            "content": content[:500],
+        }
+        if role:
+            record["role"] = role
+        with open(fpath, "a", encoding="utf-8") as f:
+            f.write(json.dumps(record, ensure_ascii=False) + "\n")
+    except Exception:
+        pass
 
 VALID_TYPES = {"decision", "file", "command", "preference", "checkpoint", "session_end", "general"}
 
@@ -189,6 +212,7 @@ def handle_store_context(args):
     tags = args.get("tags", [])
     project = args.get("project", "")
     session_id = args.get("session_id", "unknown")
+    _log_jsonl(session_id, "store", text[:500], role=entry_type)
     entry_id = str(uuid.uuid4())
     timestamp = datetime.now(timezone.utc).isoformat()
 
@@ -215,6 +239,8 @@ def handle_store_context(args):
 def handle_search_context(args):
     query = args.get("query", "")
     project = args.get("project")
+    session_id = args.get("session_id", "")
+    _log_jsonl(session_id, "search", query)
     entry_type = args.get("type")
     tags = args.get("tags")
     n_results = min(args.get("n_results", 10), 50)
@@ -317,6 +343,8 @@ def handle_get_session_summary(args):
 def handle_multi_search_context(args):
     query = args.get("query", "")
     project = args.get("project")
+    session_id = args.get("session_id", "")
+    _log_jsonl(session_id, "search", query)
     n_results = min(args.get("n_results", 10), 50)
     from_date = args.get("from_date")
     to_date = args.get("to_date")
@@ -361,6 +389,7 @@ def handle_save_message(args):
     text = args.get("text", "")
     session_id = args.get("session_id", "")
     role = args.get("role", "user")
+    _log_jsonl(session_id, "msg", text, role=role)
     try:
         ch = _get_ch()
         return ch.session_save(text, session_id, role)

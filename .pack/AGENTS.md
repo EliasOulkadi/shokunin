@@ -87,15 +87,18 @@ Si elige un numero, usa `session continue <session_id>` para cargar el contexto 
 Si elige buscar, usa `search_context` (MCP tool) o ejecuta chroma-helper.py search para buscar contexto relevante.
 Muestra los resultados al usuario.
 
-### 2. DURANTE LA SESION - guardar periodicamente (OBLIGATORIO)
-Usa `store_context` (MCP tool) para guardar. Tambien puedes hacerlo via script:
-```powershell
-python ~/.shokunin/scripts/chroma-helper.py save "texto" "[session_id]" "checkpoint" "tags" "[proyecto]"
-```
-Despues de CADA evento importante (decision, archivo, comando, preferencia) guarda con chroma-helper.py.
+### 2. DURANTE LA SESION - guardado automatico
+El MCP server guarda automaticamente cada interaccion en sessions/<id>.jsonl.
+No necesitas hacer nada manualmente. El sistema captura:
+- Cada `store_context` (checkpoints, decisiones, archivos)
+- Cada busqueda (`search_context`, `multi_search_context`)
+- Cada mensaje guardado con `save_message`
 
-### 3. AL FINAL DE LA SESION - resumen completo (OBLIGATORIO)
-Guarda un resumen estructurado con chroma-helper.py type session_end.
+### 3. AL FINAL DE LA SESION - resumen completo
+Usa `/save` si estas en OpenCode, o ejecuta:
+```powershell
+python ~/.shokunin/scripts/chroma-helper.py save "SESSION SUMMARY\n## Decisions\n- ...\n## Files\n- ...\n## Commands\n- ..." "[session_id]" "session_end" "session-end,[proyecto]" "[proyecto]"
+```
 
 ### Session ID automatico
 El wrapper setea estas variables:

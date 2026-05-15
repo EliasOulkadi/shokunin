@@ -113,6 +113,23 @@ Si elige un numero, usa `session continue <session_id>` para cargar el contexto 
 Si elige buscar, usa `search_context` (MCP tool) o ejecuta chroma-helper.py search para buscar contexto relevante.
 Muestra los resultados al usuario.
 
+### 2. DURANTE LA SESIÃ"N â€" guardado automatico
+El MCP server guarda automaticamente cada interaccion en sessions/&lt;id&gt;.jsonl.
+No necesitas hacer nada manualmente. El sistema captura:
+- Cada `store_context` (checkpoints, decisiones, archivos)
+- Cada busqueda (`search_context`, `multi_search_context`)
+- Cada mensaje guardado con `save_message`
+
+### 3. AL FINAL DE LA SESIÃ"N â€" resumen completo
+Usa `/save` si estas en OpenCode, o ejecuta:
+```powershell
+python ~/.shokunin/scripts/chroma-helper.py save "SESSION SUMMARY\n## Decisions\n- ...\n## Files\n- ...\n## Commands\n- ..." "[session_id]" "session_end" "session-end,[proyecto]" "[proyecto]"
+```
+Luego pregunta: "Sesiones recientes. Quieres continuar alguna (numero), buscar en todas (b) o empezar nueva (n)?"
+Si elige un numero, usa `session continue <session_id>` para cargar el contexto completo.
+Si elige buscar, usa `search_context` (MCP tool) o ejecuta chroma-helper.py search para buscar contexto relevante.
+Muestra los resultados al usuario.
+
 **Windows:**
 ```powershell
 & "$env:USERPROFILE\.shokunin\scripts\search-memory.ps1" -Query "[proyecto_actual]" -Project "[nombre_proyecto]"
