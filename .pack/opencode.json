@@ -33,11 +33,7 @@
   "mcp": {
     "filesystem": {
       "type": "local",
-<<<<<<< HEAD
       "command": ["npx", "-y", "@modelcontextprotocol/server-filesystem", "{{MCP_ROOT_PATH}}"]
-=======
-      "command": ["npx", "-y", "@modelcontextprotocol/server-filesystem", "{{FILESYSTEM_ROOT}}"]
->>>>>>> d565e80 (fix: make NVIDIA optional, fix install.sh for Linux, sync pack templates)
     },
     "fetch": {
       "type": "local",
@@ -45,11 +41,7 @@
     },
     "memory": {
       "type": "local",
-<<<<<<< HEAD
       "command": ["{{PYTHON_BIN}}", "{{MCP_MEMORY_PATH}}"]
-=======
-      "command": ["{{PYTHON_BIN}}", "{{SHOKUNIN_DIR}}/memory/mcp-server.py"]
->>>>>>> d565e80 (fix: make NVIDIA optional, fix install.sh for Linux, sync pack templates)
     }
   },
   "agent": {
