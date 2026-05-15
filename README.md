@@ -89,12 +89,6 @@ Each skill includes: trigger-optimized descriptions, procedural workflows, error
 - PowerShell 5.1+ required. Run `$PSVersionTable.PSVersion` to verify.
 - Execution policy must allow scripts: `Set-ExecutionPolicy RemoteSigned -Scope CurrentUser`
 
-### Demos (skill kami)
-- [Equity Report](assets/demos/demo-tesla.pdf) - Tesla Q1 2026 financial report
-- [Slides](assets/demos/demo-agent-slides.pdf) - "The Agent You Don't Know" keynote
-- [Resume](assets/demos/demo-musk-resume.pdf) - Executive resume example
-- [Portfolio](assets/demos/demo-kaku.pdf) - Project portfolio
-
 ## Quick Start
 
 **Windows:**
