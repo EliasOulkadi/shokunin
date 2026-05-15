@@ -185,13 +185,14 @@ def consolidate(project=None, max_entries=100):
     return {"consolidated": consolidated}
 
 
-def session_list(limit=5, project=None, page=1, per_page=10):
+def session_list(limit=5, project=None, page=1, per_page=10, brief=False):
     try:
         where_filter = {"project": project} if project else None
         all_data = collection.get(limit=500, where=where_filter)
     except Exception:
         return []
 
+    summ_len = 150 if brief else 300
     session_ids = {}
     if all_data.get("ids"):
         for i in range(len(all_data["ids"])):
@@ -210,7 +211,7 @@ def session_list(limit=5, project=None, page=1, per_page=10):
                     "project": proj,
                     "entry_count": 0,
                     "types": set(),
-                    "summary": all_data["documents"][i][:300],
+                    "summary": all_data["documents"][i][:summ_len],
                 }
             session_ids[sid]["last_ts"] = meta.get("timestamp", "")
             session_ids[sid]["entry_count"] += 1
@@ -221,8 +222,8 @@ def session_list(limit=5, project=None, page=1, per_page=10):
         s["session_id"].startswith("healthcheck-") or
         s["session_id"].startswith("mcp-test-") or
         s["session_id"].startswith("test-") or
-        s["session_id"] == "entries" or
-        s["session_id"] == "file" or
+        s["session_id"].startswith("consolidated-") or
+        s["session_id"] in ("entries", "file", "session_end") or
         (set(s["types"]) <= {"test", "general"} and s["entry_count"] <= 2)
     )]
     sessions.sort(key=lambda s: s["first_ts"] or "", reverse=True)
@@ -279,7 +280,7 @@ def _parse_session_text(text):
             extracted["files"].append(stripped.lstrip("- * ")[:300])
     return extracted
 
-def session_continue(session_id):
+def session_continue(session_id, summary_only=False):
     if not session_id:
         return {"error": "session_id required", "entries": []}
     all_data = collection.get(where={"session_id": session_id})
@@ -290,13 +291,14 @@ def session_continue(session_id):
     full_decisions = []
     full_files = []
     full_commands = []
+    full_checkpoints = []
 
     for i in range(len(all_data["ids"])):
         meta = all_data["metadatas"][i]
         text = all_data["documents"][i]
         etype = meta.get("type", "")
         entry = {
-            "text": text[:2000],
+            "text": text[:400] if summary_only else text[:2000],
             "type": etype,
             "tags": json.loads(meta.get("tags", "[]")),
             "project": meta.get("project", ""),
@@ -315,25 +317,26 @@ def session_continue(session_id):
             full_files.append(text[:300])
         elif etype == "command":
             full_commands.append(text[:300])
+        elif etype == "checkpoint":
+            full_checkpoints.append(text[:300])
 
-    session_end_entries = [e for e in entries if e["type"] == "session_end"]
-    checkpoints = [e for e in entries if e["type"] == "checkpoint"]
-
-    return {
+    result = {
         "session_id": session_id,
         "entry_count": len(entries),
-        "entries": entries,
         "context": {
-            "session_ends": len(session_end_entries),
+            "session_ends": len([e for e in entries if e["type"] == "session_end"]),
             "decisions": len(full_decisions),
             "decisions_list": full_decisions[:10],
             "files_modified": len(full_files),
             "files_list": full_files[:10],
             "commands": len(full_commands),
             "commands_list": full_commands[:5],
-            "checkpoints": len(checkpoints),
+            "checkpoints": len(full_checkpoints),
         },
     }
+    if not summary_only:
+        result["entries"] = entries
+    return result
 
 
 def session_save(text, session_id, role="user"):
@@ -400,11 +403,13 @@ if __name__ == "__main__":
     elif cmd == "session" and len(sys.argv) >= 3:
         sub = sys.argv[2]
         if sub == "list":
-            limit = int(sys.argv[3]) if len(sys.argv) > 3 else 5
-            project = sys.argv[4] if len(sys.argv) > 4 else None
-            print(json.dumps(session_list(limit, project)))
+            brief = "--brief" in sys.argv
+            limit = int(sys.argv[3]) if len(sys.argv) > 3 and not sys.argv[3].startswith("--") else 3
+            project = sys.argv[4] if len(sys.argv) > 4 and not sys.argv[4].startswith("--") else None
+            print(json.dumps(session_list(limit, project, brief=brief)))
         elif sub == "continue" and len(sys.argv) >= 4:
-            print(json.dumps(session_continue(sys.argv[3])))
+            summary_only = "--summary" in sys.argv
+            print(json.dumps(session_continue(sys.argv[3], summary_only=summary_only)))
         elif sub == "save" and len(sys.argv) >= 5:
             print(json.dumps(session_save(sys.argv[3], sys.argv[4], sys.argv[5] if len(sys.argv) > 5 else "user")))
         else:

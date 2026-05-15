@@ -80,7 +80,7 @@ Se activan automaticamente segun lo que pidas. No necesitas nombrarlas.
 ### 1. AL INICIAR SESION - buscar contexto previo (OBLIGATORIO)
 Primero, lista las sesiones recientes para que el usuario elija cual continuar:
 ```powershell
-python ~/.shokunin/scripts/chroma-helper.py session list 5
+python ~/.shokunin/scripts/chroma-helper.py session list 3
 ```
 Luego pregunta: "Sesiones recientes. Quieres continuar alguna (numero), buscar en todas (b) o empezar nueva (n)?"
 Si elige un numero, usa `session continue <session_id>` para cargar el contexto completo.

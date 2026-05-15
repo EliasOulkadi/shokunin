@@ -163,7 +163,7 @@ All data stored at `~/.shokunin/memory/`. No cloud, no telemetry, no subscriptio
 
 ## Commands
 
-After installation, run `opencode` in any project directory. The AI agent loads your skills, searches memory from past sessions, and is ready to work.
+**OpenCode custom commands:** `/save` (save session to ChromaDB), `/load` (load previous session), `/status` (healthcheck).
 
 **Windows:**
 ```powershell
@@ -197,7 +197,7 @@ The ecosystem works across multiple AI coding runtimes. The core (skills, memory
 | **Cline** (VS Code) | ✅ Reads SKILL.md | ✅ Via MCP | ✅ .pack/templates/cline-settings.json | ✅ .ps1 + .sh | Add to settings.json |
 | **Cursor** | ✅ Reads SKILL.md | ✅ Via rules | ✅ .pack/templates/cursor-mcp.json | ✅ .ps1 + .sh | Copy to .cursor/ |
 | **Continue.dev** | ✅ Reads SKILL.md | ✅ Via rules | ✅ .pack/templates/continue-config.yaml | ✅ .ps1 + .sh | Copy to .continue/ |
-| **Windsurf** | ✅ Reads SKILL.md | ✅ Via rules | ⬜ Via UI only | ✅ .sh | Add .windsurf/rules/ |
+| **Windsurf** | ✅ Reads SKILL.md | ✅ Via rules | ✅ .pack/templates/windsurf-mcp.json | ✅ .sh | Copy template |
 
 ### Setup per runtime
 
@@ -209,7 +209,7 @@ The ecosystem works across multiple AI coding runtimes. The core (skills, memory
 
 **Continue.dev:** Copy `.pack/templates/continue-config.yaml` to `.continue/config.yaml`. Add `.pack/rules/continue-memory.md` to `.continue/rules/`.
 
-**Windsurf:** Configure MCP servers in Settings > Cascade > MCP Servers. Copy `.pack/rules/windsurf-memory.md` to `.windsurf/rules/memory.md`.
+**Windsurf:** Copy `.pack/templates/windsurf-mcp.json` MCP config. Copy `.pack/rules/windsurf-memory.md` to `.windsurf/rules/memory.md`.
 
 ## Links
 
