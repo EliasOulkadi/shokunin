@@ -37,7 +37,7 @@
   "mcp": {
     "filesystem": {
       "type": "local",
-      "command": ["npx", "-y", "@modelcontextprotocol/server-filesystem", "C:\\Users\\{{USERNAME}}"]
+      "command": ["npx", "-y", "@modelcontextprotocol/server-filesystem", "{{MCP_ROOT_PATH}}"]
     },
     "fetch": {
       "type": "local",
@@ -45,7 +45,7 @@
     },
     "memory": {
       "type": "local",
-      "command": ["python", "C:\\Users\\{{USERNAME}}\\.shokunin\\memory\\mcp-server.py"]
+      "command": ["{{PYTHON_BIN}}", "{{MCP_MEMORY_PATH}}"]
     }
   },
   "agent": {

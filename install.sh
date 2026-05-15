@@ -130,7 +130,21 @@ if [ -z "$NVIDIA_KEY" ]; then
 fi
 
 if [ -f "$CONFIG_SRC" ]; then
-    sed "s|YOUR_NVIDIA_API_KEY|$NVIDIA_KEY|g" "$CONFIG_SRC" > "$CONFIG_DIR/opencode.json" 2>/dev/null || cp "$CONFIG_SRC" "$CONFIG_DIR/opencode.json"
+    # Detect Python binary (python3 on Debian/Ubuntu, python on others)
+    PYTHON_BIN="python3"
+    command -v python3 &>/dev/null || PYTHON_BIN="python"
+
+    # Generate config with all substitutions
+    sed "s|YOUR_NVIDIA_API_KEY|$NVIDIA_KEY|g; \
+         s|{{MCP_ROOT_PATH}}|$HOME|g; \
+         s|{{PYTHON_BIN}}|$PYTHON_BIN|g; \
+         s|{{MCP_MEMORY_PATH}}|$CORES_DIR/memory/mcp-server.py|g" \
+      "$CONFIG_SRC" > "$CONFIG_DIR/opencode.json" 2>/dev/null || cp "$CONFIG_SRC" "$CONFIG_DIR/opencode.json"
+
+    # Validate no unsubstituted placeholders remain
+    if grep -q "{{MCP_\|{{PYTHON_BIN}}" "$CONFIG_DIR/opencode.json" 2>/dev/null; then
+        log "WARNING: MCP placeholders not substituted. Check opencode.json"
+    fi
 fi
 if [ -n "$NVIDIA_KEY" ] && ! grep -q "NVIDIA_API_KEY" "$HOME/.bashrc" 2>/dev/null; then
     echo "export NVIDIA_API_KEY='$NVIDIA_KEY'" >> "$HOME/.bashrc"

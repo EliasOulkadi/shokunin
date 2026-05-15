@@ -221,7 +221,9 @@ function Setup-OpenCodeConfig {
 
     # Generate config with proper paths
     $template = Get-Content (Join-Path $PSScriptRoot ".pack\opencode.json") -Raw
-    $template = $template -replace "{{USERNAME}}", $env:USERNAME
+    $template = $template -replace "{{MCP_ROOT_PATH}}", $env:USERPROFILE
+    $template = $template -replace "{{PYTHON_BIN}}", "python"
+    $template = $template -replace "{{MCP_MEMORY_PATH}}", "$env:USERPROFILE\.shokunin\memory\mcp-server.py"
     $template = $template -replace "YOUR_NVIDIA_API_KEY", "YOUR_NVIDIA_API_KEY"
 
     # Check for NVIDIA API key
