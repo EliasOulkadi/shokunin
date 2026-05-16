@@ -6,9 +6,8 @@ import sys
 import uuid
 from datetime import datetime, timezone
 
-from chromadb.config import Settings
-
 import chromadb
+from chromadb.config import Settings
 
 _HOME = os.getenv("USERPROFILE") or os.getenv("HOME") or os.path.expanduser("~")
 BASE_DIR = os.path.join(_HOME, ".shokunin", "memory")
