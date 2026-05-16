@@ -1,5 +1,22 @@
 # Changelog
 
+## [4.0.0] - 2026-05-16
+
+### Added
+- 24 new skills: aesthetic-web, agent-browser, agent-tools, code-review, comprehensive-review, cross-review, efficient-coding, find-skills, humanize, impeccable, init, kagen, kami, neon-postgres, plan, playwright, research, senior-engineer, shokunin-update, skill-creator, web-security, zen-comprehensive-review, zen-review, emil-design-eng, taste, taste-soft, taste-minimalist
+- 5 integrated external skills with improvements: emil-design-eng, impeccable, taste, taste-soft, taste-minimalist
+- All skills consolidated under `.pack/skills/` (single source of truth, 62 total)
+- CI workflow updated to validate `.pack/skills/` instead of root directories
+
+### Changed
+- Upgraded 17 skills to v4.0 with Before/After tables, exact specs, pre-flight checklists
+- All frontend skills now include Emil Kowalski patterns, Paul Bakaus principles, Leon Lin variance engines
+- `prefers-reduced-motion` required on every animation skill
+- Install scripts now point to `.pack/skills/` (62 skills)
+- README updated: 38 -> 62 skills, 8 -> 10 domains
+- Removed 37 outdated skill directories from repo root (moved to `.pack/skills/`)
+- Removed orphaned directories: cleanup-surgeon, readme-shokunin
+
 ## [3.0.0] - 2026-05-13
 
 ### Added

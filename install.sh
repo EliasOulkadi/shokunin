@@ -135,7 +135,7 @@ for retry in 1 2 3; do
 done
 
 COUNT=0
-for dir in "$REPO_DIR"/*/; do
+for dir in "$REPO_DIR/.pack/skills"/*/; do
     if [ -f "${dir}SKILL.md" ]; then
         NAME=$(basename "$dir")
         TARGET="$SKILLS_DIR/$NAME"

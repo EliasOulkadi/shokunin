@@ -9,11 +9,11 @@ jobs:
         shell: bash
         run: |
           errors=0
-          for dir in */; do
+          for dir in .pack/skills/*/; do
             f="${dir}SKILL.md"
             [ -f "$f" ] || continue
             n=$(basename "$dir")
-            [ "$n" = "kami" ] || [ "$n" = "readme-shokunin" ] && continue
+            [ "$n" = "kami" ] && continue
             grep -q "^name:" "$f" || { echo "MISSING name: $n"; errors=$((errors+1)); }
             grep -qi "workflow\|structure\|60fps" "$f" || { echo "MISSING workflow: $n"; errors=$((errors+1)); }
             grep -qi "error\|emergency" "$f" || { echo "MISSING error: $n"; errors=$((errors+1)); }

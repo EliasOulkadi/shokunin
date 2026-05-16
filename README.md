@@ -8,7 +8,7 @@
 [![OpenCode](https://img.shields.io/badge/OpenCode-1.15-6B46C1?logo=openai)](https://opencode.ai)
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/EliasOulkadi/shokunin/graphs/commit-activity)
 
-**Persistent AI memory for developers.** 38 skills, multi-strategy recall (vector + BM25 + temporal), ChromaDB memory, MCP servers, declarative self-updates. Zero servers, zero API costs, fully offline.
+**Persistent AI memory for developers.** 62 skills, multi-strategy recall (vector + BM25 + temporal), ChromaDB memory, MCP servers, declarative self-updates. Zero servers, zero API costs, fully offline.
 
 > *職人 (shokunin) means artisan in Japanese. These skills aim for that standard: every detail crafted, every edge case handled, every workflow automated.*
 
@@ -26,7 +26,7 @@ bash <(curl -sL https://raw.githubusercontent.com/EliasOulkadi/shokunin/master/i
 
 ```
 OpenCode + VS Code + WezTerm
-  38 skills + superpowers plugin + 4 subagents
+  62 skills + superpowers plugin + 4 subagents
   MCP servers: filesystem, fetch, memory + ChromaDB
   AI: OpenCode Go (default) + Ollama (local fallback)
   Update system: declarative manifest with drift detection
@@ -35,21 +35,22 @@ OpenCode + VS Code + WezTerm
 
 ## Skills
 
-38 skills across 8 domains. Each skill teaches the agent how to handle a specific domain: with decision tables, error patterns, production checklists, anti-patterns, and cited sources. Not generic prompts. Real engineering guides.
+62 skills across 10 domains. Each skill teaches the agent how to handle a specific domain: with decision tables, error patterns, production checklists, anti-patterns, and cited sources. Not generic prompts. Real engineering guides.
 
-The Docker skill is 6,300 words with multi-stage build templates for Node, Go, Python and Rust, BuildKit cache optimization, distroless base images, seccomp profiles, and CVE scanning. The auth skill references OWASP directly. The database one has real EXPLAIN ANALYZE output. Skills are validated by CI on every push: frontmatter, workflow, error handling, sources. All mandatory.
+The Docker skill is 6,300 words with multi-stage build templates for Node, Go, Python and Rust, BuildKit cache optimization, distroless base images, seccomp profiles, and CVE scanning. The auth skill references OWASP directly. The database one has real EXPLAIN ANALYZE output. Frontend skills include Emil Kowalski patterns (Sonner, Vaul), Paul Bakaus principles (Impeccable), and Leon Lin variance engines (Taste). Skills are validated by CI on every push: frontmatter, workflow, error handling, sources. All mandatory.
 
 | Domain | Skills | Version |
 |--------|--------|---------|
-| **Infrastructure** | docker, kubernetes, terraform, ci-cd, db-admin | v3.0 |
-| **Backend** | auth-architect, api-forge, db-sculptor, error-handler | v3.0 |
-| **Frontend** | component-forge, responsive-engine, motion-craft, landing-craft, ui-ux-pro-max | v3.0 |
-| **Mobile** | flutter, react-native | v3.0 |
-| **Quality** | test-commander, performance-profiler | v3.0 |
-| **Content & Business** | communication, content-marketing, business-proposals, seo-geo, translate-craft | v3.0 |
-| **Documents** | kami (PDF generator), portfolio-auto | v3.0 |
-| **Productivity** | git-workflow, windows-powershell, strategy, design, documentation, runbook-gen, finance, legal-counsel | v3.0 |
-| **System** | memory, chromadb, shokunin-update, whendone-plus | v4.2 |
+| **Infrastructure** | docker, kubernetes, terraform, ci-cd, db-admin | v4.0 |
+| **Backend** | auth-architect, api-forge, db-sculptor, error-handler | v4.0 |
+| **Frontend** | component-forge, responsive-engine, motion-craft, landing-craft, aesthetic-web, ui-ux-pro-max, emil-design-eng, impeccable, taste, taste-soft, taste-minimalist | v4.0 |
+| **Mobile** | flutter, react-native | v4.0 |
+| **Quality** | test-commander, performance-profiler, code-review, comprehensive-review, cross-review, zen-review, zen-comprehensive-review | v4.0 |
+| **Content & Business** | communication, content-marketing, business-proposals, seo-geo, translate-craft, documentation | v4.0 |
+| **Documents** | kami (PDF generator), portfolio-auto, kagen (AI images) | v4.0 |
+| **Productivity** | git-workflow, windows-powershell, strategy, design, runbook-gen, finance, legal-counsel, whendone-plus | v4.0 |
+| **AI Agents** | agent-browser, agent-tools, find-skills, skill-creator, research, humanize | v4.0 |
+| **System** | memory, chromadb, shokunin-update, init, efficient-coding, senior-engineer, plan, playwright, neon-postgres, web-security | v4.2 |
 
 Each skill includes: trigger-optimized descriptions, procedural workflows, error handling, production checklists, anti-patterns, cited sources. Advanced skills also include executable scripts, reference files, and reusable templates.
 
@@ -57,7 +58,7 @@ Each skill includes: trigger-optimized descriptions, procedural workflows, error
 
 | Component | Purpose |
 |-----------|---------|
-| **37 SKILL.md files** | Domain expertise that auto-activates |
+| **62 SKILL.md files** | Domain expertise that auto-activates |
 | **OpenCode config** | MCP servers, subagents, superpowers plugin |
 | **ChromaDB memory** | Persistent context across sessions (v4.0, 3-layer capture, structured data) |
 | **CLAUDE.md + AGENTS.md** | Mandatory memory instructions: context search on every start |

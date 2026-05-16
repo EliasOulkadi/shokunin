@@ -91,9 +91,8 @@ function Install-Dependencies {
 # SECTION 4: INSTALL SKILLS
 # ============================================================
 function Install-Skills {
-    Write-Step "Instalando 36 skills..."
-    $repoSkills = Join-Path $PSScriptRoot "skills"
-    if (-not (Test-Path $repoSkills)) { $repoSkills = Join-Path $PSScriptRoot "." }
+    Write-Step "Instalando 62 skills..."
+    $repoSkills = Join-Path $PSScriptRoot ".pack\skills"
 
     if (-not (Test-Path $script:skillsDir)) {
         New-Item -ItemType Directory -Path $script:skillsDir -Force | Out-Null
@@ -434,7 +433,7 @@ Write-Host @"
 â•šâ•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
   Este instalador configura tu PC como estacion de trabajo
-  AI Engineer con 36 skills, memoria persistente, bot de
+  AI Engineer con 62 skills, memoria persistente, bot de
   Telegram, y automatizaciones â€” todo gratis y open source.
 
   Requiere: Windows 10/11, Node.js 18+, Python 3.11+

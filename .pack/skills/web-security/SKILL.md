@@ -1,0 +1,250 @@
+---
+name: Web Security
+description: >
+  Apply professional-grade security standards to any web application task.
+  Use this skill when writing code that handles authentication, authorization,
+  user input, APIs, file uploads, sessions, secrets, payments, or any data
+  from external sources. Also use when the user asks to review, audit, or
+  assess security of code or a web app. Covers OWASP Top 10 (2025), secure
+  coding, threat modeling, and defensive architecture. Activate even when
+  security is not explicitly mentioned — treat every web feature as a security
+  surface.
+---
+
+# Web Security — Professional Standards
+
+## Mindset
+
+Every input is hostile until proven otherwise.
+Every privilege is a liability until proven necessary.
+The average breach goes undetected for 200+ days — not because attacks are sophisticated,
+but because code assumed the caller was trustworthy.
+
+Security is not a feature added at the end. It is a design constraint applied from the first line.
+
+---
+
+## OWASP Top 10 — 2025 Edition
+
+Apply these as a mental checklist on every feature you build or review.
+
+### A01 — Broken Access Control (#1 most exploited)
+
+The most common and most damaging class of web vulnerability.
+
+**Rules:**
+- Every endpoint must verify the caller has permission for the *specific resource* — not just that they're logged in
+- Deny by default: if there's no explicit `allow`, the answer is `deny`
+- Never expose internal IDs directly — use opaque tokens or UUIDs, not sequential integers (IDOR prevention)
+- Check authorization server-side on every request — never trust client-side state or hidden form fields
+- Validate CORS: `Access-Control-Allow-Origin: *` is only acceptable for truly public, read-only data
+- File path inputs must be sanitized — validate against a whitelist and use `path.resolve()` + check prefix
+
+**IDOR pattern to enforce:**
+```
+// Wrong — trusts caller owns the resource
+GET /api/orders/1234
+
+// Right — verify ownership server-side
+const order = await getOrder(orderId)
+if (order.userId !== req.user.id) return 403
+```
+
+### A02 — Cryptographic Failures
+
+**Rules:**
+- HTTPS everywhere — no exceptions, including internal APIs
+- Never store passwords in plaintext or with reversible encryption — use bcrypt, Argon2, or scrypt
+- Never use MD5 or SHA-1 for security purposes — use SHA-256 minimum, SHA-512 preferred
+- Secrets (API keys, tokens, passwords) never go in source code — use environment variables or secrets managers
+- Sensitive data at rest must be encrypted — user PII, payment data, health records
+- Session tokens must be cryptographically random — minimum 128 bits of entropy
+- Never log sensitive data: passwords, tokens, credit card numbers, SSNs, health info
+
+**Secret detection before every commit:**
+```
+# Patterns that must NEVER appear in source code:
+# - API keys (sk-*, AIza*, AKIA*, etc.)
+# - Private keys (-----BEGIN PRIVATE KEY-----)
+# - Connection strings with passwords
+# - .env files committed to git
+```
+
+### A03 — Injection (SQL, XSS, Command, NoSQL)
+
+**SQL injection — always parameterize:**
+```
+// Wrong — never do this
+db.query(`SELECT * FROM users WHERE id = ${userId}`)
+
+// Right — parameterized queries
+db.query('SELECT * FROM users WHERE id = ?', [userId])
+// or ORM equivalents: User.findById(userId)
+```
+
+**XSS — context-aware output encoding:**
+- Never inject user data into HTML without escaping
+- Use framework's built-in escaping (React JSX auto-escapes, Angular templates, etc.)
+- `innerHTML` with user content → always sanitize with DOMPurify or equivalent
+- `eval()`, `new Function()`, `setTimeout(string)` — ban entirely
+
+**Command injection:**
+```
+// Wrong
+exec(`ffmpeg -i ${userFilename} output.mp4`)
+
+// Right — never concatenate user input into shell commands
+// Use argument arrays, not string interpolation
+execFile('ffmpeg', ['-i', userFilename, 'output.mp4'])
+```
+
+### A04 — Insecure Design
+
+Security flaws at the design level that code changes can't fix.
+
+**Threat model every feature:**
+Before building: ask "who would want to abuse this, and how?"
+- Rate limit endpoints by default, especially auth, password reset, and email verification
+- Multi-factor authentication for sensitive operations (payment, account changes, admin)
+- Secure password reset: time-limited tokens, single use, invalidated on use
+- Principle of least privilege in service architecture — services access only what they need
+
+### A05 — Security Misconfiguration
+
+**Security headers — always set:**
+```
+Content-Security-Policy: default-src 'self'
+X-Content-Type-Options: nosniff
+X-Frame-Options: DENY
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+Referrer-Policy: strict-origin-when-cross-origin
+Permissions-Policy: camera=(), microphone=(), geolocation=()
+```
+
+**Other rules:**
+- Never expose stack traces or internal errors to users — log them server-side, return generic messages
+- Disable directory listing on web servers
+- Remove debug endpoints, verbose error modes, and developer tools before production
+- Default credentials (admin/admin, root/root) must be changed before first deployment
+
+### A06 — Vulnerable and Outdated Components
+
+- Run `npm audit`, `pip check`, `go mod verify` on every dependency update
+- Pin dependency versions — floating `^` versions can auto-update to vulnerable releases
+- Never use packages with known critical CVEs in production
+- Unused dependencies must be removed — every dependency is an attack surface
+- Check for typosquatting on new packages (`axios` vs `axois`, `lodash` vs `loddash`)
+
+### A07 — Authentication Failures
+
+**Session management:**
+- Invalidate sessions on logout — don't just delete the cookie client-side
+- Regenerate session token on privilege escalation (login, role change, 2FA completion)
+- Session tokens expire: 15-30 min for sensitive apps, max 24h for standard apps
+- HttpOnly + Secure + SameSite=Strict on all session cookies
+
+**Brute force protection:**
+- Rate limit login attempts: 5 attempts per 15 minutes per IP/account
+- Exponential backoff after repeated failures
+- Account lockout with secure unlock flow
+- Never reveal whether email exists during login ("Invalid credentials" for both)
+
+**Password rules:**
+- Minimum 12 characters, no arbitrary maximum (bcrypt handles length internally)
+- Check against known breached password lists (HaveIBeenPwned API)
+- No forced periodic rotation — it degrades security (users add "1" at the end)
+
+### A08 — Software and Data Integrity Failures
+
+- Verify integrity of downloaded resources (checksums, signatures)
+- Use `integrity` attribute on CDN-loaded scripts (SRI: Subresource Integrity)
+- CI/CD pipelines must not have write access to production unless deploying
+- Never deserialize untrusted data with permissive deserializers
+- Pin GitHub Actions to specific commit SHAs, not branch names (`@v1` can be hijacked)
+
+### A09 — Security Logging and Monitoring
+
+Every security-relevant event must be logged with enough context to reconstruct the attack.
+
+**Always log:**
+- Failed login attempts (with IP, timestamp, account targeted)
+- Successful logins (with IP, user-agent)
+- Access control failures (who tried to access what they can't)
+- Input validation failures on security-sensitive fields
+- Admin actions (who did what, when)
+- Password changes and account lockouts
+
+**Never log:**
+- Passwords (even failed attempts)
+- Session tokens or API keys
+- Credit card numbers, SSNs, health data
+- Full request bodies containing sensitive fields
+
+**Log format must include:** timestamp, IP, user ID (if authenticated), action, result, resource ID
+
+### A10 — Server-Side Request Forgery (SSRF)
+
+If your server fetches URLs based on user input, you are vulnerable to SSRF.
+SSRF in cloud environments exposes the instance metadata service (AWS: 169.254.169.254).
+
+```
+// Wrong — user controls what your server fetches
+const response = await fetch(req.body.url)
+
+// Right — validate against allowlist before fetching
+const ALLOWED_DOMAINS = ['api.trusted.com', 'cdn.trusted.com']
+const url = new URL(req.body.url)
+if (!ALLOWED_DOMAINS.includes(url.hostname)) return 400
+const response = await fetch(url.toString())
+```
+
+---
+
+## Security Review Checklist
+
+Run this mentally on every feature, and explicitly when asked to audit:
+
+### Authentication & Authorization
+- [ ] Every endpoint checks authentication
+- [ ] Every endpoint checks authorization for the specific resource
+- [ ] IDOR: resource ownership verified server-side, not by ID alone
+- [ ] Sessions invalidated on logout and privilege change
+- [ ] Rate limiting on auth endpoints
+
+### Input & Output
+- [ ] All user input validated and sanitized at the boundary
+- [ ] SQL queries parameterized (no string concatenation)
+- [ ] HTML output context-encoded (no raw innerHTML with user data)
+- [ ] File uploads: type validated, size limited, stored outside webroot, served with correct MIME type
+- [ ] URL inputs validated against allowlist (SSRF prevention)
+
+### Secrets & Cryptography
+- [ ] No secrets in source code or logs
+- [ ] Passwords hashed with bcrypt/Argon2 (not MD5/SHA-1)
+- [ ] Sensitive data encrypted at rest
+- [ ] HTTPS enforced (no HTTP fallback)
+
+### Headers & Configuration
+- [ ] Security headers present (CSP, HSTS, X-Frame-Options, etc.)
+- [ ] Error messages don't leak internals
+- [ ] Debug mode disabled in production
+- [ ] Dependencies free of known critical CVEs
+
+### Logging & Monitoring
+- [ ] Security events logged with context
+- [ ] No sensitive data in logs
+- [ ] Errors logged server-side, generic message returned to user
+
+---
+
+## Gotchas — Real Attack Vectors Often Missed
+
+- **`path.join()` is not path traversal protection** — `path.join('/uploads', '../../../etc/passwd')` works. Use `path.resolve()` and verify the result starts with your expected base path.
+- **JWTs are not encrypted by default** — the payload is base64-encoded (readable), not encrypted. Never put sensitive data in a JWT payload unless you're using JWE.
+- **`SameSite=Lax` doesn't protect against all CSRF** — top-level navigations (GET requests via links) still send the cookie. Use CSRF tokens for state-changing operations.
+- **Regex can cause ReDoS** — catastrophic backtracking in regex patterns applied to user input can DOS your server. Test regexes against ReDoS checkers before using in production.
+- **Rate limiting by IP only is bypassed by distributed attacks** — also rate limit by user account and by action type.
+- **`JSON.parse()` on untrusted input can throw** — always wrap in try/catch. An uncaught JSON parse error crashes Node.js requests.
+- **`typeof null === 'object'`** — null checks in JavaScript require explicit `=== null`, not just falsy checks.
+- **Redirect URLs must be validated** — `?redirect=https://evil.com` after login is an open redirect. Validate redirects against an allowlist of your own domains.
+- **Signed cookies are not encrypted** — frameworks like Express's `cookie-session` sign cookies (prevents tampering) but the content is readable. Don't store sensitive data in signed cookies.
