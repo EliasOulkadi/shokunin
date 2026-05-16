@@ -1,0 +1,163 @@
+image: node:22-slim
+
+stages:
+  - lint
+  - test
+  - build
+  - docker
+  - scan
+  - deploy
+
+variables:
+  NODE_ENV: development
+  DOCKER_DRIVER: overlay2
+  DOCKER_TLS_CERTDIR: ""
+  REGISTRY: $CI_REGISTRY_IMAGE
+
+cache:
+  key:
+    files:
+      - pnpm-lock.yaml
+    prefix: $CI_COMMIT_REF_SLUG
+  paths:
+    - node_modules/
+    - .pnpm-store/
+  policy: pull-push
+
+lint:
+  stage: lint
+  script:
+    - corepack enable
+    - corepack prepare pnpm@9 --activate
+    - pnpm install --frozen-lockfile
+    - pnpm lint
+    - pnpm typecheck
+    - pnpm format:check
+
+test-unit:
+  stage: test
+  parallel: 4
+  script:
+    - corepack enable
+    - corepack prepare pnpm@9 --activate
+    - pnpm install --frozen-lockfile
+    - pnpm test -- --shard=$CI_NODE_INDEX/$CI_NODE_TOTAL
+  artifacts:
+    when: on_failure
+    paths:
+      - test-results/
+    expire_in: 7 days
+
+test-e2e:
+  stage: test
+  services:
+    - name: postgres:16-alpine
+      alias: postgres
+      variables:
+        POSTGRES_DB: app_test
+        POSTGRES_USER: app
+        POSTGRES_PASSWORD: app
+  variables:
+    DATABASE_URL: postgresql://app:app@postgres:5432/app_test
+  script:
+    - corepack enable
+    - corepack prepare pnpm@9 --activate
+    - pnpm install --frozen-lockfile
+    - npx playwright install chromium
+    - pnpm test:e2e
+  artifacts:
+    when: on_failure
+    paths:
+      - playwright-report/
+    expire_in: 7 days
+
+build:
+  stage: build
+  script:
+    - corepack enable
+    - corepack prepare pnpm@9 --activate
+    - pnpm install --frozen-lockfile
+    - pnpm build
+  artifacts:
+    paths:
+      - dist/
+    expire_in: 1 hour
+
+docker:
+  stage: docker
+  image: docker:27-cli
+  services:
+    - name: docker:27-dind
+      command: ["--tls=false"]
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_TLS_CERTDIR: ""
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+  script:
+    - apk add --no-cache docker-buildx
+    - docker buildx create --use
+    - echo "$CI_REGISTRY_PASSWORD" | docker login $CI_REGISTRY --username $CI_REGISTRY_USER --password-stdin
+    - docker buildx build
+        --cache-from type=registry,ref=$REGISTRY:cache
+        --cache-to type=registry,ref=$REGISTRY:cache,mode=max
+        --tag $REGISTRY:$CI_COMMIT_SHA
+        --tag $REGISTRY:latest
+        --push
+        .
+
+trivy-scan:
+  stage: scan
+  image:
+    name: aquasec/trivy:latest
+    entrypoint: [""]
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+  script:
+    - trivy image --severity CRITICAL,HIGH --exit-code 1 --no-progress $REGISTRY:$CI_COMMIT_SHA
+  needs:
+    - docker
+
+deploy-staging:
+  stage: deploy
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+  environment:
+    name: staging
+    url: https://staging.app.example.com
+  needs:
+    - docker
+    - trivy-scan
+  script:
+    - apk add --no-cache aws-cli
+    - aws sts get-caller-identity
+    - aws ecs update-service --cluster staging --service app --force-new-deployment --region us-east-1
+    - aws ecs wait services-stable --cluster staging --services app --region us-east-1
+
+deploy-production:
+  stage: deploy
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+  when: manual
+  environment:
+    name: production
+    url: https://app.example.com
+  needs:
+    - deploy-staging
+  script:
+    - apk add --no-cache aws-cli
+    - aws sts get-caller-identity
+    - aws ecs update-service --cluster production --service app --force-new-deployment --region us-east-1
+    - aws ecs wait services-stable --cluster production --services app --region us-east-1
+    - |
+      for i in $(seq 1 12); do
+        STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://app.example.com/healthz)
+        if [ "$STATUS" = "200" ]; then
+          echo "Health check passed"
+          exit 0
+        fi
+        sleep 5
+      done
+      echo "Health check failed"
+      exit 1
+  timeout: 10m

@@ -1,0 +1,176 @@
+/* ── Motion Craft: Reusable Keyframes ──────────────────────────── */
+/*   All keyframes include a prefers-reduced-motion safe variant.  */
+/*   Apply the .no-motion class to a parent to disable animation.  */
+/* ───────────────────────────────────────────────────────────────── */
+
+/* ═══════════════════════════════════════════════════════════════ */
+/*  FADE                                                         */
+/* ═══════════════════════════════════════════════════════════════ */
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fade-in-down {
+  from { opacity: 0; transform: translateY(-24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fade-in-left {
+  from { opacity: 0; transform: translateX(-24px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes fade-in-right {
+  from { opacity: 0; transform: translateX(24px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* ═══════════════════════════════════════════════════════════════ */
+/*  SCALE                                                        */
+/* ═══════════════════════════════════════════════════════════════ */
+
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.9); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes scale-in-bounce {
+  0%   { opacity: 0; transform: scale(0.8); }
+  60%  { transform: scale(1.05); }
+  80%  { transform: scale(0.98); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+/* ═══════════════════════════════════════════════════════════════ */
+/*  ENTER (slides)                                               */
+/* ═══════════════════════════════════════════════════════════════ */
+
+@keyframes slide-in-left {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(0); }
+}
+
+@keyframes slide-in-right {
+  from { transform: translateX(100%); }
+  to   { transform: translateX(0); }
+}
+
+@keyframes slide-in-up {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+
+@keyframes slide-in-down {
+  from { transform: translateY(-100%); }
+  to   { transform: translateY(0); }
+}
+
+/* ═══════════════════════════════════════════════════════════════ */
+/*  UTILITY                                                      */
+/* ═══════════════════════════════════════════════════════════════ */
+
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: 0.7; transform: scale(1.05); }
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  25%      { transform: translateY(-12px); }
+  50%      { transform: translateY(0); }
+  75%      { transform: translateY(-6px); }
+}
+
+/* ═══════════════════════════════════════════════════════════════ */
+/*  ENTRANCE: stagger-ready classes                               */
+/* ═══════════════════════════════════════════════════════════════ */
+
+.anim-fade-in       { animation: fade-in       var(--duration-normal, 200ms) var(--ease-standard, ease) both; }
+.anim-fade-in-up    { animation: fade-in-up    var(--duration-normal, 200ms) var(--ease-decelerated, ease-out) both; }
+.anim-fade-in-down  { animation: fade-in-down  var(--duration-normal, 200ms) var(--ease-decelerated, ease-out) both; }
+.anim-fade-in-left  { animation: fade-in-left  var(--duration-normal, 200ms) var(--ease-decelerated, ease-out) both; }
+.anim-fade-in-right { animation: fade-in-right var(--duration-normal, 200ms) var(--ease-decelerated, ease-out) both; }
+.anim-scale-in      { animation: scale-in      var(--duration-normal, 200ms) var(--ease-decelerated, ease-out) both; }
+.anim-scale-in-bounce { animation: scale-in-bounce var(--duration-slow, 350ms) var(--ease-standard, ease) both; }
+.anim-slide-in-left { animation: slide-in-left var(--duration-slow, 350ms) var(--ease-standard, ease) both; }
+.anim-slide-in-right { animation: slide-in-right var(--duration-slow, 350ms) var(--ease-standard, ease) both; }
+.anim-shimmer       { animation: shimmer 1.5s linear infinite; }
+.anim-spin          { animation: spin 1s linear infinite; }
+.anim-pulse         { animation: pulse 2s ease-in-out infinite; }
+.anim-bounce        { animation: bounce 1s ease infinite; }
+
+/* Stagger helper: apply to children to auto-stagger */
+.anim-stagger > * {
+  animation: fade-in-up var(--duration-normal, 200ms) var(--ease-decelerated, ease-out) both;
+  animation-delay: calc(var(--stagger-delay, 50ms) * var(--stagger-index, 0));
+}
+
+/* ═══════════════════════════════════════════════════════════════ */
+/*  PREFERS-REDUCED-MOTION                                        */
+/* ═══════════════════════════════════════════════════════════════ */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* Preserve opacity-based animations (accessibility critical) */
+  .anim-fade-in,
+  .anim-fade-in-up,
+  .anim-fade-in-down,
+  .anim-fade-in-left,
+  .anim-fade-in-right,
+  .anim-scale-in,
+  .anim-scale-in-bounce {
+    animation: fade-in var(--duration-instant, 50ms) ease both !important;
+  }
+
+  /* Keep shimmer but at imperceptible speed for screen readers */
+  .anim-shimmer {
+    animation: none !important;
+    background: var(--shimmer-fallback, #e0e0e0) !important;
+  }
+
+  /* Keep spin for loading states but at 1 iteration */
+  .anim-spin {
+    animation: none !important;
+  }
+
+  /* Keep pulse for attention states but static */
+  .anim-pulse {
+    animation: none !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════ */
+/*  .NO-MOTION CLASS OVERRIDE (opt-out via parent)               */
+/* ═══════════════════════════════════════════════════════════════ */
+
+.no-motion *,
+.no-motion *::before,
+.no-motion *::after {
+  animation: none !important;
+  transition: none !important;
+}

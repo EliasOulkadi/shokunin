@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5" />
+  <meta name="description" content="[Product name] — [one-line benefit statement. 120-160 chars]" />
+  <meta name="theme-color" content="#080808" />
+  <link rel="canonical" href="https://example.com" />
+
+  <!-- Preload fonts -->
+  <link rel="preload" href="/fonts/inter.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="/fonts/charter.woff2" as="font" type="font/woff2" crossorigin />
+
+  <title>[Product name] — [compelling benefit, under 10 words]</title>
+
+  <style>
+    /* ── Critical CSS (inlined for instant render) ── */
+
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg: #080808;
+      --bg-elevated: #111;
+      --text: #f0f0f0;
+      --text-muted: #888;
+      --accent: #6c5ce7;
+      --accent-hover: #7d6ff0;
+      --radius: 12px;
+      --space-xs: 8px;
+      --space-sm: 16px;
+      --space-md: 24px;
+      --space-lg: 48px;
+      --space-xl: clamp(4rem, 8vw, 8rem);
+      --font-sans: Inter, system-ui, -apple-system, sans-serif;
+      --font-serif: Charter, Georgia, serif;
+      --container: min(1200px, 100% - 2rem);
+      --grain: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    }
+
+    html {
+      scroll-behavior: smooth;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      font-size: 16px;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: var(--grain);
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* Base headings */
+    h1, h2, h3, h4 {
+      font-family: var(--font-serif);
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+    }
+
+    /* Layout */
+    .container {
+      width: 100%;
+      max-width: var(--container);
+      margin-inline: auto;
+      padding-inline: 1rem;
+    }
+
+    /* ── Hero ── */
+    .hero {
+      min-height: 100dvh;
+      display: flex;
+      align-items: center;
+      padding-block: var(--space-xl);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero__content {
+      position: relative;
+      z-index: 2;
+      max-width: 680px;
+    }
+
+    .hero__tagline {
+      font-size: 0.875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--accent);
+      margin-bottom: var(--space-sm);
+      font-weight: 600;
+    }
+
+    .hero__headline {
+      font-size: clamp(2.5rem, 5vw, 4.5rem);
+      line-height: 1.05;
+      margin-bottom: var(--space-md);
+    }
+
+    .hero__sub {
+      font-size: clamp(1rem, 2vw, 1.25rem);
+      color: var(--text-muted);
+      max-width: 540px;
+      margin-bottom: var(--space-md);
+    }
+
+    .hero__actions {
+      display: flex;
+      gap: var(--space-sm);
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .hero__visual {
+      position: absolute;
+      right: -5%;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 50%;
+      max-width: 600px;
+      z-index: 1;
+      opacity: 0.6;
+      pointer-events: none;
+      /* Parallax placeholder — implement via JS or CSS scroll-driven */
+    }
+
+    /* ── CTA ── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      font-family: var(--font-sans);
+      font-weight: 600;
+      font-size: 1rem;
+      text-decoration: none;
+      cursor: pointer;
+      border: none;
+      border-radius: var(--radius);
+      transition: all 0.2s ease;
+      min-height: 48px;
+      min-width: 48px;
+      padding: 0.75rem 1.75rem;
+    }
+
+    .btn--primary {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .btn--primary:hover,
+    .btn--primary:focus-visible {
+      background: var(--accent-hover);
+      transform: translateY(-1px);
+    }
+
+    .btn--secondary {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid rgba(255,255,255,0.15);
+    }
+
+    .btn--secondary:hover,
+    .btn--secondary:focus-visible {
+      border-color: rgba(255,255,255,0.3);
+      background: rgba(255,255,255,0.05);
+    }
+
+    .btn:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    /* ── Social proof ── */
+    .social-proof {
+      padding-block: var(--space-lg);
+      text-align: center;
+    }
+
+    .social-proof__label {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+      margin-bottom: var(--space-md);
+    }
+
+    .social-proof__logos {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: var(--space-lg);
+      filter: grayscale(1) brightness(1.5);
+      opacity: 0.6;
+    }
+
+    .social-proof__logos img {
+      height: 28px;
+      width: auto;
+      transition: all 0.3s ease;
+    }
+
+    .social-proof__logos img:hover {
+      filter: none;
+      opacity: 1;
+    }
+
+    .social-proof__metric {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-top: var(--space-md);
+    }
+
+    .social-proof__metric span {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      font-weight: 400;
+    }
+
+    /* ── Sections ── */
+    section {
+      padding-block: var(--space-xl);
+    }
+
+    .section__label {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--accent);
+      margin-bottom: var(--space-xs);
+      font-weight: 600;
+    }
+
+    .section__title {
+      font-size: clamp(2rem, 4vw, 3rem);
+      margin-bottom: var(--space-sm);
+    }
+
+    .section__desc {
+      font-size: 1.125rem;
+      color: var(--text-muted);
+      max-width: 600px;
+      margin-bottom: var(--space-lg);
+    }
+
+    /* ── Features grid ── */
+    .features {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-md);
+    }
+
+    .feature {
+      padding: var(--space-md);
+      border-radius: var(--radius);
+      background: var(--bg-elevated);
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .feature__icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      background: rgba(108, 92, 231, 0.12);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: var(--space-sm);
+      font-size: 1.25rem;
+    }
+
+    .feature__title {
+      font-family: var(--font-serif);
+      font-size: 1.25rem;
+      margin-bottom: var(--space-xs);
+    }
+
+    .feature__desc {
+      font-size: 0.925rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    /* ── Problem (PAS) ── */
+    .pas {
+      max-width: 700px;
+      margin-inline: auto;
+    }
+
+    .pas p {
+      font-size: 1.125rem;
+      margin-bottom: var(--space-sm);
+      color: var(--text-muted);
+    }
+
+    .pas .pas__strong {
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    /* ── Testimonials ── */
+    .testimonials {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--space-md);
+    }
+
+    .testimonial {
+      background: var(--bg-elevated);
+      border-radius: var(--radius);
+      padding: var(--space-md);
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .testimonial__quote {
+      font-size: 0.95rem;
+      line-height: 1.7;
+      color: var(--text-muted);
+      margin-bottom: var(--space-sm);
+      font-style: italic;
+    }
+
+    .testimonial__author {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+
+    .testimonial__avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    .testimonial__name {
+      font-size: 0.875rem;
+      font-weight: 600;
+    }
+
+    .testimonial__role {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    /* ── Pricing ── */
+    .pricing {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-md);
+      align-items: start;
+    }
+
+    .plan {
+      background: var(--bg-elevated);
+      border-radius: var(--radius);
+      padding: var(--space-md);
+      border: 1px solid rgba(255,255,255,0.06);
+      position: relative;
+    }
+
+    .plan--featured {
+      border-color: var(--accent);
+      transform: scale(1.05);
+      background: linear-gradient(180deg, rgba(108,92,231,0.06), transparent);
+    }
+
+    .plan__badge {
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--accent);
+      color: #fff;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 0.25rem 1rem;
+      border-radius: 100px;
+    }
+
+    .plan__name {
+      font-family: var(--font-serif);
+      font-size: 1.25rem;
+      margin-bottom: var(--space-xs);
+    }
+
+    .plan__price {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: var(--space-xs);
+    }
+
+    .plan__price span {
+      font-size: 1rem;
+      font-weight: 400;
+      color: var(--text-muted);
+    }
+
+    .plan__desc {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      margin-bottom: var(--space-md);
+    }
+
+    .plan__features {
+      list-style: none;
+      margin-bottom: var(--space-md);
+    }
+
+    .plan__features li {
+      padding-block: 6px;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .plan__features li::before {
+      content: '✓';
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .plan .btn {
+      width: 100%;
+    }
+
+    /* ── FAQ ── */
+    .faq-list {
+      max-width: 700px;
+      margin-inline: auto;
+    }
+
+    .faq-item {
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      padding-block: var(--space-sm);
+    }
+
+    .faq-item__q {
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: none;
+      border: none;
+      color: var(--text);
+      font-size: 1rem;
+      width: 100%;
+      text-align: left;
+      padding: 0;
+      min-height: 44px;
+    }
+
+    .faq-item__q::after {
+      content: '+';
+      font-size: 1.25rem;
+      color: var(--text-muted);
+      transition: transform 0.2s ease;
+    }
+
+    .faq-item[open] .faq-item__q::after {
+      content: '−';
+    }
+
+    .faq-item__a {
+      padding-top: var(--space-xs);
+      color: var(--text-muted);
+      font-size: 0.925rem;
+      line-height: 1.7;
+    }
+
+    /* ── Final CTA ── */
+    .final-cta {
+      text-align: center;
+    }
+
+    .final-cta .hero__sub {
+      margin-inline: auto;
+    }
+
+    .final-cta .hero__actions {
+      justify-content: center;
+    }
+
+    /* ── Footer ── */
+    .footer {
+      padding-block: var(--space-lg);
+      border-top: 1px solid rgba(255,255,255,0.06);
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .footer a {
+      color: var(--text);
+      text-decoration: none;
+    }
+
+    .footer a:hover {
+      text-decoration: underline;
+    }
+
+    /* ── Focus styles ── */
+    :focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    /* ── Reduced motion ── */
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+      html {
+        scroll-behavior: auto;
+      }
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 1024px) {
+      .features {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .pricing {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .plan--featured {
+        transform: none;
+      }
+
+      .hero__visual {
+        opacity: 0.3;
+        width: 60%;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .features {
+        grid-template-columns: 1fr;
+      }
+
+      .testimonials {
+        grid-template-columns: 1fr;
+      }
+
+      .pricing {
+        grid-template-columns: 1fr;
+        gap: var(--space-lg);
+      }
+
+      .hero__visual {
+        display: none;
+      }
+
+      .hero__content {
+        max-width: 100%;
+        text-align: center;
+      }
+
+      .hero__sub {
+        margin-inline: auto;
+      }
+
+      .hero__actions {
+        justify-content: center;
+      }
+
+      .btn {
+        width: 100%;
+      }
+    }
+
+    @media (max-width: 480px) {
+      :root {
+        --space-xl: clamp(3rem, 6vw, 4rem);
+      }
+
+      .social-proof__logos {
+        gap: var(--space-md);
+      }
+
+      .social-proof__logos img {
+        height: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="hero" role="banner">
+    <div class="container">
+      <div class="hero__content">
+        <p class="hero__tagline">[Tagline — one word brand promise]</p>
+        <h1 class="hero__headline">[Headline — compelling benefit, &lt;10 words]</h1>
+        <p class="hero__sub">[Subheadline — expand on the headline. What do they get? Why should they care?]</p>
+        <div class="hero__actions">
+          <a href="#cta" class="btn btn--primary" data-cta="primary">
+            [Start my free trial] &rarr;
+          </a>
+          <a href="#demo" class="btn btn--secondary">
+            See how it works
+          </a>
+        </div>
+      </div>
+      <img
+        class="hero__visual"
+        src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='500'%3E%3Crect width='600' height='500' fill='%23111' rx='16'/%3E%3Ctext x='300' y='260' font-family='sans-serif' font-size='20' fill='%23555' text-anchor='middle'%3EProduct visual%3C/text%3E%3C/svg%3E"
+        alt="[Product name] interface preview"
+        width="600"
+        height="500"
+        loading="lazy"
+        decoding="async"
+      />
+    </div>
+  </header>
+
+  <section class="social-proof" aria-label="Social proof">
+    <div class="container">
+      <p class="social-proof__label">Trusted by teams from</p>
+      <div class="social-proof__logos">
+        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='28'%3E%3Crect width='80' height='28' fill='%23555' rx='4'/%3E%3C/svg%3E" alt="Company 1" width="80" height="28" loading="lazy" />
+        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='28'%3E%3Crect width='80' height='28' fill='%23555' rx='4'/%3E%3C/svg%3E" alt="Company 2" width="80" height="28" loading="lazy" />
+        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='28'%3E%3Crect width='80' height='28' fill='%23555' rx='4'/%3E%3C/svg%3E" alt="Company 3" width="80" height="28" loading="lazy" />
+        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='28'%3E%3Crect width='80' height='28' fill='%23555' rx='4'/%3E%3C/svg%3E" alt="Company 4" width="80" height="28" loading="lazy" />
+        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='28'%3E%3Crect width='80' height='28' fill='%23555' rx='4'/%3E%3C/svg%3E" alt="Company 5" width="80" height="28" loading="lazy" />
+        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='28'%3E%3Crect width='80' height='28' fill='%23555' rx='4'/%3E%3C/svg%3E" alt="Company 6" width="80" height="28" loading="lazy" />
+      </div>
+      <p class="social-proof__metric">
+        10,000+ <span>active users</span>
+      </p>
+    </div>
+  </section>
+
+  <section class="pas" aria-label="Problem and solution">
+    <div class="container">
+      <h2 class="section__title" style="text-align:center">[The problem you solve]</h2>
+      <div class="pas">
+        <p>
+          <span class="pas__strong">[Problem:]</span> [Name the exact pain. "You're spending hours on manual reporting."]
+        </p>
+        <p>
+          <span class="pas__strong">[The cost of not fixing it:]</span> [Consequences. Wasted time, lost revenue, stress.]
+        </p>
+        <p>
+          <span class="pas__strong">[Solution:]</span> [How you solve it, without over-explaining. "We automate everything so you can focus."]
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section aria-label="Features">
+    <div class="container">
+      <p class="section__label">Features</p>
+      <h2 class="section__title">[Benefit-led headline]</h2>
+      <p class="section__desc">[Subtext explaining the value, not the feature list]</p>
+
+      <div class="features">
+        <article class="feature">
+          <div class="feature__icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+          </div>
+          <h3 class="feature__title">[Benefit headline]</h3>
+          <p class="feature__desc">[One clear benefit. Not what it does — what it enables.]</p>
+        </article>
+        <article class="feature">
+          <div class="feature__icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+          </div>
+          <h3 class="feature__title">[Benefit headline]</h3>
+          <p class="feature__desc">[One clear benefit. Not what it does — what it enables.]</p>
+        </article>
+        <article class="feature">
+          <div class="feature__icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <h3 class="feature__title">[Benefit headline]</h3>
+          <p class="feature__desc">[One clear benefit. Not what it does — what it enables.]</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section aria-label="Testimonials">
+    <div class="container">
+      <p class="section__label">Testimonials</p>
+      <h2 class="section__title">[Headline about trust and results]</h2>
+      <p class="section__desc">[Short context about who these people are]</p>
+
+      <div class="testimonials">
+        <blockquote class="testimonial">
+          <p class="testimonial__quote">"[Specific result they achieved. Numbers if possible. 'Increased our conversions by 40% in the first month.']"</p>
+          <footer class="testimonial__author">
+            <img
+              class="testimonial__avatar"
+              src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Ccircle cx='20' cy='20' r='20' fill='%23333'/%3E%3C/svg%3E"
+              alt="[Name]"
+              width="40"
+              height="40"
+              loading="lazy"
+            />
+            <div>
+              <cite class="testimonial__name">[Full name]</cite>
+              <p class="testimonial__role">[Title], [Company]</p>
+            </div>
+          </footer>
+        </blockquote>
+        <blockquote class="testimonial">
+          <p class="testimonial__quote">"[Specific result they achieved. Different context from the first one to cover range of benefits.]"</p>
+          <footer class="testimonial__author">
+            <img
+              class="testimonial__avatar"
+              src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Ccircle cx='20' cy='20' r='20' fill='%23333'/%3E%3C/svg%3E"
+              alt="[Name]"
+              width="40"
+              height="40"
+              loading="lazy"
+            />
+            <div>
+              <cite class="testimonial__name">[Full name]</cite>
+              <p class="testimonial__role">[Title], [Company]</p>
+            </div>
+          </footer>
+        </blockquote>
+      </div>
+    </div>
+  </section>
+
+  <section aria-label="Pricing">
+    <div class="container">
+      <p class="section__label">Pricing</p>
+      <h2 class="section__title">[Simple, transparent pricing]</h2>
+      <p class="section__desc">[Short pricing philosophy or guarantee statement]</p>
+
+      <div class="pricing">
+
+        <article class="plan">
+          <h3 class="plan__name">Starter</h3>
+          <p class="plan__price">$19 <span>/month</span></p>
+          <p class="plan__desc">[What this tier is best for]</p>
+          <ul class="plan__features">
+            <li>Feature one</li>
+            <li>Feature two</li>
+            <li>Feature three</li>
+            <li>Feature four</li>
+          </ul>
+          <a href="#cta" class="btn btn--secondary" data-cta="pricing">Get started</a>
+        </article>
+
+        <article class="plan plan--featured">
+          <span class="plan__badge">Most popular</span>
+          <h3 class="plan__name">Pro</h3>
+          <p class="plan__price">$49 <span>/month</span></p>
+          <p class="plan__desc">[What this tier is best for]</p>
+          <ul class="plan__features">
+            <li>Everything in Starter</li>
+            <li>Advanced feature</li>
+            <li>Premium feature</li>
+            <li>Priority support</li>
+            <li>Integrations</li>
+          </ul>
+          <a href="#cta" class="btn btn--primary" data-cta="pricing">Get started</a>
+          <p style="font-size:0.8rem;color:var(--text-muted);text-align:center;margin-top:var(--space-xs)">30-day money-back guarantee</p>
+        </article>
+
+        <article class="plan">
+          <h3 class="plan__name">Enterprise</h3>
+          <p class="plan__price">$149 <span>/month</span></p>
+          <p class="plan__desc">[What this tier is best for]</p>
+          <ul class="plan__features">
+            <li>Everything in Pro</li>
+            <li>SSO &amp; SAML</li>
+            <li>Custom integrations</li>
+            <li>Dedicated support</li>
+            <li>SLA guarantee</li>
+          </ul>
+          <a href="#cta" class="btn btn--secondary" data-cta="pricing">Contact sales</a>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+  <section aria-label="Frequently asked questions">
+    <div class="container">
+      <p class="section__label">FAQ</p>
+      <h2 class="section__title">[Common questions answered]</h2>
+      <p class="section__desc">[Subtext if needed]</p>
+
+      <div class="faq-list">
+        <details class="faq-item">
+          <summary class="faq-item__q">[What happens after I sign up?]</summary>
+          <div class="faq-item__a">[Clear answer addressing the concern or objection behind the question.]</div>
+        </details>
+        <details class="faq-item">
+          <summary class="faq-item__q">[Can I switch plans later?]</summary>
+          <div class="faq-item__a">[Clear answer addressing the concern or objection behind the question.]</div>
+        </details>
+        <details class="faq-item">
+          <summary class="faq-item__q">[Is there a free trial?]</summary>
+          <div class="faq-item__a">[Clear answer addressing the concern or objection behind the question.]</div>
+        </details>
+        <details class="faq-item">
+          <summary class="faq-item__q">[What kind of support do you offer?]</summary>
+          <div class="faq-item__a">[Clear answer addressing the concern or objection behind the question.]</div>
+        </details>
+        <details class="faq-item">
+          <summary class="faq-item__q">[How does the money-back guarantee work?]</summary>
+          <div class="faq-item__a">[Clear answer addressing the concern or objection behind the question.]</div>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <section class="final-cta" aria-label="Final call to action">
+    <div class="container">
+      <div class="hero__content" style="max-width:100%">
+        <p class="hero__tagline">[Reinforce the value]</p>
+        <h2 class="hero__headline" id="cta">[Same ask, different context — near scroll bottom]</h2>
+        <p class="hero__sub">[Remove remaining hesitation with one final benefit + risk reversal]</p>
+        <div class="hero__actions">
+          <a href="#" class="btn btn--primary" data-cta="final">
+            [Start my free trial] &rarr;
+          </a>
+        </div>
+        <p style="font-size:0.8rem;color:var(--text-muted);margin-top:var(--space-xs)">
+          No credit card required &middot; Cancel anytime &middot; 30-day guarantee
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer" role="contentinfo">
+    <div class="container">
+      <p>
+        &copy; <span id="year"></span> [Company Name].
+        All rights reserved.
+        <a href="#">Privacy Policy</a> &middot;
+        <a href="#">Terms of Service</a>
+      </p>
+    </div>
+  </footer>
+
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear()
+  </script>
+
+  <!-- Non-critical CSS loaded asynchronously -->
+  <link rel="preload" href="/styles/non-critical.css" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+  <noscript><link rel="stylesheet" href="/styles/non-critical.css" /></noscript>
+
+</body>
+</html>

@@ -1,0 +1,163 @@
+/* Modern CSS Reset
+   Based on Andy Bell's modern reset, with responsive-friendly additions.
+   https://piccalil.li/blog/a-modern-css-reset/ */
+
+/* Box-sizing: border-box everywhere */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* Remove default margin */
+* {
+  margin: 0;
+}
+
+html {
+  /* Smooth scrolling — users with vestibular disorders can override via prefers-reduced-motion */
+  scroll-behavior: smooth;
+}
+
+body {
+  /* Improve text rendering */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  /* Sensible base line-height */
+  line-height: 1.5;
+
+  /* Minimum readable body size — prevents mobile zoom issues */
+  font-size: 16px;
+
+  /* Allow content to set the body height naturally */
+  min-height: 100svh;
+}
+
+/* Responsive media elements */
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+  max-inline-size: 100%;
+  block-size: auto;
+}
+
+/* Preserve aspect ratio for embedded media */
+iframe {
+  max-inline-size: 100%;
+}
+
+/* Inherit fonts for form elements (buttons, inputs, selects, textareas) */
+input,
+button,
+textarea,
+select {
+  font: inherit;
+  letter-spacing: inherit;
+  word-spacing: inherit;
+}
+
+/* Remove default button styling */
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+  padding: 0;
+  color: inherit;
+}
+
+/* Remove default fieldset styling */
+fieldset {
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* Make textareas resizable only vertically — prevents layout breakage */
+textarea {
+  resize: vertical;
+}
+
+/* Prevent font size inflation on landscape mobile */
+/* See: https://kilianvalkhof.com/2022/css-html/your-css-reset-needs-text-size-adjust-probably/ */
+html {
+  -moz-text-size-adjust: none;
+  -webkit-text-size-adjust: none;
+  text-size-adjust: none;
+}
+
+/* Remove list styling on elements with [role="list"] (accessibility-safe reset) */
+ul[role="list"],
+ol[role="list"] {
+  list-style: none;
+  padding: 0;
+}
+
+/* Anchor elements without a class get default styling */
+a:not([class]) {
+  text-decoration-skip-ink: auto;
+  color: currentColor;
+}
+
+/* Remove animations and transitions for users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* Focus visible for keyboard navigation */
+:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+/* Remove focus outline for mouse users */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Prevent overflow — images, tables, code blocks won't break the layout */
+pre,
+code,
+kbd,
+samp {
+  max-inline-size: 100%;
+  overflow-x: auto;
+}
+
+/* Table consistency */
+table {
+  border-collapse: collapse;
+  inline-size: 100%;
+}
+
+/* Hyphenation for long words */
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+
+/* Root stacking context for better z-index management */
+#root,
+#__next {
+  isolation: isolate;
+}
