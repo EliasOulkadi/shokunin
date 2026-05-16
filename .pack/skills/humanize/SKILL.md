@@ -1,3 +1,6 @@
+---
+name: humanize
+---
 # humanize · 人間
 
 **人間 · にんげん** — "human being". Makes AI-generated text sound like a real person wrote it.

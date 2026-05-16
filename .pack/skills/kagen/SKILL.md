@@ -1,3 +1,6 @@
+---
+name: kagen
+---
 # kagen · 紙源
 
 **紙源 · かげん** - paper source. PDF generation companion to Kami.

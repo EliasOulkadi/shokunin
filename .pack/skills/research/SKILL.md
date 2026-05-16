@@ -1,3 +1,6 @@
+---
+name: research
+---
 # research · 調査
 
 **調査 · ちょうさ** — "investigation". Source verification and fact-checking for document generation.
