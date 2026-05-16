@@ -35,9 +35,9 @@ OpenCode + VS Code + WezTerm
 
 ## Skills
 
-38 skills across 8 domains. Each skill teaches the agent how to handle a specific domain — with decision tables, error patterns, production checklists, anti-patterns, and cited sources. Not generic prompts. Real engineering guides.
+38 skills across 8 domains. Each skill teaches the agent how to handle a specific domain: with decision tables, error patterns, production checklists, anti-patterns, and cited sources. Not generic prompts. Real engineering guides.
 
-The Docker skill is 6,300 words with multi-stage build templates for Node, Go, Python and Rust, BuildKit cache optimization, distroless base images, seccomp profiles, and CVE scanning. The auth skill references OWASP directly. The database one has real EXPLAIN ANALYZE output. Skills are validated by CI on every push: frontmatter, workflow, error handling, sources — all mandatory.
+The Docker skill is 6,300 words with multi-stage build templates for Node, Go, Python and Rust, BuildKit cache optimization, distroless base images, seccomp profiles, and CVE scanning. The auth skill references OWASP directly. The database one has real EXPLAIN ANALYZE output. Skills are validated by CI on every push: frontmatter, workflow, error handling, sources. All mandatory.
 
 | Domain | Skills | Version |
 |--------|--------|---------|
@@ -80,7 +80,7 @@ Each skill includes: trigger-optimized descriptions, procedural workflows, error
 | **Python** | ≥ 3.11 | Run `python3 --version` to verify. |
 | **Git** | ≥ 2.x | Run `git --version` to verify. |
 
-### Linux — additional dependencies
+### Linux: additional dependencies
 | Dependency | Why | Install |
 |------------|-----|---------|
 | `python3-pip` | Required for ChromaDB. Not included by default on Ubuntu/Debian. | `sudo apt-get install -y python3-pip` |
@@ -89,7 +89,7 @@ Each skill includes: trigger-optimized descriptions, procedural workflows, error
 
 > **Ubuntu 24.04+:** PEP 668 blocks global `pip install` by default. The installer handles this automatically with `--break-system-packages`. If you run into issues, see the Troubleshooting section below.
 
-### Windows — additional notes
+### Windows: additional notes
 - PowerShell 5.1+ required. Run `$PSVersionTable.PSVersion` to verify.
 - Execution policy must allow scripts: `Set-ExecutionPolicy RemoteSigned -Scope CurrentUser`
 
@@ -100,7 +100,7 @@ Each skill includes: trigger-optimized descriptions, procedural workflows, error
 # 1. Install
 irm https://raw.githubusercontent.com/EliasOulkadi/shokunin/master/install.ps1 | iex
 
-# 2. (Optional) Free NVIDIA API key — or skip, OpenCode Go works without it
+# 2. (Optional) Free NVIDIA API key, or skip, OpenCode Go works without it
 #    https://build.nvidia.com/
 
 # 3. Start OpenCode (with memory capture)
@@ -115,7 +115,7 @@ opencode
 # 1. Install
 bash <(curl -sL https://raw.githubusercontent.com/EliasOulkadi/shokunin/master/install.sh)
 
-# 2. (Optional) Free NVIDIA API key — or skip, OpenCode Go works without it
+# 2. (Optional) Free NVIDIA API key, or skip, OpenCode Go works without it
 #    https://build.nvidia.com/
 
 # Quick Start (non-interactive):
