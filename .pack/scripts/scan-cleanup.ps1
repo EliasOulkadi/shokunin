@@ -69,7 +69,7 @@ function Classify-File {
         if ($Info.DaysSinceModified -gt 60) { return @("safe","PAPELERA","Comprimido antiguo") }
         return @("review","REVISA","Comprimido reciente")
     }
-    if ($Info.Directory -eq "Desktop") {
+    if ($Info.Directory -eq (Split-Path -Leaf ([Environment]::GetFolderPath('Desktop')))) {
         if ($Info.DaysSinceModified -gt 30) { return @("review","REVISA","Archivo suelto en Desktop") }
         return @("keep","CONSERVAR","En Desktop, reciente")
     }
@@ -114,6 +114,7 @@ function Do-Cleanup {
     $header = "=== CLEANUP $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') ==="
     Add-Content -Path $logFile -Value $header
 
+    Add-Type -AssemblyName Microsoft.VisualBasic
     foreach ($id in $Ids) {
         $parts = $id -split "\|"
         $path = $parts[0]
@@ -121,7 +122,6 @@ function Do-Cleanup {
         if (Test-Path $path) {
             try {
                 $item = Get-Item -LiteralPath $path
-                Add-Type -AssemblyName Microsoft.VisualBasic
                 [Microsoft.VisualBasic.FileIO.FileSystem]::DeleteFile($path, "OnlyErrorDialogs", "SendToRecycleBin")
                 $entry = "$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') | MOVED | $path | $($item.Length) | $reason"
                 Add-Content -Path $logFile -Value $entry
@@ -145,8 +145,8 @@ function Do-Cleanup {
 if ($Scan) {
     $groups = @{}
     $targets = @{
-        "DESKTOP" = "$env:USERPROFILE\Desktop"
-        "DOWNLOADS" = "$env:USERPROFILE\Downloads"
+        "DESKTOP" = [Environment]::GetFolderPath('Desktop')
+        "DOWNLOADS" = Join-Path $env:USERPROFILE "Downloads"
     }
     $tempTarget = "$env:TEMP"
     if (Test-Path $tempTarget) { $targets["TEMP"] = $tempTarget }

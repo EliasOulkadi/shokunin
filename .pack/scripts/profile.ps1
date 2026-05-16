@@ -4,7 +4,7 @@
 # Aliases â€” Git
 function gst { git status }
 function ga { git add -A }
-function gc { param($m) git commit -m "$m" }
+function gcm { param($m) git commit -m "$m" }
 function gp { git push }
 function gl { git pull --ff-only }
 function gb { git branch }
@@ -28,10 +28,12 @@ function touch { param($File) New-Item -ItemType File -Path $File -Force }
 function which { param($Cmd) Get-Command $Cmd -ErrorAction SilentlyContinue | Select-Object Source }
 function admin { Start-Process powershell -Verb RunAs }
 
-# PSReadLine autocomplete
-Set-PSReadLineOption -PredictionSource History
-Set-PSReadLineOption -PredictionViewStyle Inline
-Set-PSReadLineKeyHandler -Key Ctrl+Space -Function MenuComplete
+# PSReadLine autocomplete (optional - skip if PSReadLine < 2.x)
+try {
+    Set-PSReadLineOption -PredictionSource History
+    Set-PSReadLineOption -PredictionViewStyle Inline -ErrorAction Stop
+    Set-PSReadLineKeyHandler -Key Ctrl+Space -Function MenuComplete -ErrorAction Stop
+} catch {}
 
 # Telegram Bot auto-start
 $botJob = Get-Job -Name "ShokuninBot" -ErrorAction SilentlyContinue

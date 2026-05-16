@@ -12,8 +12,7 @@ Nombre de la skill afectada o creada.
 - [ ] README actualizado si es nueva skill
 
 ## Validación
-- [ ] 
-ame coincide con el directorio
+- [ ] name coincide con el directorio
 - [ ] Descripción tiene triggers + negative triggers
 - [ ] Workflow numerado con pasos claros
 - [ ] Anti-patterns incluidos

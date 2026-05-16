@@ -19,6 +19,10 @@ COLLECTION_NAME = "shokunin_memory"
 client = chromadb.PersistentClient(path=CHROMA_PATH, settings=Settings(anonymized_telemetry=False))
 collection = client.get_or_create_collection(name=COLLECTION_NAME)
 
+def _sanitize_id(sid):
+    safe = sid.replace("..", "").replace(":", "-").replace("/", "-").replace("\\", "-")
+    return re.sub(r'[<>"|?*\0]', '-', safe)
+
 def save(text, session_id, entry_type="general", tags=None, project=""):
     if not text or not session_id:
         return {"error": "text and session_id required", "stored": False}
@@ -34,7 +38,7 @@ def save(text, session_id, entry_type="general", tags=None, project=""):
     }
     collection.add(documents=[text], metadatas=[metadata], ids=[entry_id])
     os.makedirs(SESSIONS_PATH, exist_ok=True)
-    safe_id = session_id.replace(":", "-").replace("/", "-")
+    safe_id = _sanitize_id(session_id)
     filepath = os.path.join(SESSIONS_PATH, f"{safe_id}.md")
     with open(filepath, "a", encoding="utf-8") as f:
         f.write(f"## {timestamp} | type: {entry_type}\n- **project:** {project}\n- **tags:** {json.dumps(tags)}\n\n{text}\n\n---\n")
@@ -354,7 +358,7 @@ def session_continue(session_id, summary_only=False):
     }
     if not summary_only:
         result["entries"] = entries
-    safe_id = session_id.replace(":", "-").replace("/", "-")
+    safe_id = _sanitize_id(session_id)
     jsonl_path = os.path.join(SESSIONS_PATH, f"{safe_id}.jsonl")
     jsonl_messages = []
     if os.path.isfile(jsonl_path):
@@ -377,7 +381,7 @@ def session_save(text, session_id, role="user"):
         return {"error": "text and session_id required", "stored": False}
     ts = datetime.now(timezone.utc).isoformat()
     entry = json.dumps({"t": "msg", "ts": ts, "role": role, "content": text}, ensure_ascii=False)
-    safe_id = session_id.replace(":", "-").replace("/", "-")
+    safe_id = _sanitize_id(session_id)
     filepath = os.path.join(SESSIONS_PATH, f"{safe_id}.jsonl")
     os.makedirs(SESSIONS_PATH, exist_ok=True)
     with open(filepath, "a", encoding="utf-8") as f:

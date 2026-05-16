@@ -49,14 +49,15 @@ try {
 
 $checkpointTimer = [System.Timers.Timer]::new($CHECKPOINT_INTERVAL_MS)
 $checkpointTimer.AutoReset = $true
+$capturedSessionId = $sessionId
 $timerEvent = Register-ObjectEvent -InputObject $checkpointTimer -EventName Elapsed -Action {
     $ts = Get-IsoTimestamp
-    $msg = "CHECKPOINT: Session $sessionId active at $ts"
+    $msg = "CHECKPOINT: Session $using:capturedSessionId active at $ts"
     try {
-        python $HELPER_PY save "$msg" $sessionId "checkpoint" "auto-checkpoint,system" "$(Get-Location)" 2>&1 | Out-Null
-        "$(Get-Date -Format 'HH:mm:ss') CHECKPOINT saved" | Out-File -FilePath "$LOG_DIR\$sessionId-checkpoints.log" -Append
+        python $HELPER_PY save "$msg" $using:capturedSessionId "checkpoint" "auto-checkpoint,system" "$(Get-Location)" 2>&1 | Out-Null
+        "$(Get-Date -Format 'HH:mm:ss') CHECKPOINT saved" | Out-File -FilePath "$LOG_DIR\$using:capturedSessionId-checkpoints.log" -Append
     } catch {
-        "$(Get-Date -Format 'HH:mm:ss') CHECKPOINT (md only)" | Out-File -FilePath "$LOG_DIR\$sessionId-checkpoints.log" -Append
+        "$(Get-Date -Format 'HH:mm:ss') CHECKPOINT (md only)" | Out-File -FilePath "$LOG_DIR\$using:capturedSessionId-checkpoints.log" -Append
     }
 }
 $checkpointTimer.Start()

@@ -73,7 +73,7 @@ Check -Name "store via MCP" -ScriptBlock {
 Check -Name "search via MCP" -ScriptBlock {
     $req = '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"search_context","arguments":{"query":"MCP healthcheck"}}}'
     $resp = $req | python "$env:USERPROFILE\.shokunin\memory\mcp-server.py" 2>&1
-    if ($resp -notmatch "mcp-test" -and $resp.Length -lt 50) { throw "MCP search returned empty" }
+    if ($resp -notmatch "mcp-test" -or $resp.Length -lt 50) { throw "MCP search returned empty" }
 }
 
 # 4. Script syntax

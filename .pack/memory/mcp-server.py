@@ -2,6 +2,7 @@
 import json
 import logging
 import os
+import re
 import sys
 import uuid
 from datetime import datetime, timezone
@@ -40,7 +41,8 @@ def _get_ch():
     return _ch_stub
 
 def _safe_id(sid):
-    return sid.replace(":", "-").replace("/", "-").replace("\\", "-")
+    safe = sid.replace("..", "").replace(":", "-").replace("/", "-").replace("\\", "-")
+    return re.sub(r'[<>"|?*\0]', '-', safe)
 
 def _log_jsonl(session_id, entry_type, content, role=None):
     if not session_id:
@@ -188,7 +190,7 @@ def handle_tools_list():
 def _save_to_markdown(text, session_id, entry_type, tags, project):
     try:
         os.makedirs(SESSIONS_PATH, exist_ok=True)
-        safe_id = session_id.replace(":", "-").replace("/", "-")
+        safe_id = _safe_id(session_id)
         filepath = os.path.join(SESSIONS_PATH, f"{safe_id}.md")
         ts = datetime.now(timezone.utc).isoformat()
         entry = (

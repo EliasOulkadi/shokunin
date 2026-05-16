@@ -61,7 +61,7 @@ jobs:
         run: python -m pytest tests/ -v
 
   test-scripts:
-    runs-on: windows-2025
+    runs-on: windows-latest
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-python@v6
@@ -108,7 +108,7 @@ jobs:
         run: python -c "import json; json.load(open('.pack/opencode.json')); print('JSON OK')"
       - name: Validate all SKILL.md have required fields
         run: |
-          for dir in */; do
+          for dir in .pack/skills/*/; do
             if [ -f "${dir}SKILL.md" ]; then
               head -5 "${dir}SKILL.md" | grep -q "name:" || echo "MISSING name: $dir"
               head -5 "${dir}SKILL.md" | grep -q "description:" || echo "MISSING description: $dir"

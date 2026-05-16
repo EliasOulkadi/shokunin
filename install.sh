@@ -93,7 +93,10 @@ step_msg "Installing Python dependencies..."
 if ! python3 -m pip --version &>/dev/null; then
   log "Installing python3-pip..."
   if command -v apt-get &>/dev/null; then
-    apt-get install -y python3-pip >> "$LOG_FILE" 2>&1 || {
+    if [ "$(id -u)" -ne 0 ]; then
+      SUDO="sudo"
+    fi
+    $SUDO apt-get install -y python3-pip >> "$LOG_FILE" 2>&1 || {
       fail "Could not install python3-pip. Try: sudo apt-get install python3-pip"
       exit 1
     }
@@ -133,6 +136,11 @@ for retry in 1 2 3; do
     git clone --depth 1 https://github.com/EliasOulkadi/shokunin.git "$REPO_DIR" 2>/dev/null && break
     sleep 1
 done
+
+if [ ! -d "$REPO_DIR" ]; then
+    fail "git clone failed after 3 attempts. Check network connectivity."
+    exit 1
+fi
 
 COUNT=0
 for dir in "$REPO_DIR/.pack/skills"/*/; do
@@ -197,8 +205,13 @@ if [ -f "$CONFIG_SRC" ]; then
     fi
 fi
 
-if [ -n "$NVIDIA_KEY" ] && ! grep -q "NVIDIA_API_KEY" "$HOME/.bashrc" 2>/dev/null; then
-    printf 'export NVIDIA_API_KEY="%s"\n' "$NVIDIA_KEY" >> "$HOME/.bashrc"
+NVIDIA_PROFILE=""
+if [ -f "$HOME/.zshrc" ]; then NVIDIA_PROFILE="$HOME/.zshrc"
+elif [ -f "$HOME/.bashrc" ]; then NVIDIA_PROFILE="$HOME/.bashrc"
+elif [ -f "$HOME/.bash_profile" ]; then NVIDIA_PROFILE="$HOME/.bash_profile"
+fi
+if [ -n "$NVIDIA_KEY" ] && [ -n "$NVIDIA_PROFILE" ] && ! grep -q "NVIDIA_API_KEY" "$NVIDIA_PROFILE" 2>/dev/null; then
+    printf 'export NVIDIA_API_KEY="%s"\n' "$NVIDIA_KEY" >> "$NVIDIA_PROFILE"
 fi
 log "Config generated"
 

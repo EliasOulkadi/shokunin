@@ -3,12 +3,13 @@
 # Requires: Windows 10/11, PowerShell 5.1+, Node.js 18+, Python 3.11+
 
 $ErrorActionPreference = "Stop"
-$Host.UI.RawUI.WindowTitle = "Shokunin AI Ecosystem Installer v4.0"
-$script:version = "4.0.0"
+$Host.UI.RawUI.WindowTitle = "Shokunin AI Ecosystem Installer v4.2.2"
+$script:version = "4.2.2"
 $script:installDir = "$env:USERPROFILE\.shokunin"
 $script:skillsDir = "$env:USERPROFILE\.config\opencode\skills"
 $script:startupDir = [Environment]::GetFolderPath('Startup')
 $script:logFile = "$env:TEMP\shokunin-install-$(Get-Date -Format 'yyyyMMdd-HHmmss').log"
+$script:sourceDir = if ($PSScriptRoot) { $PSScriptRoot } else { "" }
 
 # ============================================================
 # SECTION 1: LOGGING & DISPLAY
@@ -34,8 +35,8 @@ function Test-Prerequisites {
     # Node.js
     try {
         $nodeVer = node --version
-        $verNum = [int]($nodeVer -replace '[v.]','').Substring(0,2)
-        if ($verNum -lt 18) { throw "version too low" }
+        $ver = [Version]($nodeVer -replace '^v')
+        if ($ver.Major -lt 18) { throw "version too low" }
         Write-Log "Node.js $nodeVer" Green
     } catch { Write-Log "Node.js 18+ requerido (https://nodejs.org)" Red; $allOk = $false }
 
@@ -91,7 +92,7 @@ function Install-Dependencies {
 # ============================================================
 function Install-Skills {
     Write-Step "Instalando 62 skills..."
-    $repoSkills = Join-Path $PSScriptRoot ".pack\skills"
+    $repoSkills = Join-Path $script:sourceDir ".pack\skills"
 
     if (-not (Test-Path $script:skillsDir)) {
         New-Item -ItemType Directory -Path $script:skillsDir -Force | Out-Null
@@ -139,7 +140,7 @@ function Install-MemorySystem {
     Write-Log "Directorios creados en $script:installDir" Green
 
     # Copy MCP server
-    $mcpSrc = Join-Path $PSScriptRoot ".pack\memory\mcp-server.py"
+    $mcpSrc = Join-Path $script:sourceDir ".pack\memory\mcp-server.py"
     if (Test-Path $mcpSrc) {
         Copy-Item $mcpSrc (Join-Path $script:installDir "memory\mcp-server.py") -Force
     } else {
@@ -149,7 +150,7 @@ function Install-MemorySystem {
     }
 
     # Copy healthcheck script
-    $hcSrc = Join-Path $PSScriptRoot ".pack\scripts\weekly-healthcheck.ps1"
+    $hcSrc = Join-Path $script:sourceDir ".pack\scripts\weekly-healthcheck.ps1"
     if (Test-Path $hcSrc) {
         Copy-Item $hcSrc (Join-Path $script:installDir "scripts\weekly-healthcheck.ps1") -Force
     }
@@ -177,7 +178,7 @@ function Install-NewScripts {
 
     $count = 0
     foreach ($script in $newScripts) {
-        $src = Join-Path $PSScriptRoot ".pack\scripts\$script"
+        $src = Join-Path $script:sourceDir ".pack\scripts\$script"
         if (Test-Path $src) {
             Copy-Item $src (Join-Path $scriptsDir $script) -Force
             $count++
@@ -212,7 +213,14 @@ function Setup-OpenCodeConfig {
     }
 
     # Generate config with proper paths
-    $template = Get-Content (Join-Path $PSScriptRoot ".pack\opencode.json") -Raw
+    $templatePath = Join-Path $script:sourceDir ".pack\opencode.json"
+    if (Test-Path $templatePath) {
+        $template = Get-Content $templatePath -Raw
+    } else {
+        $url = "https://raw.githubusercontent.com/EliasOulkadi/shokunin/master/.pack/opencode.json"
+        $template = (Invoke-WebRequest -Uri $url).Content
+        Write-Log "Template descargado desde GitHub" Yellow
+    }
     $jsonPath = $env:USERPROFILE.Replace('\', '\\')
     $template = $template -replace "{{MCP_ROOT_PATH}}", $jsonPath
     $template = $template -replace "{{PYTHON_BIN}}", "python"
@@ -248,18 +256,10 @@ function Setup-PowerShellProfile {
     Write-Step "Configurando PowerShell profile..."
 
     $profileContent = @'
-# Shokunin profile loaded from .pack/scripts/profile.ps1
-$profileScript = Join-Path $PSScriptRoot ".pack\scripts\profile.ps1"
-if (Test-Path $profileScript) {
-    $profileContent = Get-Content $profileScript -Raw
-    $profileContent | Invoke-Expression
+$localScript = "$env:USERPROFILE\.shokunin\scripts\profile.ps1"
+if (Test-Path $localScript) {
+    . $localScript
     Write-Host "Shokunin AI Ecosystem loaded" -ForegroundColor Cyan
-} else {
-    $localProfile = "$env:USERPROFILE\.shokunin\scripts\profile.ps1"
-    if (Test-Path $localProfile) {
-        . $localProfile
-        Write-Host "Shokunin AI Ecosystem loaded" -ForegroundColor Cyan
-    }
 }
 '@
 
@@ -293,7 +293,7 @@ function Setup-Instructions {
     $claudeDir = "$env:USERPROFILE\.claude"
     if (-not (Test-Path $claudeDir)) { New-Item -ItemType Directory -Path $claudeDir -Force | Out-Null }
 
-    $claudeTemplate = Join-Path $PSScriptRoot ".pack\CLAUDE.md"
+    $claudeTemplate = Join-Path $script:sourceDir ".pack\CLAUDE.md"
     if (Test-Path $claudeTemplate) {
         $claudeContent = Get-Content $claudeTemplate -Raw
         if (Test-Path "$claudeDir\CLAUDE.md") {
@@ -305,7 +305,7 @@ function Setup-Instructions {
     }
 
     # AGENTS.md
-    $agentsTemplate = Join-Path $PSScriptRoot ".pack\AGENTS.md"
+    $agentsTemplate = Join-Path $script:sourceDir ".pack\AGENTS.md"
     if (Test-Path $agentsTemplate) {
         $agentsContent = Get-Content $agentsTemplate -Raw
         $agentsContent | Set-Content "$env:USERPROFILE\AGENTS.md" -Force -Encoding UTF8
@@ -341,7 +341,7 @@ function Setup-Extras {
     Write-Step "Instalando herramientas adicionales..."
 
     # WezTerm config
-    $weztermSrc = Join-Path $PSScriptRoot ".pack\wezterm.lua"
+    $weztermSrc = Join-Path $script:sourceDir ".pack\wezterm.lua"
     if (Test-Path $weztermSrc) {
         if (-not (Test-Path "$env:USERPROFILE\.wezterm.lua")) {
             Copy-Item $weztermSrc "$env:USERPROFILE\.wezterm.lua" -Force
@@ -350,14 +350,14 @@ function Setup-Extras {
     }
 
     # Bookmarklet
-    $bmSrc = Join-Path $PSScriptRoot ".pack\bookmarklet.html"
+    $bmSrc = Join-Path $script:sourceDir ".pack\bookmarklet.html"
     if (Test-Path $bmSrc) {
         Copy-Item $bmSrc "$env:USERPROFILE\shokunin-bookmarklet.html" -Force
         Write-Log "Bookmarklet: shokunin-bookmarklet.html" Green
     }
 
     # Dashboard
-    $dbSrc = Join-Path $PSScriptRoot ".pack\dashboard.html"
+    $dbSrc = Join-Path $script:sourceDir ".pack\dashboard.html"
     if (Test-Path $dbSrc) {
         Copy-Item $dbSrc "$env:USERPROFILE\shokunin-dashboard.html" -Force
         Write-Log "Dashboard: shokunin-dashboard.html" Green

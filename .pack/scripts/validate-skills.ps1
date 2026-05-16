@@ -46,7 +46,7 @@ foreach ($d in $skillDirs) {
     $refs = [regex]::Matches($content, 'scripts/[\w.-]+') | ForEach-Object { $_.Value }
     foreach ($ref in $refs) {
         $scriptPath = Join-Path $d.FullName $ref
-        $packPath = Join-Path $ENV:USERPROFILE ".shokunin\scripts\$ref"
+        $packPath = Join-Path $env:USERPROFILE ".shokunin\scripts\$ref"
         if (-not (Test-Path $scriptPath) -and -not (Test-Path $packPath)) {
             Warn "$($d.Name)" "referenced script not found: $ref"
         }
