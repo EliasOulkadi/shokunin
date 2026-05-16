@@ -6,7 +6,7 @@ Thanks for your interest in contributing. Here's what you need to know.
 
 Each skill lives in its own directory with a `SKILL.md` file at the root.
 
-1. Create a new directory in the repo root with a descriptive name (e.g. `my-skill/`)
+1. Create a new directory under `.pack/skills/` with a descriptive name (e.g. `.pack/skills/my-skill/`)
 2. Write a `SKILL.md` following the existing format:
    - YAML frontmatter with `name` and `description`
    - Section-based workflow with steps

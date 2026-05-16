@@ -92,7 +92,7 @@ function Install-Dependencies {
 # ============================================================
 function Install-Skills {
     Write-Step "Instalando 62 skills..."
-    $repoSkills = Join-Path $PSScriptRoot "."
+    $repoSkills = Join-Path $PSScriptRoot ".pack\skills"
 
     if (-not (Test-Path $script:skillsDir)) {
         New-Item -ItemType Directory -Path $script:skillsDir -Force | Out-Null
