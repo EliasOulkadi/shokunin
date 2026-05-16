@@ -35,6 +35,10 @@ OpenCode + VS Code + WezTerm
 
 ## Skills
 
+38 skills across 8 domains. Each skill teaches the agent how to handle a specific domain — with decision tables, error patterns, production checklists, anti-patterns, and cited sources. Not generic prompts. Real engineering guides.
+
+The Docker skill is 6,300 words with multi-stage build templates for Node, Go, Python and Rust, BuildKit cache optimization, distroless base images, seccomp profiles, and CVE scanning. The auth skill references OWASP directly. The database one has real EXPLAIN ANALYZE output. Skills are validated by CI on every push: frontmatter, workflow, error handling, sources — all mandatory.
+
 | Domain | Skills | Version |
 |--------|--------|---------|
 | **Infrastructure** | docker, kubernetes, terraform, ci-cd, db-admin | v3.0 |
