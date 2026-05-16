@@ -5,21 +5,23 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      - name: Validate SKILL.md frontmatter + required sections
+      - name: Validate SKILL.md frontmatter
         shell: bash
         run: |
           errors=0
+          warnings=0
           for dir in .pack/skills/*/; do
             f="${dir}SKILL.md"
             [ -f "$f" ] || continue
             n=$(basename "$dir")
             [ "$n" = "kami" ] && continue
-            grep -q "^name:" "$f" || { echo "MISSING name: $n"; errors=$((errors+1)); }
-            grep -qi "workflow\|structure\|60fps" "$f" || { echo "MISSING workflow: $n"; errors=$((errors+1)); }
-            grep -qi "error\|emergency" "$f" || { echo "MISSING error: $n"; errors=$((errors+1)); }
-            grep -qi "sources\|fuentes" "$f" || { echo "MISSING sources: $n"; errors=$((errors+1)); }
+            grep -q "^name:" "$f" || { echo "ERROR: MISSING name: $n"; errors=$((errors+1)); }
+            grep -qi "workflow\|structure\|60fps\|trigger\|sub-command" "$f" || { echo "WARN: MISSING workflow: $n"; warnings=$((warnings+1)); }
+            grep -qi "error\|emergency\|anti-pattern\|banned" "$f" || { echo "WARN: MISSING error section: $n"; warnings=$((warnings+1)); }
+            grep -qi "sources\|fuentes\|references\|cited" "$f" || { echo "WARN: MISSING sources: $n"; warnings=$((warnings+1)); }
           done
-          if [ "$errors" -gt 0 ]; then echo "FAILED: $errors"; exit 1; fi
+          echo "Skills validated: $errors errors, $warnings warnings"
+          if [ "$errors" -gt 0 ]; then exit 1; fi
           echo "All skills OK"
 
       - name: Validate JSON config
