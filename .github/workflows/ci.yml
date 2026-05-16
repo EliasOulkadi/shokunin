@@ -9,7 +9,7 @@ jobs:
         shell: bash
         run: |
           errors=0
-          for dir in .pack/skills/*/; do
+          for dir in */; do
             f="${dir}SKILL.md"
             [ -f "$f" ] || continue
             n=$(basename "$dir")
