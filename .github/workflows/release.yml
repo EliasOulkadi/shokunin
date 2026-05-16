@@ -30,11 +30,6 @@ jobs:
         run: |
           VERSION=${GITHUB_REF_NAME#v}
           mkdir -p "shokunin-$VERSION"
-          for dir in */; do
-            if [ -f "${dir}SKILL.md" ]; then
-              cp -r "$dir" "shokunin-$VERSION/"
-            fi
-          done
           cp -r .pack "shokunin-$VERSION/"
           cp install.ps1 install.sh "shokunin-$VERSION/"
           tar -czf "shokunin-$VERSION.tar.gz" "shokunin-$VERSION/"
@@ -48,6 +43,6 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           name: Shokunin ${{ github.ref_name }}
-          body_path: release-summary.txt
+          body: ${{ env.RELEASE_NOTES }}
           files: |
             ${{ env.ARCHIVE }}

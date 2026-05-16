@@ -47,7 +47,7 @@ function Classify-File {
     $name = $Info.Name.ToLower()
     $ext = $Info.Extension.ToLower()
 
-    if ($Info.FullName -match "memory\\|chroma_db\\|sessions\\") { return @("protect","CONSERVAR","Ruta protegida") }
+    if ($Info.FullName -match "(memory|chroma_db|sessions)\\") { return @("protect","CONSERVAR","Ruta protegida") }
 
     $isAiPdf = $false
     if ($Info.IsPdf) {
@@ -83,10 +83,10 @@ function Classify-File {
 
 function Write-Report {
     param($Groups)
-    $g = [char]0x1F7E2; $y = [char]0x1F7E1; $r = [char]0x1F534
+    $g = [System.Char]::ConvertFromUtf32(0x1F7E2); $y = [System.Char]::ConvertFromUtf32(0x1F7E1); $r = [System.Char]::ConvertFromUtf32(0x1F534)
     if ($Groups.Keys.Count -eq 0) { Write-Host "Nada que limpiar." -ForegroundColor Green; return }
 
-    Write-Host "Escaneando C:\Users\swagger..." -ForegroundColor Cyan
+    Write-Host "Escaneando $env:USERPROFILE..." -ForegroundColor Cyan
     foreach ($dir in ($Groups.Keys | Sort-Object)) {
         $files = $Groups[$dir]
         if ($files.Count -eq 0) { continue }

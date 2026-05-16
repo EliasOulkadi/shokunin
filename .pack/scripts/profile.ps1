@@ -4,7 +4,7 @@
 # Aliases â€” Git
 function gst { git status }
 function ga { git add -A }
-function gc { param($m) git commit -m $m }
+function gc { param($m) git commit -m "$m" }
 function gp { git push }
 function gl { git pull --ff-only }
 function gb { git branch }
@@ -63,4 +63,4 @@ function global:opencode {
     }
 }
 
-Write-Host "Shokunin AI Ecosystem loaded" -Fo
+Write-Host "Shokunin AI Ecosystem loaded" -ForegroundColor Cyan

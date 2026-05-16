@@ -109,8 +109,8 @@ if python3 -m pip install --dry-run chromadb 2>&1 | grep -q "externally-managed"
   PIP_FLAGS="$PIP_FLAGS --break-system-packages"
 fi
 
-if python3 -m pip install chromadb $PIP_FLAGS 2>&1 | grep -q "RECORD"; then
-  log "Detected typing-extensions conflict, ignoring"
+if python3 -m pip list 2>/dev/null | grep -qi "typing-extensions"; then
+  log "Detected typing-extensions, ignoring installed"
   PIP_FLAGS="$PIP_FLAGS --ignore-installed typing-extensions"
 fi
 
@@ -198,7 +198,7 @@ if [ -f "$CONFIG_SRC" ]; then
 fi
 
 if [ -n "$NVIDIA_KEY" ] && ! grep -q "NVIDIA_API_KEY" "$HOME/.bashrc" 2>/dev/null; then
-    echo "export NVIDIA_API_KEY='$NVIDIA_KEY'" >> "$HOME/.bashrc"
+    printf 'export NVIDIA_API_KEY="%s"\n' "$NVIDIA_KEY" >> "$HOME/.bashrc"
 fi
 log "Config generated"
 

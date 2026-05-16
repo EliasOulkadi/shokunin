@@ -2,6 +2,24 @@
   "$schema": "https://opencode.ai/config.json",
   "model": "opencode-go/deepseek-v4-flash",
   "provider": {
+    "nvidia": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "NVIDIA",
+      "api": "https://integrate.api.nvidia.com/v1",
+      "options": {
+        "baseURL": "https://integrate.api.nvidia.com/v1",
+        "timeout": 600000,
+        "chunkTimeout": 60000
+      },
+      "models": {
+        "moonshotai/kimi-k2.6": {
+          "name": "Kimi K2.6",
+          "reasoning": true,
+          "tool_call": true,
+          "temperature": true
+        }
+      }
+    },
     "opencode-go": {
       "npm": "@ai-sdk/openai-compatible",
       "name": "OpenCode Go",

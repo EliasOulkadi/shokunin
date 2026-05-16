@@ -83,7 +83,6 @@ function Install-Dependencies {
 
     Write-Step "Instalando MCP servers (npx)..."
     npm install -g @modelcontextprotocol/server-filesystem @modelcontextprotocol/server-fetch 2>&1 | Out-Null
-     2>&1 | Out-Null
     Write-OK
 }
 
@@ -111,12 +110,15 @@ function Install-Skills {
     if ($count -gt 0) { Write-Log "$count skills instaladas en $script:skillsDir" Green }
     else {
         Write-Log "No se encontraron skills en el repositorio. Clonando..." Yellow
-        git clone https://github.com/EliasOulkadi/shokunin.git "$env:TEMP\shokunin-tmp" 2>&1 | Out-Null
-        Get-ChildItem "$env:TEMP\shokunin-tmp" -Directory | Where-Object { Test-Path (Join-Path $_.FullName "SKILL.md") } | ForEach-Object {
-            $target = Join-Path $script:skillsDir $_.Name
-            if (-not (Test-Path $target)) { New-Item -ItemType Directory -Path $target -Force | Out-Null }
-            Copy-Item -Recurse -Force "$($_.FullName)\*" "$target\" -ErrorAction SilentlyContinue
-            $count++
+        git clone --depth 1 https://github.com/EliasOulkadi/shokunin.git "$env:TEMP\shokunin-tmp" 2>&1 | Out-Null
+        $skillsPath = "$env:TEMP\shokunin-tmp\.pack\skills"
+        if (Test-Path $skillsPath) {
+            Get-ChildItem $skillsPath -Directory | Where-Object { Test-Path (Join-Path $_.FullName "SKILL.md") } | ForEach-Object {
+                $target = Join-Path $script:skillsDir $_.Name
+                if (-not (Test-Path $target)) { New-Item -ItemType Directory -Path $target -Force | Out-Null }
+                Copy-Item -Recurse -Force "$($_.FullName)\*" "$target\" -ErrorAction SilentlyContinue
+                $count++
+            }
         }
         Remove-Item -Recurse -Force "$env:TEMP\shokunin-tmp" -ErrorAction SilentlyContinue
         Write-Log "$count skills instaladas" Green
@@ -217,7 +219,6 @@ function Setup-OpenCodeConfig {
     $rawMemory = $env:USERPROFILE + '\.shokunin\memory\mcp-server.py'
     $jsonMemory = $rawMemory.Replace('\', '\\')
     $template = $template -replace "{{MCP_MEMORY_PATH}}", $jsonMemory
-    $template = $template -replace "YOUR_NVIDIA_API_KEY", "YOUR_NVIDIA_API_KEY"
 
     # Check for NVIDIA API key
     $nvKey = [Environment]::GetEnvironmentVariable('NVIDIA_API_KEY','User')
@@ -233,10 +234,7 @@ function Setup-OpenCodeConfig {
         $nvKeyInput = Read-Host "  NVIDIA API Key (deja vacio para despues)"
         if ($nvKeyInput) {
             [Environment]::SetEnvironmentVariable('NVIDIA_API_KEY', $nvKeyInput, 'User')
-            $template = $template -replace "YOUR_NVIDIA_API_KEY", $nvKeyInput
         }
-    } else {
-        $template = $template -replace "YOUR_NVIDIA_API_KEY", $nvKey
     }
 
     $template | Set-Content $configFile -Force

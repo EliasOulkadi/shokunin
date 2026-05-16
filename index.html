@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shokunin — Persistent AI Memory for Developers</title>
+<meta name="description" content="Multi-strategy memory for AI agents across sessions. 62 skills + BM25 + vector search + temporal filtering + reciprocal rank fusion. Open source, single-command install.">
+<meta name="theme-color" content="#f5f4ed">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22 fill=%22%231B365D%22>職</text></svg>">
+<link rel="canonical" href="https://eliasoulkadi.github.io/shokunin">
+<meta property="og:title" content="Shokunin — AI Memory + 62 Skills for Developers">
+<meta property="og:description" content="Persistent memory for AI agents. BM25 + vector + temporal + RRF. One command install. Open source.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://eliasoulkadi.github.io/shokunin">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Shokunin — AI Memory for Developers">
+<meta name="twitter:description" content="Persistent AI memory. Open source. One command.">
+<meta property="og:image" content="https://eliasoulkadi.github.io/shokunin/og.png">
+<meta name="twitter:image" content="https://eliasoulkadi.github.io/shokunin/og.png">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"Shokunin","description":"Multi-strategy memory for AI agents","url":"https://eliasoulkadi.github.io/shokunin","operatingSystem":"Cross-platform","applicationCategory":"DeveloperApplication","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"author":{"@type":"Person","name":"Elias Oulkadi"}}
+</script>
+<style>
+  :root {
+    --parchment: #f5f4ed;
+    --ivory: #faf9f5;
+    --ink-blue: #1B365D;
+    --ink-light: #2D5A8A;
+    --ink-tag: #E4ECF5;
+    --near-black: #141413;
+    --dark-warm: #3d3d3a;
+    --olive: #504e49;
+    --stone: #6b6a64;
+    --border: #e8e6dc;
+    --border-soft: #e5e3d8;
+    --font-display: clamp(72px, 11vw, 160px);
+    --font-h1: clamp(32px, 5vw, 56px);
+    --font-h2: clamp(24px, 3.5vw, 36px);
+    --font-body: clamp(16px, 1.1vw, 18px);
+    --font-mono: clamp(14px, 0.95vw, 15px);
+    --max-width: 900px;
+    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-decel: cubic-bezier(0, 0, 0.2, 1);
+    --ease-out-strong: cubic-bezier(0.23, 1, 0.32, 1);
+    --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+    --serif: Charter, Georgia, Palatino, "Times New Roman", serif;
+    --mono: "JetBrains Mono", "SF Mono", "Fira Code", Consolas, Monaco, monospace;
+  }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes fadeInUp { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; background: var(--parchment); }
+  body { background: var(--parchment); color: var(--near-black); font-family: Charter, Georgia, Palatino, "Times New Roman", serif; font-size: var(--font-body); line-height: 1.55; -webkit-font-smoothing: antialiased; }
+  body::after { content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 9999; opacity: 0.04; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); background-size: 200px 200px; background-repeat: repeat; }
+
+  code, pre { font-family: "JetBrains Mono", "SF Mono", "Fira Code", Consolas, Monaco, monospace; }
+  a { color: var(--ink-blue); text-decoration: none; transition: opacity 150ms var(--ease-decel); }
+  a:hover { opacity: 0.7; }
+  h1, h2, h3 { font-weight: 500; line-height: 1.15; color: var(--near-black); }
+  h1 { font-size: var(--font-h1); letter-spacing: -0.02em; margin-bottom: 16px; }
+  h2 { font-size: var(--font-h2); letter-spacing: -0.01em; }
+  h3 { font-size: clamp(18px, 2vw, 22px); }
+
+  .section { padding: clamp(80px, 12vh, 160px) 24px; max-width: var(--max-width); margin: 0 auto; perspective: 1200px; }
+  .section-divider { width: 48px; height: 1px; margin: 0 auto; background: linear-gradient(90deg, transparent, var(--border), transparent); }
+  .section-divider--foot { width: 80px; height: 1px; margin: 0 auto clamp(40px, 6vh, 80px); background: linear-gradient(90deg, transparent, var(--border), transparent); }
+
+  .reveal { opacity: 0; transform: translateY(40px) rotateX(2deg) scale(0.98); transition: opacity 0.7s var(--ease-out), transform 0.7s var(--ease-out); }
+  .reveal.visible { opacity: 1; transform: translateY(0) rotateX(0) scale(1); }
+  .reveal-delay-1 { transition-delay: 0.1s; }
+  .reveal-delay-2 { transition-delay: 0.2s; }
+  .reveal-delay-3 { transition-delay: 0.3s; }
+
+  .rain-drop { position: absolute; top: 2%; width: 2px; height: 20px; background: var(--ink-blue); opacity: 0.35; pointer-events: none; border-radius: 50% 50% 50% 2px / 50% 50% 40% 30%; animation: rain linear infinite; }
+  .rain-drop--slow { width: 1px; height: 12px; opacity: 0.2; animation: rain-slow linear infinite; }
+  @keyframes rain { 0% { transform: translateY(0) translateX(0); opacity: 0.35; } 10% { opacity: 0.25; } 60% { opacity: 0.1; } 100% { transform: translateY(85vh) translateX(3px); opacity: 0; } }
+  @keyframes rain-slow { 0% { transform: translateY(0); opacity: 0.2; } 50% { opacity: 0.1; } 100% { transform: translateY(85vh); opacity: 0; } }
+
+  /* HERO */
+  .hero { min-height: 85dvh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 80px 24px 24px; position: relative; overflow: hidden; max-width: var(--max-width); margin: 0 auto; }
+  .hero-bg { position: absolute; top: 5%; left: 0; right: 0; width: fit-content; margin-inline: auto; font-size: clamp(120px, 18vw, 280px); color: var(--ink-blue); opacity: 0.12; pointer-events: none; font-weight: 500; line-height: 1; white-space: nowrap; will-change: transform; }
+  .hero h1 { font-size: var(--font-display); animation: fadeIn 0.8s var(--ease-out) both; letter-spacing: -0.03em; }
+  .hero-sub { font-size: clamp(17px, 1.3vw, 21px); color: var(--dark-warm); max-width: 540px; margin: 0 auto 32px; line-height: 1.5; letter-spacing: 0.01em; animation: fadeIn 0.8s var(--ease-out) 0.2s both; }
+
+  /* Social proof */
+  .hero-proof { display: flex; align-items: center; gap: 16px; justify-content: center; flex-wrap: wrap; animation: fadeInUp 0.8s var(--ease-out) 0.3s both; margin-bottom: 28px; font-size: 14px; color: var(--stone); }
+  .hero-proof span { display: inline-flex; align-items: center; gap: 4px; }
+  .hero-proof svg { width: 14px; height: 14px; }
+
+  .hero-install { animation: fadeInUp 0.8s var(--ease-out) 0.4s both; width: 100%; max-width: 580px; margin: 0 auto 20px; }
+  .hero-install pre { background: var(--ivory); border-radius: 8px; padding: 16px 20px; font-size: var(--font-mono); color: var(--near-black); white-space: normal; overflow-wrap: break-word; word-break: break-all; text-align: left; border: 1px solid var(--border); position: relative; }
+  .hero-install .copy-btn { position: absolute; top: 12px; right: 12px; background: var(--ink-tag); color: var(--ink-blue); border: none; border-radius: 4px; padding: 4px 10px; font-size: 12px; font-family: var(--serif); cursor: pointer; transition: background 0.15s var(--ease-decel), transform 0.1s var(--ease-out-strong); }
+  .hero-install .copy-btn:hover { background: var(--ink-blue); color: #fff; }
+  .hero-install .copy-btn:active { transform: scale(0.95); }
+  a:focus-visible, button:focus-visible { outline: 2px solid var(--ink-blue); outline-offset: 2px; border-radius: 2px; }
+  .hero-install .copy-btn:focus-visible { background: var(--ink-blue); color: #fff; }
+
+  .hero-cta { display: flex; flex-direction: column; align-items: center; gap: 12px; animation: fadeInUp 0.8s var(--ease-out) 0.6s both; }
+  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 12px 28px; border-radius: 6px; font-family: Charter, Georgia, serif; font-size: 15px; font-weight: 500; cursor: pointer; text-decoration: none; transition: transform 0.12s var(--ease-out-strong), box-shadow 0.12s var(--ease-out-strong); will-change: transform; min-height: 44px; }
+  .btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(27, 54, 93, 0.12); }
+  .btn:active { transform: scale(0.97); }
+  .btn-primary { background: var(--ink-blue); color: #fff; }
+  .btn-secondary-text { color: var(--ink-light); font-size: 14px; font-family: Charter, Georgia, serif; }
+  .btn-secondary-text:hover { color: var(--ink-blue); opacity: 1; }
+
+  .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-top: 40px; }
+  .feature-card { background: var(--ivory); border-radius: 8px; padding: 28px; border: 1px solid var(--border); transition: transform 0.2s var(--ease-out), box-shadow 0.2s var(--ease-out); transform-style: preserve-3d; }
+  .feature-card:active { transform: scale(0.97); }
+  .feature-card h3 { color: var(--ink-blue); margin-bottom: 8px; }
+  .feature-card p { color: var(--dark-warm); line-height: 1.55; font-size: 15px; }
+
+  .stats-line { text-align: center; font-size: clamp(15px, 1.1vw, 17px); color: var(--dark-warm); max-width: 600px; margin: 0 auto; line-height: 1.6; }
+  .stats-line strong { color: var(--ink-blue); font-weight: 500; }
+  .sep { color: var(--border); margin: 0 2px; }
+
+  .arch-diagram { background: var(--ivory); border-radius: 8px; padding: 24px 28px; border: 1px solid var(--border); font-family: var(--mono); font-size: var(--font-mono); overflow-x: auto; white-space: pre; text-align: center; color: var(--dark-warm); }
+
+  table { width: 100%; border-collapse: collapse; font-size: 14px; margin-top: 24px; }
+  table th { text-align: left; color: var(--dark-warm); font-weight: 500; padding: 12px 16px; border-bottom: 2px solid var(--border); font-size: 13px; }
+  table td { padding: 12px 16px; border-bottom: 1px solid var(--border-soft); vertical-align: top; }
+  table td:first-child { font-weight: 500; white-space: nowrap; }
+
+  .faq-item { border-bottom: 1px solid var(--border); padding: 20px 0; }
+  .faq-q { font-weight: 500; color: var(--ink-blue); cursor: pointer; font-size: 17px; }
+  .faq-a { color: var(--dark-warm); margin-top: 8px; line-height: 1.55; font-size: 15px; }
+
+  footer { text-align: center; padding: clamp(40px, 6vh, 60px) 24px; color: var(--stone); font-size: 14px; border-top: 1px solid var(--border); max-width: var(--max-width); margin: 0 auto; }
+  footer a { color: var(--ink-blue); }
+
+  .japanese { font-feature-settings: "kern"; }
+
+  /* Section with subtle gradient */
+  .section-mesh { background-image: radial-gradient(ellipse 60% 40% at 30% 50%, rgba(27, 54, 93, 0.03) 0%, transparent 60%); }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0s !important; transition-duration: 0s !important; }
+    .reveal { opacity: 1; transform: none; }
+    .tool-icon { opacity: 1 !important; transform: none !important; }
+    .hero-bg { transform: none !important; }
+    .rain-drop, .rain-drop--slow { animation: none !important; opacity: 0 !important; }
+  }
+  @media (pointer: coarse) {
+    .btn, .faq-q, button { min-height: 44px; }
+    .features-grid { gap: 16px; }
+  }
+  @media (max-width: 768px) {
+    .hero { min-height: 70dvh; padding: 60px 16px 16px; }
+    .hero h1 { font-size: clamp(48px, 12vw, 96px); margin-bottom: 12px; }
+    .hero-sub { font-size: clamp(15px, 3vw, 18px); max-width: 100%; margin-bottom: 20px; }
+    .hero-install { max-width: 100%; margin: 0 0 14px; }
+    .hero-install pre { font-size: clamp(12px, 2.5vw, 14px); padding: 14px 12px; word-break: break-all; }
+    .hero-install .copy-btn { top: 8px; right: 8px; font-size: 11px; padding: 3px 8px; }
+    .hero-proof { font-size: 11px; gap: 8px; margin-bottom: 20px; }
+    .hero-bg { display: none; }
+    .hero-cta { gap: 6px; }
+    .btn { padding: 10px 20px; font-size: 14px; }
+
+    .section { padding: clamp(32px, 5vh, 48px) 16px; }
+    .features-grid { grid-template-columns: 1fr; gap: 12px; }
+    .feature-card { padding: 16px; }
+    .feature-card p { font-size: 14px; }
+
+    .arch-diagram { padding: 14px; font-size: clamp(11px, 2vw, 13px); overflow-x: auto; text-align: left; white-space: pre-wrap; word-break: break-all; }
+
+    table { font-size: 12px; display: block; overflow-x: auto; white-space: nowrap; }
+    table td { padding: 8px 10px; }
+    table td:first-child { white-space: normal; }
+
+    .faq-q { font-size: 15px; }
+    .faq-a { font-size: 14px; }
+    .faq-item { padding: 16px 0; }
+
+    h1 { font-size: clamp(28px, 7vw, 42px); }
+    h2 { font-size: clamp(22px, 5vw, 30px); }
+
+    footer { padding: clamp(28px, 5vw, 40px) 16px; font-size: 13px; }
+
+    .splash-text { font-size: clamp(60px, 28vw, 120px); }
+  }
+  @media (max-width: 480px) {
+    .hero h1 { font-size: clamp(36px, 14vw, 64px); }
+    .hero-sub { font-size: clamp(14px, 3.5vw, 16px); margin-bottom: 16px; }
+    .hero-install pre { font-size: 11px; padding: 10px 10px; }
+    .arch-diagram { font-size: 10px; }
+    .hero-proof { gap: 6px; font-size: 10px; }
+    .feature-card p { font-size: 13px; }
+    .bench-row { grid-template-columns: 60px 1fr 28px 1fr 28px; gap: 3px; }
+    .bench-label { font-size: 10px; }
+    .bench-val { font-size: 10px; }
+    .splash-text { font-size: clamp(48px, 24vw, 80px); }
+  }
+  @media (max-width: 360px) {
+    .hero h1 { font-size: clamp(28px, 12vw, 44px); }
+    .hero-sub { font-size: 13px; }
+    .hero-install pre { font-size: 10px; padding: 8px 8px; }
+    .hero-proof { font-size: 9px; gap: 4px; }
+    .btn { padding: 8px 14px; font-size: 13px; }
+    .feature-card { padding: 12px; }
+    table { font-size: 10px; }
+    .bench-label { font-size: 10px; }
+    .bench-val { font-size: 10px; }
+  }
+
+  .splash { position: fixed; inset: 0; z-index: 10000; background: var(--parchment); display: flex; align-items: center; justify-content: center; transition: opacity 0.5s var(--ease-out); }
+  .splash.hide { opacity: 0; pointer-events: none; }
+  .splash-text { font-size: clamp(80px, 20vw, 200px); color: #d8d5cc; animation: splashPulse 2.2s var(--ease-out) forwards; line-height: 1; }
+  @keyframes splashPulse {
+    0% { transform: scale(1.3); opacity: 0; }
+    15% { transform: scale(1.3); opacity: 1; }
+    45% { transform: scale(0.85); opacity: 1; }
+    75% { transform: scale(0.92); opacity: 0.9; }
+    100% { transform: scale(0.88); opacity: 0; }
+  }
+
+  html, body { overflow-x: hidden; }
+  body { max-width: 100vw; }
+  .hero-install pre { overflow-wrap: anywhere; }
+  .features-grid { max-width: 100%; }
+  .arch-diagram { white-space: pre-wrap; word-break: break-word; }
+  table { max-width: 100%; display: block; }
+
+  .bench-highlight { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 32px; }
+  .bench-highlight-item { background: var(--ivory); border-radius: 12px; padding: 28px 24px; text-align: center; border: 1px solid var(--border); transition: transform 0.15s var(--ease-out-strong); }
+  .bench-highlight-item--emphasis { border-color: var(--ink-blue); box-shadow: inset 0 0 0 1px var(--ink-blue), 0 0 24px rgba(27,54,93,0.06); }
+  .bench-highlight-item .big-num { font-size: clamp(32px, 5vw, 56px); font-weight: 500; line-height: 1.1; letter-spacing: -0.02em; }
+  .bench-highlight-item .big-num.good { color: var(--ink-blue); }
+  .bench-highlight-item .big-num.bad { color: #c62828; }
+  .bench-highlight-item .big-num.neutral { color: var(--dark-warm); }
+  .bench-highlight-item .sub { margin-top: 6px; font-size: 13px; color: var(--stone); }
+  .bench-highlight-item .vs { display: block; font-size: 12px; color: var(--stone); margin-top: 4px; }
+
+  .bench-callout { background: var(--ivory); border-radius: 12px; padding: 24px 28px; border: 1px solid var(--border); margin: 24px 0; text-align: center; }
+  .bench-callout .lead { font-size: clamp(18px, 2vw, 24px); color: var(--ink-blue); font-weight: 500; }
+  .bench-callout .detail { font-size: 14px; color: var(--dark-warm); margin-top: 8px; line-height: 1.55; }
+
+  .bench-chart { margin: 24px 0; padding: 28px 24px; background: var(--ivory); border-radius: 12px; border: 1px solid var(--border); }
+  .bench-row { display: grid; grid-template-columns: 100px 1fr 44px 1fr 44px; gap: 8px 12px; align-items: center; margin-bottom: 14px; }
+  .bench-row:last-child { margin-bottom: 0; }
+  .bench-label { font-size: 13px; color: var(--dark-warm); font-weight: 500; text-align: right; }
+  .bench-track { height: 24px; background: var(--border-soft); border-radius: 4px; overflow: hidden; }
+  .bench-bar { height: 100%; border-radius: 4px; transform: scaleX(0); transform-origin: left; transition: transform 1s var(--ease-out); }
+  .bench-bar.vec { background: var(--stone); }
+  .bench-bar.mul { background: linear-gradient(135deg, var(--ink-blue), var(--ink-light)); }
+  .bench-val { font-size: 12px; font-weight: 500; color: var(--near-black); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .bench-legend { display: flex; gap: 20px; justify-content: center; margin-top: 18px; font-size: 12px; color: var(--stone); }
+  .bench-legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .bench-legend .ldot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+  .bench-legend .ldot.vec { background: var(--stone); }
+  .bench-legend .ldot.mul { background: linear-gradient(135deg, var(--ink-blue), var(--ink-light)); }
+
+  .bench-footnote { margin-top: 24px; padding: 16px 20px; background: var(--ink-tag); border-radius: 8px; font-size: 13px; color: var(--ink-blue); line-height: 1.55; }
+  .bench-footnote a { color: var(--ink-blue); text-decoration: underline; }
+
+  @media (max-width: 768px) {
+    .bench-highlight { grid-template-columns: 1fr; gap: 12px; }
+    .bench-highlight-item { padding: 20px 16px; }
+    .bench-highlight-item .big-num { font-size: clamp(28px, 8vw, 44px); }
+    .bench-row { grid-template-columns: 80px 1fr 28px 1fr 28px; gap: 4px; margin-bottom: 10px; }
+    .bench-label { font-size: 11px; }
+    .bench-track { height: 20px; }
+    .bench-val { font-size: 11px; }
+    .bench-chart { padding: 20px 12px; }
+    .bench-callout { padding: 20px 16px; }
+    .bench-footnote { flex-direction: column; gap: 8px; }
+    .bench-footnote a { margin-left: 0; }
+  }
+
+  .tool-icon { display: inline-flex; flex-direction: column; align-items: center; gap: 4px; cursor: default; opacity: 0; transform: translateY(12px); transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1); }
+  .tool-icon svg { transition: filter 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1); }
+  .tool-icon span { transition: color 0.25s cubic-bezier(0.16, 1, 0.3, 1); }
+  .reveal.visible .tool-icon { animation-name: iconStaggerIn; animation-duration: 0.6s; animation-timing-function: var(--ease-out); animation-fill-mode: forwards; }
+  .tool-icon:nth-child(1) { animation-delay: 0ms; }
+  .tool-icon:nth-child(2) { animation-delay: 80ms; }
+  .tool-icon:nth-child(3) { animation-delay: 160ms; }
+  .tool-icon:nth-child(4) { animation-delay: 240ms; }
+  .tool-icon:nth-child(5) { animation-delay: 320ms; }
+  .tool-icon:nth-child(6) { animation-delay: 400ms; }
+  @keyframes iconStaggerIn { to { opacity: 1; transform: translateY(0); } }
+  @media (hover: hover) and (pointer: fine) {
+    .tool-icon:hover { transform: translateY(-3px); }
+    .tool-icon:hover svg { filter: brightness(1.4) drop-shadow(0 0 2px rgba(27,54,93,0.25)); opacity: 0.9; }
+    .feature-card:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(27, 54, 93, 0.10); }
+    .bench-highlight-item:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(27, 54, 93, 0.08); }
+  }
+</style>
+</head>
+<body>
+  <div class="splash" id="splash" aria-hidden="true"><span class="splash-text japanese">職人</span></div>
+
+<main>
+<!-- HERO -->
+<section class="hero">
+  <span class="hero-bg japanese" aria-hidden="true">職人</span>
+  <h1><span style="color:var(--ink-blue)">職人</span> Shokunin</h1>
+  <p class="hero-sub">Multi-strategy AI memory with 62 expert skills. Your context persists between sessions. Zero servers. No API calls. One command.</p>
+  <div class="hero-proof">
+    <span>62 skills</span>
+    <span>6 runtimes</span>
+    <span>Open source</span>
+  </div>
+  <div class="hero-install">
+    <pre><span style="color:var(--ink-blue)">bash</span> &lt;(curl -sL https://raw.githubusercontent.com/EliasOulkadi/shokunin/master/install.sh)<button class="copy-btn js-copy" aria-label="Copy install command">Copy</button></pre>
+  </div>
+  <div class="hero-cta">
+    <a href="https://github.com/EliasOulkadi/shokunin" class="btn btn-primary"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg> View on GitHub</a>
+    <a href="https://github.com/EliasOulkadi/shokunin/blob/master/docs/Shokunin-Enterprise-White-Paper.pdf" class="btn-secondary-text">Read the white paper</a>
+  </div>
+</section>
+
+<div class="section-divider" aria-hidden="true"></div>
+
+<!-- FEATURES -->
+<section class="section">
+  <h2 class="reveal">What it does</h2>
+  <p class="reveal reveal-delay-1" style="color:var(--dark-warm);max-width:600px;margin-top:8px;">Your AI agent forgets between sessions. Vector search alone misses exact keywords and can't filter by date. Shokunin fixes all three.</p>
+  <div class="features-grid">
+    <div class="feature-card reveal reveal-delay-1">
+      <h3>Multi-strategy recall</h3>
+      <p>ChromaDB vector search combined with BM25 keyword matching, temporal date-range filters, and reciprocal rank fusion. Pure Python. Zero dependencies.</p>
+    </div>
+    <div class="feature-card reveal reveal-delay-2">
+      <h3>Session management</h3>
+      <p><code>session list</code> shows recent sessions with metadata. <code>session continue</code> loads full context (decisions, files, commands parsed automatically). No more guessing which session to resume.</p>
+    </div>
+    <div class="feature-card reveal reveal-delay-3">
+      <h3>MCP auto-logging</h3>
+      <p>Every MCP tool call logged to sessions/&lt;id&gt;.jsonl. 8 tools across 6 AI coding runtimes. Works in OpenCode, Claude Code, Cursor, Windsurf, Cline, and Continue. Zero agent coordination needed.</p>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<section class="section reveal">
+  <p class="stats-line">Built on <strong>99+</strong> memory entries, <strong>62</strong> expert skills, <strong>8</strong> MCP tools, <strong>25+</strong> CI checks, and <strong>6</strong> AI runtimes.</p>
+</section>
+
+<!-- ARCHITECTURE -->
+<section class="section">
+  <h2 class="reveal">Architecture</h2>
+  <p class="reveal reveal-delay-1" style="color:var(--dark-warm);max-width:600px;margin:8px 0 20px;">Seven layers. Clear boundaries. No server processes. Everything runs on your machine.</p>
+  <div class="arch-diagram reveal reveal-delay-2">
+Config      ~/.config/opencode/          provider setup, MCP servers, agents, commands
+
+Instructions  ~/AGENTS.md + CLAUDE.md    global rules, session startup workflow
+
+Update       ~/.shokunin/shokunin.json   declarative manifest, drift detection
+
+Orchestration ~/.shokunin/scripts/       session wrapping, healthchecks, cleanup
+
+Memory       ~/.shokunin/memory/         ChromaDB, MCP server, auto-log JSONL
+
+Skills       ~/.config/opencode/skills/  62 SKILL.md, automatic activation
+
+Infrastructure ~/.shokunin/backups/      backups, logs, database files
+  </div>
+</section>
+
+<!-- SESSION MANAGEMENT -->
+<section class="section section-mesh">
+  <h2 class="reveal">Session management</h2>
+  <div class="features-grid" style="margin-top:24px;">
+    <div class="feature-card reveal reveal-delay-1">
+      <h3>List</h3>
+      <p><code>session list 3</code> shows recent sessions with date, project, entries, and summary. The agent runs it automatically at startup so you can pick where to continue.</p>
+    </div>
+    <div class="feature-card reveal reveal-delay-2">
+      <h3>Continue</h3>
+      <p><code>session continue &lt;id&gt;</code> loads the full session. Parses text from session_end entries to extract decisions, files modified, and commands. Even if saved as one blob.</p>
+    </div>
+    <div class="feature-card reveal reveal-delay-3">
+      <h3>Auto-log</h3>
+      <p>Every MCP tool call (<code>store_context</code>, <code>search_context</code>, <code>save_message</code>) writes to <code>sessions/&lt;id&gt;.jsonl</code> automatically. No agent coordination needed.</p>
+    </div>
+  </div>
+</section>
+
+<!-- MCP TOOLS -->
+<section class="section reveal">
+  <h2>MCP tools</h2>
+  <p style="color:var(--dark-warm);max-width:600px;margin:8px 0 20px;">Eight tools across six AI coding runtimes. All tools auto-logged to JSONL.</p>
+  <div class="arch-diagram" style="text-align:left;">
+store_context  — save text with type, tags, project, session_id<br>
+search_context: vector similarity search with project/tag filters<br>
+multi_search   — vector + BM25 + temporal filter + RRF fusion (v4.2.1)<br>
+consolidate    — group old entries by project with keyword extraction<br>
+list_sessions  — list recent sessions with metadata (v4.2.2)<br>
+continue       — load full session context with parsed decisions/files (v4.2.2)<br>
+save_message   — record individual message in session JSONL transcript<br>
+session_summary— summarize all entries in a given session
+  </div>
+  <div style="display:flex;flex-wrap:wrap;gap:24px;justify-content:center;margin-top:32px;">
+    <div class="tool-icon" style="text-align:center"><svg width="32" height="32" viewBox="0 0 512 512" fill="none"><rect width="512" height="512" rx="64" fill="#131010"/><path d="M384 416H128V96H384V416ZM320 160H192V352H320V160Z" fill="white"/></svg><span style="display:block;font-size:12px;color:var(--stone);text-transform:uppercase;letter-spacing:1px;margin-top:4px;">OpenCode</span></div>
+    <div class="tool-icon" style="text-align:center"><svg width="32" height="32" viewBox="0 0 24 24" fill="#D97757"><path d="m4.7144 15.9555 4.7174-2.6471.079-.2307-.079-.1275h-.2307l-.7893-.0486-2.6956-.0729-2.3375-.0971-2.2646-.1214-.5707-.1215-.5343-.7042.0546-.3522.4797-.3218.686.0608 1.5179.1032 2.2767.1578 1.6514.0972 2.4468.255h.3886l.0546-.1579-.1336-.0971-.1032-.0972L6.973 9.8356l-2.55-1.6879-1.3356-.9714-.7225-.4918-.3643-.4614-.1578-1.0078.6557-.7225.8803.0607.2246.0607.8925.686 1.9064 1.4754 2.4893 1.8336.3643.3035.1457-.1032.0182-.0728-.164-.2733-1.3539-2.4467-1.445-2.4893-.6435-1.032-.17-.6194c-.0607-.255-.1032-.4674-.1032-.7285L6.287.1335 6.6997 0l.9957.1336.419.3642.6192 1.4147 1.0018 2.2282 1.5543 3.0296.4553.8985.2429.8318.091.255h.1579v-.1457l.1275-1.706.2368-2.0947.2307-2.6957.0789-.7589.3764-.9107.7468-.4918.5828.2793.4797.686-.0668.4433-.2853 1.8517-.5586 2.9021-.3643 1.9429h.2125l.2429-.2429.9835-1.3053 1.6514-2.0643.7286-.8196.85-.9046.5464-.4311h1.0321l.759 1.1293-.34 1.1657-1.0625 1.3478-.8804 1.1414-1.2628 1.7-.7893 1.36.0729.1093.1882-.0183 2.8535-.607 1.5421-.2794 1.8396-.3157.8318.3886.091.3946-.3278.8075-1.967.4857-2.3072.4614-3.4364.8136-.0425.0304.0486.0607 1.5482.1457.6618.0364h1.621l3.0175.2247.7892.522.4736.6376-.079.4857-1.2142.6193-1.6393-.3886-3.825-.9107-1.3113-.3279h-.1822v.1093l1.0929 1.0686 2.0035 1.8092 2.5075 2.3314.1275.5768-.3218.4554-.34-.0486-2.2039-1.6575-.85-.7468-1.9246-1.621h-.1275v.17l.4432.6496 2.3436 3.5214.1214 1.0807-.17.3521-.6071.2125-.6679-.1214-1.3721-1.9246L14.38 17.959l-1.1414-1.9428-.1397.079-.674 7.2552-.3156.3703-.7286.2793-.6071-.4614-.3218-.7468.3218-1.4753.3886-1.9246.3157-1.53.2853-1.9004.17-.6314-.0121-.0425-.1397.0182-1.4328 1.9672-2.1796 2.9446-1.7243 1.8456-.4128.164-.7164-.3704.0667-.6618.4008-.5889 2.386-3.0357 1.4389-1.882.929-1.0868-.0062-.1579h-.0546l-6.3385 4.1164-1.1293.1457-.4857-.4554.0608-.7467.2307-.2429 1.9064-1.3114Z"/></svg><span style="display:block;font-size:12px;color:var(--stone);text-transform:uppercase;letter-spacing:1px;margin-top:4px;">Claude</span></div>
+    <div class="tool-icon" style="text-align:center"><svg width="32" height="32" viewBox="0 0 24 24" fill="#000"><path d="M11.503.131 1.891 5.678a.84.84 0 0 0-.42.726v11.188c0 .3.162.575.42.724l9.609 5.55a1 1 0 0 0 .998 0l9.61-5.55a.84.84 0 0 0 .42-.724V6.404a.84.84 0 0 0-.42-.726L12.497.131a1.01 1.01 0 0 0-.996 0M2.657 6.338h18.55c.263 0 .43.287.297.515L12.23 22.918c-.062.107-.229.064-.229-.06V12.335a.59.59 0 0 0-.295-.51l-9.11-5.257c-.109-.063-.064-.23.061-.23"/></svg><span style="display:block;font-size:12px;color:var(--stone);text-transform:uppercase;letter-spacing:1px;margin-top:4px;">Cursor</span></div>
+    <div class="tool-icon" style="text-align:center"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#4A90D9" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg><span style="display:block;font-size:12px;color:var(--stone);text-transform:uppercase;letter-spacing:1px;margin-top:4px;">Cline</span></div>
+    <div class="tool-icon" style="text-align:center"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#8B5CF6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg><span style="display:block;font-size:12px;color:var(--stone);text-transform:uppercase;letter-spacing:1px;margin-top:4px;">Continue</span></div>
+    <div class="tool-icon" style="text-align:center"><svg width="32" height="32" viewBox="0 0 24 24" fill="#3B82F6"><path d="M23.55 5.067c-1.2038-.002-2.1806.973-2.1806 2.1765v4.8676c0 .972-.8035 1.7594-1.7597 1.7594-.568 0-1.1352-.286-1.4718-.7659l-4.9713-7.1003c-.4125-.5896-1.0837-.941-1.8103-.941-1.1334 0-2.1533.9635-2.1533 2.153v4.8957c0 .972-.7969 1.7594-1.7596 1.7594-.57 0-1.1363-.286-1.4728-.7658L.4076 5.1598C.2822 4.9798 0 5.0688 0 5.2882v4.2452c0 .2147.0656.4228.1884.599l5.4748 7.8183c.3234.462.8006.8052 1.3509.9298 1.3771.313 2.6446-.747 2.6446-2.0977v-4.893c0-.972.7875-1.7593 1.7596-1.7593h.003a1.798 1.798 0 0 1 1.4718.7658l4.9723 7.0994c.4135.5905 1.05.941 1.8093.941 1.1587 0 2.1515-.9645 2.1515-2.153v-4.8948c0-.972.7875-1.7594 1.7596-1.7594h.194a.22.22 0 0 0 .2204-.2202v-4.622a.22.22 0 0 0-.2203-.2203Z"/></svg><span style="display:block;font-size:12px;color:var(--stone);text-transform:uppercase;letter-spacing:1px;margin-top:4px;">Windsurf</span></div>
+  </div>
+</section>
+
+<!-- HINDSIGHT -->
+<section class="section reveal">
+  <h2>Comparison with Hindsight</h2>
+  <p style="color:var(--dark-warm);max-width:600px;margin:8px 0 20px;">Hindsight (vectorize-io/hindsight) leads memory benchmarks (91.4% LongMemEval). We took the ideas that make sense for a local tool and left the enterprise dependencies.</p>
+  <table>
+    <thead><tr><th>Aspect</th><th>Shokunin</th><th>Hindsight</th></tr></thead>
+    <tbody>
+      <tr><td>Storage</td><td>ChromaDB (file, 30 MB)</td><td>PostgreSQL + pgvector</td></tr>
+      <tr><td>Search strategies</td><td>2 (vector + BM25) + temporal</td><td>4 (semantic, BM25, graph, temporal)</td></tr>
+      <tr><td>Result fusion</td><td>Reciprocal Rank Fusion</td><td>RRF + cross-encoder rerank</td></tr>
+      <tr><td>LLM dependency</td><td>None for memory ops</td><td>Required per retain() call</td></tr>
+      <tr><td>Install</td><td>1 shell script</td><td>Docker or pip + PostgreSQL</td></tr>
+      <tr><td>Offline</td><td>Full (no network)</td><td>Partial (needs LLM API)</td></tr>
+      <tr><td>MCP auto-log</td><td>Built-in</td><td>Not available</td></tr>
+      <tr><td>Session mgmt</td><td>list/continue/save + text parsing</td><td>Not available</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- SKILLS -->
+<section class="section section-mesh reveal">
+  <h2>Skills</h2>
+  <p style="color:var(--dark-warm);max-width:650px;margin:8px 0 8px;">62 skills across 10 domains. Powered by Emil Kowalski (Sonner 13M+ weekly downloads, Linear), Paul Bakaus (ex-Google, ex-Disney, ex-Unity), and Leon Lin + blueemi. Each skill is a real engineering guide with Before/After tables, exact specs, pre-flight checklists, and cited sources.</p>
+  <div class="features-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));gap:16px;margin-top:20px;">
+    <div class="feature-card"><h3>Infrastructure</h3><p>docker, kubernetes, terraform, ci-cd, db-admin</p></div>
+    <div class="feature-card"><h3>Backend</h3><p>auth-architect, api-forge, db-sculptor, error-handler</p></div>
+    <div class="feature-card" style="grid-column:span 2"><h3>Frontend</h3><p>component-forge, responsive-engine, motion-craft, landing-craft, aesthetic-web, ui-ux-pro-max, emil-design-eng, impeccable, taste, taste-soft, taste-minimalist</p></div>
+    <div class="feature-card"><h3>Mobile</h3><p>flutter, react-native</p></div>
+    <div class="feature-card"><h3>Quality</h3><p>test-commander, performance-profiler, code-review, comprehensive-review, cross-review, zen-review, zen-comprehensive-review</p></div>
+    <div class="feature-card"><h3>Content & Business</h3><p>communication, content-marketing, business-proposals, seo-geo, translate-craft, documentation</p></div>
+    <div class="feature-card"><h3>Documents</h3><p>kami (PDF), portfolio-auto, kagen (AI images)</p></div>
+    <div class="feature-card"><h3>Productivity</h3><p>git-workflow, windows-powershell, runbook-gen, strategy, design, finance, legal-counsel, whendone-plus</p></div>
+    <div class="feature-card"><h3>AI Agents</h3><p>agent-browser, agent-tools, find-skills, skill-creator, research, humanize</p></div>
+    <div class="feature-card" style="grid-column:span 2"><h3>System</h3><p>memory, chromadb, shokunin-update, init, efficient-coding, senior-engineer, plan, playwright, neon-postgres, web-security</p></div>
+  </div>
+  <p style="color:var(--stone);font-size:13px;margin-top:16px;max-width:650px;">Every skill follows the same v4.0 structure: YAML frontmatter for auto-discovery, sub-commands (design / audit / optimize), exact specifications (100-160ms for button press, hash passwords with Argon2id memory=19456), Before/After review tables, error handling tables, pre-flight production checklists, banned patterns, and cited sources. The motion-craft skill, for example, is 20 KB covering Emil Kowalski's exact easing curves, duration tables by element type, and a mandatory review format.</p>
+</section>
+
+<div class="section-divider" aria-hidden="true"></div>
+
+<!-- BENCHMARKS -->
+<section class="section reveal">
+  <h2>Benchmarks</h2>
+  <p style="color:var(--dark-warm);max-width:650px;margin:8px 0 8px;">Measured on 15 queries (3 iterations x 5 queries) against 120+ real ChromaDB entries. The multi-strategy returns real-world sessions 60% of the time that vector-only misses completely.</p>
+
+  <div class="bench-highlight">
+    <div class="bench-highlight-item">
+      <span class="big-num good">100%</span>
+      <span class="sub">Any relevant hit</span>
+      <span class="vs">Both strategies</span>
+    </div>
+    <div class="bench-highlight-item bench-highlight-item--emphasis">
+      <span class="big-num good">60%</span>
+      <span class="sub">Real session hits</span>
+      <span class="vs">vs 0% vector-only</span>
+    </div>
+    <div class="bench-highlight-item">
+      <span class="big-num neutral">1.4s</span>
+      <span class="sub">Avg latency</span>
+      <span class="vs">+13.8% overhead</span>
+    </div>
+  </div>
+
+  <div class="bench-callout reveal reveal-delay-1">
+    <p class="lead">The multi-strategy finds real sessions that vector-only never returns.</p>
+    <p class="detail">While the synthetic probe hit rate is lower (40% vs 100%), BM25 correctly prioritizes semantically richer real entries above the probe. 100% of queries return at least one relevant result.</p>
+  </div>
+
+  <div class="bench-chart reveal reveal-delay-2">
+    <div class="bench-row">
+      <span class="bench-label">Real session hits</span>
+      <div class="bench-track"><div class="bench-bar vec" data-pct="0"></div></div>
+      <span class="bench-val" data-final="0%">0%</span>
+      <div class="bench-track"><div class="bench-bar mul" data-pct="60"></div></div>
+      <span class="bench-val" data-final="60%">60%</span>
+    </div>
+    <div class="bench-row">
+      <span class="bench-label">Any relevant hit</span>
+      <div class="bench-track"><div class="bench-bar vec" data-pct="100"></div></div>
+      <span class="bench-val" data-final="100%">100%</span>
+      <div class="bench-track"><div class="bench-bar mul" data-pct="100"></div></div>
+      <span class="bench-val" data-final="100%">100%</span>
+    </div>
+    <div class="bench-row">
+      <span class="bench-label">Probe hit rate</span>
+      <div class="bench-track"><div class="bench-bar vec" data-pct="100"></div></div>
+      <span class="bench-val" data-final="100%">100%</span>
+      <div class="bench-track"><div class="bench-bar mul" data-pct="40"></div></div>
+      <span class="bench-val" data-final="40%">40%</span>
+    </div>
+    <div class="bench-row">
+      <span class="bench-label">Avg latency</span>
+      <div class="bench-track"><div class="bench-bar vec" data-pct="87"></div></div>
+      <span class="bench-val" data-final="1293ms">1293ms</span>
+      <div class="bench-track"><div class="bench-bar mul" data-pct="100"></div></div>
+      <span class="bench-val" data-final="1471ms">1471ms</span>
+    </div>
+    <div class="bench-legend">
+      <span><span class="ldot vec"></span> Vector-only</span>
+      <span><span class="ldot mul"></span> Multi-strategy</span>
+    </div>
+  </div>
+
+  <div class="bench-footnote" style="display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;">
+    <span style="flex-shrink:0;font-size:11px;color:var(--dark-warm);">Embedding: all-MiniLM-L6-v2 (22M, 384-dim) · BM25: k1=1.5, b=0.75 · Fusion: RRF k=60</span>
+    <a href="https://github.com/EliasOulkadi/shokunin/tree/master/benchmarks" style="margin-left:auto;font-size:13px;">Full methodology and reproduction steps</a>
+  </div>
+</section>
+
+
+<!-- FAQ -->
+<section class="section">
+  <h2 class="reveal">FAQ</h2>
+  <div class="faq-item reveal reveal-delay-1">
+    <p class="faq-q">Does it work offline?</p>
+    <p class="faq-a">Yes. Everything runs locally. No cloud dependency, no API calls per memory operation, no telemetry.</p>
+  </div>
+  <div class="faq-item reveal reveal-delay-2">
+    <p class="faq-q">What runtimes are supported?</p>
+    <p class="faq-a">OpenCode, Claude Code, Cursor, Cline, Continue.dev, and Windsurf. MCP templates included for each.</p>
+  </div>
+  <div class="faq-item reveal reveal-delay-2">
+    <p class="faq-q">Do I need an NVIDIA API key?</p>
+    <p class="faq-a">No. OpenCode Go is the default provider and works without any key. NVIDIA is optional.</p>
+  </div>
+  <div class="faq-item reveal reveal-delay-3">
+    <p class="faq-q">How is this different from Hindsight?</p>
+    <p class="faq-a">Shokunin is local-first (no servers, no Docker). Hindsight is enterprise (better benchmarks, heavier infrastructure). They solve overlapping problems at different scales.</p>
+  </div>
+  <div class="faq-item reveal reveal-delay-3">
+    <p class="faq-q">How do I install?</p>
+    <p class="faq-a">On Linux: <code>bash &lt;(curl -sL https://raw.githubusercontent.com/EliasOulkadi/shokunin/master/install.sh)</code>. On Windows: <code>irm https://raw.githubusercontent.com/EliasOulkadi/shokunin/master/install.ps1 | iex</code>. That's it.</p>
+  </div>
+</section>
+
+<div class="section-divider" aria-hidden="true"></div>
+</main>
+<footer>
+  <p>
+    <a href="https://github.com/EliasOulkadi/shokunin">GitHub</a>
+    <span class="sep" aria-hidden="true">·</span>
+    <a href="https://github.com/EliasOulkadi/shokunin/blob/master/docs/Shokunin-Enterprise-White-Paper.pdf">White paper</a>
+    <span class="sep" aria-hidden="true">·</span>
+    <a href="https://github.com/EliasOulkadi/shokunin#readme">Docs</a>
+    <span class="sep" aria-hidden="true">·</span>
+    MIT License · v4.0
+  </p>
+  <p style="margin-top:10px;"><span class="japanese">職人</span> the artisan spirit. Built with care.</p>
+</footer>
+
+<script defer>
+(function() {
+  const splash = document.getElementById('splash');
+  if (splash && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    setTimeout(() => { splash.classList.add('hide'); }, 2200);
+    setTimeout(() => { if (splash.parentNode) splash.remove(); }, 2700);
+  } else if (splash) {
+    splash.remove();
+  }
+
+  const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (prefersReduced) {
+    document.querySelectorAll('.reveal').forEach(el => { el.style.opacity = '1'; el.style.transform = 'none'; el.style.transition = 'none'; });
+  } else {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => { if (entry.isIntersecting) { entry.target.classList.add('visible'); observer.unobserve(entry.target); } });
+    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+  }
+
+  // 3D parallax + hero depth (throttled via rAF)
+  if (!prefersReduced) {
+    const heroBg = document.querySelector('.hero-bg');
+    const heroH1 = document.querySelector('.hero h1');
+    const heroSub = document.querySelector('.hero-sub');
+    const heroProof = document.querySelector('.hero-proof');
+    const isMobile = window.matchMedia('(max-width: 768px)').matches;
+    let ticking = false;
+    window.addEventListener('scroll', () => {
+      if (isMobile || ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        const scrollY = window.scrollY;
+        if (heroBg) heroBg.style.transform = 'scale(' + (1 + scrollY * 0.0003) + ') translateY(' + (scrollY * 0.15) + 'px)';
+        if (heroH1) heroH1.style.transform = 'translateY(' + (scrollY * 0.04) + 'px)';
+        if (heroSub) heroSub.style.transform = 'translateY(' + (scrollY * 0.06) + 'px)';
+        if (heroProof) heroProof.style.transform = 'translateY(' + (scrollY * 0.08) + 'px)';
+        ticking = false;
+      });
+    }, { passive: true });
+  }
+
+  // 3D card tilt (desktop only)
+  if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+    document.querySelectorAll('.feature-card, .bench-highlight-item').forEach(card => {
+      card.addEventListener('mousemove', (e) => {
+        const rect = card.getBoundingClientRect();
+        const x = (e.clientX - rect.left) / rect.width - 0.5;
+        const y = (e.clientY - rect.top) / rect.height - 0.5;
+        card.style.transform = 'perspective(800px) rotateY(' + (x * 8) + 'deg) rotateX(' + (-y * 6) + 'deg) translateZ(8px)';
+      });
+      card.addEventListener('mouseleave', () => { card.style.transform = ''; });
+    });
+  }
+
+  // Benchmark bars: scaleX + counter animation
+  const benchObs = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.querySelectorAll('.bench-bar').forEach(bar => {
+          const pct = parseFloat(bar.dataset.pct || '0');
+          bar.style.transform = 'scaleX(' + (pct / 100) + ')';
+        });
+        if (!prefersReduced) {
+          entry.target.querySelectorAll('.bench-val').forEach(el => {
+            const final = el.dataset.final || '';
+            const isMs = final.includes('ms');
+            const num = parseFloat(final);
+            if (isNaN(num) || num <= 0) { el.textContent = final; return; }
+            const duration = 900;
+            const start = performance.now();
+            const step = (now) => {
+              const progress = Math.min((now - start) / duration, 1);
+              el.textContent = isMs ? Math.round(progress * num) + 'ms' : Math.round(progress * num) + '%';
+              if (progress < 1) requestAnimationFrame(step);
+            };
+            requestAnimationFrame(step);
+          });
+        }
+        benchObs.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.3 });
+  document.querySelectorAll('.bench-chart').forEach(el => benchObs.observe(el));
+
+  // Copy button with pulse feedback
+  document.querySelectorAll('.js-copy').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const pre = btn.closest('pre');
+      if (!pre) return;
+      const preClone = pre.cloneNode(true);
+      preClone.querySelector('.copy-btn')?.remove();
+      const text = preClone.textContent?.trim();
+      if (!text) return;
+      navigator.clipboard.writeText(text).then(() => {
+        btn.textContent = 'Copied';
+        btn.style.background = 'var(--ink-blue)';
+        btn.style.color = '#fff';
+        setTimeout(() => { btn.textContent = 'Copy'; btn.style.background = ''; btn.style.color = ''; }, 2000);
+      }).catch(() => { btn.textContent = 'Error'; setTimeout(() => { btn.textContent = 'Copy'; }, 2000); });
+    });
+  });
+})();
+</script>
+
+</body>
+</html>
