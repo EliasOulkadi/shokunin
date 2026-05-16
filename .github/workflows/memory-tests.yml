@@ -38,6 +38,12 @@ jobs:
         with:
           python-version: '3.11'
       - run: pip install chromadb pytest
+      - name: Setup installed paths for pytest
+        run: |
+          mkdir -p ~/.shokunin/scripts/
+          mkdir -p ~/.shokunin/memory/sessions/
+          cp .pack/scripts/chroma-helper.py ~/.shokunin/scripts/
+          cp .pack/memory/mcp-server.py ~/.shokunin/memory/
       - name: Test chroma-helper save/search
         run: |
           python .pack/scripts/chroma-helper.py save "CI test $(date)" "ci-$(date +%s)" "test" "ci" "ci-project"
