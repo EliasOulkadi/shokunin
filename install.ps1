@@ -146,15 +146,6 @@ function Install-MemorySystem {
         Invoke-WebRequest -Uri $url -OutFile (Join-Path $script:installDir "memory\mcp-server.py") -ErrorAction SilentlyContinue
     }
 
-    # Copy Telegram bot
-    $tgSrc = Join-Path $PSScriptRoot ".pack\telegram\bot.py"
-    if (Test-Path $tgSrc) {
-        Copy-Item $tgSrc (Join-Path $script:installDir "telegram\bot.py") -Force
-    } else {
-        $url = "https://raw.githubusercontent.com/EliasOulkadi/shokunin/master/.pack/telegram/bot.py"
-        Invoke-WebRequest -Uri $url -OutFile (Join-Path $script:installDir "telegram\bot.py") -ErrorAction SilentlyContinue
-    }
-
     # Copy healthcheck script
     $hcSrc = Join-Path $PSScriptRoot ".pack\scripts\weekly-healthcheck.ps1"
     if (Test-Path $hcSrc) {
@@ -410,9 +401,6 @@ function Show-Summary {
      y edita ~\.config\opencode\opencode.json con tu key
 
 
-     Crea un bot en @BotFather y guarda el token:
-     
-
   3. Abre un NUEVO terminal para cargar el perfil
 
   4. Ejecuta: .\run-opencode.ps1 (o solo opencode para sesion simple)
@@ -433,8 +421,8 @@ Write-Host @"
 â•šâ•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
   Este instalador configura tu PC como estacion de trabajo
-  AI Engineer con 62 skills, memoria persistente, bot de
-  Telegram, y automatizaciones â€” todo gratis y open source.
+  AI Engineer con 62 skills, memoria persistente,
+  y automatizaciones — todo gratis y open source.
 
   Requiere: Windows 10/11, Node.js 18+, Python 3.11+
   Tiempo estimado: 2-5 minutos
