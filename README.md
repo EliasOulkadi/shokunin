@@ -163,7 +163,7 @@ All data stored at `~/.shokunin/memory/`. No cloud, no telemetry, no subscriptio
 .\memory-healthcheck.ps1
 ```
 
-- [Enterprise White Paper v2.1](docs/Shokunin-Enterprise-White-Paper.pdf) - Full ecosystem overview, multi-strategy recall, Hindsight comparison
+- [Technical Overview v4.2.2](docs/Shokunin-Technical-Overview-v4.2.2.pdf) - Full ecosystem overview, multi-strategy recall, Hindsight comparison
 
 ## Troubleshooting
 
