@@ -15,6 +15,8 @@
 
 **Persistent AI memory for developers.** 62 skills, multi-strategy recall (vector + BM25 + temporal), ChromaDB memory, MCP servers, declarative self-updates. Zero servers, zero API costs, fully offline.
 
+**v4.2.2** adds freshness decay (time-weighted memory), claim verification (verify_file_path MCP tool), 9 MCP tools (was 8), and 30+ bug fixes.
+
 > *職人 (shokunin) means artisan in Japanese. These skills aim for that standard: every detail crafted, every edge case handled, every workflow automated.*
 
 ```powershell
@@ -135,6 +137,10 @@ opencode
 ## Memory System v4.2.1
 
 Multi-strategy recall (vector + BM25 + temporal + reciprocal rank fusion). Session management with explicit continue (no guessing which session to resume).
+
+- **Freshness decay**: exponential recency blending — old memories fade over 30-day half-life so stale claims don't drown out recent context
+- **Claim verification**: `verify_file_path` MCP tool validates file paths from old memory before the agent acts on them — treats memory as claims from a frozen point in time, not facts
+- **9 MCP tools** (up from 8): store_context, search_context, get_session_summary, multi_search_context (vector+BM25+RRF+temporal), consolidate_memories, list_sessions, continue_session, save_message, verify_file_path
 
 ```bash
 # List recent sessions
