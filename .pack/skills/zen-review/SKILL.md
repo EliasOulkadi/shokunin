@@ -14,6 +14,8 @@ Do NOT clone or fetch — the repo is already checked out.
 Do NOT run tests, builds, or modify any files.
 Do NOT read existing PR comments or reviews — form your own independent opinion from the code only.
 
+## Workflow
+
 ## Your Task
 
 1. Get the diff of changes to review. Try these sources in order:
@@ -110,3 +112,36 @@ Severity:
 - P3: Low — minor issue, suggestion
 
 If no issues found, return: `[]`
+
+## Error Handling
+
+| Cause | Fix |
+|-------|-----|
+| `git diff` produces empty output against base branch | No changes to review. Inform user and stop. Do not fabricate findings. |
+| Target file has been deleted in the diff but reference persists | Read the git diff carefully — `--- a/path` and `+++ /dev/null` indicate deletion. Skip file analysis and note the deletion in findings with line 0. |
+| `git merge-base` fails (shallow clone, no remote tracking) | Fall back to `git diff HEAD~1` for single commit. If that fails, use `git diff HEAD` for working tree changes. Inform user of degraded context. |
+| File is too large to read in a single call (10K+ lines) | Read the file in 2000-line windows centered on the changed hunks. Cross-reference function signatures by searching for `func ` or `def ` patterns. |
+| Diff contains binary files or generated code | Skip binary files. For generated code (protobuf, GraphQL schema, lock files), note the change exists but do not review line-by-line — review the source of truth instead. |
+| Type checker or linter config is unavailable | Note in findings: "Static analysis tools were not run. Type correctness verified manually against function signatures." |
+| Caller search returns too many results to review exhaustively | Sample 3-5 representative callers across different modules. Note sample size in the finding body so the user knows the review depth. |
+
+## Sources
+
+- Google Code Review Guidelines (google.github.io/eng-practices/review) — reviewer responsibilities, review speed, and what to look for
+- OWASP Top 10 2025 (owasp.org/www-project-top-ten) — security vulnerability categories relevant to code review
+- "The Pragmatic Programmer" by David Thomas and Andrew Hunt (Addison-Wesley, 20th Anniversary Edition, 2019) — defensive programming and code correctness patterns
+- Conventional Comments specification (conventionalcomments.org) — structured feedback format with labels and severity
+- "Software Engineering at Google" by Titus Winters, Tom Manshreck, Hyrum Wright (O'Reilly, 2020) — code review culture and practices at scale
+- Microsoft Security Development Lifecycle (microsoft.com/en-us/sdl) — threat modeling and security review methodology
+- "Secure by Design" by Dan Bergh Johnsson, Daniel Deogun, Daniel Sawano (Manning, 2019) — domain-driven security patterns for code review
+
+## Anti-Patterns
+
+| Pattern | Problem | Fix |
+|---------|---------|-----|
+| Reviewing without reading the full changed file | A diff shows 5 changed lines, but those lines depend on 200 lines of surrounding context. Shallow review misses type mismatches, dead code, and behavioral regressions. | Always read the complete file after reviewing the diff. Verify every function signature referenced by changed code. |
+| Reporting style issues as security or correctness findings | Formatting, naming, and whitespace findings dilute the review and erode trust with the author. | Filter to: correctness, security, performance, behavioral changes. If a style issue causes a bug, report the bug, not the style. |
+| Skipping caller analysis when a function signature changes | A changed return type or parameter order silently breaks every call site. | Grep for the function name across the codebase. Read 3-5 callers. If zero callers found, note that in findings. |
+| Reviewing only added lines and ignoring deleted lines | Deleted error handling, removed validation, or dropped null checks are among the most dangerous changes in a diff. | For every deletion hunk, ask: what guarantee did this code provide? Is that guarantee still satisfied? |
+| Trusting test changes without verifying what they test | Tests can be wrong — asserting incorrect behavior, missing edge cases, or passing for the wrong reason. | Read the test file and trace the test through the code it exercises. Verify the assertion matches the expected behavior. |
+| Recommending fixes inline during the review | The review output is a JSON finding, not a code patch. Mixing diagnosis and prescription creates merge conflicts and bypasses author ownership. | Describe what is wrong and what would happen at runtime. Let the author choose the fix. Offer to implement only if asked. |

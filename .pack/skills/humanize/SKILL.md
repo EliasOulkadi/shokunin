@@ -137,7 +137,7 @@ The real em dash is used for asides or tone shifts, not as glue between label an
 
 ---
 
-## The humanization workflow
+## Workflow
 
 ### Step 1: Detect
 
@@ -207,6 +207,19 @@ Use this checklist before delivering any humanized text:
 | Claims without attributed source | | |
 
 ---
+
+## Error Handling
+
+| Cause | Fix |
+|-------|-----|
+| Text still reads as AI after one pass | Run through AI detector (GPTZero, Originality). Identify remaining tells. Apply second pass focusing on burstiness (vary sentence length). |
+| Over-correction: text became too informal | Match register to the channel and audience. Internal email: casual-direct. Client report: professional. Academic: formal. |
+| Removing all connectors made text choppy | Keep natural connectors ("but", "so", "and", "then"). Only remove mechanical ones ("Moreover", "Nevertheless", "Consequently"). |
+| Added filler words now sound forced | Use colloquialisms sparingly. "Well", "look", "the thing is" — max 1-2 per page. Overuse sounds fake. |
+| Passive-to-active conversion reads awkwardly | Not all passives are bad. Keep passive when the actor is unknown or irrelevant. Target < 30% passive voice, not 0%. |
+| Text lost important nuance when simplifying | Preserve technical precision. Humanize the wrapper, not the substance. Facts, data, and specific claims stay intact. |
+| Em dash removal broke sentence flow | Replace `—` with parentheses, comma, colon, or restructure sentence. Don't just delete — find the right natural alternative. |
+| AI detector still flags the text | Check burstiness distribution. Ensure paragraph lengths vary (1-line to 8-line mix). Add one genuine opinion/judgment. Verify no rhetorical question closers. |
 
 ## Sources
 

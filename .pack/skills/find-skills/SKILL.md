@@ -110,3 +110,36 @@ I can still help with this task directly.
 If this is something you do often, create your own skill:
 npx skills init my-xyz-skill
 ```
+
+## Error Handling
+
+| Cause | Fix |
+|-------|-----|
+| `npx skills find` returns zero results for a valid query | Query may be too specific or use jargon not in skill descriptions. Broaden to the domain term (e.g., "testing" instead of "jest snapshot serializers"). Try 2-3 synonym variations. |
+| `npx skills add` fails with "package not found" | Verify the package spec format: `<owner>/<repo>@<skill-name>`. Check https://skills.sh/ for the exact package path. GitHub rate limits may apply — retry after 60s. |
+| Installed skill does not activate (agent ignores it) | Skill description might not match the user's phrasing. Check the skill's `description` field in its SKILL.md frontmatter. It should use trigger phrases the user naturally says. |
+| `npx skills check` reports updates but `add` re-installs same version | The CLI caches resolution metadata. Run `npx skills check --refresh` to force re-resolution. If still stuck, uninstall with `npx skills remove <package>` and re-add. |
+| Skills website (skills.sh) is unreachable | GitHub Pages may be down or DNS blocked. Fall back to direct GitHub search: `gh search repos --topic agent-skill <query>`. Present results from the CLI search as primary alternative. |
+| User requests a skill for a niche domain with no ecosystem coverage | No skill exists yet. Offer to help directly. Propose creating a custom skill with `npx skills init`. Show the skill-creator workflow if the user wants to build and publish it. |
+| Skill install conflicts with an existing skill of the same name | Two skills share a namespace. The CLI will refuse to overwrite. Uninstall the old one first: `npx skills remove <old-package>`. Verify the old skill isn't needed before removing. |
+
+## Sources
+
+- Skills CLI documentation (skills.sh/docs) — package manager usage, publish flow, and repository structure
+- Vercel Agent Skills repository (github.com/vercel-labs/agent-skills) — reference skill implementations with 100K+ installs
+- Anthropic Skills specification (github.com/anthropics/skills) — skill format, metadata schema, and compatibility guidelines
+- Zencoder Agent Skills repository (github.com/zencoderai/skills) — OSS security and workflow skills reference
+- npm package registry documentation (docs.npmjs.com) — npx resolution, caching, and version management
+- GitHub Search API documentation (docs.github.com/en/rest/search) — topic-based repository discovery as fallback
+- "The Design of Everyday Things" by Don Norman (Basic Books, 2013) — discoverability principles applied to skill ecosystem UX
+
+## Anti-Patterns
+
+| Pattern | Problem | Fix |
+|---------|---------|-----|
+| Recommending a skill without checking install count or maintenance status | Abandoned skills with 0 installs waste the user's time and may contain broken or outdated instructions. | Check install count (>1K preferred), last update (<6 months), and source reputation before presenting. |
+| Installing a skill the user didn't explicitly agree to install | Skills modify agent behavior. Installing without consent breaks trust. | Always present the skill first, wait for explicit confirmation, then install. Never auto-install. |
+| Searching only once and giving up when zero results appear | First query may use the wrong terminology or be too narrow. | Try 2-3 synonym variations and broader domain terms before concluding no skill exists. |
+| Suggesting a skill when the task is trivial and built-in capabilities suffice | Overhead of installing and loading a skill for a 30-second task wastes tokens and attention. | Only suggest skills for recurring patterns, complex domains, or tasks the user explicitly flagged as needing a skill. |
+| Evaluating skill quality by description alone without reading the actual content | Descriptions are marketing. The SKILL.md content determines actual usefulness. | After identifying candidates, read the skill's SKILL.md on GitHub before presenting. Check for concrete patterns, code examples, and workflow steps. |
+| Assuming a skill works on all platforms when it's only tested on one | A skill written for Claude Code may fail on OpenCode or Gemini CLI due to tool name differences. | Check the skill's `compatibility` metadata field. If missing, test the first step manually before recommending. |

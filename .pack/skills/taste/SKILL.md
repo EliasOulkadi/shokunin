@@ -143,7 +143,7 @@ Reference library of advanced UI concepts. Never default to generic. Use Framer 
 ### Text: Kinetic Marquee, Text Mask Reveal, Scramble Effect, Circular Path
 ### Micro: Particle Explosion, Ripple Click, Skeleton Shimmer, Animated SVG Line Drawing
 
-## 9. ERROR HANDLING TABLE (shokunin improvement)
+## Error Handling
 
 | Error | Cause | Fix |
 |-------|-------|-----|
@@ -173,7 +173,35 @@ Reference library of advanced UI concepts. Never default to generic. Use Framer 
 - [ ] Perpetual animations in isolated Client Components
 - [ ] Dependency verification: all imports exist in package.json
 
-## Sources (shokunin improvement)
+---
+
+## Workflow
+
+1. **Read user intent** — extract product type, style keywords, motion preference, visual density preference. Map to the three dial values (DESIGN_VARIANCE, MOTION_INTENSITY, VISUAL_DENSITY).
+2. **Lock dependencies** — check package.json before importing. Tailwind version (v3 vs v4 syntax). Icon library availability. Framer Motion presence.
+3. **Establish the global config** — set typography (display sans, body sans, mono). Set 1 accent color (saturation < 80%). Set neutral palette (Zinc or Slate, never mixed).
+4. **Apply bias corrections** — anti-center for DESIGN_VARIANCE > 4. No cards for VISUAL_DENSITY > 7. No serif for dashboards. No purple glows. No Inter as display.
+5. **Build component tree** — extract interactive/motion components into isolated Client Components with `'use client'`. Static content stays server-rendered.
+6. **Layer creative effects** — apply grain/noise to fixed pseudo-elements only. Add scroll-entry reveals (staggered at 100ms intervals). Spring physics for magnetic micro-interactions.
+7. **Guard performance** — only animate `transform` + `opacity`. Gate hover behind `@media (hover: hover)`. Mandatory `prefers-reduced-motion` on every animation.
+8. **Run pre-flight checklist** — verify mobile `min-h-[100dvh]`, no emojis, no banned patterns, all states rendered (loading, empty, error, success).
+
+## Anti-Patterns
+
+| Pattern | Problem | Fix |
+|---------|---------|-----|
+| Importing Framer Motion without checking package.json | Build fails, missing dependency | Verify dependency exists first. Output `npm install framer-motion` if missing. |
+| Using Tailwind v4 syntax in v3 projects | Breaking changes in class names | Check package.json Tailwind version. Match syntax to installed version. |
+| `h-screen` everywhere | iOS Safari viewport bugs, layout shift | Always `min-h-[100dvh]` for full-screen sections. |
+| Animated `width`/`height`/`top`/`left` properties | Layout thrashing, GPU cannot accelerate | Only animate `transform` and `opacity`. Use compositor-only properties. |
+| Inter as display font for premium products | Looks generic, no character | Use Geist, Outfit, Cabinet Grotesk, or Satoshi for display headings. |
+| Neon glows, purple button shadows, oversaturated accents | AI tell — looks templated | Neutral bases (Zinc/Slate) with a single controlled accent. OKLCH over hex. |
+| Grain texture on scrolling containers | Scroll jank, paint storms | Apply grain exclusively to `position: fixed; pointer-events: none` pseudo-elements. |
+| `useState` for continuous animation values | Triggers React re-renders 60fps | Use Framer Motion `useMotionValue` + `useTransform` outside React render cycle. |
+| Centered hero section when DESIGN_VARIANCE > 4 | Cliché, no personality | Split screen (50/50), left-aligned content with right-aligned asset, or asymmetric whitespace. |
+| Missing loading/empty/error states on interactive components | Broken UX when data isn't perfect | Implement all four states: loading (skeleton), empty (guidance), error (inline+actionable), success. |
+
+## Sources
 
 - Emil Kowalski — Design engineering (Sonner, Vaul, Linear, animations.dev)
 - Paul Lewis — Compositor-only properties (Google Chrome)

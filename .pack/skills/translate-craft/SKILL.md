@@ -83,7 +83,7 @@ Translate **meaning**, not words. If the reader can tell it's a translation, it 
 - **Root system**: Words derive from 3-letter roots
 - **Length**: ~25% shorter. Text shrinks in UI.
 
-## Procedural Workflow
+## Workflow
 
 1. **Identify scope**: source, target, audience, medium, tone tier
 2. **Analyze source**: flag idioms, cultural references, ambiguity
@@ -134,6 +134,19 @@ Translate **meaning**, not words. If the reader can tell it's a translation, it 
 - [ ] RTL: layout mirrored, numbers left-to-right
 - [ ] Read-aloud test passed
 - [ ] Back-translation sample checked for meaning drift
+
+## Error Handling
+
+| Cause | Fix |
+|-------|-----|
+| Placeholder syntax (`{name}`, `%s`, `{{var}}`) broken in translation | Preserve exact placeholder format. Verify each appears unchanged in output. Test with real data. |
+| Text expansion breaking UI layout (German +25%, Spanish +25%) | Design containers with flex-grow. Test with longest translated string. Account for CJK shortening (-15-20%). |
+| False friends between language pairs | Maintain language-pair-specific false friends list. ES: "embarazada" ≠ "embarrassed". FR: "actuellement" ≠ "actually". DE: "Gift" ≠ "gift". |
+| Mixed formality in same document (tú/usted, Sie/du) | Pick one register at start. Scan entire document for consistency. Language-specific rules table has defaults. |
+| Word-for-word translation producing unnatural phrasing | Restructure to target language word order. KO: SOV. JA: drop subjects. AR: root-based word derivation. |
+| RTL layout breaks on dynamically injected content | Use CSS logical properties exclusively (`margin-inline-start`, `padding-inline`, `border-inline-end`). Never `left`/`right`. |
+| Back-translation reveals meaning drift | If reconstructed source differs from original, the translation is too literal or too loose. Adjust: preserve meaning, not word order. |
+| Cultural reference doesn't exist in target market | Adapt or explain. Replace region-specific idioms with natural equivalent. Add brief context for untranslatable concepts. |
 
 ## Anti-Patterns
 

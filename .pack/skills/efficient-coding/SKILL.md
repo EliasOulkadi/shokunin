@@ -167,3 +167,48 @@ These are the most common ways agents waste tokens — treat each as a hard rule
   — use direct imperatives or don't say it.
 - **Restating the task**: Don't open your response with a rephrasing of what the user asked.
   Start with the action or the answer.
+
+---
+
+## Workflow
+
+1. **Assess scope** — simple task: execute directly. Complex or unfamiliar: quick grep/glob discovery first.
+2. **Batch exploration** — run all independent searches (grep, glob, read) in a single response. Never interleave discovery with editing.
+3. **Read precisely** — use offset+limit for targeted sections. Never whole-file reads for single symbols or known locations.
+4. **Implement surgically** — use Edit tool for targeted replacements. Change only lines necessary to accomplish the task.
+5. **Verify minimally** — run lint/typecheck if available. Check build passes. Don't add tests unless requested.
+6. **Stop cleanly** — output matches request. No summaries, no explanations, no follow-up questions.
+
+## Error Handling
+
+| Cause | Fix |
+|-------|-----|
+| Context bloat from repeated reads | Track what's already in session context. Re-read only if file was modified since last read. |
+| Stale context from interleaved discovery/editing | Separate exploration phase from implementation phase completely. |
+| Tool round-trip waste from sequential calls | Batch all independent grep, glob, read, and bash calls into one response. |
+| Speculative command execution | Form a hypothesis before running any command. Never run "just to see." |
+| Unwanted file or dependency creation | Always prefer editing existing files. Check package.json/requirements.txt before adding deps. |
+| Lint/typecheck failure discovered late | Run verification commands before marking any task done. |
+| Scope creep into unrelated refactoring | Fix only what was asked. Mention unrelated issues briefly but never fix unasked. |
+
+## Anti-Patterns
+
+| Pattern | Problem | Fix |
+|---------|---------|-----|
+| Full-file reads for single symbols | Wastes context on irrelevant code | Grep for the symbol, read only the section containing it |
+| "I'll now open the file to..." narration | Costs tokens, adds zero value | Just open the file and proceed |
+| Re-reading files already in session context | Duplicate context, wasted tokens | Trust session history. Re-read only if modified. |
+| Padding acknowledgments ("Great question!") | Filler that costs tokens | Start with the action or answer directly |
+| Creating new files for small changes | Fragments the codebase unnecessarily | Edit existing files with surgical precision |
+| Explaining code after writing it unprompted | Unsolicited output wastes tokens | Only explain if user explicitly asks |
+| Running speculative commands with no hypothesis | Wastes tool calls and tokens | Form hypothesis, then act decisively |
+
+## Sources
+
+- Google Engineering Practices — "Code Review: Small CLs" (google.github.io/eng-practices)
+- Kent Beck — "Tidy First?" (O'Reilly, 2023)
+- Martin Fowler — "Refactoring" (Addison-Wesley, 2nd Edition)
+- John Ousterhout — "A Philosophy of Software Design" (Yaknyam Press)
+- Hunt & Thomas — "The Pragmatic Programmer" (Addison-Wesley, 20th Anniversary)
+- Paul Graham — "Succinctness is Power" (paulgraham.com)
+- Greg Wilson — "Teaching Tech Together" (teachtogether.tech)

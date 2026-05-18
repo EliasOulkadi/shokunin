@@ -16,7 +16,7 @@ Accept any combination of:
 2. **Git commit hashes** — one or more SHAs; extract the diff with git
 3. **Task description / requirements** — context for what the change is supposed to accomplish
 
-## Review Workflow
+## Workflow
 
 ### Step 1: Obtain the diff
 
@@ -195,3 +195,42 @@ Always assume positive intent. Phrase findings as observations: "This path retur
 | 200-500 lines | Read structure, sample key paths | 10-15 min |
 | 500+ lines | Read description + key files; flag if too large | 15+ min |
 | Generated/auto-formatted code | Check output correctness only | 1-2 min |
+
+---
+
+## Error Handling
+
+| Cause | Fix |
+|-------|-----|
+| User provides no diff, no commits, no range | Ask for input before proceeding. Don't guess or review random code. |
+| Git diff on a single commit returns empty | Use `git diff <commit>^..<commit>` to show changes introduced by that commit. |
+| Diff exceeds 500 lines and is unreviewable | Flag the size as a P3 finding. Review structure only, sample key paths. |
+| Changed file deleted in working tree | Verify file still exists before reading. Note the deletion in review. |
+| Diff contains binary or generated files | Skip binary files. For generated code, check output correctness only. |
+| Reference code (callers/importers) not found | Note limited context in review. Flag that surrounding analysis was incomplete. |
+| Task requirements contradict the diff | Flag the deviation as a finding. Note what the requirement says vs what the code does. |
+| Multiple commit hashes provided, one is invalid | Verify each hash with `git cat-file -t <hash>`. Skip invalid hashes, review remaining. |
+
+## Anti-Patterns
+
+| Pattern | Problem | Fix |
+|---------|---------|-----|
+| Reviewing pre-existing code not in the diff | Scope creep. Overwhelms the author with unrelated issues. | Only flag issues introduced by the change. Mention pre-existing issues separately if critical. |
+| Flagging style preferences as P0/P1 bugs | Dilutes severity. Authors ignore future reviews. | P0 = crash/security/data loss. P1 = broken feature. P2 = code smell. P3 = preference. |
+| Suggesting functional changes beyond the diff scope | Changes WHAT the code does, not HOW | Preserve functionality. Only suggest changes to implementation approach. |
+| "This could be simplified" with no specific alternative | Vague, unactionable, frustrating | Always provide a concrete suggested fix with code example. |
+| Reviewing generated or vendored code line-by-line | Waste of reviewer time | Check only output correctness. Skip formatting/style on generated code. |
+| Using absolute language ("This is wrong") without evidence | Defensive response from author | Phrase as observation: "This path returns null when..." with evidence. |
+| Padding review with praise or filler | Wastes author's reading time | Keep it concise. Verdict, findings table, details for P0/P1 only. |
+| Not reading surrounding code for context | Misses callers, importers, and downstream effects | Read changed files fully. Search for dependents. Understand the blast radius. |
+
+## Sources
+
+- Google Engineering Practices — "How to Do a Code Review" (google.github.io/eng-practices)
+- SmartBear — "Best Practices for Code Review" (smartbear.com)
+- Palantir — "Code Review Best Practices" (blog.palantir.com)
+- Microsoft — "Code Review Checklist" (learn.microsoft.com)
+- OWASP Code Review Guide — owasp.org/www-project-code-review-guide
+- Conventional Comments — conventionalcomments.org
+- Philipp Hauer — "Code Review Guidelines for Humans" (philipphauer.de)
+- Trisha Gee — "Code Review Best Practices" (trishagee.com)

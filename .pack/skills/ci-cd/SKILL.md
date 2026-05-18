@@ -53,6 +53,61 @@ This generates a production-ready pipeline with:
 
 **If the build is consistently >15 min**: add more shards or parallelize independent jobs.
 
+#### Test sharding
+
+```yaml
+# GitHub Actions: split tests across N parallel runners
+strategy:
+  matrix:
+    shard: [1, 2, 3, 4]
+steps:
+  - run: npx vitest --shard=${{ matrix.shard }}/${{ strategy.job-total }}
+```
+
+In GitLab CI, use the `parallel:` key: `parallel: 4` and `CI_NODE_INDEX` / `CI_NODE_TOTAL` env vars.
+
+**Decision**: Use sharding when test suite >5 min. Start with 2 shards, increase until each shard runs in <3 min. For Playwright, shard by spec file weight with `playwright test --shard=$CI_NODE_INDEX/$CI_NODE_TOTAL`.
+
+#### Monorepo strategies
+
+| Pattern | Trigger rule | Cache key |
+|---------|-------------|-----------|
+| Path-based | `paths: ['packages/web/**']` (GHA) / `rules:changes:` (GitLab) | `${{ hashFiles('packages/web/package-lock.json') }}` |
+| Label-based | `if: contains(github.event.pull_request.labels.*.name, 'web')` | Per-package cache restore |
+| Full rebuild | Monorepo tools (Nx, Turborepo) use their own remote caching | N/A — tool-managed |
+
+For large monorepos, use **Nx** or **Turborepo** for task orchestration. Let the tool handle `--since`, affected projects, and remote cache. Reference the tool's CI recipe — don't hand-roll matrix logic when the tool already solves it.
+
+#### Environment protection rules
+
+```yaml
+# GitHub Actions — manual approval gate before production
+deploy-prod:
+  needs: [deploy-staging]
+  environment:
+    name: production
+    # Enforces: required reviewers, wait timer, restricted branches, deployment history
+  steps: [...]
+```
+
+- **Required reviewers**: Minimum 2 for production, 1 for staging
+- **Wait timer**: Force 5-minute buffer before deploy (catch last-minute reverts)
+- **Deployment branches**: Only `main` or `release/*` can trigger production
+- **Auto-inactive**: Mark deployments inactive after 30 days, prevent stale environment clutter
+- **GitLab equivalent**: `environment: production` with `deploy: free` or protected environments
+- **CircleCI equivalent**: `approval` job type with restricted contexts
+
+#### Secret rotation
+
+Never store long-lived secrets in CI/CD. Prefer:
+
+1. **OIDC (preferred)**: No secrets at all — federated identity with short-lived tokens
+2. **Short-lived credentials**: Clouds offer 1-hour max tokens via OIDC
+3. **Secret rotation schedule**: Rotate all static secrets every 90 days, documented in playbook
+4. **CI/CD secret scanning**: Enable GitHub secret scanning push protection or GitLab secret detection
+
+For legacy systems requiring static secrets, store them only in the CI/CD platform's encrypted variables (not in repo), audit access via audit logs, and set expiration reminders via automation.
+
 ### Step 4: Set up OIDC (no static secrets)
 
 ```yaml
@@ -99,6 +154,19 @@ See [references/self-hosted-runners.md](references/self-hosted-runners.md) for K
 - Custom hardware (GPU, large memory)
 - Docker-in-Docker performance
 - Private network access
+
+## Error Handling
+
+| Error | Cause | Fix |
+|-------|-------|-----|
+| `Resource not accessible by integration` | Missing `permissions:` block in GHA workflow | Add `permissions: contents: read, id-token: write` at job or workflow level |
+| `fatal: unable to access ... The requested URL returned error: 403` | Expired or missing git credentials | Use `actions/checkout` with `token: ${{ secrets.GITHUB_TOKEN }}` or deploy key |
+| `Error response from daemon: manifest for ... not found` | Docker image tag doesn't exist in registry | Verify tag was built and pushed; check registry path matches exactly |
+| `Job failed: runner disconnected` | Self-hosted runner crashed or network flaked | Add `timeout-minutes` per job, configure runner auto-restart, use spot instance rebalancing |
+| `No space left on device` | Build artifacts filling runner disk | Add cleanup step: `rm -rf /tmp/*` or use `actions/upload-artifact` with retention; reduce Docker image size |
+| `deploy job requires a unique deployment_id` | Concurrent deploys to same environment | Add `concurrency: group: ${{ github.workflow }}-${{ github.ref }}` to prevent race conditions |
+| `Cache not found` (restore) / `Cache already exists` (save) | Cache key mismatch or cache hit on locked key | Use `restore-keys` fallback for partial matches; include `hashFiles('lockfile')` in primary key |
+| OIDC token fetch failed | Missing `id-token: write` permission or IAM trust relationship misconfigured | Verify IAM trust policy allows `token.actions.githubusercontent.com` + correct repo/subject claim |
 
 ## Production Checklist
 

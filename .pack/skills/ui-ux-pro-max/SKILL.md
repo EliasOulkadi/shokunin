@@ -15,6 +15,16 @@ Reference these guidelines when:
 - Building landing pages or dashboards
 - Implementing accessibility requirements
 
+## Workflow
+
+1. **Analyze requirements** — extract product type, style keywords, industry, and technology stack from user request. Default to `html-tailwind` if no stack specified.
+2. **Generate design system** — run `python3 scripts/search.py "<query>" --design-system -p "Project Name"` for comprehensive style, color, typography, and effects recommendations.
+3. **Supplement with domain searches** — query `style`, `typography`, `ux`, `chart`, or `landing` domains for additional detail on specific areas.
+4. **Persist design system for multi-page projects** — use `--persist` to create `design-system/MASTER.md` with page-specific overrides via `--page`.
+5. **Apply stack guidelines** — run `--stack <stack>` (default: html-tailwind) for implementation-specific best practices.
+6. **Implement with the design system as source of truth** — colors, typography, spacing, and effects all come from the persisted MASTER.md.
+7. **Run pre-delivery checklist** — verify visual quality, interaction, light/dark mode, layout, and accessibility before delivering code.
+
 ## Rule Categories by Priority
 
 | Priority | Category | Impact | Domain |
@@ -375,3 +385,44 @@ Before delivering UI code, verify these items:
 - [ ] Form inputs have labels
 - [ ] Color is not the only indicator
 - [ ] `prefers-reduced-motion` respected
+
+---
+
+## Error Handling
+
+| Cause | Fix |
+|-------|-----|
+| Python not installed, search script fails | Run `python3 --version` first. Install per OS instructions in Prerequisites section. |
+| `--design-system` returns no matching style | Re-run with different keywords. Try broader terms or synonyms. |
+| `--persist` fails due to permissions | Verify write access to project root. Run from a directory with write permissions. |
+| `--stack` flag returns no results for chosen stack | Verify the stack name matches exactly (use `html-tailwind` not "tailwind"). Check available stacks list. |
+| `--domain` search returns empty results | Broaden keywords. Check domain name matches the available domains table. |
+| Merged output has conflicting design rules | Review MASTER.md for contradictions. Default to the first matching rule in hierarchy. |
+| Page-specific override file not found | Use `--page "pagename"` flag to regenerate. File is created at `design-system/pages/`. |
+| Gradient/text color contrast fails WCAG 2.1 | Check color-contrast ratio. Minimum 4.5:1 for normal text, 3:1 for large text. |
+
+## Anti-Patterns
+
+| Pattern | Problem | Fix |
+|---------|---------|-----|
+| Emojis used as UI icons | Looks unprofessional, inconsistent sizing | Use SVG icons from Lucide, Heroicons, or Phosphor exclusively |
+| Scale transforms on hover without `cursor-pointer` | No indication element is interactive | Add `cursor-pointer` to all clickable/hoverable elements |
+| `h-screen` on mobile layouts | iOS Safari viewport bugs cause layout shift | Always use `min-h-[100dvh]` instead |
+| Transparent glass cards in light mode (`bg-white/10`) | Invisible, illegible on white backgrounds | Use `bg-white/80` or higher opacity in light mode |
+| Missing `prefers-reduced-motion` media query | Animations cause discomfort for users with motion sensitivity | Gate every animation behind `@media (prefers-reduced-motion: reduce)` |
+| Floating navbar flush to viewport edges (`top-0 left-0`) | Content hides behind navigation | Add `top-4 left-4 right-4` spacing on floating navbars |
+| Mixing different icon libraries on one page | Inconsistent stroke width, sizing, and visual weight | Pick one icon set for the entire project |
+| Tailing gray-400-level text for body copy in light mode | Fails WCAG contrast minimums | Use `slate-600` (#475569) minimum for body text in light mode |
+
+## Sources
+
+- WCAG 2.1/2.2 — Web Content Accessibility Guidelines (w3.org/WAI)
+- Nielsen Norman Group — "UX Guidelines for Ecommerce" (nngroup.com)
+- shadcn/ui — Component library and theming (ui.shadcn.com)
+- Tailwind CSS — Utility-first framework (tailwindcss.com)
+- Google Fonts — Typography pairs and metrics (fonts.google.com)
+- Refactoring UI — Adam Wathan & Steve Schoger (refactoringui.com)
+- Practical UI — Adham Dannaway (practical-ui.com)
+- Erik Kennedy — "7 Rules for Creating Gorgeous UI" (learnui.design)
+- OKLCH Color Picker — oklch.com
+- Adam Argyle — "Building a Color Scheme" (web.dev)

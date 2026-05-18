@@ -16,6 +16,15 @@ metadata:
 
 Production Flutter apps with Clean Architecture, Riverpod, GoRouter, Impeller, and platform channels. Based on Flutter docs, Riverpod patterns, and production experience.
 
+## Workflow
+
+1. **Scaffold**: `dart run flutter_skeleton` or create `lib/core`, `lib/features/*/domain|data|presentation` by hand. Add Riverpod + GoRouter + Freezed deps in `pubspec.yaml`.
+2. **Domain first**: Define entities, repository contracts, and use cases. Zero Flutter imports. Pure Dart with `freezed` for sealed unions.
+3. **Data layer**: Implement repositories with Dio/retrofit, DTOs with `json_serializable`, and data sources. Wire up in Riverpod with `Provider<AuthRepository>`.
+4. **Presentation**: Build screens and widgets with `ConsumerWidget`/`ConsumerStatefulWidget`. Wire `NotifierProvider` for each feature. Keep `ref.watch` at leaf level.
+5. **Routing**: Configure GoRouter with auth redirect (`redirect` guard), nested routes per feature, and deep link patterns.
+6. **Ship**: Run tests → `flutter build appbundle` / `flutter build ipa` → deploy via Codemagic or GitHub Actions. Enable Impeller on Android in `build.gradle`.
+
 ## Sub-Commands
 
 | Command | Description |
@@ -79,7 +88,7 @@ final authStateProvider = StreamProvider<User?>((ref) {
   return ref.watch(authRepositoryProvider).authStateChanges();
 });
 
-final loginProvider = StateNotifierProvider<LoginNotifier, AsyncValue<void>>((ref) {
+final loginProvider = NotifierProvider<LoginNotifier, AsyncValue<void>>((ref) {
   return LoginNotifier(ref.watch(loginUseCaseProvider));
 });
 
@@ -143,6 +152,19 @@ Run: `dart run pigeon --input battery.dart --dart_out lib/battery.dart`
 - `cached_network_image` or `expo-image`
 - Profile: `flutter run --profile`, DevTools
 - Avoid `RepaintBoundary` overuse
+
+## Error Handling
+
+| Scenario | Cause | Fix |
+|----------|-------|-----|
+| `Bad state: No element` | Empty stream/iterable accessed without check | Guard with `.isEmpty` or use `.firstOrNull` |
+| `LateInitializationError` | `late` variable accessed before init | Use nullable `T?` or `StateNotifier` with initial value |
+| Platform channel: `MissingPluginException` | Method not implemented on native side | Verify Pigeon codegen ran, check method name matches both sides |
+| `ConcurrentModificationError` | Modifying list while iterating | Use `.toList()` to copy before mutation, or use `List.unmodifiable` |
+| `type 'Null' is not a subtype of type 'String'` | JSON null from API not handled in DTO | Add `@JsonKey(defaultValue: '')` or make fields nullable, run codegen |
+| GoRouter: `GoError: no routes for location` | Deep link path not registered | Add fallback redirect to `/` or register catch-all `/*` route |
+| Riverpod: provider not disposed | Circular dependency between providers | Use `ref.watch` in build methods only, never in constructors. Break cycles with `Provider.autoDispose` |
+| Build failed: `Could not resolve all files` (Android) | Gradle dependency conflict or outdated plugin | Run `./gradlew --refresh-dependencies`, check `build.gradle` versions match AGP requirements |
 
 ## Production Checklist
 

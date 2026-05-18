@@ -358,3 +358,51 @@ Before marking any code task done, run through:
 - [ ] No duplicated logic?
 - [ ] Lint and typecheck pass?
 - [ ] The next engineer can change this safely?
+
+---
+
+## Workflow
+
+1. **Understand intent** — read the task requirements. Identify the boundary of the change and what must not be touched.
+2. **Survey surroundings** — grep/glob for callers, importers, and dependent code. Understand how the changed code fits into the larger system.
+3. **Plan the change** — identify the minimal set of files and lines that must change. Prefer surgical edits over rewrites.
+4. **Write clear, fail-safe code** — guard clauses over nested ifs. Named constants over magic values. Parameterized queries over string interpolation. Explicit error handling at every boundary.
+5. **Self-review the diff** — read your own changes as if reviewing a teammate's PR. Check naming, edge cases, security, and style consistency.
+6. **Verify correctness** — run lint, typecheck, and the narrowest test that exercises the change. Fix any failures before claiming completion.
+
+## Error Handling
+
+| Cause | Fix |
+|-------|-----|
+| Null/undefined cascading through functions | Validate at boundary. Return early with explicit null guards. Never propagate null silently. |
+| Nested conditionals creating unreachable branches | Flatten with guard clauses. Return/fail early on invalid states. |
+| Long functions mixing I/O with business logic | Separate pure computation from I/O. Extract I/O to dedicated functions. |
+| Swallowed exceptions in empty catch blocks | Always log with context and rethrow, or handle explicitly. Never empty catch {}. |
+| API/timeout failures with no recovery | Add retry with jitter, timeout, and circuit breaker for every external call. |
+| Race conditions from shared mutable state | Use transactions for multi-step writes. Add locking or atomic operations for shared state. |
+| Missing auth checks on endpoints | Verify auth middleware is applied to every endpoint. Check authorization for the specific resource, not just login status. |
+| Magic numbers scattered across codebase | Extract to named constants with descriptive names and units. |
+
+## Anti-Patterns
+
+| Pattern | Problem | Fix |
+|---------|---------|-----|
+| "Manager"/"Helper"/"Handler" classes | Vague naming hides responsibility | Name by intent and domain concept: `OrderRepository`, `TaxCalculator` |
+| Functions with 5+ parameters | Argument order bugs, hard to call | Create a request/options object. Limit to 3 max. |
+| Comments explaining what the code does | Code should be self-documenting | Refactor until the comment is unnecessary. Keep only "why" comments. |
+| Premature abstractions ("just in case") | Adds complexity for imaginary future needs | Abstract only when duplication exists. YAGNI. |
+| Mixing concerns in one class/service | One class changes for 3 different reasons | Apply Single Responsibility: persistence, business logic, and notification belong in separate classes. |
+| Inheritance chains over 2 levels deep | Implicit behavior, hard to trace | Prefer composition. Inject dependencies explicitly. |
+| Processing user input without validation | Injection, corruption, crashes | Validate and sanitize at the system boundary before any processing. |
+| Throwing generic Error with no context | Debugging requires grep, not error messages | Include what failed, what identifier, and actionable context in every error. |
+
+## Sources
+
+- Robert C. Martin — "Clean Code" (Prentice Hall)
+- Martin Fowler — "Refactoring" (Addison-Wesley, 2nd Edition)
+- John Ousterhout — "A Philosophy of Software Design" (Yaknyam Press)
+- Michael Feathers — "Working Effectively with Legacy Code" (Prentice Hall)
+- Steve McConnell — "Code Complete" (Microsoft Press, 2nd Edition)
+- Hunt & Thomas — "The Pragmatic Programmer" (Addison-Wesley, 20th Anniversary)
+- Kent Beck — "Implementation Patterns" (Addison-Wesley)
+- OWASP Top 10 — owasp.org/www-project-top-ten

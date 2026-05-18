@@ -259,3 +259,16 @@ npx lighthouse https://staging.example.com --output=json | \
 - clinic.js — Node.js profiling
 - WebPageTest — Real device testing
 - Chrome UX Report — Field data for Core Web Vitals
+
+## Error Handling
+
+| Cause | Fix |
+|-------|-----|
+| Lighthouse audit crashes on SPA with hash routing | Use `--chrome-flags="--disable-web-security"` or serve localhost via static server, never `file://` |
+| Lighthouse scores vary 5+ points between runs | Normal. Run 3-5 times, use median. Always audit Incognito with no extensions. Variance from network jitter and CPU scheduling |
+| Bundle analyzer can't parse source maps — blank treemap | Verify `devtool: 'hidden-source-map'` in webpack/Vite. Regenerate build with source maps enabled. Check `sourceMapFilename` matches |
+| RUM field data shows much worse LCP than lab (Lighthouse) | Lab is synthetic (fast CPU/network). Field data from real users on slow devices. Trust field data. Optimize for p75, not median |
+| Performance budget assertion fails CI on every PR | Investigate which chunk exceeded budget immediately. Treat as build failure. Block merge until resolved or budget explicitly raised with justification |
+| Chrome DevTools Performance tab freezes on large trace (>30s) | Record shorter traces (5-10s max). Use `--user-data-dir` with clean profile. Export HAR for sharing instead of full trace |
+| `clinic doctor` fails with "Cannot find module" | Works only with Node.js < 22. For Node 22+, use `node --cpu-prof` and analyze with Chrome DevTools. clinic is community-maintained, lagging Node releases |
+| WebPageTest results vary significantly by test location | Test from 2+ geographic regions. Use `medianRun` and `repeatView` in WPT API. Document which locations were tested in audit report |

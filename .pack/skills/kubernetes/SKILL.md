@@ -9,6 +9,24 @@ metadata:
   version: "3.0"
   author: shokunin
 allowed-tools: Read Bash Write Grep Glob
+triggers:
+  - k8s
+  - kubernetes
+  - deploy
+  - pod
+  - cluster
+  - helm
+  - kustomize
+  - kubectl
+  - service mesh
+  - istio
+  - linkerd
+  - cilium
+  - gateway api
+  - hpa
+  - network policy
+  - statefulset
+  - daemonset
 ---
 
 # Kubernetes Architect
@@ -38,6 +56,18 @@ scripts/generate-manifest.sh -n api -i myregistry.com/api:1.0.0 -p 3000 -r 3 -o 
 This creates: `deployment.yaml`, `service.yaml`, `hpa.yaml`, `pdb.yaml` with all security contexts, probes, resource requests/limits, and topology spread constraints pre-configured.
 
 **If the service expects HTTP traffic**, also create a Gateway API HTTPRoute.
+
+### Template alternatives: Helm and Kustomize
+
+The scaffold script above generates raw manifests. For more complex deployments, consider:
+
+| Tool | Best for | Pattern |
+|------|----------|---------|
+| **Helm** (`helm create`) | Packaging reusable apps, versioned releases, templating | `values.yaml` → Go templates → rendered manifests. Use `helm lint` and `helm template` for validation. |
+| **Kustomize** (`kubectl kustomize`) | Environment-specific overlays, patching base manifests | `base/` + `overlays/{dev,staging,prod}/` with strategic merge patches. Native in `kubectl`. |
+| **Raw manifests** | Simple services, fast iteration, no templating overhead | Plain YAML in `manifests/`. Use with the scaffold script. |
+
+Use Helm for distributing apps (charts), Kustomize for environment variants (overlays), and raw manifests for speed. The scaffold script handles the raw manifest path — for Helm/Kustomize, create the chart or overlay manually following the same security constraints.
 
 ### Step 3: Configure networking
 
@@ -155,8 +185,10 @@ scripts/debug-pod.sh api-7d8f9c-abc  # describes pod, shows logs, checks events,
 | Symptom | Likely cause |
 |---------|-------------|
 | `CrashLoopBackOff` with OOMKill | Out of memory — increase `resources.limits.memory` |
-| `CrashLoopBackOff` with ImagePullBackOff | Wrong image name or tag |
+| `CrashLoopBackOff` with ImagePullBackOff | Wrong image name, tag, or registry credentials |
 | `Pending` with no node | Insufficient resources or PVC pending |
+| `ImagePullBackOff` | Image tag doesn't exist, registry unreachable, or `imagePullSecrets` missing | Verify image exists: `docker pull <image>`. Check `imagePullSecrets` in namespace. |
+| `CreateContainerConfigError` | ConfigMap or Secret referenced but not mounted | `kubectl describe pod` lists missing config keys. Verify ConfigMap/Secret exists in same namespace. |
 | `Running` but not ready | Readiness probe failing — check `/ready` endpoint |
 
 ## Error Handling
@@ -168,6 +200,9 @@ scripts/debug-pod.sh api-7d8f9c-abc  # describes pod, shows logs, checks events,
 | Service unreachable | `kubectl port-forward svc/api 8080:80` | Check selector matches pod labels |
 | DNS not resolving | `kubectl exec -it dnsutils -- nslookup api` | Check CoreDNS pods and Service entries |
 | TLS cert invalid | `kubectl describe certificate` | Check cert-manager issuer and DNS |
+| PVC stuck in Pending | `kubectl describe pvc` → no matching PV, storage class wrong | Check StorageClass exists. Verify PV capacity >= PVC request. Check `volumeMode` matches. |
+| ConfigMap not mounted | `kubectl describe pod` → "MountVolume.SetUp failed" | Verify ConfigMap name matches. Use `subPath` for single-file mounts. Check namespace — ConfigMaps are namespace-scoped. |
+| RBAC denied | `kubectl auth can-i <verb> <resource> --as <user>` returns no | Check Role/RoleBinding or ClusterRole/ClusterRoleBinding. Verify `subjects` match service account. Use `kubectl auth reconcile -f rbac.yaml` to sync.
 
 ## Production Checklist
 

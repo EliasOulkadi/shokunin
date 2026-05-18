@@ -29,7 +29,7 @@ metadata:
 
 **IMPORTANT DISCLAIMER**: Reference information for educational and preliminary analysis. NOT legal advice. No attorney-client relationship. Laws vary by jurisdiction and change frequently. Always consult a qualified attorney.
 
-## 1. Procedural Workflow
+## Workflow
 
 When asked a legal compliance question, follow these steps:
 
@@ -51,7 +51,7 @@ When asked a legal compliance question, follow these steps:
 | Risk | What happens if you don't? (fines, lawsuits, reputation) |
 | Timeline | When must you comply? (deadlines, phased enforcement) |
 
-## 2. Error Handling
+## Error Handling
 
 | Scenario | What to do | Don't do |
 |----------|-----------|----------|
@@ -181,7 +181,7 @@ When asked a legal compliance question, follow these steps:
 - [ ] Breach notification procedure tested with drill
 - [ ] Cookie consent records auditable (proof of consent)
 
-## 7. Anti-Patterns
+## Anti-Patterns
 
 | Anti-pattern | Why it's wrong | Instead |
 |-------------|----------------|---------|

@@ -1,4 +1,4 @@
-﻿---
+---
 name: component-forge
 description: Build production-grade components for React, Vue 3, and Svelte 5 with all states (loading, empty, error, success, idle), TypeScript strict, WCAG 2.2 accessibility, server components (RSC), and compound component patterns. Includes scaffold script, reference patterns, and template files for React and Vue. Use when user asks to create a UI component, frontend module, or design system component. Do NOT use for page layouts (use landing-craft), routing, or state management architecture (global stores).
 license: MIT
@@ -35,6 +35,8 @@ scripts/scaffold-component.sh Modal vue
 scripts/scaffold-component.sh Accordion svelte
 ```
 
+> **Windows:** The scaffold script requires Git Bash or WSL. Not compatible with PowerShell or CMD.
+
 Creates:
 ```
 Button/
@@ -69,14 +71,14 @@ function Profile({ userId }: { userId: string }) {
 
 ### Step 4: Apply accessibility checklist
 
-- [ ] All interactive elements keyboard reachable (Tab → Enter/Space)
+- [ ] All interactive elements keyboard reachable (Tab ? Enter/Space)
 - [ ] ARIA labels on icon-only buttons
 - [ ] Focus trap in modals and dialogs
 - [ ] Loading state announced via `aria-live="polite"`
 - [ ] Error state has `role="alert"`
 - [ ] Color is not the only differentiator (add icon/text)
-- [ ] Proper heading hierarchy (h1 → h2 → h3, no skips)
-- [ ] Touch targets ≥ 44×44px
+- [ ] Proper heading hierarchy (h1 ? h2 ? h3, no skips)
+- [ ] Touch targets = 44-44px
 - [ ] `prefers-reduced-motion` respected
 
 See [references/a11y-patterns.md](references/a11y-patterns.md) for roving tabindex, focus management, screen reader testing, and contrast ratios.
@@ -153,7 +155,7 @@ Popovers scale from their trigger. Modals stay centered.
   transform-origin: var(--transform-origin);
 }
 
-/* Modals — always centered */
+/* Modals - always centered */
 .modal {
   transform-origin: center;
 }
@@ -352,11 +354,11 @@ When reviewing component code, use a Before/After table:
 
 | Before | After | Why |
 |--------|-------|-----|
-| Missing loading state | `{ status: 'loading' }` → `<Skeleton />` | Users see a blank screen otherwise |
+| Missing loading state | `{ status: 'loading' }` ? `<Skeleton />` | Users see a blank screen otherwise |
 | `aria-label` missing on icon button | `aria-label="Close dialog"` | Screen reader announces "button" with no context |
 | `ease-in` on modal enter | `cubic-bezier(0, 0, 0.2, 1)` 250ms | Ease-in starts slow, feels sluggish on entering UI |
 | No `:active` state on button | `transform: scale(0.97)` 160ms ease-out | Buttons must feel responsive to press |
-| `setState` after unmount | `useEffect` cleanup + `AbortController` | Race condition — stale data overwrites fresh state |
+| `setState` after unmount | `useEffect` cleanup + `AbortController` | Race condition - stale data overwrites fresh state |
 | `h-screen` for hero | `min-h-[100dvh]` | `100vh` breaks on iOS Safari with URL bar visible |
 | 500ms modal enter | 250ms | UI animations over 300ms feel slow |
 | Focus not trapped in modal | Implement focus loop (Tab/Shift+Tab) | Keyboard users escape modal and get lost |
@@ -382,7 +384,7 @@ When reviewing component code, use a Before/After table:
 - [ ] Stagger: 30-80ms delay, max 400ms total
 - [ ] Focus: restored to trigger after modal/tooltip close
 - [ ] `100dvh` used instead of `100vh` for full-screen
-- [ ] Touch targets ≥ 44×44px
+- [ ] Touch targets = 44-44px
 - [ ] `prefers-reduced-motion` respected
 
 ---
@@ -393,7 +395,7 @@ When reviewing component code, use a Before/After table:
 |-------------|-----|
 | Default export | Named exports only |
 | `any` in props | Strict types, discriminated unions |
-| Missing loading state | Every data-fetching component renders loading → error → success |
+| Missing loading state | Every data-fetching component renders loading ? error ? success |
 | useEffect for derived state | `useMemo` or computed property |
 | Giant component > 200 lines | Split into sub-components |
 | Inline handlers in render | Extract to `useCallback` |
@@ -405,18 +407,18 @@ When reviewing component code, use a Before/After table:
 | Focus not restored after overlay close | Save and restore `document.activeElement` |
 | `h-screen` on mobile | `min-h-[100dvh]` |
 | Gray text on gray background | WCAG AA 4.5:1 minimum |
-| Touch targets under 44px | Minimum 44×44px |
+| Touch targets under 44px | Minimum 44-44px |
 
 ---
 
 ## Sources
 
-- Emil Kowalski — Design engineering philosophy (Sonner, Vaul, Linear)
-- Heydon Pickering — Inclusive Components
-- React docs (react.dev) — Composition vs Inheritance
-- Vue 3 docs (vuejs.org) — Composition API
-- Svelte 5 docs (svelte.dev) — Runes
+- Emil Kowalski - Design engineering philosophy (Sonner, Vaul, Linear)
+- Heydon Pickering - Inclusive Components
+- React docs (react.dev) - Composition vs Inheritance
+- Vue 3 docs (vuejs.org) - Composition API
+- Svelte 5 docs (svelte.dev) - Runes
 - MDN ARIA Authoring Practices Guide
-- WCAG 2.2 — Accessibility guidelines
-- Radix UI — Focus trap, popover, tooltip patterns
-- Base UI — Transform origin variables
+- WCAG 2.2 - Accessibility guidelines
+- Radix UI - Focus trap, popover, tooltip patterns
+- Base UI - Transform origin variables

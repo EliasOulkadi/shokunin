@@ -282,3 +282,75 @@ From building Sonner (13M+ weekly npm downloads):
 - Paul Lewis — "Stick to compositor-only properties" (Google Chrome)
 - easing.dev, easings.co
 - WCAG 2.1 §2.3.3 — Animation from Interactions
+
+## Workflow
+
+### Step 1: Audit existing interactions
+
+Before writing any animation code, inspect current state:
+1. List every animated element on the page
+2. Check easing, duration, and animated-properties for each
+3. Flag violations: `transition: all`, `ease-in` on entering elements, animations on keyboard shortcuts, durations > 300ms for UI
+
+### Step 2: Apply the Animation Decision Framework
+
+For each interaction, answer in strict order:
+1. **Should this animate?** Check frequency. 100+/day = no animation. Tens/day = reduce. Occasional = standard. Rare = delight allowed.
+2. **What is the purpose?** Must be: spatial consistency, state indication, user feedback, or preventing jarring changes. Not "it looks cool."
+3. **What easing?** Entering → `cubic-bezier(0.23, 1, 0.32, 1)`. Exiting → `cubic-bezier(0.4, 0, 1, 1)`. On-screen movement → `cubic-bezier(0.77, 0, 0.175, 1)`.
+4. **How fast?** Button: 100-160ms. Tooltip: 125-200ms. Dropdown: 150-250ms. Modal: 200-400ms. Exit faster than enter.
+
+### Step 3: Implement with compositor-only properties
+
+1. Animate only `transform` and `opacity` — GPU-composited
+2. Use CSS transitions for interruptible UI elements (hover, toggle, expand)
+3. Use CSS animations only for looping or self-triggered animations
+4. For Framer Motion: write `transform: "translateX(100px)"` as a string, never `x: 100` (which uses `requestAnimationFrame`)
+5. Set `transform-origin` to trigger anchor for popovers, `center` for modals
+
+### Step 4: Add tactile micro-feedback
+
+1. Every pressable element: `scale(0.97)` on `:active`, 160ms `cubic-bezier(0.23, 1, 0.32, 1)`
+2. Popovers/dropdowns scale from trigger point using `--radix-popover-content-transform-origin`
+3. Tooltips: 125ms entry, skip delay on subsequent hovers (`data-instant`)
+4. Stagger list items 30-80ms apart, total stagger < 400ms
+
+### Step 5: Add accessibility and performance gates
+
+1. Wrap all animations in `@media (prefers-reduced-motion: reduce)` — set duration to 0.01ms
+2. Gate hover effects behind `@media (hover: hover) and (pointer: fine)`
+3. Test on real device with touch input (USB + Safari remote devtools)
+4. Slow-motion pass: increase all durations 2-5x to spot issues invisible at full speed
+
+### Step 6: Review and ship
+
+1. Review next day with fresh eyes
+2. Frame-by-frame in Chrome DevTools Animations panel
+3. Verify: no `transition: all`, no `ease-in` on enter, no animation on keyboard actions, no `scale(0)` entries
+4. Run the Pre-Flight Checklist
+
+## Error Handling
+
+| Cause | Fix |
+|-------|-----|
+| Animation jank/stutter on low-end mobile devices | Reduce duration, lower stagger count, or disable entirely via `prefers-reduced-motion`. Animate only `transform` + `opacity` — never layout properties |
+| Popover entry animates from wrong origin after scroll or resize | `--radix-popover-content-transform-origin` updates on reposition. Ensure the CSS variable is set dynamically by the popover library, not hardcoded. Verify after scroll |
+| Hold-to-delete `clip-path` animation doesn't trigger on iOS Safari touch | Touch events require explicit handling. Use `touchstart`/`touchend` alongside `:active`. Test `clip-path` transition on real iOS Safari — some versions have clipping bugs |
+| Framer Motion `x`/`y` drops frames on scroll-heavy pages | Replace `<motion.div animate={{ x: 100 }} />` with `<motion.div animate={{ transform: "translateX(100px)" }} />`. The `x`/`y` shortcuts bypass GPU compositor |
+| `@starting-style` dialog/toast entry animation missing in production | Requires Chrome 117+ or Safari 17.2+. For broader support, use two-class approach (`.toast` + `.toast-enter`) toggled via JavaScript |
+| Stagger animation blocks user interaction while items are appearing | Keep total stagger < 400ms. Items should be interactive as they appear — do not set `pointer-events: none` on parent during stagger |
+| Button `:active` scale not firing on iOS Safari | iOS suppresses `:active` by default on `div`/`span`. Use native `<button>` element or add `touch-action: manipulation` to get immediate touch feedback |
+| `transform-origin` on modal causes flicker when combined with backdrop | Modals must use `transform-origin: center`. If backdrop is animated separately, synchronize timing: both use same duration and easing curve |
+
+## Anti-Patterns
+
+| Pattern | Problem | Fix |
+|---------|---------|-----|
+| `transition: all 300ms ease-in` | Triggers expensive layout property transitions. `ease-in` on enter feels sluggish and laggy. `all` causes unintended side-effect transitions | Specify exact properties: `transition: transform 200ms ease-out, opacity 200ms ease-out` |
+| Entry animation from `scale(0)` or `opacity: 0` with no intermediate state | Nothing in physics appears from total nothingness. Feels unnatural and jarring | Start from `scale(0.95)` with `opacity: 0`. Minimum visible scale >= 0.9 for UI. The element should feel like it's expanding into existence |
+| Animating Cmd+K palette toggle, Escape to close, or any keyboard shortcut | Users trigger these 100+ times/day. Any delay, even 100ms, accumulates to significant daily friction | Zero animation. Instant state change. Raycast, Spotlight, VS Code Command Palette all do this correctly |
+| `ease-in` on dropdowns, tooltips, modals entering | Perceived as slower than `ease-out` at the exact same duration. Users interpret as interface lag | Always `cubic-bezier(0.23, 1, 0.32, 1)` (strong ease-out) for entering elements. The eye catches the fastest part first |
+| Elastic/bounce easing on functional UI (buttons, toggles, form elements) | Distracting, feels toy-like, undermines professional credibility. Bounce reads as "trying too hard" | Reserve subtle spring (`bounce: 0.2`, `duration: 0.5`) for drag-to-dismiss and celebrations only. Never on standard UI transitions |
+| Animating `width`, `height`, `top`, `left` | Triggers layout recalculation on every frame. Runs on CPU, not GPU. Janky at any frame rate | `transform: scale()` instead of `width`/`height`. `transform: translate()` instead of `top`/`left`. Compositor-only properties always |
+| Same duration and easing for enter and exit | Exit must feel faster. Users want elements to appear smoothly but disappear instantly so they can continue their task | Exit duration = 50-70% of enter duration. Use `ease-in` (starts fast, slows) on exit. Use `ease-out` (starts fast, slows) on enter |
+| Hero text reveal with `animation-delay` > 500ms | User has scrolled past before animation plays. Animation served zero purpose and just annoyed | Hero animations trigger on mount, not on scroll. If scroll-triggered, start when element top is 20% visible from viewport bottom |

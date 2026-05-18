@@ -73,6 +73,11 @@ The agent should automatically:
 | Collection not found | First run | Creates automatically on first store |
 | Slow first query | Downloading ONNX model | First run downloads ~79MB. Subsequent runs are instant. |
 | Memory not returning results | No data stored yet | Normal on first use. Start by saving something. |
+| Embedding model fails to download | Network blocked or proxy required | Set `CHROMADB_EMBEDDING_MODEL` env var. Fall back to `all-MiniLM-L6-v2` which is smaller (~23MB). |
+| Duplicate or stale entries flooding results | Auto-save firing too frequently during rapid iteration | Apply 5-second debounce before storing context. Consolidate entries with `memory_consolidate_memories` periodically. |
+| Collection corrupted after crash | Write interrupted during power loss or force-quit | Restore from latest backup in `~/.shokunin/memory/backups/`. Run `memory-healthcheck.ps1` to verify integrity. |
+| Search returns irrelevant results for short queries | Under-2-word queries have poor vector signal | Use 3+ word queries. Include project name, topic, and a descriptive verb phrase. |
+| Session ID collision or reuse | Wrapper failed to generate unique ID, or manual copy-paste | Check `~/.shokunin/current-session.json`. Run `python chroma-helper.py session list` to verify uniqueness.
 
 ## Commands
 
@@ -83,8 +88,23 @@ The agent should automatically:
 /forget [id]         → Remove a specific memory entry
 ```
 
+## Anti-Patterns
+
+| Pattern | Problem | Fix |
+|---------|---------|-----|
+| Storing secrets or tokens in memory entries | Plaintext memory is readable by any process with filesystem access | Never store API keys, passwords, or tokens. Use environment variables or a dedicated secret manager. |
+| Saving every single message instead of checkpoints | Floods the vector DB with near-duplicate embeddings, degrading search quality | Save only decisions, file changes, and commands. Debounce rapid successive saves to 5 seconds. |
+| Using memory as a key-value store | ChromaDB is optimized for semantic similarity, not exact-match lookups | Use the file system or a config file for deterministic data. Reserve memory for fuzzy, contextual recall. |
+| Searching with overly broad queries like "what did we do" | Returns too many low-relevance results, wasting tokens and attention | Narrow the query: project name + topic + timeframe. Example: "auth refactoring decisions May 2026". |
+| Not consolidating old sessions | Vector DB grows unbounded, slowing queries and increasing disk usage | Run `memory_consolidate_memories` weekly. Archive sessions older than 90 days. |
+| Assuming memory entries are immutable truth | Entries represent frozen-in-time claims. Code may have changed since then. | Always verify file paths and function names before acting. Use `verify_file_path` or grep to confirm. |
+| Skipping session search at conversation start | Loses all context from prior work, forcing the agent to re-discover already-solved problems | Mandatory step: always run `session list` and search before responding to any task. |
+
 ## Sources
 
-- ChromaDB documentation (docs.trychroma.com)
-- OpenAI text-embedding-ada-002 (or local ONNX embedder)
-- MCP Protocol (modelcontextprotocol.io)
+- ChromaDB documentation (docs.trychroma.com) — vector database setup, embedding models, and query best practices
+- OpenAI text-embedding-ada-002 documentation (platform.openai.com/docs/guides/embeddings) — production embedding model benchmarks
+- MCP Protocol specification (modelcontextprotocol.io) — agent-to-tool communication protocol
+- Sentence Transformers all-MiniLM-L6-v2 (sbert.net/docs/pretrained_models.html) — lightweight local embedding alternative
+- ONNX Runtime documentation (onnxruntime.ai) — cross-platform model inference for local embeddings
+- "Designing Data-Intensive Applications" by Martin Kleppmann (O'Reilly, 2017) — durability, replication, and consistency patterns relevant to local DB design

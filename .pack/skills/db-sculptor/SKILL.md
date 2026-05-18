@@ -96,7 +96,83 @@ CREATE INDEX CONCURRENTLY idx_orders_user_status
 -- After fix: Index Only Scan, ~0.3ms
 ```
 
+**Common optimization patterns:**
+
+```sql
+-- Pattern 1: Function on indexed column → expression index
+-- Slow: WHERE LOWER(email) = 'user@example.com'
+-- Fix:
+CREATE INDEX idx_users_email_lower ON users (LOWER(email));
+
+-- Pattern 2: Missing FK index → Nested Loop join
+-- Slow: SELECT * FROM orders JOIN users ON orders.user_id = users.id WHERE users.name = 'Alice'
+-- Fix:
+CREATE INDEX idx_orders_user_id ON orders (user_id);
+
+-- Pattern 3: ORDER BY + LIMIT without index → full sort
+-- Slow: SELECT * FROM events ORDER BY created_at DESC LIMIT 20;
+-- Fix:
+CREATE INDEX idx_events_created_at ON events (created_at DESC);
+
+-- Pattern 4: COUNT on large table without WHERE → estimated count
+-- Slow: SELECT COUNT(*) FROM huge_table;
+-- Fix (approximate):
+SELECT reltuples::bigint FROM pg_class WHERE relname = 'huge_table';
+
+-- Pattern 5: Pagination with OFFSET → performance degrades
+-- Slow: SELECT * FROM items ORDER BY id LIMIT 20 OFFSET 100000;
+-- Fix (keyset pagination):
+SELECT * FROM items WHERE id > 100000 ORDER BY id LIMIT 20;
+
+-- Pattern 6: Unused indexes bloating writes
+-- Identify unused indexes:
+SELECT schemaname, tablename, indexname, idx_scan
+FROM pg_stat_user_indexes
+WHERE idx_scan = 0
+ORDER BY pg_relation_size(indexrelid) DESC;
+
+-- Pattern 7: Parallel query for large scans
+-- Force parallel workers on large analytical queries:
+SET max_parallel_workers_per_gather = 4;
+EXPLAIN (ANALYZE, BUFFERS) SELECT ...;
+```
+
 ### Step 5: Safe migrations (expand/contract)
+
+**Prisma example:**
+```prisma
+// prisma/schema.prisma
+model User {
+  id        String   @id @default(uuid()) @db.Uuid
+  email     String   @unique
+  timezone  String?  // Phase 1: nullable
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([email])
+  @@map("users")
+}
+```
+
+**Drizzle ORM example:**
+```typescript
+// db/schema/users.ts
+import { pgTable, text, timestamp, uuid, index } from "drizzle-orm/pg-core";
+
+export const users = pgTable("users", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  email: text("email").notNull().unique(),
+  timezone: text("timezone"), // Phase 1: nullable
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+}, (table) => ({
+  emailIdx: index("idx_users_email").on(table.email),
+}));
+
+// Migration command: npx drizzle-kit generate && npx drizzle-kit migrate
+```
+
+**Expand/contract SQL:**
 
 ```sql
 -- Phase 1 (expand): Add column as nullable
@@ -119,6 +195,31 @@ ALTER TABLE users DROP COLUMN old_timezone;
 - Backfill in separate migration from schema change
 - Rollback written BEFORE applying forward
 - Never rename + change type in same migration
+
+### PgBouncer connection pooling
+
+```ini
+# pgbouncer.ini
+[databases]
+mydb = host=localhost port=5432 dbname=mydb
+
+[pgbouncer]
+listen_addr = 0.0.0.0
+listen_port = 6432
+auth_type = scram-sha-256
+auth_file = /etc/pgbouncer/userlist.txt
+pool_mode = transaction
+default_pool_size = 25
+max_client_conn = 200
+max_db_connections = 25
+```
+
+**Rules:**
+- Use `pool_mode = transaction` (default) for most workloads — session-level pooling breaks `SET` and `LISTEN/NOTIFY`
+- Use `pool_mode = session` only when you need prepared statements, `SET` session variables, or listen/notify
+- Set `max_db_connections` to 25-50% of PostgreSQL `max_connections` — PgBouncer multiplexes client connections
+- Set `default_pool_size` based on CPU cores: 4× cores for mixed workloads, 1× for CPU-bound
+- Never use `pool_mode = statement` — breaks multi-statement transactions
 
 ## Error Handling
 

@@ -1,4 +1,4 @@
-﻿---
+---
 name: motion-craft
 description: Design GPU-accelerated animations with Web Animations API (WAAPI), Scroll-Driven Animations (ScrollTimeline/ViewTimeline), FLIP technique, easing systems, and accessibility (prefers-reduced-motion). Use when user asks to create animations, transitions, scroll effects, page transitions, or interactive motion for web UIs. Do NOT use for canvas-based animations (Three.js, PixiJS), video editing, or non-web (native mobile) motion design.
 license: MIT
@@ -15,6 +15,8 @@ metadata:
 Animations that communicate, not decorate. Every frame must earn its place.
 
 Inspired by Emil Kowalski (Linear, Sonner, Vaul), Paul Lewis (Google Chrome), and the CSS Animation Working Group.
+
+## Workflow
 
 ## The Animation Decision Framework
 
@@ -37,12 +39,12 @@ Every animation must have a clear answer to "why does this animate?"
 
 | Purpose | Example | Valid? |
 |---------|---------|--------|
-| Spatial consistency | Toast enters and exits from the same direction | ✅ |
-| State indication | Button morphs to show "sent" | ✅ |
-| Feedback | Button scales down on press, confirming the interface heard the user | ✅ |
-| Preventing jarring changes | Elements fading in instead of appearing abruptly | ✅ |
-| Explanation | Marketing animation showing how a feature works | ✅ |
-| "It looks cool" AND the user sees it often | Gratuitous motion | ❌ |
+| Spatial consistency | Toast enters and exits from the same direction | ? |
+| State indication | Button morphs to show "sent" | ? |
+| Feedback | Button scales down on press, confirming the interface heard the user | ? |
+| Preventing jarring changes | Elements fading in instead of appearing abruptly | ? |
+| Explanation | Marketing animation showing how a feature works | ? |
+| "It looks cool" AND the user sees it often | Gratuitous motion | ? |
 
 ### 3. What easing should it use?
 
@@ -55,7 +57,7 @@ Every animation must have a clear answer to "why does this animate?"
 | Constant motion (marquee, progress bar) | linear | `cubic-bezier(0, 0, 1, 1)` |
 | UI interactions (buttons, tooltips, dropdowns) | strong ease-out | `cubic-bezier(0.23, 1, 0.32, 1)` |
 
-**Critical: never use ease-in for UI entering animations.** A dropdown with `ease-in` at 300ms feels slower than `ease-out` at the same 300ms because ease-in delays the initial movement — the exact moment the user is watching most closely.
+**Critical: never use ease-in for UI entering animations.** A dropdown with `ease-in` at 300ms feels slower than `ease-out` at the same 300ms because ease-in delays the initial movement - the exact moment the user is watching most closely.
 
 ### 4. How fast should it be?
 
@@ -104,13 +106,13 @@ Sources: [easing.dev](https://easing.dev/), [easings.co](https://easings.co/)
 
 | Property | GPU composite? | Triggers |
 |----------|:--:|----------|
-| `transform` (translate, scale, rotate) | ✅ Yes | Composite only |
-| `opacity` | ✅ Yes | Composite only |
-| `filter` | ⚠️ Sometimes | Paint + Composite |
-| `clip-path` | ⚠️ Sometimes | Paint + Composite |
-| `width`, `height`, `top`, `left`, `margin`, `padding`, `border-width` | ❌ No | Layout + Paint + Composite |
-| `box-shadow` | ❌ No | Paint + Composite |
-| `color`, `background-color` | ❌ No | Paint only |
+| `transform` (translate, scale, rotate) | ? Yes | Composite only |
+| `opacity` | ? Yes | Composite only |
+| `filter` | ?? Sometimes | Paint + Composite |
+| `clip-path` | ?? Sometimes | Paint + Composite |
+| `width`, `height`, `top`, `left`, `margin`, `padding`, `border-width` | ? No | Layout + Paint + Composite |
+| `box-shadow` | ? No | Paint + Composite |
+| `color`, `background-color` | ? No | Paint only |
 
 ## Review Format (Required)
 
@@ -122,7 +124,7 @@ When reviewing UI animation code, you MUST use a markdown table with Before | Af
 |--------|-------|-----|
 | `transition: all 300ms` | `transition: transform 200ms ease-out` | Specify exact properties; avoid `all` which triggers layout recalculation |
 | `transform: scale(0)` | `transform: scale(0.95); opacity: 0` | Nothing in the real world appears from nothing |
-| `ease-in` on dropdown | `cubic-bezier(0.23, 1, 0.32, 1)` | `ease-in` starts slow — feels sluggish. Strong ease-out gives instant feedback |
+| `ease-in` on dropdown | `cubic-bezier(0.23, 1, 0.32, 1)` | `ease-in` starts slow - feels sluggish. Strong ease-out gives instant feedback |
 | No `:active` state on button | `transform: scale(0.97)` on `:active` | Buttons must feel responsive to press |
 | `transform-origin: center` on popover | `transform-origin: var(--radix-popover-content-transform-origin)` | Popovers should scale from their trigger. Modals stay centered. |
 | `transition: 300ms` without `prefers-reduced-motion` | `@media (prefers-reduced-motion: reduce) { transition-duration: 0.01ms }` | WCAG 2.1 requires reduced-motion support |
@@ -138,7 +140,7 @@ After: transition: transform 200ms ease-out
 
 ## CSS Transitions (preferred for UI)
 
-CSS transitions are interruptible — they can be retargeted mid-animation. Keyframes restart from zero. For any interaction that can be triggered rapidly (toasts, toggles, dropdowns), transitions produce smoother results.
+CSS transitions are interruptible - they can be retargeted mid-animation. Keyframes restart from zero. For any interaction that can be triggered rapidly (toasts, toggles, dropdowns), transitions produce smoother results.
 
 ```css
 .button {
@@ -179,7 +181,7 @@ Enter can be slower (user is deciding), exit must be fast (system responding):
 }
 ```
 
-### Enter states with @starting-style
+### Enter states with @starting-style (Chrome-only as of 2026, not yet Baseline)
 
 ```css
 .toast {
@@ -209,7 +211,7 @@ Enter can be slower (user is deciding), exit must be fast (system responding):
 
 ---
 
-## BUTTONS — Tactile Feedback
+## BUTTONS - Tactile Feedback
 
 Every pressable element needs physical response.
 
@@ -222,11 +224,11 @@ Every pressable element needs physical response.
 }
 ```
 
-The scale must be subtle (0.95-0.98). Applied to all pressable elements — buttons, cards, list items, tabs.
+The scale must be subtle (0.95-0.98). Applied to all pressable elements - buttons, cards, list items, tabs.
 
 ---
 
-## POPOVERS — Origin-Aware
+## POPOVERS - Origin-Aware
 
 Popovers scale from their trigger, not center. Modals stay centered.
 
@@ -278,7 +280,7 @@ Keep stagger delays short (30-80ms between items). Never block interaction while
 
 ## CSS Animations (keyframes)
 
-Use for predetermined, non-dynamic animations. Keyframes restart from zero on interruption — avoid for UI.
+Use for predetermined, non-dynamic animations. Keyframes restart from zero on interruption - avoid for UI.
 
 ```css
 @keyframes enter-right {
@@ -303,7 +305,7 @@ Springs feel more natural than duration-based animations because they simulate r
 - Gestures that can be interrupted mid-animation
 - Decorative mouse-tracking interactions
 
-### Apple approach (recommended — easier to reason about)
+### Apple approach (recommended - easier to reason about)
 
 ```js
 { type: "spring", duration: 0.5, bounce: 0.2 }
@@ -352,11 +354,13 @@ animation.finish()
 animation.finished.then(() => console.log('done'))
 ```
 
-WAAPI beats Framer Motion under heavy load — it runs off the main thread. Use for dynamic, interruptible animations where CSS keyframes fall short.
+WAAPI beats Framer Motion under heavy load - it runs off the main thread. Use for dynamic, interruptible animations where CSS keyframes fall short.
 
 ---
 
 ## SCROLL-DRIVEN ANIMATIONS
+
+**Browser support note:** Scroll-driven animations (`animation-timeline: view()` and `scroll()`) are Chrome/Edge-only as of 2026, not yet Baseline. Provide JS fallbacks via IntersectionObserver for Firefox/Safari.
 
 ### ViewTimeline (element enters/leaves viewport)
 
@@ -403,7 +407,7 @@ window.addEventListener('scroll', () => {
 
 ## FLIP Technique
 
-For layout animations — animating elements that change position/size.
+For layout animations - animating elements that change position/size.
 
 ```javascript
 function animateLayout(element, callback) {
@@ -466,7 +470,7 @@ Speed in animation directly affects how users perceive your app:
 
 These skip layout and paint, running on GPU.
 
-### CSS variables are inheritable — avoid for animation
+### CSS variables are inheritable - avoid for animation
 
 ```js
 // Bad: triggers recalculation on all children
@@ -478,7 +482,7 @@ element.style.transform = `translateY(${distance}px)`
 
 ### CSS animations beat JS under load
 
-When the browser is busy loading a new page, Framer Motion animations (using `requestAnimationFrame`) drop frames. CSS animations remain smooth — they run off the main thread.
+When the browser is busy loading a new page, Framer Motion animations (using `requestAnimationFrame`) drop frames. CSS animations remain smooth - they run off the main thread.
 
 ### Framer Motion: use `transform` string, not shorthand
 
@@ -514,7 +518,7 @@ Each `will-change` creates a new compositor layer, consuming GPU memory. Apply b
 }
 ```
 
-WCAG 2.1 Success Criterion 2.3.3 — Animation from Interactions.
+WCAG 2.1 Success Criterion 2.3.3 - Animation from Interactions.
 
 For fine-grained control:
 
@@ -587,17 +591,17 @@ Before delivering animated UI code:
 
 - [ ] No animation on keyboard-initiated actions
 - [ ] Every animation has a stated purpose (why does this animate?)
-- [ ] Easing curve matches scenario (entering → ease-out, exiting → ease-in)
+- [ ] Easing curve matches scenario (entering ? ease-out, exiting ? ease-in)
 - [ ] UI duration under 300ms (button 100-160ms, dropdown 150-250ms, modal 200-300ms)
 - [ ] Exit faster than enter (asymmetric timing)
 - [ ] Only `transform` and `opacity` animated (GPU composite)
 - [ ] `prefers-reduced-motion` respected
 - [ ] Hover animations gated behind `@media (hover: hover)`
 - [ ] Touch targets 44x44mm minimum
-- [ ] No `scale(0)` entries — start from `scale(0.95)`
+- [ ] No `scale(0)` entries - start from `scale(0.95)`
 - [ ] Popover `transform-origin` anchors to trigger
 - [ ] Stagger delays under 80ms
-- [ ] No `transition: all` — exact properties only
+- [ ] No `transition: all` - exact properties only
 - [ ] Framer Motion: `transform` string over `x`/`y` shorthand
 - [ ] `will-change` removed after animation completes
 - [ ] Button press: `scale(0.97)` on `:active`
@@ -605,35 +609,55 @@ Before delivering animated UI code:
 
 ---
 
+## Anti-Patterns
+
 ## BANNED PATTERNS
 
 | Banned | Because |
 |--------|---------|
 | `transition: all` | Triggers layout recalculation on every frame |
-| `ease-in` on entering UI | Delays initial movement — feels sluggish |
+| `ease-in` on entering UI | Delays initial movement - feels sluggish |
 | `scale(0)` entry | Nothing disappears and reappears completely in the real world |
-| Animating `width`, `height`, `top`, `left` | Layout thrashing — use `transform` |
-| `requestAnimationFrame` for scroll effects | Blocking — use ScrollTimeline or IntersectionObserver |
-| Bounce / elastic easing on functional UI | Unprofessional — reserve for playful interactions only |
-| Duration > 500ms on functional UI | Feels slow — users notice and get frustrated |
+| Animating `width`, `height`, `top`, `left` | Layout thrashing - use `transform` |
+| `requestAnimationFrame` for scroll effects | Blocking - use ScrollTimeline or IntersectionObserver |
+| Bounce / elastic easing on functional UI | Unprofessional - reserve for playful interactions only |
+| Duration > 500ms on functional UI | Feels slow - users notice and get frustrated |
 | Auto-playing carousels without pause | WCAG accessibility violation |
-| Framer Motion `x`/`y` props under load | Not hardware-accelerated — frames drop during page loads |
+| Framer Motion `x`/`y` props under load | Not hardware-accelerated - frames drop during page loads |
 | No `prefers-reduced-motion` | WCAG 2.1 failure |
-| `will-change` on everything | GPU memory waste — creates compositor layers |
-| `translateZ(0)` on every element | Too many GPU layers — memory overhead |
-| Keyframes for dynamic UI | Not interruptible — use CSS transitions |
+| `will-change` on everything | GPU memory waste - creates compositor layers |
+| `translateZ(0)` on every element | Too many GPU layers - memory overhead |
+| Keyframes for dynamic UI | Not interruptible - use CSS transitions |
 | `transform-origin: center` on popovers | Breaks spatial consistency with trigger |
 | Same speed enter and exit | Exit should always be faster |
 
 ---
 
+## Error Handling
+
+| Error | Cause | Fix |
+|-------|-------|-----|
+| `transition: all` causes jank on unrelated property changes | Browser recalculates layout for every animated frame; `all` triggers layout on properties that don't need it | Specify exact properties: `transition: transform 200ms ease-out, opacity 200ms ease-out` |
+| Framer Motion `x`/`y` props drop frames during page loads | `x`/`y` use `requestAnimationFrame` on the main thread, competing with React renders | Use `animate={{ transform: "translateX(100px)" }}` string — hardware-accelerated, GPU composite |
+| Animation stutters on mobile Safari | iOS Safari throttles `requestAnimationFrame` in low-power mode; non-composited properties force layout | Only animate `transform` and `opacity`. Test on physical iOS devices via USB remote debugging. |
+| Popover scales from wrong origin | Default `transform-origin: center` breaks spatial consistency with the trigger element | Set `transform-origin: var(--radix-popover-content-transform-origin)` for Radix; `var(--transform-origin)` for Base UI |
+| Staggered list items flash all at once then disappear | `animation-delay` applied but items are visible by default before animation starts | Set initial state: `opacity: 0; transform: translateY(8px)`. Animation resolves to visible. |
+| CSS keyframes restart on re-trigger instead of continuing | Keyframes run from frame 0 every time `animation-name` is applied | Use CSS transitions for interruptible UI (toasts, toggles, dropdowns). Keyframes only for predetermined, fire-once animations. |
+| `@starting-style` doesn't work in Firefox/Safari | `@starting-style` is Chrome-only as of 2026, not yet Baseline | Provide JS fallback: set initial inline styles, then remove them on next frame to trigger transition. |
+| Scroll-driven animation has no effect in Firefox | `animation-timeline: view()` and `scroll()` are not supported outside Chrome/Edge | Provide `IntersectionObserver` fallback that toggles a CSS class for animation. |
+| `will-change: transform` never removed | Browser allocates GPU memory for the compositor layer indefinitely | Remove `will-change` or set to `auto` after animation completes. Use sparingly — each layer costs GPU memory. |
+| Magnetic button causes continuous React re-renders | `useState` for cursor position triggers re-render at 60fps | Use Framer Motion `useMotionValue` + `useTransform` — updates outside React render cycle. |
+| Scroll parallax jank from `scroll` event listener | `window.addEventListener('scroll')` fires on main thread, competing with rendering | Use `ScrollTimeline` (Chrome) or throttled `IntersectionObserver` with `requestAnimationFrame` debounce. |
+| Touch device fires hover state on tap, then hover state persists | Mobile browsers synthesize hover on first tap and keep it until another tap elsewhere | Gate hover animations behind `@media (hover: hover) and (pointer: fine)`. |
+| Auto-playing carousel without pause button | WCAG 2.2.2 violation: moving content must be pausable | Add pause/play button. Respect `prefers-reduced-motion`. Allow keyboard control. |
+
 ## Sources
 
-- Emil Kowalski — animations.dev, Sonner, Vaul (Linear team)
-- Paul Lewis — "Stick to compositor-only properties" (Google Chrome)
+- Emil Kowalski - animations.dev, Sonner, Vaul (Linear team)
+- Paul Lewis - "Stick to compositor-only properties" (Google Chrome)
 - Web Animations API Specification (W3C)
 - CSS Scroll-Driven Animations Specification (W3C)
-- WCAG 2.1 Guideline 2.3.3 — Animation from Interactions
-- easing.dev, easings.co — custom easing curve builders
-- motion.dev — Animation reference
+- WCAG 2.1 Guideline 2.3.3 - Animation from Interactions
+- easing.dev, easings.co - custom easing curve builders
+- motion.dev - Animation reference
 - Framer Motion documentation

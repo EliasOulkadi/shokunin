@@ -132,6 +132,29 @@ Subject line: 30-50 chars. Start with verb or number. No ALL CAPS. A/B test 20%.
 - [ ] Links tested and valid
 - [ ] Read aloud: flow natural, no jargon
 
+## Workflow
+
+1. **Define the audience persona** — who reads this? What do they know? What problem do they have? Language, examples, and tone reflect this one persona.
+2. **Select the copywriting framework** — AIDA for landing pages, PAS for pain-point content, BAB for transformational offers, FAB for product descriptions.
+3. **Write the headline first** — under 15 words, keyword near start, specific outcome promise. Score against headline formulas. No clickbait.
+4. **Open with a strong lead** — problem-first, story-first, curiosity gap, or data-first. Hook the reader in the first 2 sentences.
+5. **Layer Cialdini principles** — minimum 3 per piece. Reciprocity (free value), social proof (testimonials/logos), authority (data/sources), scarcity (genuine limits only).
+6. **Optimize for SEO + GEO** — primary keyword in H1, first 100 words, one H2. Direct answer in first 2 paragraphs for AI overviews. Structured data where applicable.
+7. **Close with one clear CTA** — single action verb + specific outcome. "Get the checklist" not "Learn more."
+
+## Error Handling
+
+| Cause | Fix |
+|-------|-----|
+| Headline scores poorly against formulas (generic, no outcome) | Rewrite with: specific number + target audience + promised result. Test 3-5 variants. |
+| Open rate below 20% on newsletter | Subject line too long or too vague. Target 30-50 chars. Start with verb or number. A/B test 20% of list. |
+| Click rate below 1% on newsletter | CTA not prominent or actionable. Move CTA higher. Make it a single, specific action with a clear benefit. |
+| Blog post reads like AI-generated, high bounce rate | Check for AI tells: uniform paragraph length, mechanical connectors, absolute neutrality, no opinion. Humanize voice. |
+| Twitter thread hook gets scrolled past | Hook must stop the scroll in 240 chars. Use: surprising stat, contrarian take, direct promise, story opening, or bold claim. |
+| Content flagged as thin or unhelpful by Google | Add original data, unique perspective, or expert insight. Cite primary sources. Include contrarian viewpoint for GEO. |
+| "Fake scarcity" damages brand trust | Only use genuine limits: limited cohort, real deadline, actual inventory constraint. Never invent urgency. |
+| Cialdini principle overuse feels manipulative | Max 3-4 principles per piece. Layer naturally. Social proof and authority should feel earned, not forced. |
+
 ## Anti-Patterns
 
 | Mistake | Fix |

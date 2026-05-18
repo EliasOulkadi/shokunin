@@ -1,4 +1,4 @@
-﻿---
+---
 name: landing-craft
 description: Build conversion-optimized landing pages with CRO frameworks (Conversion Research, LIFT Model), scroll effects, A/B testing, personalization, form optimization, and Core Web Vitals (INP, LCP, CLS). Use when user asks to create a landing page, sales page, lead generation page, or improve conversion rates. Do NOT use for full product design (use component-forge), animation-specific (use motion-craft), or brand identity (use design).
 license: MIT
@@ -40,6 +40,26 @@ Before writing code, select ONE combination based on the brief. This prevents ev
 
 ---
 
+## Workflow
+
+### Step 1: Select creative archetype
+Pick one vibe + layout from the Creative Variance Engine. Every page must feel distinct.
+
+### Step 2: Wireframe the sections
+Block out all 10 sections (Hero through Final CTA). Each section answers: what does the visitor need to hear RIGHT NOW to move forward?
+
+### Step 3: Draft copy
+Headline under 10 words. One CTA above fold. Social proof near top. Use PAS framework for problem section.
+
+### Step 4: Implement with mobile-first HTML/CSS
+8px grid. clamp() for fluid typography. No centered hero text. Grain overlay (opacity 0.03-0.06).
+
+### Step 5: Optimize for Core Web Vitals
+Preload hero image. Inline critical CSS. Lazy-load below-fold images. Target LCP < 2.5s, INP < 200ms.
+
+### Step 6: A/B test and iterate
+Test highest-impact element first (headline). 95% significance. Min 1,000 visitors per variant.
+
 ## The Structure
 
 ```
@@ -60,12 +80,12 @@ Every section answers: what does the visitor need to hear RIGHT NOW to move to t
 
 ## Hero Rules (from Unbounce data)
 
-1. **Value in 3 seconds**: headline must communicate core benefit. A/B test headline first — highest-impact element.
+1. **Value in 3 seconds**: headline must communicate core benefit. A/B test headline first - highest-impact element.
 2. **CTA visible without scroll**: primary button above the fold. Above 600px vh.
 3. **One CTA**: one primary action. Secondary links are text only.
-4. **Headline under 10 words**: "Ship 3x faster with automated deployments" not "Welcome to DeployPro — the fastest way to ship code"
-5. **Never center text**: Left-aligned text + right-aligned visual (Split Screen). Centered hero is the #1 AI cliché.
-6. **Supporting visual**: product screenshot, illustration, or demo — never a generic stock photo.
+4. **Headline under 10 words**: "Ship 3x faster with automated deployments" not "Welcome to DeployPro - the fastest way to ship code"
+5. **Never center text**: Left-aligned text + right-aligned visual (Split Screen). Centered hero is the #1 AI clich-.
+6. **Supporting visual**: product screenshot, illustration, or demo - never a generic stock photo.
 
 ### Hero alt-layouts (not all center)
 
@@ -189,7 +209,7 @@ Test one element at a time. 95% statistical significance. Min 1,000 visitors per
 Place near the top (within first 2 sections). Types by effectiveness:
 
 1. **Logos of recognizable companies** (3-12, grayscale, hover color. Never use without permission.)
-2. **Specific user metrics**: "Join 10,000+ paying customers" — number must be real
+2. **Specific user metrics**: "Join 10,000+ paying customers" - number must be real
 3. **Relevant testimonial**: quote with name, title, photo, specific result
 4. **Award/certification badge**: only if recognizable (SOC 2, YC, Product Hunt)
 
@@ -357,7 +377,7 @@ Rules:
 | CTA | Full-width, min 48px tall, thumb-friendly |
 | Forms | Single column, large inputs (48px min) |
 | Font size | Body never below 16px |
-| Touch targets | 44×44px min, 12px gap |
+| Touch targets | 44-44px min, 12px gap |
 | Horizontal scroll | Never. Test on 320px width. |
 | Hero | Full-width text, no image until 768px |
 
@@ -381,12 +401,24 @@ Before launching, verify:
 - [ ] FAQ addresses top 5 real objections
 - [ ] Lighthouse Performance > 90
 - [ ] Core Web Vitals pass (LCP < 2.5s, INP < 200ms, CLS < 0.1)
-- [ ] Mobile: all touch targets ≥ 44×44px, no horizontal scroll
+- [ ] Mobile: all touch targets = 44-44px, no horizontal scroll
 - [ ] A/B test plan: identify highest-impact element, document hypothesis
 - [ ] No fake urgency or scarcity
-- [ ] No generic stock photos — real product, real people, or illustration
+- [ ] No generic stock photos - real product, real people, or illustration
 
 ---
+
+## Error Handling
+
+| Scenario | Cause | Fix |
+|----------|-------|-----|
+| Hero image LCP > 4s | No preload or unoptimized format | Preload with `<link rel="preload" as="image">`, use WebP/AVIF, serve via CDN |
+| CLS from late-loading fonts | Web font triggers layout shift | Self-host fonts. Use `font-display: swap`. Preload with `<link rel="preload" as="font">` |
+| A/B test inconclusive | Not enough traffic or significance | Min 1,000 visitors/variant, 95% significance, run for 2+ business cycles |
+| Form abandonment spike | Too many fields or validation confusion | Reduce to minimum viable fields. Inline real-time validation. Preserve values on error. |
+| Mobile bounce rate > 70% | Touch targets too small, horizontal scroll | All touch targets >= 44px. Test at 320px width. No horizontal overflow. |
+| Scroll effects jank on mobile | `requestAnimationFrame` scroll listeners | Use CSS `animation-timeline: view()` or IntersectionObserver. Debounce JS scroll handlers. |
+| CTA click-through below 1% | Weak copy, wrong placement | A/B test CTA text. Ensure CTA visible without scroll. Single primary action above fold. |
 
 ## Anti-Patterns
 
@@ -404,7 +436,7 @@ Before launching, verify:
 | Pricing without annual toggle | Annual = 17-20% discount. Always offer it. |
 | CTA says "Submit" | Action verb + value: "Get my free guide" |
 | Hero image without preload | `<link rel="preload" as="image">` for LCP |
-| `h-screen` for hero | `min-h-[100dvh]` — avoids iOS Safari jump |
+| `h-screen` for hero | `min-h-[100dvh]` - avoids iOS Safari jump |
 | Form inputs under 48px on mobile | iOS zooms on anything under 16px font |
 
 ---
@@ -412,10 +444,10 @@ Before launching, verify:
 ## Sources
 
 - Unbounce Conversion Benchmark Report (44,000+ A/B tests analyzed)
-- GoodUI.org — A/B tested UI patterns database
-- CXL Institute — Conversion optimization research
+- GoodUI.org - A/B tested UI patterns database
+- CXL Institute - Conversion optimization research
 - WiderFunnel LIFT Model
-- NN Group — Conversion studies and usability research
-- Refactoring UI — Adam Wathan, Steve Schoger
+- NN Group - Conversion studies and usability research
+- Refactoring UI - Adam Wathan, Steve Schoger
 - Google Web Vitals (web.dev)
-- Copyhackers — Conversion copywriting
+- Copyhackers - Conversion copywriting

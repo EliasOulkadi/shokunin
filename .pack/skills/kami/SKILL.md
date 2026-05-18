@@ -13,6 +13,8 @@ Good content deserves good paper. One design language across eight document type
 
 Part of `Kaku · Waza · Kami` - Kaku writes code, Waza drills habits, **Kami delivers documents**.
 
+## Workflow
+
 ## Step 0 · Load brand profile (if exists)
 
 Check `~/.config/kami/brand.md` (preferred) or `~/.kami/brand.md` (legacy fallback). If found, read `references/brand-profile.md` for the full four-layer application spec (placeholder substitution, session defaults, visual customization, habit notes) and its six guardrails. If no profile exists, continue without interruption.
@@ -408,4 +410,47 @@ Never say "I'll adjust the spacing" without naming the exact property and its ne
 
 ---
 
-Next: **apply Step 3's tier table to decide what to read**, then copy the matching template and start filling.
+## Error Handling
+
+| Error | Cause | Fix |
+|-------|-------|-----|
+| Build fails with `ModuleNotFoundError: No module named 'weasyprint'` | WeasyPrint not installed (system dependency) | Run `pip install weasyprint`; on macOS also `brew install pango gdk-pixbuf libffi` |
+| Chinese text renders as tofu (boxes) | TsangerJinKai02 fonts not found | Run `bash scripts/ensure-fonts.sh` before building; fallback to Source Han Serif SC |
+| `build.py` exits with `No such file: *.html` | Working directory is wrong or template names don't match | Run from the skill root directory; check `scripts/build.py --list-templates` |
+| Placeholder `{{...}}` appears in output PDF | Forgot to fill template variables or `--check-placeholders` was skipped | Run `python3 scripts/build.py --check-placeholders path/to/filled.html` before building |
+| Page overflow (content cut off at bottom) | Content exceeds the physical page height | Reduce content, increase page size (see Step 2.6 size table), or check `production.md` overflow guidance |
+| Font renders at wrong weight (bold looks like regular) | Wrong font-weight file loaded (W04 vs W05) | Verify `@font-face` declarations both point to correct TsangerJinKai02 files |
+| PDF metadata empty or wrong | `build.py` cannot infer author from git config | Set `KAMI_AUTHOR` environment variable as fallback |
+| Japanese text uses wrong glyph variants | CJK unification renders Chinese glyphs for Japanese text | Visually verify; switch to YuMincho-first stack if available; accept best-effort output |
+| WeasyPrint slides have broken page breaks | Column or flex content splits across pages | Use `page-break-inside: avoid` on `.slide`; check `production.md` Part 4 |
+| PPTX output has missing fonts or layout drift | python-pptx cannot embed TsangerJinKai02 | PPTX is fallback-only; recommend WeasyPrint HTML → PDF path instead |
+
+## Sources
+
+- Robert Bringhurst — "The Elements of Typographic Style" (Hartley & Marks, 4th Edition, 2012) — typographic rhythm, page proportions, font pairing
+- Josef Müller-Brockmann — "Grid Systems in Graphic Design" (Niggli Verlag, 1996) — grid theory and modular layouts
+- WeasyPrint documentation (weasyprint.org) — HTML/CSS to PDF rendering engine
+- python-pptx documentation (python-pptx.readthedocs.io) — PPTX generation fallback
+- TsangerJinKai02 font — commercial Chinese serif typeface by Tsanger Studio
+- Charter font — open-source serif by Matthew Carter (practicaltypography.com/charter)
+- YuMincho font — Japanese serif typeface (bundled with macOS)
+- W3C CSS Paged Media Module Level 3 (w3.org/TR/css-page-3) — @page rules, page margins, footnotes
+- W3C CSS Generated Content for Paged Media (w3.org/TR/css-gcpm-3) — running headers, cross-references
+- Adobe InDesign best practices — print layout reference for multi-page documents
+
+## Anti-Patterns
+
+| Anti-pattern | Why it fails | Fix |
+|-------------|-------------|-----|
+| Leaving `{{PLACEHOLDER}}` text in the final document | Looks unfinished; erodes trust | Run `--check-placeholders` before every build; no template variable survives to PDF |
+| Inventing metrics, financial data, or statistics | Fabricated data is discoverable and destroys credibility | Mark gaps with `[DATA NEEDED: description]`; never invent numbers |
+| Using stock-image descriptions as image content ("A diverse team collaborating in a modern office") | Meaningless filler; looks AI-generated | Use real images, omit the slot, or use kami default placeholder with a gap note |
+| Padding content to fill template slots | Forces content that doesn't exist; dilutes the real message | A resume with 3 real projects is better than 5 with 2 fabricated ones |
+| Writing paragraphs that restate their own heading | Zero information density; wastes reader attention | Every paragraph must add information not conveyed by its heading |
+| Using industry clichés ("synergistic", "cutting-edge", "best-in-class") | Generic language signals template output | Use concrete, specific language from `writing.md` quality bars |
+| Applying CSS changes without reading the design spec | Breaks the visual language; inconsistent spacing | CSS stays untouched unless you're in "Layout tweak" tier |
+| Generating a diagram that adds no insight beyond a paragraph | A well-written paragraph conveys more than a decorative diagram | Ask: "would a well-written paragraph teach the reader less than this diagram?" |
+| Skipping the source check for branded documents | Facts about companies, products, or dates go stale fast | Verify against primary sources before writing any current-sounding claim |
+| Building without `--verify` | Hidden issues: missing fonts, page overflow, leftover placeholders | Always run `python3 scripts/build.py --verify` before shipping |
+| Using CJK parentheses `（...）` in slides | Breaks visual rhythm; looks translated from English | Replace with `·` or `,` in slide decks |
+| Defaulting to PPTX path | PPTX output has layout drift and cannot embed custom fonts | WeasyPrint HTML → PDF is the default; PPTX only when user explicitly requires editable file |

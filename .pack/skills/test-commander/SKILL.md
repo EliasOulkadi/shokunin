@@ -223,3 +223,17 @@ If a test flakes more than once: fix it same day or skip it with `test.skip()` +
 - Chromatic — Visual testing
 - Martin Fowler — TestCoverage
 - Google Testing Blog — Flaky test elimination
+
+## Error Handling
+
+| Cause | Fix |
+|-------|-----|
+| MSW server fails to start — port conflict in CI | Run with `--no-file-parallelism` flag. MSW workers share the same server; parallel test files compete for port |
+| `screen.findByText()` consistently times out at 1000ms | Increase timeout in options: `screen.findByText(..., {}, { timeout: 5000 })`. Verify MSW handler path matches exactly (trailing slash matters) |
+| Visual snapshot differs between CI (Linux) and local (macOS/Windows) | Font anti-aliasing and rendering differ by OS. Run visual tests on same OS as CI. Use `maxDiffPixelRatio: 0.02` for cross-OS tolerance |
+| `beforeAll` MSW hook fails — entire test file skips | Ensure `server.listen()` is in `beforeAll` (not `beforeEach`). Register all handlers before calling `listen()`. Check `onUnhandledRequest: 'warn'` catches missing handlers |
+| Playwright E2E passes locally, fails headless in CI | Use `--trace on` in CI config. Check browser version: `npx playwright install --with-deps chromium`. Some JS executes differently headless vs headed |
+| Test factory generates duplicate unique IDs | Use `faker.string.uuid()` or `crypto.randomUUID()`. Never use sequential integers for unique IDs. Add uniqueness assertion in factory validation |
+| E2E test flakes on dynamic content that loads after navigation | Use `page.waitForResponse(urlPattern)` targeting the API call, not `waitForTimeout()`. Assert on data-dependent element, not fixed time |
+| Snapshot test fails on every CI run with timestamp diffs | Check snapshot for timestamps, random IDs, or dynamic dates. Mock with `vi.setSystemTime()` or `jest.useFakeTimers()`. Never snapshot unstable content |
+| CI shard times out after 10 minutes | Increase shard count from 4 to 8+ for large suites. Profile slowest test file with `--reporter=verbose`. Extract slow E2E tests to separate job |

@@ -256,3 +256,40 @@ node <SKILL_DIRECTORY>/scripts/post_review.js <OWNER>/<REPO> <PR_NUMBER> <diff-f
 ```
 
 The script validates comment line numbers against the diff, adjusts them to the nearest valid diff line when close, and moves out-of-range comments to the review body. You don't need to validate line numbers manually. The script logs progress and any errors (even if they were recoverable). It outputs in the end whether the review was posted successfully.
+
+## Error Handling
+
+| Cause | Fix |
+|-------|-----|
+| Subagent fails to spawn (timeout, model unavailable, API error) | Retry with a different model from another provider. If all models fail, fall back to Strategy A (root agent reviews all 6 criteria) and note reduced coverage in output |
+| Diff file is empty or contains only binary/image changes | Report to user: "No reviewable text changes found." Skip subagents entirely. Do not force a review on empty or binary-only diffs |
+| `fetch-diff.md` subagent cannot determine base branch for local mode | Try `main` first, then `master`, then `develop`. If none exist, report error to user with the branches found and ask them to specify the base |
+| Subagent returns findings without file:line references | Re-run that specific subagent with explicit instruction: "You MUST include file path and line number for every finding. Findings without location context cannot be used." |
+| PR posting script fails with GitHub API authentication error (401/403) | Verify `GITHUB_TOKEN` env var is set with `repo` scope. For private repos, use a Personal Access Token with full repo access. Check token hasn't expired |
+| Duplicate findings from parallel subagents cannot be auto-merged with confidence | Flag to user: "N findings reduced to M unique after deduplication. Manual review recommended for findings where subagents disagreed on severity or scope" |
+| Diff exceeds 10,000 lines (hard complexity) — reviews take too long | Warn user before proceeding: "Diff is very large (N lines). Review quality decreases with size. Consider splitting into smaller PRs. Continue anyway?" |
+| Posted PR comment line number doesn't match any diff hunk exactly | The `post_review.js` script auto-adjusts to nearest valid line. If adjustment fails (line too far from any hunk), comment moves to review body instead |
+
+## Anti-Patterns
+
+| Pattern | Problem | Fix |
+|---------|---------|-----|
+| Reviewing without reading the task description or PR body | Misses context on intent. Flags intentional design decisions as bugs. Reviewer and author talk past each other | Always read task description first. Compare diff against stated requirements, not reviewer's assumptions |
+| Nitpicking formatting, naming, and style only | Misses logic errors, security holes, and performance regressions. Creates false sense of thoroughness while letting real bugs through | Linting/formatting handled by CI. Review focuses on correctness, security, performance, architecture. Style comments are P3 at most |
+| Requesting changes without suggesting alternative approach | Blocks contributor who then has to schedule another round-trip to discuss. Slows velocity | Every P0/P1 finding includes a concrete suggested fix or at minimum a direction. Reviewer invests time in solutions, not just problem-spotting |
+| Rubber-stamping PRs from senior team members or frequent collaborators | Authority bias. Senior engineers make mistakes. Most post-mortems trace to "reviewed by peer who trusted author's experience" | Apply identical review criteria regardless of author seniority. If too busy, don't approve — ask another reviewer |
+| Reviewing only the diff in isolation, not the integration surface | Change correct in isolation but breaks when composed with other recent changes or crosses module boundaries | Check out branch locally. Run full test suite. Grep for callers of modified functions. Check for merge conflicts and cross-module interactions |
+| Blocking merge on P3 nits and stylistic preferences | Slows velocity without quality gain. Contributor spends time on changes that don't reduce bugs or improve performance | P3 = approve with optional suggestions. "Request changes" only for P0 and P1. Trust the contributor to decide on style preferences |
+| Posting dozens of PR comments without prioritization | Overwhelms the author. They can't distinguish critical from cosmetic | Group and prioritize before posting. Top comment should summarize: X critical, Y major, Z minor. Critical issues get individual comments; minor issues can be batched in summary |
+| Using review as a gatekeeping or knowledge-hoarding mechanism | Deliberately slow reviews to maintain information asymmetry. Toxic to team culture | Set SLA: review within 4 business hours. If blocked waiting for domain expert, note it and unblock with partial review |
+
+## Sources
+
+- Google Engineering Practices — Code Review Developer Guide (google.github.io/eng-practices/review)
+- Microsoft Code With Engineering Playbook — Code Reviews (microsoft.github.io/code-with-engineering-playbook)
+- Palantir — Code Review Best Practices (blog.palantir.com)
+- SmartBear — Best Practices for Peer Code Review (smartbear.com)
+- "Modern Code Review: A Case Study at Microsoft" — Bacchelli & Bird, 2013 (ACM)
+- "Expectations, Outcomes, and Challenges of Modern Code Review" — Microsoft Research (2013)
+- GitHub Docs — About Pull Request Reviews (docs.github.com)
+- Google SRE Workbook — Change Management chapter

@@ -1,4 +1,4 @@
-﻿---
+---
 name: auth-architect
 description: Implement authentication and authorization with OWASP Top 10 standards, OAuth 2.0 + OIDC, WebAuthn/Passkeys, session management, and RBAC/ABAC. Use when user asks to implement login, signup, authentication, authorization, JWT, OAuth, SSO, passkeys, MFA, or role-based access. Do NOT use for API key management (use api-forge), encryption at rest, or network-level security (firewalls, WAF).
 license: MIT
@@ -53,7 +53,7 @@ Production authentication following OWASP Top 10, NIST SP 800-63B, and patterns 
 
 **Password requirements** (NIST SP 800-63B):
 - Minimum 12 characters (no max below 64)
-- NO composition rules (uppercase, number, symbol required — these weaken security, NIST §5.1.1.2)
+- NO composition rules (uppercase, number, symbol required - these weaken security, NIST §5.1.1.2)
 - Allow all printable ASCII + Unicode
 - Check against HaveIBeenPwned API (k-anonymity, SHA-1 prefix)
 - Rate limit: 5 attempts per 15 min per IP + username
@@ -83,13 +83,13 @@ async function refreshToken(providedRefreshToken: string) {
   const stored = await db.findRefreshToken(providedRefreshToken)
 
   if (!stored) {
-    // Token not found — possible reuse. Revoke all user tokens.
+    // Token not found - possible reuse. Revoke all user tokens.
     await db.revokeAllRefreshTokens(extractUserId(providedRefreshToken))
     throw new AuthError('Token family revoked')
   }
 
   if (stored.used) {
-    // This token was already used — reuse detected. Revoke all.
+    // This token was already used - reuse detected. Revoke all.
     await db.revokeAllRefreshTokens(stored.userId)
     throw new AuthError('Token reuse detected')
   }
@@ -149,7 +149,7 @@ Scopes: Always least privilege. Document each scope's access level.
 #### RBAC
 
 ```
-User → Role(s) → Permission(s)
+User ? Role(s) ? Permission(s)
 ```
 
 ```json
@@ -176,7 +176,7 @@ Allow if:
 
 | Parameter | Value |
 |-----------|-------|
-| Session ID generation | `crypto.randomUUID()` — never sequential |
+| Session ID generation | `crypto.randomUUID()` - never sequential |
 | Session storage | Redis, TTL = 24h (absolute). DB for analytics. |
 | Idle timeout | 30 min (sensitive), 2h (standard) |
 | Absolute timeout | 24h |
@@ -217,9 +217,33 @@ const otpauth = authenticator.keyuri(user.email, 'MyApp', secret)
 - Notify user on: new device login, password change, email change, MFA change
 - Support account recovery: out-of-band verification (email + SMS), time-delayed
 
+## Error Handling
+
+Every auth failure must return a generic message. Never reveal which part of auth failed. Log the specific reason internally.
+
+| Scenario | HTTP | Response Message | Log Action |
+|----------|------|------------------|------------|
+| Invalid email/password | 401 | "Invalid credentials" | Log: `auth_failure` + username + reason (breach check, hash mismatch, unknown user) |
+| Account locked | 423 | "Account temporarily locked. Try again in 30 minutes." | Log: `account_locked` + user_id + failed_attempts |
+| Token expired | 401 | "Session expired. Please log in again." | Log: `token_expired` + user_id + token_jti |
+| Token reuse detected | 401 | "Session expired. Please log in again." | Log: `token_reuse_detected` ? revoke all user tokens |
+| CSRF token mismatch | 403 | "Invalid request" | Log: `csrf_mismatch` + user_id + origin |
+| Rate limit exceeded | 429 | "Too many attempts. Try again in 15 minutes." | Log: `rate_limited` + identifier + endpoint |
+| Permission denied | 403 | "Access denied" | Log: `permission_denied` + user_id + resource + required_permission |
+| MFA challenge failed | 401 | "Verification failed" | Log: `mfa_failure` + user_id + factor_type |
+| OAuth state mismatch | 400 | "Invalid request" | Log: `oauth_state_mismatch` + redirect_uri |
+| WebAuthn challenge failed | 401 | "Verification failed" | Log: `webauthn_failure` + credential_id + reason |
+
+**Rules:**
+- Never distinguish between "email not found" and "wrong password" in responses - identical 401 for both
+- Never expose `reason` or `code` to the client on auth errors
+- Log all auth failures with user identifier, timestamp, IP, and user agent
+- Alert on spikes: >20 auth failures per user per minute, >100 per IP per minute
+- Return `Retry-After` header for rate-limited responses
+
 ## Production Checklist
 
-- [ ] Password hashing: Argon2id (memory=19456, iterations=2, parallelism=1) or BCrypt (cost ≥ 12)
+- [ ] Password hashing: Argon2id (memory=19456, iterations=2, parallelism=1) or BCrypt (cost = 12)
 - [ ] Password breach check (HaveIBeenPwned API, k-anonymity)
 - [ ] Rate limiting: login (5/15min per IP+username), reset (3/60min), MFA (3/15min)
 - [ ] Refresh token: rotation on every use. Reuse detection revokes ALL user tokens.
@@ -230,7 +254,7 @@ const otpauth = authenticator.keyuri(user.email, 'MyApp', secret)
 - [ ] CORS: whitelist origins, never `*` with credentials
 - [ ] SQL injection: parameterized queries everywhere. Never string interpolation.
 - [ ] MFA available for all users. Required for admin actions.
-- [ ] Account lockout: 5 failed attempts → temporary lockout (30 min) with notification
+- [ ] Account lockout: 5 failed attempts ? temporary lockout (30 min) with notification
 - [ ] Logging: every auth event. Append-only. No PII in logs.
 - [ ] Passwords: min 12 chars. No composition rules (NIST §5.1.1.2).
 - [ ] Recovery: time-limited token (15 min), sent to verified email only. Single use.
@@ -256,8 +280,8 @@ const otpauth = authenticator.keyuri(user.email, 'MyApp', secret)
 ## Sources
 
 - OWASP Top 10 (2025)
-- OWASP Cheat Sheet Series — Authentication, Session Management, CSRF, Forgot Password
-- NIST SP 800-63B — Digital Identity Guidelines (§5.1.1.2 password requirements)
+- OWASP Cheat Sheet Series - Authentication, Session Management, CSRF, Forgot Password
+- NIST SP 800-63B - Digital Identity Guidelines (§5.1.1.2 password requirements)
 - IETF RFC 7519 (JWT), RFC 6749 (OAuth 2.0), RFC 7636 (PKCE)
 - WebAuthn Level 2 (W3C Recommendation)
 - Auth0 Security Architecture

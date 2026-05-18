@@ -61,3 +61,35 @@ This automatically:
 - Modify files in `protected` groups (chroma_db, sessions, logs, backups)
 - Apply changes without user confirmation
 - Edit the manifest without understanding every field
+
+## Error Handling
+
+| Cause | Fix |
+|-------|-----|
+| shokunin.json manifest is missing or malformed | Validate JSON syntax with `Test-Json`. If missing, run installer `~/.shokunin/install.ps1` to regenerate from template. Report exact parse error line if malformed. |
+| File hash mismatch but content is identical | Encoding difference (CRLF vs LF) or trailing whitespace. Normalize line endings with `.pack/scripts/normalize-eol.ps1` before re-checking. |
+| Backup directory exceeds disk quota | Old backups accumulate over time. Retention policy: keep last 5 backups. Purge older directories with `Remove-Item -Recurse`. |
+| Protected file group modified by apply | A bug or misconfiguration in the manifest marked a protected path as writable. Abort immediately. Rollback from backup. Fix manifest before retry. |
+| Rollback target timestamp not found | Backup was purged by retention policy or never created. Cannot recover that point in time. Run `status` to assess current state and manually fix drift. |
+| Powershell execution policy blocks the script | System execution policy set to Restricted | Run `Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser` or invoke with `powershell -ExecutionPolicy Bypass -File script.ps1`. |
+| ChromaDB save during apply step fails | MCP server is down or ChromaDB collection is locked | Apply still succeeded on the filesystem. Save the update event manually: `python ~/.shokunin/scripts/chroma-helper.py save "update applied" ...`. |
+
+## Sources
+
+- PowerShell 5.1 documentation (learn.microsoft.com/en-us/powershell/scripting) — execution policy, file hashing, and error handling
+- ChromaDB Python client documentation (docs.trychroma.com) — collection management and persistence
+- Semantic Versioning 2.0.0 (semver.org) — version comparison logic used in drift detection
+- Git documentation on plumbing commands (git-scm.com/docs/git-hash-object) — content-addressable storage pattern inspiration
+- "Infrastructure as Code" by Kief Morris (O'Reilly, 2nd Edition, 2020) — drift detection and reconciliation patterns
+- NIST SP 800-88 Guidelines for Media Sanitization — secure file overwrite patterns used in backup rotation
+
+## Anti-Patterns
+
+| Pattern | Problem | Fix |
+|---------|---------|-----|
+| Running `apply` without running `plan` first | Changes are applied without user awareness of what will be modified | Always run `plan` → show summary → get confirmation → then `apply`. |
+| Modifying protected paths directly instead of through manifest | Data loss: chroma_db, sessions, logs get overwritten and cannot be recovered | Never touch paths under the protected group. If they need changes, update the manifest logic, not the files. |
+| Hand-editing the manifest without understanding every field | A typo in a path or hash field cascades into false drift positives or corrupted apply | Use the declarative format. Every path must be absolute. Every hash must be SHA-256. Validate with `Test-Json` after edits. |
+| Ignoring drift warnings for long periods | Drift accumulates, making later applies riskier and harder to roll back | Run `status` weekly. Schedule via Task Scheduler: `shokunin-update.ps1 status > ~/.shokunin/logs/drift.log`. |
+| Restoring from backup without verifying backup integrity | A corrupted backup restores corrupted files | Before rollback, verify backup checksums against the original manifest hashes. Abort if mismatch. |
+| Running apply while another apply is in progress | Race condition on backup/restore directories causing incomplete state | Use a lock file: `~/.shokunin/.apply-lock`. If lock exists and process is alive, wait or abort. Stale lock (>30 min) can be removed. |

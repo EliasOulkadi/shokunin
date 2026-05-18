@@ -273,6 +273,17 @@ jobs:
 | Secrets in state outputs | Mark `sensitive = true`, use external secrets manager |
 | No preconditions/postconditions | Add for security-critical resources |
 
+## Error Handling
+
+| Scenario | Cause | Diagnosis | Fix |
+|----------|-------|-----------|-----|
+| State lock timeout | Another process holds the lock (CI stuck, manual apply abandoned) | `terraform force-unlock -force` will show lock ID and holder | Kill the holding process first. If process is dead, `terraform force-unlock <lock-id>`. Set `max_retries` in backend config. |
+| Provider version mismatch | `required_providers` version constraint doesn't match lock file (`.terraform.lock.hcl`) | `terraform init` fails with "provider version constraints changed" | Run `terraform init -upgrade` to update lock file. Pin versions with `~>` not `>=`. Commit lock file. |
+| Plan diff too large (>5000 lines) | Drift from manual console changes, or too many resources in one state file | Plan output is unreadable, review impossible | Split into smaller component state files. Use `terraform plan -target` for targeted review. Run `terraform refresh` to sync state. Consider `-parallelism=1` for slow APIs. |
+| Apply timeout | API throttling, resource creation taking >30min, network issues | Apply hangs or exits with timeout error | Increase `-lock-timeout=30m`. Check cloud provider status page. Split into smaller applies. Set resource `timeouts {}` blocks. Use `TF_LOG=DEBUG` for verbose output. |
+| Backend unreachable | S3 bucket deleted, IAM role expired, network partition | `terraform init` or `terraform plan` fails with "Failed to load backend" | Verify S3 bucket exists and IAM role has `s3:GetObject` + `s3:PutObject` + `dynamodb:GetItem` + `dynamodb:PutItem`. Check `~/.aws/credentials`. Restore bucket from backup if deleted. |
+| Workspace inconsistency | Wrong workspace selected (`default` vs `prod`), stale plan file | Apply fails on unexpected resource diffs or destroys | Always `terraform workspace show` before plan/apply. Use directory-per-environment to eliminate workspace risk. Delete stale `.tfplan` files after apply. |
+
 ## Sources
 
 - Terraform Documentation (developer.hashicorp.com/terraform)

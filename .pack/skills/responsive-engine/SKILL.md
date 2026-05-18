@@ -336,3 +336,51 @@ Before delivering responsive layout code:
 - Every Layout — responsive layout patterns
 - WCAG 2.2 — Touch target size
 - iOS Safari viewport bug documentation (WebKit blog)
+
+## Workflow
+
+### Step 1: Audit existing layout
+
+Before writing any CSS, identify what's broken:
+- Open Chrome DevTools Device Toolbar (Ctrl+Shift+M)
+- Test at 320px, 375px, 768px, 1024px, 1440px
+- Flag: horizontal scrollbars, overflowing content, text < 16px, touch targets < 44px
+- Screenshot at each breakpoint for before/after comparison
+
+### Step 2: Establish container query boundaries
+
+1. Identify components needing independent responsiveness (cards, sidebars, grid items)
+2. Set `container-type: inline-size` on their direct parent
+3. Name containers with `container-name` for complex nested layouts
+4. Replace any media queries targeting those components with `@container` rules
+
+### Step 3: Replace fixed units with fluid units
+
+1. Find all `px` values for widths, font sizes, spacing
+2. Convert fonts to `clamp()` (minimum, preferred, maximum)
+3. Convert spacing to `clamp()` or relative units (`%`, `cqi`, `cqw`)
+4. Replace `h-screen` with `min-h-[100dvh]` everywhere
+
+### Step 4: Write mobile collapse rules
+
+1. Identify asymmetric layouts, overlapping elements, multi-column grids
+2. Write `@media (max-width: 767px)` block collapsing everything to single column
+3. Remove negative margins and rotations on mobile
+4. Ensure touch targets >= 44x44px with 8px gap between interactive elements
+
+### Step 5: Add form factor and accessibility guards
+
+1. Gate hover effects behind `@media (hover: hover)`
+2. Gate fine-pointer interactions behind `@media (pointer: fine)`
+3. Add `@supports selector(:has(*))` fallbacks for all `:has()` selectors
+4. Respect `prefers-reduced-motion` on all animations
+5. Set minimum body font-size to 16px
+
+### Step 6: Verify across devices
+
+1. No horizontal scroll at any width from 320px to 2560px
+2. `min-h-[100dvh]` replaces all `h-screen` instances
+3. Touch targets >= 44x44px with 8px gap
+4. Container Queries used for component responsiveness
+5. Asymmetric layouts collapse to single column below 768px
+6. All `:has()` selectors guarded with `@supports` fallback

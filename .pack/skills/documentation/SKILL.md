@@ -128,6 +128,28 @@ Rules: One action per step. Bold UI labels exactly as they appear. Max 15 words 
 - [ ] Changelog: unreleased section present, versions correct
 - [ ] KB: tested by someone unfamiliar with the product
 
+## Workflow
+
+1. **Identify document type** — README, API docs, changelog, or knowledge base article. Each has a distinct structure and rule set.
+2. **Gather source material** — for README: project files, package.json, build system. For API: OpenAPI spec or route handlers. For changelog: git log. For KB: product expertise.
+3. **Apply the template** — README: hook → features → quick start → API → examples → config → contributing → license. API: method → path → description → auth → request → response → errors.
+4. **Fill every section with real data** — no "TODO", "coming soon", "TBD", placeholder text. Quick start must be copy-paste runnable. API docs need curl + SDK examples.
+5. **Verify everything** — test quick start from clean environment. Check every link resolves. Confirm license badge matches LICENSE file. KB: test steps as an unfamiliar user.
+6. **Cut the generic** — remove default template comments. Strip "write unit tests" style advice. Every sentence must convey a specific convention or fact about this project.
+
+## Error Handling
+
+| Cause | Fix |
+|-------|-----|
+| Quick start commands fail from a clean environment | Test every command from scratch. Ensure no omitted imports, no assumed global state, no missing env vars. |
+| API docs missing error response codes | Document all possible status codes for every endpoint: 400 (validation), 401 (auth), 403 (forbidden), 404 (not found), 500 (server error). |
+| Changelog entry lacks migration notes for breaking changes | Every breaking change must include: what changed, why, and the exact migration path. Link to the PR. |
+| KB article steps don't produce expected result when followed | Have someone unfamiliar with the product walk through the steps. Fix any ambiguity or missing context. |
+| Links in documentation resolve to 404 or redirect | Check every link. Prefer permalinks. Verify external links haven't moved. Use web archive as fallback for critical references. |
+| README badges show incorrect or outdated status | Verify CI badge matches current pipeline. Version badge matches latest release. Coverage badge matches current report. |
+| API docs example response doesn't match actual API output | Generate response examples from actual API output, not from spec definitions. Update when the API changes. |
+| Default README template published with unfilled sections | Remove all template comments and TODO markers before publishing. If a section has no content, omit it rather than leaving a placeholder. |
+
 ## Anti-Patterns
 
 | Anti-Pattern | Correct |

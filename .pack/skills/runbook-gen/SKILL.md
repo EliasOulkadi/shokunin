@@ -29,7 +29,7 @@ negatives:
 
 Operation runbooks that on-call engineers can follow under pressure. Based on Google SRE practices, PagerDuty incident response, and post-mortem culture.
 
-## 1. Procedural Workflow
+## Workflow
 
 Follow these steps in order when generating a runbook:
 
@@ -194,7 +194,7 @@ One paragraph. System-focused, not person-focused.
 ### What We'll Do Differently
 ```
 
-## 7. Error Handling Table
+## Error Handling
 
 | Scenario | Behaviour | Guidance |
 |----------|-----------|----------|
@@ -224,7 +224,7 @@ Before marking a runbook complete, verify every item:
 - [ ] **Secrets checked** — no passwords, API keys, or tokens in commands; use env vars
 - [ ] **Reviewed by secondary on-call** — fresh eyes catch assumptions
 
-## 9. Anti-Patterns Table
+## Anti-Patterns
 
 | Anti-pattern | Why It Fails | Fix |
 |-------------|-------------|-----|
@@ -239,7 +239,7 @@ Before marking a runbook complete, verify every item:
 | Post-mortem blames people | Blame culture kills incident reporting | "What broke the system?" not "Who broke it?" |
 | Skipping customer comms | Stakeholders hear "we're down" from social media | Draft customer email as part of template |
 
-## 10. Sources
+## Sources
 
 - Google SRE Book: "Monitoring Distributed Systems"
 - Google SRE Workbook: Incident Response

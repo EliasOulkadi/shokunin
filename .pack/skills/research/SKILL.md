@@ -163,3 +163,53 @@ Rule: if the document goes to an external client or has legal/security implicati
 - Reuters / AP sourcing standards
 - GlobalX Publications, "Fact-Checking, Triangulation, and Evidence Reliability in Research"
 - NHMRC evidence hierarchy framework
+
+---
+
+## Workflow
+
+1. **Define research scope** — identify exactly what claims need verification: numbers, dates, versions, names, quotes, CVE IDs, statistics.
+2. **Search primary sources first** — official changelogs, CVE entries (nvd.nist.gov), SEC filings, source code repositories, direct HTTP responses.
+3. **Triangulate across independent sources** — cross-check each claim against 3+ unrelated sources. Do they independently agree? If only one source, mark as UNVERIFIED.
+4. **Assess source credibility** — financial interest, professional stake, funding bias, personal relationships. Apply the five-minute background check from NPR methodology.
+5. **Assign verification tiers** — VERIFIED (2+ primary sources), CORROBORATED (multiple sources, no primary), UNVERIFIED (single source). Tag every claim.
+6. **Run anti-hallucination filter** — verify every number, date, version, and quote against the Vectara HHEM checklist before writing.
+7. **Adapt verification level to document type** — maximum for pentest/security reports and CVs. Medium for white papers and exec summaries. Lower for personal letters.
+
+## Error Handling
+
+| Cause | Fix |
+|-------|-----|
+| CVE ID returned no results from NVD | Search official vendor advisory directly. Check if it's a reserved but unpublished CVE. Mark as CORROBORATED if vendor confirms. |
+| Official changelog disagrees with secondary sources | Trust the primary source. Note the discrepancy. Re-check secondary sources for outdated or misinterpreted data. |
+| Statistics claim with no identifiable study | Reject the claim. Do not publish. Replace with qualified language ("commonly observed", "widely reported") or omit entirely. |
+| Source behind paywall or login gate | Search for preprint, open-access version, or web archive. If unavailable, mark as "source not independently verified." |
+| Direct quote cannot be confirmed to exist | Do not publish as verbatim. If essential, paraphrase with attribution like "as characterized by..." or "according to reporting by..." |
+| Multiple sources conflict on a key date or number | Go with the primary source. Note the conflict if it matters (e.g., "Sources differ on exact date; official changelog lists [date]"). |
+| AI hallucination detected in generated text during verification | Strip the hallucinated claim immediately. Replace with verified data or omit. Re-check surrounding context for contamination. |
+| Research timed out before all claims verified | Prioritize critical claims (CVEs, versions, names). Mark unverified claims explicitly. Ship with "preliminary" designation if necessary. |
+
+## Anti-Patterns
+
+| Pattern | Problem | Fix |
+|---------|---------|-----|
+| "Studies show..." with no citation | Hallucinated authority. Undermines entire document credibility. | Never state a study exists without a verifiable citation. Use real sources or don't claim one. |
+| Accepting the first Google result as fact | Single-source bias. SEO ranking ≠ accuracy. | Always triangulate. Minimum 3 independent sources for factual claims. |
+| Citing Wikipedia as a primary source | Wikipedia is a tertiary source. Editing wars and vandalism skew content. | Trace Wikipedia citations to their original primary sources. Use Wikipedia as a launch point, not an endpoint. |
+| Publishing numbers without checking if they're from a real study | LLMs invent plausible-sounding statistics 15-20% of the time. | Verify every number against its original study. If the study doesn't exist, the number doesn't either. |
+| Using LLM training data as "verification" without web search | Training data is frozen, outdated, and hallucination-prone. | Always run live web searches. Cross-check against current official sources. |
+| Including level 5 (single source) claims without marking them | Reader assumes verified when it's actually unconfirmed. | Explicitly mark any level 5 claim: "[Source: single report, not independently confirmed]". |
+| Treating all sources as equally credible | A Reddit comment ≠ a peer-reviewed paper ≠ an NVD entry. | Apply evidence hierarchy. Weight sources by type, not by what supports the desired narrative. |
+| Skipping verification because the claim "sounds right" | Confirmation bias. LLMs are confident and wrong simultaneously. | Verify every factual claim. "Sounds right" is how hallucinations reach production documents. |
+
+- Heuer & Pherson, *Structured Analytic Techniques for Intelligence Analysis* (CIA Sherman Kent School)
+- US Government, *A Tradecraft Primer: Structured Analytic Techniques for Improving Intelligence Analysis* (2009)
+- NPR Training, "Don't just check the facts, check the source: a guide to verification" (March 2026)
+- Princeton University Library, guide "Triangulation and Media Literacy" (2025)
+- War Intel Hub, "OSINT Verification Methodology"
+- Vectara HHEM hallucination benchmark leaderboard (March 2026)
+- Prompt Guardrails, "AI Hallucination Detection and Prevention Guide" (2026)
+- News Factory, "News Fact-Checking in 2026: Hallucination Benchmarks, RAG, and Verification Tools"
+- Reuters / AP sourcing standards
+- GlobalX Publications, "Fact-Checking, Triangulation, and Evidence Reliability in Research"
+- NHMRC evidence hierarchy framework

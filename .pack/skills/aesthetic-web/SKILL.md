@@ -384,3 +384,69 @@ window.addEventListener('scroll', () => {
 - OKLCH color space (oklch.com)
 - Emil Kowalski — Design engineering philosophy
 - WCAG 2.2 — Accessibility guidelines
+
+## Workflow
+
+### Step 1: Identify register
+
+Determine Brand vs Product before any design decision. Brand = marketing, landing pages, portfolio (design IS the product). Product = dashboards, admin, tools (design SERVES the product). This single choice controls the entire creative range.
+
+### Step 2: Select color direction
+
+Choose one of the 4 directions: Dark+accent, Deep navy+spotlight, Cream editorial, Warm mesh. Never mix directions. Every color from this point flows from the chosen palette. Write all new colors in OKLCH with hex fallbacks.
+
+### Step 3: Choose typography pair
+
+1. Pick display font: editorial serif (Canela, DM Serif Display, Playfair) or bold display sans (Cabinet Grotesk, Bebas Neue, Space Grotesk)
+2. Pick body font: DM Sans, Geist, or Inter (body only — never as headline)
+3. Set fluid type scale via CSS custom properties with `clamp()`
+
+### Step 4: Build atmospheric background
+
+1. Apply gradient mesh or illustrated scene — never a flat solid color
+2. Add grain overlay (opacity 0.03-0.06) as `::after` pseudo-element
+3. Dark (#080808) or cream (#f5f2ec) base layer
+
+### Step 5: Compose layout and hero
+
+1. Oversized hero headline: `clamp(48px, 7vw, 96px)` minimum
+2. Left-aligned hero text with visual on the right — never center-aligned
+3. Floating/tilted product screenshots with box-shadow depth
+4. Line length capped at 65-75ch via `max-width`
+5. One accent color <= 10% of any screen
+
+### Step 6: Add motion and polish
+
+1. Scroll effects: parallax, reveal (opacity + translateY), or 3D perspective
+2. Button press: `scale(0.97)` on `:active`, 160ms ease-out
+3. Hover states: 120-160ms `cubic-bezier(0.23, 1, 0.32, 1)`
+4. Respect `prefers-reduced-motion` on every animation
+5. Run the Pre-Delivery Checklist before shipping
+
+## Error Handling
+
+| Cause | Fix |
+|-------|-----|
+| Gradient mesh shows harsh color banding on low-quality displays | Add grain overlay (opacity 0.02-0.04) to dither banding. Use larger radial-gradient spreads (80-100% of ellipse). Reduce chroma at gradient edges |
+| Custom display font (Canela, DM Serif) fails to load on slow connections | Always set `font-display: swap` with system serif fallback stack. Preload woff2 in `<head>`: `<link rel="preload" as="font" href="..." crossorigin>` |
+| 3D perspective text clips or cuts off at viewport edges | Set `overflow: hidden` on perspective container. Add padding >= 50% of perspective offset. Test at 320px width |
+| Grain SVG overlay causes scroll jank on low-end mobile (GPU overdraw) | Reduce grain to `background-size: 100px 100px`, opacity to 0.02. Disable grain entirely below 768px via `@media (max-width: 767px)` |
+| OKLCH colors render as black/white in older Safari (< 15.4) | Provide hex fallback before each OKLCH value: `color: #f5f2ec; color: oklch(96% 0.005 0)`. Same for all OKLCH declarations |
+| Floating screenshot overflows parent container on mobile | Remove `position: absolute`, negative offsets, and rotations below 768px. Stack screenshots vertically with standard spacing |
+| Scroll reveal animation triggers CLS (Layout Shift) regression | Reserve space with `min-height` or `aspect-ratio` before reveal fires. Never use `display: none` to hide elements before reveal — use `opacity` and `visibility` |
+| Glassmorphism background-blur causes 60fps drop on scroll | Glass is GPU-expensive. Use only on static hero sections, never on scroll containers. Test `backdrop-filter` performance with Chrome FPS meter |
+
+## Anti-Patterns
+
+| Pattern | Problem | Fix |
+|---------|---------|-----|
+| Flat white (#fff) background with Inter as display font | Looks like an unstyled wireframe, not a shipped product | Always use tinted dark or cream base. Pair with a proper display font |
+| Purple-to-blue gradient on white background | The #1 AI output cliché across all LLMs. Instant "AI generated" signal | Pick one of the 4 color directions. Never default to purple gradient |
+| Icon + heading + description cards in identical 3-column grid | Zero visual hierarchy. Users scan past without reading any card | Vary card sizes. Use asymmetric grids (2fr 1fr). Break grid rhythm with full-width sections |
+| Emoji used as UI icons | Renders inconsistently across platforms. Looks unpolished | Use Lucide or Phosphor icon libraries exclusively. SVG only |
+| Animations on every element without stated purpose | Motion fatigue. Users disable animations or leave the page | Every animation needs a purpose: spatial consistency, state indication, feedback. Product register: be restrained |
+| Center-aligned hero text with centered CTA button | Generic SaaS template. Zero personality or visual tension | Left-align hero text. Place visual on right. Create deliberate asymmetry |
+| `border-left` > 1px with accent color on sidebar/dashboard | Immediate "AI made this" tell in dashboard interfaces | Use subtle spacing, background tint, or hairline separators instead |
+| Gradient text via `background-clip: text` | Decorative, never semantic. Fails WCAG contrast at gradient mid-point | Use solid colors with weight and scale contrast for hierarchy |
+| Glassmorphism as default card surface | Trendy 2022. Low contrast, poor readability. Adds visual noise | Use only when atmospehre IS the product (Brand register). Never in Product dashboards |
+| Nesting cards inside cards | Creates visual clutter. User cannot establish information hierarchy | One level of card per section. Use dividers or spacing for sub-groups |

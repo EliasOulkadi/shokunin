@@ -51,7 +51,7 @@ Professional writing that gets results. Based on Harvard Business Review, Radica
 | `escalate` | Draft escalation with clear facts, impact, and request |
 | `reply` | Reply to a message with appropriate tone |
 
-## Procedural Workflow
+## Workflow
 
 **Step 1 — Identify audience & context**
 - Who is the recipient? What is your relationship?
@@ -190,6 +190,19 @@ Rules:
 | Nordics | Flat, consensus-driven | Direct but collaborative |
 
 ---
+
+## Error Handling
+
+| Cause | Fix |
+|-------|-----|
+| Recipient didn't respond in 48 hours | Send one follow-up with same subject. First line: "Gentle ping on this — do you need anything from me to move forward?" |
+| Email draft is too long (>200 words client, >150 internal) | Cut to essentials. Move details to bullet points. Complex topics → Loom video or shared doc. |
+| Tone feels passive-aggressive on re-read | Replace "per my last email" with direct restatement. Remove "as I mentioned." Check for blame language. |
+| Cross-cultural miscommunication risk | Check culture table. Japanese: add polite preamble, drop subject pronouns. German: complete information, use Sie. French: context before ask. |
+| Emotional reaction while drafting | Save draft. Wait 1 hour minimum. Revise before sending. Remove all loaded language. |
+| Vague action items after meeting | Every action item must have: named owner + ISO date deadline + specific verb. No "we should think about." |
+| Feedback received negatively | Check SBI structure: Situation (when/where) + Behavior (observable) + Impact (effect). End with "Does that resonate?" Never "you always/never." |
+| Escalation email ignored by leadership | Structure: clear facts first, business impact second, specific request third. Keep under 150 words. No blame. Include deadline. |
 
 ## Anti-Patterns
 

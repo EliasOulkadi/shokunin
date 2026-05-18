@@ -29,6 +29,47 @@ metadata:
 
 Structured thinking for brainstorming, prompt engineering, and decision making.
 
+## Workflow
+
+### Step 1: Intake & Framing
+
+Extract the user's core need and classify it into one of three tracks:
+
+| Track | Trigger | Output |
+|-------|---------|--------|
+| **Decision** | "Should I...", "Which option...", "Help me choose..." | Scored recommendation with rationale and runner-up tradeoff |
+| **Ideation** | "Brainstorm...", "Generate ideas for...", "What are ways to..." | Prioritized list of ideas with convergent selection |
+| **Clarity** | "How do I think about...", "Improve this prompt", "Reframe..." | Restructured framing, 7-dimension prompt, or first-principles breakdown |
+
+If the user's need spans multiple tracks, run them sequentially: Clarity → Ideation → Decision.
+
+### Step 2: Select Framework
+
+For **Decision** track: Choose ICE if speed matters, Impact/Effort matrix if resources are constrained, First Principles if the problem feels stuck or assumed, Pre-Mortem if the decision is high-stakes and irreversible.
+
+For **Ideation** track: Start with brainwriting (quantity). If ideas stall, inject SCAMPER or reverse brainstorming. Never open with free association for groups of 3+ — dominant voices take over.
+
+For **Clarity** track: Run the 7-dimension prompt diagnosis. Identify which dimensions are weak (0-3 on a 1-10 scale). Rewrite the prompt addressing the weakest dimensions first.
+
+### Step 3: Execute Framework
+
+Follow the framework protocol from its dedicated section below. Timebox strictly:
+- Decision: 20 min (5 min framing, 10 min scoring, 5 min decision)
+- Ideation: 60 min (divergent 30 min, cluster 10 min, convergent 20 min)
+- Clarity: 10 min (diagnose 3 min, rewrite 5 min, changelog 2 min)
+
+### Step 4: Document & Deliver
+
+Every strategy output must include:
+- The chosen framework and why it was selected
+- The raw output (scores, ideas, rewritten prompt)
+- One recommended action with owner + next step + deadline
+- One explicitly rejected alternative and the reason
+
+### Step 5: Verify Against Production Checklist
+
+Run the Production Checklist before delivering. If any item is unchecked, return to the relevant step. Never deliver a strategy artifact that skips convergent selection or lacks a specified output format.
+
 ## Brainstorming
 
 ### 1. Process

@@ -364,3 +364,75 @@ npx playwright pdf "file:///path/to/kami-output.html" "final.pdf"
 - [CSS Paged Media W3C specification](https://www.w3.org/TR/css-page-3/)
 - [Blog.rasc.ch: Generating PDFs with Playwright and Go](https://blog.rasc.ch/2026/03/playwrightpdf.html)
 - [HN: What is the open-source way to convert HTML to PDF](https://news.ycombinator.com/item?id=45404760)
+
+## Workflow
+
+### Step 1: Validate HTML template
+
+Before rendering, verify the template is production-ready:
+1. Open the HTML in a browser first: confirm fonts load, CSS applies, layout renders correctly at print size
+2. Check that `@page` rules specify explicit size (`A4`, `Letter`) and margins
+3. Verify `-webkit-print-color-adjust: exact` and `print-color-adjust: exact` are set on `*`
+4. Confirm all `@font-face` declarations use relative paths, not absolute filesystem paths
+
+### Step 2: Configure render settings
+
+1. Set `format` (A4, Letter, A3) to match the template's `@page { size: }` declaration
+2. Set `printBackground: true` — always. Never skip this. Chromium strips backgrounds by default
+3. Set Playwright `margin: { top: '0', bottom: '0', left: '0', right: '0' }` — use CSS `@page` margins instead
+4. Use `waitUntil: 'networkidle'` to ensure fonts, CSS, and images are fully loaded before rendering
+
+### Step 3: Render PDF
+
+1. Launch browser once (warm mode) — reuse for all documents in batch
+2. Navigate with `file://` protocol to avoid CORS and authentication issues with local files
+3. Await `page.pdf()` with configured options
+4. Close page after each render but keep browser alive for next document
+
+### Step 4: Validate output PDF
+
+1. Open PDF and check: parchment/tinted background rendered (not white), fonts embedded correctly, page breaks occur at logical points
+2. Scan every page for near-empty pages (2 lines or less floating at page top)
+3. Verify code blocks, callouts, and tables are not split across page boundaries
+4. Check CJK characters render correctly if document contains Chinese, Japanese, or Korean text
+
+### Step 5: Apply visual patterns by document type
+
+1. Pentest/security report: severity badges, risk bars, finding headers, styled code blocks, impact/remediation boxes
+2. One-pager/executive summary: glance grid (4 metrics), lead paragraph, takeaway box, cover with decorative accent line
+3. White paper/long document: chapter breaks on dense sections, callouts, keep-together wrappers on critical blocks
+4. Letter: wide margins (25mm), formal greeting/closing, single-column, no unnecessary breaks
+5. Resume: dense body (9.2pt), metric row, project bullets with action + result format
+
+### Step 6: Run self-review protocol
+
+Complete ALL four checklist categories before final output: Structural (blocking), Visual (high priority), Content (high priority), Technical (blocking). Every item in the self-review protocol is a real failure mode documented from previous iterations.
+
+## Error Handling
+
+| Cause | Fix |
+|-------|-----|
+| PDF renders with stark white background instead of parchment (#f5f4ed) | Chromium strips all backgrounds in print mode. Ensure BOTH `printBackground: true` in Playwright JS config AND `-webkit-print-color-adjust: exact` on `*` in CSS |
+| Custom fonts render as fallback system serif in the PDF output | Use relative paths in `@font-face` `src: url("fonts/CustomFont.woff2")`. Place font files in same directory as HTML or a subdirectory. Chromium resolves relative to the HTML file's location |
+| CJK characters (Chinese, Japanese, Korean) render as empty boxes or tofu | Include a CJK-capable font via `@font-face` or add system CJK fallback stack: `font-family: "TsangerJinKai02", "SimSun", "MS Mincho", serif`. Test before batch rendering |
+| Near-empty page at end of section (2 lines of text floating alone) | Merge the short section with the previous one. Only apply `break-before: page` to chapters with > 1/3 page of content. Count elements: if heading + paragraph count < 5 total, don't force a page break |
+| Table rows split awkwardly across consecutive pages | Add `table tr { break-inside: avoid; }` in CSS. For large spanning tables, add `table { break-inside: avoid; }` so the entire table moves as a block |
+| Page break leaves an isolated heading at the very bottom of a page | Add `h1, h2, h3, h4 { break-after: avoid; }` to ensure at least the first content element after a heading stays with it on the same page |
+| PDF file size is excessive (10MB+ for a text-heavy document) | Remove unnecessary raster images. Subset and compress embedded fonts to only used glyphs. Reduce DPI of any embedded raster content. Check for duplicated embedded resources |
+| `page.pdf()` call hangs indefinitely on `networkidle` with dynamic/JS-rendered content | Switch to `waitUntil: 'load'` or add explicit `page.waitForTimeout(3000)`. For charts and JS-rendered content, use `waitForSelector()` on a known rendered element |
+| Chromium version mismatch between local dev and CI causes visual output differences | Lock Chromium version explicitly: note the version `npx playwright install chromium` installs. Document it in CI config. Re-baseline visual checks on every Chromium version bump |
+| Multiple documents rendered in bulk — browser crashes after N documents due to memory | Implement page pooling: close and reopen pages every 10-20 documents. Or restart browser every 50 documents. Memory leak in Chromium PDF rendering is a known issue |
+
+## Anti-Patterns
+
+| Pattern | Problem | Fix |
+|---------|---------|-----|
+| Setting margins via Playwright `margin` parameter instead of CSS `@page` | Playwright margin rendering is inconsistent across Chromium versions. CSS `@page` margins produce predictable, standards-compliant output | Always use `@page { margin: 24mm 26mm 26mm 26mm; }` in CSS. Set Playwright `margin: { top: '0', bottom: '0', left: '0', right: '0' }` |
+| `break-before: page` applied to every section/chapter unconditionally | Creates near-empty pages when a section has little content. Reader sees a page with 2 lines. Looks unprofessional and amateur | Only force page breaks on chapters with > 1/3 page of content. Count paragraph + table + list elements. If < 5 total content elements, skip the forced break |
+| All pages share identical visual structure (title → table → title → table) | Monotonous reading experience. Reader disengages after page 3. Document fails to sustain attention through key findings | Vary rhythm: finding box, then risk bar, then callout, then table, then narrative paragraph. Alternate between data-dense and commentary pages |
+| Repeated em dashes used as label/value separator in tables and lists | "Black Box — no credentials" repeated 15 times in a pentest report. Jarring, lazy, reads like raw data dump | Use colon separator (`Black Box: no credentials`), parentheses, or proper table columns with distinct header and value styling |
+| Code blocks visually indistinguishable from surrounding body text | Reader skims past code assuming it's prose. Reduces document credibility. Technical content loses all impact | Style every code block: 2.5pt left border, ivory/tinted background, monospace font (Consolas/Courier), generous padding (10-14pt), slight border-radius |
+| `printBackground: false` anywhere in the production rendering pipeline | Chrome strips all background colors, including parchment. Document renders on stark white default. Destroys the Kami visual design | Always `printBackground: true`. Add CI assertion: if PDF renders with white background, fail the build |
+| Launching a new browser instance per PDF document | Cold start ~630ms vs warm ~13ms. 48x slower per document. Wastes CI minutes on multi-document projects | Use warm mode (PDFRenderer class pattern): launch browser once, render all documents, close browser once. Keep-alive between renders |
+| Font files referenced with absolute Windows paths (`C:\Users\swagger\fonts\...`) | PDF generated on a different machine or in CI won't find fonts. Paths break across environments. Not portable | Always use relative paths in `@font-face`: `src: url("fonts/CustomFont.woff2")`. Place font files in same directory or subdirectory as the HTML template |
+| Skipping the self-review protocol because "it looks fine in the browser" | Browser rendering != PDF output. Chrome applies different print stylesheet rules. Many issues only visible in the final PDF | Always open the actual PDF output and run through all 4 checklist categories. Visual inspection is mandatory, not optional |

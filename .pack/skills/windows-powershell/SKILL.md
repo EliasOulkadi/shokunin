@@ -74,7 +74,7 @@ The script checks if each tool is already installed before attempting. Uses `win
 Copy the premium profile template:
 ```powershell
 # Install the premium profile
-Copy-Item "$env:USERPROFILE\.config\opencode\skills\windows-powershell\assets\Microsoft.PowerShell_profile.ps1" $PROFILE
+Copy-Item "~\\.config\\opencode\\skills\\windows-powershell\\assets\\Microsoft.PowerShell_profile.ps1" $PROFILE
 
 # Reload profile
 . $PROFILE
@@ -92,7 +92,7 @@ The profile includes:
 
 ```powershell
 # Weekly cleanup every Sunday at 9 PM
-schtasks /Create /SC WEEKLY /D SUN /TN "SystemCleanup" /TR "powershell.exe -File '$env:USERPROFILE\.config\opencode\skills\windows-powershell\scripts\cleanup-system.ps1'" /ST 21:00 /RL HIGHEST
+schtasks /Create /SC WEEKLY /D SUN /TN "SystemCleanup" /TR "powershell.exe -File '~\\.config\\opencode\\skills\\windows-powershell\\scripts\\cleanup-system.ps1'" /ST 21:00 /RL HIGHEST
 ```
 
 ## Windows Utilities Reference
@@ -104,7 +104,7 @@ See [references/powershell-mastery.md](references/powershell-mastery.md) for com
 | Find large files | `Get-ChildItem -Recurse | Sort-Object Length -Descending | Select-Object -First 20` |
 | Kill process by port | `Get-Process -Id (Get-NetTCPConnection -LocalPort 3000).OwningProcess | Stop-Process` |
 | Check disk health | `Get-PhysicalDisk | Get-HealthStatus` |
-| Export installed programs | `Get-WmiObject Win32_Product | Export-Csv installed.csv` |
+| Export installed programs | `Get-Package | Export-Csv installed.csv` |
 | Check battery health | `powercfg /batteryreport` |
 | Network speed test | `Invoke-WebRequest -Uri "http://speedtest.url"` |
 | Windows activation status | `slmgr /xpr` |

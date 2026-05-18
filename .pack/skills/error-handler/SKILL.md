@@ -1,4 +1,4 @@
-﻿---
+---
 name: error-handler
 description: Design error handling, structured logging, and observability with OpenTelemetry (traces, metrics, logs), error classification, recovery patterns (retry with jitter, circuit breaker, bulkhead, timeout), error budgets/SLOs with burn rate alerts, and production incident triage. Use when user asks to implement error handling, logging, monitoring, observability, OpenTelemetry, error boundaries, circuit breakers, retry logic, or SLO tracking. Do NOT use for incident runbooks (use runbook-gen), vendor-specific APM setup (Datadog, Sentry agent config), or K8s debugging.
 license: MIT
@@ -29,7 +29,7 @@ Observability that makes debugging fast and production predictable. Based on Goo
 
 | Signal | Purpose | Example |
 |--------|---------|---------|
-| Traces | Follow a request across services | User request → API Gateway → Auth → DB |
+| Traces | Follow a request across services | User request ? API Gateway ? Auth ? DB |
 | Metrics | Aggregate measurements over time | Request count, error rate, latency p50/p95/p99 |
 | Logs | Discrete events with context | "User login failed: invalid credentials for user_abc123" |
 
@@ -87,6 +87,8 @@ process.on('SIGTERM', async () => {
 - Production: `ParentBased` + `TraceIdRatioBased(0.1)` (10% head-based)
 - Never sample errors out. Use `AlwaysOn` for traces with `status=ERROR`.
 
+
+> **Import note:** `ParentBasedSampler` is imported from `@opentelemetry/sdk-trace-base`, NOT from `@opentelemetry/sdk-node`. If using `@opentelemetry/sdk-node`, configure it via the `sampler` option in `NodeSDK` constructor.
 ### Step 3: Implement structured error middleware
 
 ```typescript
@@ -129,7 +131,7 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
     })
   }
 
-  // Generic fallback — never leak internal state
+  // Generic fallback - never leak internal state
   res.status(500).json({
     error: {
       code: 'INTERNAL_ERROR',
@@ -251,8 +253,8 @@ sum(rate(http_requests_total[5m]))
 ```
 
 **Multi-window, multi-burn-rate approach** (Google SRE):
-- Short window (5m) + high burn rate (6-10x) → Page on-call immediately
-- Long window (1h) + low burn rate (2-3x) → Ticket for next business day
+- Short window (5m) + high burn rate (6-10x) ? Page on-call immediately
+- Long window (1h) + low burn rate (2-3x) ? Ticket for next business day
 
 ## Structured Logging Schema
 
@@ -283,7 +285,7 @@ Every log line must be JSON with these fields:
 **Rules:**
 - Never log PII, tokens, passwords, or full credit card numbers
 - Always include `trace_id`, `span_id`, `request_id` for correlation
-- `duration_ms` on every request. p95 > 200ms → investigate.
+- `duration_ms` on every request. p95 > 200ms ? investigate.
 
 ## Production Checklist
 
@@ -316,13 +318,29 @@ Every log line must be JSON with these fields:
 | Circuit breaker never tested | Test in staging by killing dependencies. |
 | Error budget without alert | Burn rate alerts are mandatory. |
 
+## Error Handling
+
+| Error | Cause | Fix |
+|-------|-------|-----|
+| OpenTelemetry SDK not exporting traces | Exporter endpoint unreachable or `OTEL_EXPORTER_OTLP_ENDPOINT` not set | Verify endpoint with `curl $OTEL_EXPORTER_OTLP_ENDPOINT/v1/traces`. Set env var before SDK initialization. |
+| `ParentBasedSampler` import fails from `@opentelemetry/sdk-node` | Wrong import path | Import from `@opentelemetry/sdk-trace-base`, not `@opentelemetry/sdk-node`. Configure via `sampler` option in `NodeSDK` constructor. |
+| Traces missing in production but appear in staging | Sampling rate too low (`TraceIdRatioBased(0.1)` drops 90%) | Use `AlwaysOn` for traces with `status=ERROR`. Never sample errors out. |
+| Structured logs have null `trace_id`/`span_id` | Context not propagated into async flow or logger not context-aware | Use `context.active()` before async operations. Inject `trace_id`/`span_id` into every log line via context propagation. |
+| Circuit breaker stays open indefinitely | `resetTimeout` is set but `half-open` state logic never triggers | Verify `Date.now() - this.lastFailureTime > this.resetTimeout` comparison. Add logging when state transitions occur. |
+| Retry exhausts budget on non-retryable errors | `isRetryable()` returns true for 400/401/403 status codes | Hard-gate retryable statuses: only `[408, 429, 502, 503, 504]` and network errors (`ETIMEDOUT`, `ECONNRESET`). |
+| Retry with jitter produces thundering herd | All instances retry at the same time due to identical base delay | Randomize `baseMs` per instance or use `Math.random() * baseMs` as the starting backoff. |
+| Burn rate alert fires for low-traffic services | Division by small request count amplifies noise | Set minimum request thresholds: only evaluate SLO when `rate(http_requests_total[5m]) > 1`. |
+| Error middleware exposes stack traces to users | Generic `INTERNAL_ERROR` handler includes `err.stack` in response body | Never return `stack` in API responses. Log it server-side; respond with `{ error: { code, message, requestId } }`. |
+| PII leaks into structured logs | Full email, IP, SSN, or credit card numbers in log fields | Mask sensitive fields: `email.replace(/(.{3}).*(@.*)/, '$1***$2')`. Configure PII redaction in log pipeline. |
+| Timeout wrapped around `fetch` never fires | `Promise.race` with `setTimeout` races against a promise that catches and suppresses errors | Always `reject` in the timeout handler, not `resolve`. The timed-out promise must reject, not resolve. |
+
 ## Sources
 
-- Google SRE Book — Monitoring Distributed Systems (Chapter 6)
-- Google SRE Workbook — Implementing SLOs (Chapter 5)
+- Google SRE Book - Monitoring Distributed Systems (Chapter 6)
+- Google SRE Workbook - Implementing SLOs (Chapter 5)
 - OpenTelemetry documentation (opentelemetry.io)
 - OpenTelemetry semantic conventions
 - Sentry error handling best practices
-- AWS Well-Architected Framework — Reliability Pillar
-- Microsoft Polly — Circuit breaker patterns
-- Hystrix — Netflix circuit breaker patterns
+- AWS Well-Architected Framework - Reliability Pillar
+- Microsoft Polly - Circuit breaker patterns
+- Hystrix - Netflix circuit breaker patterns

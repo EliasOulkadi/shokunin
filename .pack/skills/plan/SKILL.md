@@ -17,7 +17,7 @@ In plan mode:
 
 DO NOT write or edit any files yet (except the plan file). This is a read-only exploration and planning phase.
 
-## Plan Workflow
+## Workflow
 
 ### Phase 1: Initial Understanding
 
@@ -125,3 +125,24 @@ Goal: Write the final plan. Include:
 | Skipping verification | Always include how to test the end result. |
 | Too many alternatives in final plan | Choose one. Use the plan file, not a discussion document. |
 | Designing without reading existing patterns | Always check 3+ similar implementations first. |
+
+## Error Handling
+
+| Cause | Fix |
+|-------|-----|
+| Research subagent returns incomplete or empty results | The subagent may have hit a timeout or the codebase scope was too narrow. Re-launch with explicit file paths and a more focused query. If still empty, read the files directly. |
+| Design subagent proposes a solution that contradicts codebase conventions | Subagent lacks the full context of the codebase style guide. Manually review the plan against 3+ existing implementations. Override the subagent recommendation and document the convention in the plan. |
+| Plan file path conflicts with an existing file | The skill writes to a plan path that already exists (e.g., `PLAN.md` was already created). Append a timestamp: `PLAN-20260518-143000.md`. Ask user if they want to overwrite or keep both. |
+| Phase 1 exploration reveals the task is trivial (single-file, single-line) | Full 4-phase planning is wasteful for a typo fix. Abort plan mode. Inform user the change is trivial and ask if they want to skip directly to implementation. |
+| Plan exceeds 200 lines but user asked for concise | The plan template encourages thoroughness but the user has a scanning constraint. Collapse "Files to Modify" to a 3-column table. Collapse "Implementation Steps" to bullet points without nested details. |
+| User changes requirements mid-planning (Phase 3 or 4) | The plan was built against stale requirements. Do not patch the existing plan. Return to Phase 1 with the new requirements. Archive the old plan with a deprecation comment. |
+
+## Sources
+
+- "The Pragmatic Programmer" by David Thomas and Andrew Hunt (Addison-Wesley, 20th Anniversary Edition, 2019) — tracer bullet development and prototyping principles
+- "Software Architecture: The Hard Parts" by Neal Ford, Mark Richards, Pramod Sadalage, Zhamak Dehghani (O'Reilly, 2021) — architectural decision records and trade-off analysis
+- "A Philosophy of Software Design" by John Ousterhout (Yaknyam Press, 2nd Edition, 2021) — deep module design and complexity management
+- Google Design Docs culture (google.github.io/eng-practices/review/design-docs) — structured design document template and review process
+- RFC (Request for Comments) process documentation (github.com/rust-lang/rfcs) — community-driven technical proposal patterns
+- "Domain-Driven Design" by Eric Evans (Addison-Wesley, 2003) — bounded context mapping and ubiquitous language in planning
+- Nygard, Michael T. "Release It! Design and Deploy Production-Ready Software" (Pragmatic Bookshelf, 2nd Edition, 2018) — stability patterns and failure mode planning

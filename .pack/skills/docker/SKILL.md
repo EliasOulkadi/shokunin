@@ -17,6 +17,10 @@ Production-grade Dockerfiles, multi-stage builds, cache optimization, security s
 
 ## Workflow
 
+### Quick start: `docker init`
+
+For new projects, run `docker init` in the project root. It auto-detects the language/framework and generates a Dockerfile, `.dockerignore`, and `compose.yaml` with best-practice defaults. Always review and harden the output — the generated files are a starting point, not production-ready.
+
 ### Step 1: Identify stack and choose template
 
 | Stack | Base image | Build stage | Runtime |
@@ -157,7 +161,7 @@ trivy image registry/app:latest
 | Secrets in build args | `--mount=type=secret` |
 | No `.dockerignore` | Add one — exclude dev files |
 | No healthcheck | Orchestrator can't detect failures |
-| pinning only major version | Pin full version tag (`22-slim` not `22`) |
+| pinning only major version | Pin full version tag (`22.14-slim` not `22-slim`) |
 
 ## Sources
 

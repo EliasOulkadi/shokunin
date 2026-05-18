@@ -92,3 +92,29 @@ If the model name is unrecognized, ask for the exact model ID.
 - **No changes in conversation**: Inform user and stop.
 - **Incomplete review**: Relay what was returned. Note it may be incomplete.
 - **Model not available**: Offer alternative from the mapping table.
+- **User requests unknown model**: Map fuzzy names to model IDs using the mapping table. If no match, ask user to provide the exact model ID string.
+- **Subagent returns malformed output**: The review subagent may return text instead of structured findings. Relay what was returned and note the format deviation.
+- **Diff context exceeds subagent limits**: For very large changesets, split the diff by file or module and run multiple sequential subagent reviews. Inform user you are splitting the review.
+- **Network or infrastructure failure during spawn**: Retry once with the same configuration. If it fails again, offer to switch to a different model or perform the review inline.
+- **Subagent produces factually incorrect findings**: Relay findings as-is but append a note that some claims could not be verified against the codebase. Do not filter or censor.
+
+## Anti-Patterns
+
+| Pattern | Problem | Fix |
+|---------|---------|-----|
+| Using cross-review for general PR review | User did not name a model. cross-review is for explicit model-named delegation only. | Use the standard `code-review` skill instead. |
+| Summarizing or filtering subagent output | The user requested an independent review. Any distortion defeats the purpose. | Relay output verbatim. Add only a 1-line model attribution. |
+| Acting on findings without user approval | The master agent is read-only in this workflow. Fixing issues automatically breaks the delegation contract. | Offer to implement recommendations but wait for user to decide. |
+| Skipping context gathering (Step 2) | Sending only the diff without file context produces shallow reviews that miss type errors and behavioral changes. | Always read final file state and related test/config files before spawning the subagent. |
+| Delegating to the same model the user is already talking to | If user says "review with sonnet" and master agent IS sonnet, this is circular. | Use a different model than the one running the master agent. |
+| Requesting review of unchanged code | cross-review only works on changes made in the current conversation. | If the user wants PR review from git, use the `code-review` skill directly. |
+
+## Sources
+
+- MCP Protocol specification (modelcontextprotocol.io) — subprocess agent spawning and message passing
+- OpenAI API model list documentation (platform.openai.com/docs/models) — supported model IDs and capabilities
+- Anthropic Claude model documentation (docs.anthropic.com/en/docs/about-claude/models) — model IDs and feature comparison
+- Google Gemini API model documentation (ai.google.dev/models/gemini) — Gemini model identifiers and rate limits
+- DeepSeek API documentation (platform.deepseek.com/api-docs) — model IDs and context window limits
+- Conventional Comments specification (conventionalcomments.org) — structured review comment formatting
+- "Software Engineering at Google" by Titus Winters, Tom Manshreck, Hyrum Wright (O'Reilly, 2020) — code review best practices at scale

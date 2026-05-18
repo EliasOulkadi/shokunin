@@ -129,3 +129,16 @@ Place at `/.well-known/llms.txt`. This is how AI crawlers (GPTBot, Claude, Gemin
 - GEO research papers (2025-2026)
 - Perplexity Publisher Guidelines
 - OpenAI GPT crawler docs
+
+## Error Handling
+
+| Cause | Fix |
+|-------|-----|
+| Google Search Console reports crawl errors on critical pages | Check robots.txt for accidental `Disallow: /` rules. Verify server returns 200 (not 5xx or 3xx loops). Submit individual URL inspection in GSC to trigger re-crawl. |
+| Structured data (JSON-LD) fails Google Rich Results Test | JSON-LD must be a valid `@type` from schema.org (not a made-up type). Check required properties for the type. Use `application/ld+json` MIME type, not `text/javascript`. Escape HTML entities inside JSON strings. |
+| llms.txt returns 404 when accessed at `/.well-known/llms.txt` | The `.well-known` directory requires explicit server routing. For static sites, place at root: `/llms.txt` and add a redirect from `/.well-known/llms.txt`. For Next.js, add to `public/` directory. |
+| Core Web Vitals LCP > 4s despite image optimization | LCP element may not be an image — it could be a text block, video poster, or background image loaded via CSS. Identify the actual LCP element in PageSpeed Insights report. Preload critical resources with `<link rel="preload">`. |
+| AI search engines (ChatGPT, Perplexity) ignore llms.txt | llms.txt is an emerging standard (2025-2026), not universally adopted. Complement with `ai-plugin.json`, comprehensive sitemap.xml, and clear entity pages. Submit to Perplexity Publisher Program separately. |
+| Canonical URL points to wrong domain after migration | Stale canonicals cause duplicate content penalties. Audit all pages with a crawler (Screaming Frog, Sitebulb). Update in bulk with server-side redirects. Verify each canonical returns 200, not a redirect chain. |
+| Hreflang tags return 404 or self-referencing loops | Each language variant must return a valid page. Use `x-default` for the language selector page. Validate with the hreflang tag tester in GSC International Targeting report. Remove broken variant links rather than leaving dead hreflang. |
+| Site dropped in rankings after major redesign | URLs may have changed without 301 redirects. Audit before/after URL maps. Implement redirects for all high-traffic pages first (prioritize by organic traffic in GSC). Submit old sitemap + new sitemap to GSC simultaneously for faster re-indexing. |

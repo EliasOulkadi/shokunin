@@ -184,3 +184,51 @@ Key points:
 - Useful for replicating to/from external Postgres systems.
 
 Link: https://neon.com/docs/guides/logical-replication-guide.md
+
+---
+
+## Workflow
+
+1. **Identify the use case** — serverless function, long-running server, edge runtime, or CI/CD automation. Determines connection method and driver.
+2. **Select connection method** — TCP for servers (pooled with `-pooler` in hostname), HTTP for serverless/edge (@neondatabase/serverless), WebSocket for transactions.
+3. **Set up the project** — run `npx neonctl@latest init` for guided setup. Or create a project via Neon Console and copy the connection string.
+4. **Install the correct driver** — `@neondatabase/serverless` for serverless/edge. Standard `pg` for Node.js servers with TCP. `@neondatabase/neon-js` for auth + data workflows.
+5. **Configure pooling** — add `-pooler` to endpoint hostname in serverless environments. PgBouncer under the hood.
+6. **Implement branching if needed** — create preview branches per PR for isolated testing. Use copy-on-write for instant clones.
+7. **Set up scale-to-zero awareness** — account for cold-start penalty (~hundreds of ms) on first query after idle. Configure suspend timeout if needed.
+
+## Error Handling
+
+| Cause | Fix |
+|-------|-----|
+| Cold-start timeout on first query after idle | Account for ~hundreds of ms latency. Warm up with a lightweight query on startup. Disable scale-to-zero on launch & scale plan. |
+| "Too many connections" in serverless environment | Add `-pooler` to endpoint hostname for PgBouncer connection pooling. |
+| `@neondatabase/serverless` HTTP query fails with large payload | Switch to WebSocket transactions for queries with large data. |
+| Branch creation fails with "quota exceeded" | Check plan limits. Free plan: 1 branch per project. Delete unused branches first. |
+| Connection string not working from Vercel/Netlify | Verify the connection string includes `sslmode=require`. Use pooled connection string for serverless. |
+| Migration fails on preview branch but works on main | Branch may have diverged. Reset branch from parent or use `neonctl branches create --parent main`. |
+| `neonctl` CLI returns authentication error | Run `neonctl auth` to re-authenticate. Verify API key is valid and not expired. |
+| Restore point-in-time outside retention window | Check plan limits. Free: 7 days. Scale: 30 days. Business: 90 days. Use closest available point. |
+
+## Anti-Patterns
+
+| Pattern | Problem | Fix |
+|---------|---------|-----|
+| Using standard TCP driver in serverless functions | Connection overhead per invocation. Exhausts available connections rapidly. | Use `@neondatabase/serverless` with HTTP queries or WebSocket. |
+| Not using pooling in high-concurrency environments | Each request opens a new Postgres connection. Hits connection limits fast. | Add `-pooler` to hostname. PgBouncer handles connection multiplexing. |
+| Long-running transactions on the serverless driver | HTTP queries have timeouts. Long transactions exceed function execution limits. | Split into smaller transactions. Use WebSocket mode for longer operations. |
+| Hardcoding connection strings in source code | Credential exposure in version control | Use environment variables. Neon Console provides `.env` ready connection strings. |
+| Creating a full database clone for testing instead of branching | Slow, expensive storage duplication. Wastes credits. | Use Neon branching (copy-on-write) for instant, zero-cost test databases. |
+| Ignoring IP allow lists in production | Database exposed to the internet if not configured | Set up IP allow lists to restrict access to known IPs/CIDRs only. |
+| Using the same branch for development and production | Schema changes in dev affect production data | Create a dev branch from main. Merge changes only after testing. |
+| Disabling scale-to-zero on hobby projects unnecessarily | Pays for idle compute time | Keep default scale-to-zero unless continuous availability is required. |
+
+## Sources
+
+- Neon Documentation — neon.com/docs
+- Neon Blog — "How Neon Works: Compute-Storage Separation" (neon.com/blog)
+- PgBouncer Documentation — pgbouncer.github.io
+- Postgres Documentation — "Connection Pooling" (postgresql.org/docs)
+- Vercel + Neon Integration Guide — vercel.com/docs/storage/vercel-postgres
+- Neon YouTube — "Getting Started with Neon" tutorials (youtube.com/@neondatabase)
+- Hacker News discussions on serverless Postgres architectures

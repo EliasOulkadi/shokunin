@@ -94,3 +94,82 @@ All motion uses custom cubic-bezier (`transition-all duration-700 ease-[cubic-be
 - [ ] `transform` + `opacity` only for animations
 - [ ] `prefers-reduced-motion` respected
 - [ ] Overall reads as "$150k agency build", not "template with nice fonts"
+
+## Workflow
+
+### Step 1: Select Archetypes
+
+Pick exactly one Vibe Archetype and one Layout Archetype from Section 2 before writing any code. Document the selection so the entire build stays coherent:
+
+```
+Vibe: Ethereal Glass | Editorial Luxury | Soft Structuralism
+Layout: Asymmetrical Bento | Z-Axis Cascade | Editorial Split
+```
+
+Never mix vibes. A page that blends Ethereal Glass gradients with Editorial Luxury serifs reads as confused, not premium.
+
+### Step 2: Block banned defaults
+
+Before writing any Tailwind class, review Section 1 "Absolute Zero" and remove all banned fonts, icons, borders, shadows, and motion defaults from the project scaffold. This is a blocking step — do not proceed until every banned item is replaced.
+
+### Step 3: Build outer shell → inner core
+
+Follow the Double-Bezel architecture (Section 3). For every major section:
+1. Create the outer wrapper (`bg-black/5 ring-1 ring-black/5 rounded-[2rem] p-1.5`)
+2. Place the inner content container (`shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)]`)
+3. Add content. Never skip the bezel — it is the signature of this aesthetic.
+
+### Step 4: Wire motion
+
+Apply motion choreography (Section 4) to:
+- Navigation: Fluid Island pattern with hamburger morph + staggered mask reveal
+- CTAs: Magnetic button physics with nested icon animation
+- Scroll entries: IntersectionObserver-driven fade + slide + blur
+
+### Step 5: Mobile collapse
+
+Overwrite every asymmetric layout rule at the `md` breakpoint (768px). All `col-span` values reset, all rotations removed, all negative margins zeroed. Use `min-h-[100dvh]` everywhere; never `h-screen`.
+
+### Step 6: Pre-output checklist
+
+Run through the 12-item checklist (Section 6) before delivering. Every unchecked box is a regression from "$150k agency" to "template with nice fonts."
+
+### Step 7: Accessibility verification
+
+- All animations respect `prefers-reduced-motion: reduce`
+- Color contrast meets WCAG 2.2 AA minimum (4.5:1 for text, 3:1 for large text)
+- Focus indicators visible and non-removed (never `outline: none` without replacement)
+- Grain overlay has `pointer-events: none` and `aria-hidden="true"`
+
+## Error Handling
+
+| Cause | Fix |
+|-------|-----|
+| CSS grain texture causes layout shift or scroll jank | Grain must be `position: fixed; pointer-events: none; z-index: [system layer]`. Never apply grain to a scrolling container. |
+| backdrop-blur causes GPU compositing failure on low-end devices | Limit blur to fixed/sticky elements only. Feature-detect with `@supports (backdrop-filter: blur(1px))`. Provide solid fallback background. |
+| Double-Bezel nested radii don't align mathematically | Outer radius `R`, inner radius must be `R - padding`. If `rounded-[2rem]` and `p-1.5` (24px), inner is `rounded-[calc(2rem-1.5rem)]`. Always use `calc()` to prevent drift. |
+| Magnetic button jitters on rapid hover/unhover | Apply `transition-transform duration-200` on the inner element only. Use `will-change: transform` on the button and remove it on `animationend`. |
+| Z-Axis Cascade cards overlap incorrectly on Safari | Safari handles `z-index` in stacking contexts differently with transforms. Apply explicit `z-index` values (not `auto`) and `transform-style: flat` on the parent. |
+| Scroll entry animations fire multiple times on fast scroll | Use `IntersectionObserver` with `threshold: 0.1` and a `once: true` flag. Track animated elements in a `WeakSet` to prevent re-triggering. |
+| Custom cubic-bezier feels sluggish on quick interactions | For interactive elements (buttons, toggles), use shorter duration: `duration-200 ease-[cubic-bezier(0.32,0.72,0,1)]`. Reserve `duration-700` for scroll entries and page transitions only. |
+
+## Sources
+
+- Apple Human Interface Guidelines (developer.apple.com/design/human-interface-guidelines) — spatial layout, motion, and material principles
+- Linear Design System (linear.app/docs/design-system) — opinionated component architecture and animation philosophy
+- Stripe Design documentation (stripe.com/design) — premium SaaS visual language and interaction patterns
+- Emil Kowalski "Animation Engineering" (animations.dev) — WAAPI, spring physics, and compositor-only animation
+- Ahmad Shadeed "CSS Container Queries" (ishadeed.com) — modern responsive layout patterns
+- WCAG 2.2 Specification (w3.org/TR/WCAG22) — accessibility compliance for motion, contrast, and focus
+- Paul Lewis "The Compositor's Properties" (web.dev/animations-guide) — GPU-safe animation properties and layout thrashing prevention
+
+## Anti-Patterns
+
+| Pattern | Problem | Fix |
+|---------|---------|-----|
+| Dropping the Double-Bezel on inner sections "for simplicity" | The page loses its signature depth. Cards become flat and generic. | Every major card/section gets the bezel. Only minor inline elements (tags, badges, tooltips) skip it. |
+| Using `h-screen` instead of `min-h-[100dvh]` | `100vh` ignores mobile browser chrome (address bar), causing overflow and clipped content. | Always use `min-h-[100dvh]`. Dynamic viewport height compensates for browser UI. |
+| Applying the same archetype combination to every project | The Creative Variance Engine exists to prevent repetition. Reusing the same vibe+layout produces indistinguishable output. | Track previously used combinations. Force new selection if the last 3 projects used the same archetype. |
+| Omitting mobile overrides | Asymmetric bento and Z-axis cascade layouts break catastrophically below 768px. | Every `col-span-*` and rotation resets at `md:` breakpoint. Test at 375px width before delivery. |
+| Linear or ease-in-out on any transition | These are explicitly banned in Section 1. Default easing reads as unpolished AI output. | Custom cubic-bezier with asymmetric curve on every transition. Interactive: `duration-200`. Scroll: `duration-700`. |
+| Adding a fourth or fifth font to "make it unique" | Premium design uses 2 fonts max (heading + body). More fonts create visual noise and degrade performance. | Stick to 1-2 typefaces. Use weight, size, and letter-spacing for hierarchy instead of additional families. |

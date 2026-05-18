@@ -117,23 +117,75 @@ This lists merged branches (excluding protected ones), asks for confirmation, de
 
 See [references/git-workflows.md](references/git-workflows.md) for full reference.
 
-| Strategy | Best for | Branch model |
-|----------|----------|--------------|
-| Trunk-based | CI/CD, deploys multiple times/day | Short-lived feature branches → main |
-| GitHub Flow | Standard SaaS | feature → main (PR + merge) |
-| GitFlow | Release management, multiple versions | feature → develop → release → main |
+| Strategy | Best for | Branch model | Pros | Cons | Guidance |
+|----------|----------|--------------|------|------|----------|
+| **Trunk-based** | CI/CD, deploys multiple times/day, feature flags | Short-lived feature branches → main (hours, not days) | Fast integration, no merge hell, simple CI | Requires feature flags + high test coverage | Keep branches under 24h. Use branch by abstraction for large changes. |
+| **GitHub Flow** | Standard SaaS, team of 2-10 | feature → main (PR + squash merge) | Simple, review-friendly, clean history | Can't manage multiple releases | Use for most projects. Squash-merge keeps main linear. Tag releases from main. |
+| **GitFlow** | Release management, multiple supported versions, regulated industries | feature → develop → release → main + hotfix branches | Full version tracking, parallel releases | High complexity, slow to release | Only use if you support 2+ release versions simultaneously. Overkill for single-version SaaS. |
+| **GitLab Flow** | Environment-based deployments, staging → production gating | feature → main → staging → production (branch per env) | Environment isolation, easy rollback | Duplicate merge overhead per env | Use when environments need different merge cadences. Pair with CI/CD environment protection. |
 
-**Default recommendation**: GitHub Flow for simplicity. Trunk-based if CI/CD is mature.
+**Default recommendation**: GitHub Flow for simplicity. Trunk-based if CI/CD is mature and deploying multiple times/day.
 
 ## Error Handling
 
 | Scenario | Cause | Fix |
 |----------|-------|-----|
-| Rebase conflicts | Multiple people changed same lines | Resolve conflicts, `git rebase --continue` |
+| Rebase conflicts | Multiple people changed same lines | Resolve conflicts, `git rebase --continue`. See conflict resolution workflow below. |
 | Can't push (non-fast-forward) | Branch behind base | Rebase on base first |
 | Accidental commit on wrong branch | Careless checkout | Cherry-pick to correct branch, reset original |
 | Detached HEAD | Accidentally checked out a commit | `git switch -c <new-branch>` |
 | Lost commits after reset | `git reset --hard` | `git reflog` → find SHA → `git cherry-pick` |
+
+## Rebase conflict resolution
+
+```
+# During rebase, conflict arises
+git status                          # See conflicted files
+# Edit conflicted files → resolve markers (<<<<<<, ======, >>>>>>)
+git add <resolved-files>
+git rebase --continue               # Move to next commit
+
+# If the rebase is going poorly and you want to bail:
+git rebase --abort                  # Return to pre-rebase state
+
+# If you're mid-rebase, unsure, and want to compare:
+git diff                            # Show conflict diff
+git mergetool                       # Launch configured merge tool (VS Code: code --wait $MERGED)
+
+# Skip a problematic commit entirely:
+git rebase --skip
+
+# After rebase, verify history:
+git log --oneline --graph -20
+```
+
+**Conflict avoidance:**
+- Keep branches short-lived (< 3 days). Longer branches accumulate merge debt.
+- Pull/rebase daily from main during long features: `git fetch origin && git rebase origin/main`
+- Break large features into stacked PRs (PR 1 → PR 2 → PR 3) instead of one 1000-line PR
+- Communicate: if you're refactoring a shared module, tell the team
+
+## Parallel work with git worktree
+
+Use `git worktree` to work on multiple branches simultaneously without stashing or cloning:
+
+```powershell
+# Create a new worktree for a feature
+git worktree add ../project-feat-auth feat/add-user-auth
+
+# List all worktrees
+git worktree list
+
+# Remove a worktree after branch is merged
+git worktree remove ../project-feat-auth
+# Then delete the branch normally
+```
+
+**When to use:**
+- Hotfix needs to go out while you're mid-feature on another branch
+- Running CI/lint/tests in one worktree while coding in another
+- Reviewing a PR branch without switching away from your current work
+- Exploring an old commit without detaching HEAD
 
 ## Branch Protection Rules
 

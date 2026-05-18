@@ -108,7 +108,7 @@ Based on: Apple Notes, Linear, Notion, Basecamp, iA Writer, and premium editoria
 6. Visual depth through imagery, ambient gradients, or subtle textures — no empty flat backgrounds.
 7. Mobile collapse: single-column `w-full px-4` below `768px`. `min-h-[100dvh]` for full-screen.
 
-## 8. Error Handling (shokunin improvement)
+## Error Handling
 
 | Error | Fix |
 |-------|-----|
@@ -131,3 +131,39 @@ Based on: Apple Notes, Linear, Notion, Basecamp, iA Writer, and premium editoria
 - [ ] `prefers-reduced-motion` on all animations
 - [ ] No emojis, no AI clichés, no generic names
 - [ ] Overall reads as "editorial, calm, premium" — not "template"
+
+---
+
+## Workflow
+
+1. **Establish canvas** — set `--canvas: #F7F6F3`, constrain content to `max-w-4xl`/`max-w-5xl`, macro-whitespace `py-24` to `py-32` between sections.
+2. **Apply typographic hierarchy** — serif headline with tight tracking/line-height, sans body at `text-base text-[#787774] leading-relaxed`, monospace for code.
+3. **Layer the monochrome system** — every card, divider, and UI surface gets `1px solid #EAEAEA`. Off-black text `#111111`. White or near-white surfaces.
+4. **Place muted pastel accents sparingly** — only for badges, tags, status indicators. Pale red, blue, green, or yellow backgrounds with matching desaturated text.
+5. **Add subtle motion** — scroll-entry reveal on content blocks (600ms cubic-bezier(0.16, 1, 0.3, 1)), hover scale(0.98) on buttons, staggered child reveals at 80ms intervals.
+6. **Collapse for mobile** — single-column `w-full px-4` below `768px`. Force `min-h-[100dvh]` for full-screen sections.
+7. **Verify editorial feel** — no gradients, no heavy shadows, no `rounded-full` on large elements, no centering, no emojis, no AI clichés.
+
+## Anti-Patterns
+
+| Pattern | Problem | Fix |
+|---------|---------|-----|
+| Using Inter, Roboto, or Open Sans | Default AI font choices, no character | Use SF Pro Display, Geist Sans, or Switzer |
+| Centered hero sections with stacked text | Looks like every template | Left-align hero text. Use asymmetric layout. |
+| `rounded-full` on cards or large containers | Soft, generic pill aesthetic | Max `12px` radius. Many elements at `4px`–`8px`. |
+| Tailwind `shadow-md`/`shadow-lg` | Heavy, muddy, cheap-looking | No box-shadow on cards. Ultra-subtle `0 2px 8px rgba(0,0,0,0.04)` on hover only. |
+| Full-saturation accent colors | Disrupts the monochrome harmony | Pastels only: saturation below 40%. Use the 4 preset pale palettes. |
+| Gradient backgrounds on sections | Breaks the flat, editorial aesthetic | Solid `#F7F6F3` or `#FBFBFA` canvas. Subtle grain overlay at opacity 0.03–0.04. |
+| "John Doe", "Acme Corp", placeholder names | Instantly signals template/AI-generated | Use realistic, contextual names and data. |
+| Stock photography with high saturation | Clashes with monochrome system | Desaturated, warm-toned images. Subtle grain overlay. Or use picsum.photos. |
+
+## Sources
+
+- Apple Human Interface Guidelines — Typography and Color (developer.apple.com/design)
+- Linear — "Linear Method: Designing in the Open" (linear.app/method)
+- iA Writer — "The Philosophy of iA Writer" (ia.net/writer)
+- Basecamp — "Shape Up: Stop Running in Circles" (basecamp.com/shapeup)
+- Notion — Design System (notion.so/design)
+- Erik Spiekermann — "Stop Stealing Sheep & Find Out How Type Works" (Adobe Press)
+- Robert Bringhurst — "The Elements of Typographic Style" (Hartley & Marks)
+- Josef Müller-Brockmann — "Grid Systems in Graphic Design" (Niggli Verlag)

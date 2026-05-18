@@ -248,3 +248,53 @@ Run this mentally on every feature, and explicitly when asked to audit:
 - **`typeof null === 'object'`** — null checks in JavaScript require explicit `=== null`, not just falsy checks.
 - **Redirect URLs must be validated** — `?redirect=https://evil.com` after login is an open redirect. Validate redirects against an allowlist of your own domains.
 - **Signed cookies are not encrypted** — frameworks like Express's `cookie-session` sign cookies (prevents tampering) but the content is readable. Don't store sensitive data in signed cookies.
+
+---
+
+## Workflow
+
+1. **Identify security surfaces** — map every boundary where data enters the system: HTTP endpoints, file uploads, webhook handlers, CLI args, form inputs.
+2. **Apply OWASP checklist** — run the Security Review Checklist against every feature touchpoint. Prioritize A01 (access control) and A03 (injection) — they account for the majority of breaches.
+3. **Validate at every boundary** — parameterize all SQL. Encode all HTML output. Validate file uploads by type, size, and content. Whitelist URL fetches (SSRF prevention).
+4. **Harden authentication** — HttpOnly + Secure + SameSite cookies. Rate limit auth endpoints. Invalidate sessions on logout and privilege escalation. Never reveal user existence in login errors.
+5. **Configure defense in depth** — security headers (CSP, HSTS, X-Frame-Options), no debug mode in production, secrets in env vars only, encrypted at rest for PII.
+6. **Audit dependencies** — run vulnerability scan on every update. Pin versions. Remove unused packages. Check for typosquatting.
+7. **Verify logging** — security events logged with context. No sensitive data in logs. Errors logged server-side, generic messages returned to users.
+
+## Error Handling
+
+| Cause | Fix |
+|-------|-----|
+| Exposed stack traces in production errors | Set generic error handler. Log full error server-side. Return "An unexpected error occurred" to user. |
+| Open redirect via `?redirect=evil.com` parameter | Validate redirect URLs against an allowlist of your own domains before redirecting. |
+| `path.join()` bypassed for path traversal | Use `path.resolve()` and verify the result starts with the expected base path. |
+| `JSON.parse()` crashing on untrusted input | Always wrap in try/catch. Uncaught JSON parse error crashes Node.js requests. |
+| Regex catastrophic backtracking (ReDoS) on user input | Test all user-facing regex patterns against ReDoS checkers. Set timeout on regex evaluation. |
+| Rate limit bypassed by distributed IPs | Layer limits: by IP, by user account, and by action type. Exponential backoff after repeated failures. |
+| `typeof null === 'object'` — null slipping past falsy checks | Use explicit `=== null` for null checks. Never rely on falsy coercion for null safety. |
+| Signed cookies read as plaintext | Signed = tamper-proof, NOT encrypted. Never store secrets in signed cookies. Use encrypted sessions. |
+
+## Anti-Patterns
+
+| Pattern | Problem | Fix |
+|---------|---------|-----|
+| String interpolation in SQL queries | SQL injection — #1 most exploited vulnerability class | Always parameterize. Use ORM or prepared statements. |
+| `innerHTML` with unsanitized user content | XSS — executes arbitrary JavaScript | Sanitize with DOMPurify. Prefer `textContent` or framework auto-escaping. |
+| Secrets in source code (API keys, tokens) | Credential exposure in git history | Environment variables or secrets manager. Pre-commit hooks to detect. |
+| `Access-Control-Allow-Origin: *` on authenticated endpoints | Cross-origin data theft | Restrict CORS to known origins. Never wildcard with credentials. |
+| Auth check only at route layer, not resource layer | IDOR — user A accesses user B's data by changing an ID | Verify ownership server-side for every resource access. |
+| `MD5` or `SHA-1` for password hashing | Trivially crackable with modern hardware | bcrypt (cost 12+), Argon2id, or scrypt only. |
+| User-provided filenames passed directly to shell commands | Command injection — `; rm -rf /` | Use argument arrays (`execFile`), never string interpolation. |
+| No timeout on external API calls | Hangs, resource exhaustion, cascading failures | Set explicit timeout on every external call. Add circuit breaker. |
+
+## Sources
+
+- OWASP Top 10 (2025) — owasp.org/www-project-top-ten
+- OWASP Cheat Sheet Series — cheatsheetseries.owasp.org
+- NIST SP 800-63 — Digital Identity Guidelines (pages.nist.gov/800-63-3)
+- CWE Top 25 Most Dangerous Software Weaknesses — cwe.mitre.org/top25
+- Mozilla Web Security Guidelines — infosec.mozilla.org/guidelines/web_security
+- Google Web Fundamentals — Security (developers.google.com/web/fundamentals/security)
+- Troy Hunt — "Have I Been Pwned" API (haveibeenpwned.com/API)
+- The Tangled Web — Michal Zalewski (No Starch Press)
+- Web Application Hacker's Handbook — Stuttard & Pinto (Wiley, 2nd Edition)

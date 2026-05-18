@@ -116,3 +116,49 @@ Before finalizing, verify:
 - **Incorporate agent rules** — weave important parts of .cursorrules or copilot instructions into relevant sections
 - **Respect existing work** — in improvement mode, preserve correct specific content
 - **Conciseness is quality** — every sentence must earn its place
+
+---
+
+## Workflow
+
+1. **Probe repository structure** — map 3 levels deep, exclude generated dirs. Identify build system, language, and framework.
+2. **Extract commands** — read package.json scripts, Makefile targets, pyproject.toml, Cargo.toml, docker-compose.yml.
+3. **Collect conventions** — linter configs (.eslintrc, .prettierrc, pyproject.toml), formatter settings, type checking mode, agent rules files (.cursorrules, .cursor/rules/).
+4. **Review git history** — last 20 commits for commit convention patterns (conventional commits, custom formats). Skip if not a git repo.
+5. **Read existing documentation** — README.md for context. Existing AGENTS.md or CLAUDE.md for improvement baseline.
+6. **Draft AGENTS.md** — 200-400 words, direct tone. Include project structure, build commands, coding style, testing, commit conventions. Omit generic advice.
+7. **Validate output** — every command mentioned exists in build system. Every path exists in repo. No fabricated content. No repetition.
+
+## Error Handling
+
+| Cause | Fix |
+|-------|-----|
+| Not a git repository | Skip git history section. Note limitation explicitly in output. |
+| Shallow clone with limited commit history | Use available commits. Note "limited history available." |
+| No build system detected | Skip build commands section. Document that no formal build system was found. |
+| Existing AGENTS.md has inaccuracies | Fix errors, fill gaps, remove generic advice. Show diff before overwriting. |
+| Agent rules files not found | Skip agent rules integration. Never invent conventions. |
+| Mixed or ambiguous conventions across files | Note the inconsistency. Default to the dominant convention in the majority of files. |
+| Empty repository with no source files | Generate minimal AGENTS.md with project name only. Add "populate as project grows." |
+
+## Anti-Patterns
+
+| Pattern | Problem | Fix |
+|---------|---------|-----|
+| Including generic advice ("write unit tests") | Not actionable, not project-specific | Only include conventions actually enforced in the codebase |
+| Listing every directory in the repo | Adds noise, not architecture insight | Document only non-obvious structure that spans multiple files |
+| Copying agent rules verbatim into AGENTS.md | Redundant and bloated | Weave important rules into relevant sections only |
+| Inventing commands not in the build system | Build breaks when user tries them | Extract commands only from actual build system files |
+| Missing sections where evidence exists | Incomplete onboarding guide | Include all sections that have supporting evidence |
+| Overwriting correct, specific existing content | Loses institutional knowledge | Preserve correct content. Fix only inaccuracies and gaps. |
+| Exceeding 400 words with filler prose | Too long to scan; loses utility | Cut every sentence that doesn't convey a specific convention |
+
+## Sources
+
+- GitHub Docs — "About READMEs" (docs.github.com)
+- Keep a Changelog — keepachangelog.com
+- Conventional Commits — conventionalcommits.org
+- Google Open Source — "README.md guidelines" (opensource.google)
+- Daniele Procida — "Diátaxis documentation framework" (diataxis.fr)
+- Write the Docs Guide — writethedocs.org
+- Eric Holscher — "Documentation Principles" (ericholscher.com)
