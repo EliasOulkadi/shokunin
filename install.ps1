@@ -1,4 +1,4 @@
-# Shokunin AI Ecosystem Installer v4.0
+# Shokunin AI Ecosystem Installer v4.2.2
 # One-command installer for the complete Shokunin AI ecosystem
 # Requires: Windows 10/11, PowerShell 5.1+, Node.js 18+, Python 3.11+
 
@@ -382,7 +382,7 @@ function Show-Summary {
 â•šâ•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
   Skills:       $((Get-ChildItem $script:skillsDir -Directory).Count) installed
-  Memory:       ChromaDB v4.0 (3 capture layers)
+  Memory:       ChromaDB v4.2 (3 capture layers)
   Scripts:      run-opencode, chroma-helper, test-memory
 
   NVIDIA API:   $(if ([Environment]::GetEnvironmentVariable('NVIDIA_API_KEY','User')) { 'Configured' } else { 'PENDING' })
@@ -394,7 +394,7 @@ function Show-Summary {
   Dashboard:    $env:USERPROFILE\shokunin-dashboard.html
 
   QUICK COMMANDS:
-  opencode                    Iniciar OpenCode
+  opencode                    Start OpenCode
   gst, ga, gc, gp, gl        Git aliases
   ni, nrd, nrb, nt           npm aliases
   dps, dlog, dstop           Docker aliases

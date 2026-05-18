@@ -162,7 +162,7 @@ ok
 
 # === LINUX SCRIPTS ===
 step_msg "Installing Linux scripts..."
-for script in run-opencode.sh memory-healthcheck.sh weekly-maintenance.sh profile.sh; do
+for script in run-opencode.sh memory-healthcheck.sh weekly-maintenance.sh profile.sh test-memory.sh scan-cleanup.sh; do
     SRC="$REPO_DIR/.pack/scripts/linux/$script"
     if [ -f "$SRC" ]; then
         cp "$SRC" "$CORES_DIR/scripts/linux/$script"

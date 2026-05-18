@@ -12,7 +12,7 @@
 ### Python
 - Format: `ruff format .`
 - Lint: `ruff check .` (full rule set, strict)
-- Types: `mypy . --strict`
+- Types: `mypy .pack/scripts/chroma-helper.py .pack/memory/mcp-server.py`
 - No bare `except:` — always specify exception type
 - Type hints on all functions
 - F-strings preferred over `%` or `.format()`
@@ -38,6 +38,7 @@
 6. CI runs automatically (lint, typecheck, security, memory tests)
 
 ## Testing
+- Python tests: `pytest tests/` (requires chromadb)
 - Memory tests: `.\test-memory.ps1` (Windows) or `./test-memory.sh` (Linux)
 - Healthcheck: `.\memory-healthcheck.ps1`
 - All PRs must pass CI before merge

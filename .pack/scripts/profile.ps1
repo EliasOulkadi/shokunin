@@ -43,6 +43,7 @@ try {
 } catch {}
 
 # Oh My Posh prompt
+# Windows-only path — uses backslash convention for Windows executables
 $ompPath = "$env:LOCALAPPDATA\Programs\oh-my-posh\bin\oh-my-posh.exe"
 if (Test-Path $ompPath) {
     try { & $ompPath init pwsh --config "$env:POSH_THEMES_PATH\atomic.omp.json" | Invoke-Expression } catch {}
@@ -54,6 +55,7 @@ function global:opencode {
     if (Test-Path $wrapper) {
         & $wrapper @args
     } else {
+        # Windows-only fallback path
         & "$env:USERPROFILE\AppData\Roaming\npm\opencode.ps1" @args
     }
 }

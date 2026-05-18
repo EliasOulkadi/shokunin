@@ -31,6 +31,18 @@ shokunin-update.ps1 uses shokunin.json manifest to:
 
 ## Drift Model
 - `.pack/` = distribution base (canonical)
-- `.tpl/` = templates used by update system to regenerate
+- `templates/` = templates used by update system to regenerate
 - `.shokunin/` = local install (expected to drift)
 - No automated sync — `install.ps1` does one-time deploy
+
+## Data Flow (expanded)
+
+**Session Lifecycle:** opencode wrapper sets `SHOKUNIN_SESSION_ID`, `SHOKUNIN_PROJECT`, and `SHOKUNIN_MCP_HEALTHY`. The MCP server writes each interaction to `sessions/<id>.jsonl`. On session end, `chroma-helper.py save` persists a final summary to ChromaDB.
+
+**Search Pipeline:** `multi_search_context` combines vector similarity (ChromaDB), BM25 keyword matching, temporal date filtering, and Reciprocal Rank Fusion (RRF) to merge results from multiple strategies.
+
+**Freshness Decay:** search results blend vector relevance with exponential recency weighting (30-day half-life) via the `freshness_boost` parameter.
+
+**Claim Verification:** `verify_file_path` MCP tool validates file paths from old memory entries before agents act on them.
+
+**Session Management:** session continuation loads full context with decisions, files, commands, and checkpoint summaries.
