@@ -37,7 +37,7 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: '3.11'
-      - run: pip install chromadb --break-system-packages pytest pytest-asyncio pytest-mock pytest-cov
+      - run: pip install --break-system-packages chromadb pytest pytest-asyncio pytest-mock pytest-cov 2>/dev/null || pip install chromadb pytest pytest-asyncio pytest-mock pytest-cov
       - name: Setup installed paths for pytest
         run: |
           mkdir -p ~/.shokunin/scripts/
@@ -69,7 +69,7 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: '3.11'
-      - run: pip install chromadb --break-system-packages
+      - run: pip install chromadb 2>/dev/null || pip install --break-system-packages chromadb
       - name: Validate all PS1 scripts parse
         shell: pwsh
         run: |
