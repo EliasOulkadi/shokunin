@@ -98,15 +98,18 @@
   .skill-desc { font-size: 14px; color: var(--dark-warm); line-height: 1.5; }
   .skip-link { position: absolute; top: -100%; left: 16px; background: var(--ink-blue); color: #fff; padding: 8px 16px; border-radius: 4px; z-index: 100000; font-size: 14px; font-family: var(--serif); }
   .skip-link:focus { top: 8px; }
-  .theme-toggle { position: fixed; bottom: 24px; right: 24px; z-index: 10000; width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--border); background: var(--ivory); color: var(--near-black); cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1), box-shadow 160ms cubic-bezier(0.23, 1, 0.32, 1), background 200ms ease; }
-  .theme-toggle:hover { transform: scale(1.08); box-shadow: 0 4px 16px rgba(0,0,0,0.12); }
-  .theme-toggle:active { transform: scale(0.95); }
-  .theme-toggle:focus-visible { outline: 2px solid var(--ink-blue); outline-offset: 2px; }
+.theme-toggle { position: fixed; top: 20px; right: 24px; z-index: 10001; background: none; border: none; color: var(--stone); cursor: pointer; padding: 6px; transition: color 0.3s ease, transform 0.3s cubic-bezier(0.23, 1, 0.32, 1); opacity: 0.5; }
+  .theme-toggle:hover { opacity: 1; color: var(--ink-blue); transform: scale(1.1); }
+  .theme-toggle:active { transform: scale(0.92); }
+  .theme-toggle:focus-visible { outline: 2px solid var(--ink-blue); outline-offset: 2px; border-radius: 2px; opacity: 1; }
   .theme-icon-moon { display: none; }
   .theme-icon-sun { display: block; }
   [data-theme="dark"] .theme-icon-moon { display: block; }
   [data-theme="dark"] .theme-icon-sun { display: none; }
-  [data-theme="dark"] .theme-toggle { background: #222; border-color: #333; color: #e8e6e0; }
+  [data-theme="dark"] .theme-toggle { color: var(--stone); opacity: 0.5; }
+  [data-theme="dark"] .theme-toggle:hover { opacity: 1; color: var(--ink-light); }
+  html { transition: background-color 0.4s ease; }
+  body, body::after { transition: background-color 0.4s ease, color 0.3s ease; }
   .skill-body { padding: 0 24px; overflow: hidden; }
   .skill-closed { max-height: 0; opacity: 0; padding-top: 0; padding-bottom: 0; overflow: hidden; transition: max-height 0.4s cubic-bezier(0.23, 1, 0.32, 1), opacity 0.2s ease, padding 0.3s ease; }
   .skill-body:not(.skill-closed) { max-height: 50vh; opacity: 1; padding: 0 24px 24px; transition: max-height 0.4s cubic-bezier(0.23, 1, 0.32, 1), opacity 0.3s ease 0.1s; overflow-y: auto; }
