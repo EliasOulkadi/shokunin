@@ -37,4 +37,4 @@ foreach ($file in $mdFiles) {
     } catch { $SKIPPED++ }
 }
 
-Write-Host "Memoria actualizada: $IMPORTED importados, $SKIPPED omitidos" -ForegroundColor $(if($IMPORTED -gt 0){'Green'}else{'Yellow'})
+Write-Host "Memory updated: $IMPORTED imported, $SKIPPED skipped" -ForegroundColor $(if($IMPORTED -gt 0){'Green'}else{'Yellow'})

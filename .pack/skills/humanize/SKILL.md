@@ -23,188 +23,188 @@ Sources: GPTZero, QuillBot, MIT Technology Review, Google Brain research (Ippoli
 
 ---
 
-## The 16 AI tells (con qué se nota)
+## The 16 AI tells (how to spot them)
 
-### 1. Palabras comodín sobreutilizadas (Grammarly 2026, Reddit)
+### 1. Overused buzzwords (Grammarly 2026, Reddit)
 
-| Palabra AI | Alternativa humana |
+| AI word | Human alternative |
 |------------|-------------------|
-| delve into | analizar, profundizar, explorar |
-| pivotal | clave, determinante, crítico |
-| underscore | destacar, señalar, remarcar |
-| multifaceted | complejo, con varios aspectos |
-| landscape | ecosistema, panorama, situación |
-| paradigm | modelo, enfoque, esquema |
-| robust | sólido, fiable, resistente |
-| leverage | aprovechar, usar, sacar partido |
-| seamless | fluido, sin fricción, natural |
-| transformative | disruptivo, profundo, radical |
+| delve into | analyze, explore, dig into |
+| pivotal | key, decisive, critical |
+| underscore | highlight, point out, stress |
+| multifaceted | complex, with several aspects |
+| landscape | ecosystem, context, situation |
+| paradigm | model, approach, framework |
+| robust | solid, reliable, resilient |
+| leverage | use, harness, take advantage of |
+| seamless | smooth, frictionless, natural |
+| transformative | disruptive, profound, radical |
 
-### 2. Conectores mecánicos (GPTZero research)
+### 2. Mechanical connectors (GPTZero research)
 
-- "Moreover", "Furthermore", "Nevertheless", "Consequently" → usar "Además", "También", "Pero", "Por eso" o nada
-- "Sin embargo" cada 3 párrafos → tachar la mitad, dejar que fluya
-- "No obstante", "Por lo tanto", "En consecuencia" → reemplazar por "Así que", "Entonces", "Eso significa que"
+- "Moreover", "Furthermore", "Nevertheless", "Consequently" → use "Also", "But", "So" or nothing
+- "However" every 3 paragraphs → cut half, let it flow
+- "Nevertheless", "Therefore", "Consequently" → replace with "So", "Then", "That means"
 
-### 3. Estructura perfecta y simétrica (MIT Tech Review)
+### 3. Perfect symmetrical structure (MIT Tech Review)
 
-Los LLMs generan párrafos del mismo largo, misma estructura: intro → punto → ejemplo → conclusión.
+LLMs generate paragraphs of the same length, same structure: intro → point → example → conclusion.
 
-**Fix:** Romper el patrón. Párrafo de una línea. Luego uno largo. Lista. Luego otro corto.
+**Fix:** Break the pattern. One-line paragraph. Then a long one. List. Then another short one.
 
-### 4. Burstiness baja (QuillBot, pdf4.dev)
+### 4. Low burstiness (QuillBot, pdf4.dev)
 
-AI produce frases de largo parejo. Los humanos alternan:
-- Frase corta. Impacto.
-- Luego una más larga que desarrolla la idea con más detalle y matices, añadiendo contexto.
-- Otra corta.
+AI produces sentences of similar length. Humans alternate:
+- Short sentence. Impact.
+- Then a longer one that develops the idea with more detail and nuance, adding context.
+- Another short one.
 
-### 5. Neutralidad absoluta (r/auscorp, Reddit)
+### 5. Absolute neutrality (r/auscorp, Reddit)
 
-La IA nunca toma posición. Suena a wiki.
-**Fix:** Meter opinión, juicio, sesgo reconocido. "Esto no nos gusta", "Esto está bien hecho", "Es debatible".
+AI never takes a position. Sounds like a wiki.
+**Fix:** Add opinion, judgment, acknowledged bias. "We don't like this", "This is well done", "This is debatable".
 
-### 6. Transiciones forzadas (HN, cybersecurity forums)
+### 6. Forced transitions (HN, cybersecurity forums)
 
-"Es importante destacar que...", "Cabe mencionar que...", "Vale la pena señalar que..." → borrar todas. Si la frase no funciona sin la muleta, reescríbela.
+"It is important to note that...", "It is worth mentioning that...", "It should be noted that..." → delete all. If the sentence doesn't work without the crutch, rewrite it.
 
-### 7. Números y estadísticas sin fuente
+### 7. Numbers and statistics without source
 
-AI inventa datos que "suenan bien". Ej: "Estudios demuestran que el 80% de los usuarios..."
-**Fix:** Si no hay fuente real, no pongas número. Usa "muchos", "la mayoría", "es frecuente".
+AI invents data that "sounds good". E.g.: "Studies show that 80% of users..."
+**Fix:** If there's no real source, don't put a number. Use "many", "most", "it's common".
 
-### 8. Voz pasiva excesiva
+### 8. Excessive passive voice
 
-"Fue realizado", "Se ha determinado", "Puede ser observado"
-**Fix:** Activa. "Realizamos", "Determinamos", "Se observa"
+"It was carried out", "It has been determined", "It can be observed"
+**Fix:** Active. "We carried out", "We determined", "We observe"
 
-### 9. Hipérbole vacía (r/cybersecurity)
+### 9. Empty hyperbole (r/cybersecurity)
 
-"Crítico", "Masivo", "Transformador", "Revolucionario" sin respaldo.
-**Fix:** Datos concretos o lenguaje mesurado.
+"Critical", "Massive", "Transformative", "Revolutionary" without backup.
+**Fix:** Concrete data or measured language.
 
-### 10. Cierre con pregunta retórica
+### 10. Closing with rhetorical question
 
-"¿Estás listo para el futuro?", "¿Te imaginas un mundo donde...?"
-**Fix:** Cerrar con afirmación o call to action directo.
+"Are you ready for the future?", "Can you imagine a world where...?"
+**Fix:** Close with a statement or direct call to action.
 
-### 11. Longitud uniforme de párrafos
+### 11. Uniform paragraph length
 
-AI: todos los párrafos 3-5 líneas.
-Humano: mezcla naturale de 1 línea con 8 líneas.
+AI: all paragraphs 3-5 lines.
+Human: natural mix of 1 line with 8 lines.
 
-### 12. F alta de coloquialismos
+### 12. Lack of colloquialisms
 
-La IA no usa "vale", "bueno", "pues", "mira", "la cosa es que", "vamos a ver". El español real tiene muletillas.
-**Fix:** Meter lenguaje natural controlado. No exagerar, pero soltar.
+AI doesn't use "well", "look", "you see", "the thing is", "let's see". Real speech has filler words.
+**Fix:** Add controlled natural language. Don't overdo it, but loosen up.
 
-### 13. Demasiado formal para el contexto
+### 13. Too formal for the context
 
-Un informe interno escrito como paper académico. Un correo como carta formal.
-**Fix:** Adecuar el registro al canal y audiencia.
+An internal report written like an academic paper. An email like a formal letter.
+**Fix:** Match the register to the channel and audience.
 
-### 14. Sin errores ni imperfecciones
+### 14. No errors or imperfections
 
-La IA no tiene erratas, no repite una palabra por accidente, no reformula.
-**Fix:** NO introducir errores artificiales. Pero sí permitir asimetría natural.
+AI has no typos, doesn't repeat a word by accident, doesn't rephrase.
+**Fix:** Do NOT introduce artificial errors. But allow natural asymmetry.
 
-### 15. Sin contracciones ni formas contractas
+### 15. No contractions or contracted forms
 
-AI: "no he", "de el", "a el"
-Humano: "no he", "del", "al" (en inglés: don't, can't, won't, it's, I'm, they're)
+AI: "do not", "cannot", "will not", "it is", "I am", "they are"
+Human: "don't", "can't", "won't", "it's", "I'm", "they're" (in English)
 
-### 16. Em dash (—) como conector universal
+### 16. Em dash (—) as universal connector
 
-La IA abusa del guión largo `—` (em dash) como conector todoterreno. Patrón típico:
-
-```
-❌ IA:   Black Box — sin credenciales previas
-❌ IA:   WordPress — actualizado a la última versión
-❌ IA:   Panel de administración — accesible sin restricciones
-```
-
-Un humano normalmente usa:
+AI abuses the em dash `—` as a universal connector. Typical pattern:
 
 ```
-✅ Real: Black Box (sin credenciales previas)
-✅ Real: WordPress actualizado a la última versión
-✅ Real: Panel de administración sin restricciones
+❌ AI:   Black Box — no previous credentials
+❌ AI:   WordPress — updated to latest version
+❌ AI:   Admin panel — accessible without restrictions
 ```
 
-El em dash real se usa para incisos o cambios de tono, no como pegamento entre label y valor. Si ves varias líneas con `—` seguidas, es IA.
+A human normally uses:
 
-**Fix:** reemplazar `—` por paréntesis, coma, dos puntos, o simplemente nada. Si el `—` separa un label de su valor, probablemente sobra el label o sobra el dash.
+```
+✅ Real: Black Box (no previous credentials)
+✅ Real: WordPress updated to latest version
+✅ Real: Admin panel accessible without restrictions
+```
+
+The real em dash is used for asides or tone shifts, not as glue between label and value. If you see multiple lines with `—` in a row, it's AI.
+
+**Fix:** replace `—` with parentheses, comma, colon, or simply nothing. If the `—` separates a label from its value, the label or the dash is probably unnecessary.
 
 ---
 
 ## The humanization workflow
 
-### Paso 1: Detectar
+### Step 1: Detect
 
-Lee el texto completo. Marca cada instancia de:
-- Palabras comodín (lista arriba)
-- Conectores mecánicos
-- Párrafos de largo idéntico
-- Voz pasiva encadenada
-- Hipérbole sin respaldo
-- Neutralidad absoluta
-- Muletillas de transición
+Read the full text. Mark every instance of:
+- Buzzwords (list above)
+- Mechanical connectors
+- Identical-length paragraphs
+- Chained passive voice
+- Unsupported hyperbole
+- Absolute neutrality
+- Transition crutches
 
-### Paso 2: Podar
+### Step 2: Prune
 
-Borra todo lo que sea relleno:
-- "Es importante destacar que" → [borrar]
-- "Cabe mencionar que" → [borrar]
-- "Vale la pena señalar que" → [borrar]
-- "Como se mencionó anteriormente" → [borrar]
-- "En el mundo actual" → [borrar]
+Delete everything that is filler:
+- "It is important to note that" → [delete]
+- "It is worth mentioning that" → [delete]
+- "It should be pointed out that" → [delete]
+- "As previously mentioned" → [delete]
+- "In today's world" → [delete]
 
-### Paso 3: Variar
+### Step 3: Vary
 
-Reescribe para romper simetría:
-- Una línea corta
-- Párrafo largo con datos
-- Otra línea corta
-- Lista o tabla
-- Párrafo de cierre con opinión
+Rewrite to break symmetry:
+- One short line
+- Long paragraph with data
+- Another short line
+- List or table
+- Closing paragraph with opinion
 
-### Paso 4: Personalizar
+### Step 4: Personalize
 
-Añadir capa de juicio/perspectiva:
-- "Esto es discutible porque..."
-- "En nuestra experiencia..."
-- "El dato que más nos preocupa es..."
-- "Francamente, esta solución no convence"
+Add a layer of judgment/perspective:
+- "This is debatable because..."
+- "In our experience..."
+- "The data that concerns us most is..."
+- "Frankly, this solution doesn't convince"
 
-### Paso 5: Verificar
+### Step 5: Verify
 
-Pasa el resultado por:
-- Un detector de IA (GPTZero, Originality)
-- Una lectura en voz alta (si suena a robot, falló)
-- La prueba "¿esto lo diría un humano en una conversación?"
+Run the result through:
+- An AI detector (GPTZero, Originality)
+- A read-aloud test (if it sounds like a robot, it failed)
+- The test: "would a human say this in a conversation?"
 
 ---
 
 ## Anti-patterns checklist
 
-Usar esta checklist antes de entregar cualquier texto humanizado:
+Use this checklist before delivering any humanized text:
 
-| Señal | Presente | Corregido |
+| Signal | Present | Fixed |
 |-------|----------|-----------|
 | Delve / dive / deep dive | | |
-| "En el mundo actual / hoy en día" | | |
-| Párrafos todos del mismo largo | | |
-| Más de 1 "sin embargo" por página | | |
-| "Es importante destacar" | | |
-| Pregunta retórica al final | | |
-| 0 opiniones o juicios | | |
-| Lenguaje más formal que el contexto | | |
-| Conector "además / por otro lado" repetido | | |
-| Voz pasiva en más del 30% de verbos | | |
-| Números sin fuente | | |
-| "No obstante / no obstante" | | |
-| Em dash `—` separando label/valor repetido | | |
-| Afirmaciones sin fuente atribuida | | |
+| "In today's world / nowadays" | | |
+| All paragraphs same length | | |
+| More than 1 "however" per page | | |
+| "It is important to note" | | |
+| Rhetorical question at the end | | |
+| 0 opinions or judgments | | |
+| Language more formal than the context | | |
+| Connector "moreover / on the other hand" repeated | | |
+| Passive voice in more than 30% of verbs | | |
+| Numbers without source | | |
+| "Nevertheless / nonetheless" | | |
+| Em dash `—` separating repeated label/value | | |
+| Claims without attributed source | | |
 
 ---
 
@@ -213,7 +213,7 @@ Usar esta checklist antes de entregar cualquier texto humanizado:
 - Grammarly (2026): "Common Words and Phrases in AI-Generated Text"
 - MIT Technology Review (2025): "How to spot AI-generated text"
 - GPTZero (2025–2026): "AI Detection Benchmarking", "Perplexity and Burstiness Explained"
-- QuillBot: articulo "Burstiness and Perplexity Explained"
+- QuillBot: article "Burstiness and Perplexity Explained"
 - Reddit r/auscorp: "What's the most obvious tell that someone has used AI"
 - Reddit r/cybersecurity, Hacker News discussions
 - Ippolito et al., Google Brain (2020): "Automatic Detection of Generated Text"

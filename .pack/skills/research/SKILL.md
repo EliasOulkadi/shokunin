@@ -20,133 +20,133 @@ Based on: CIA Structured Analytic Techniques (Heuer & Pherson), US Government Tr
 
 ## Evidence hierarchy (adapted from NHMRC + intelligence community)
 
-Usar esta jerarquía para determinar el peso de cada fuente:
+Use this hierarchy to determine the weight of each source:
 
-| Nivel | Tipo | Ejemplo |
+| Level | Type | Example |
 |-------|------|---------|
-| **1 — Primaria directa** | Documento oficial, captura directa, dato observado | Response HTTP real, código fuente, DB dump, screenshot |
-| **2 — Primaria oficial** | Comunicado oficial, documentación pública, filing | SEC filing, CVE entry, changelog oficial, press release |
-| **3 — Secundaria reputada** | Medio establecido, paper revisado, base de datos curada | NVD, Wordfence, OWASP, Reuters, arXiv |
-| **4 — Múltiples fuentes independientes** | 3+ fuentes no relacionadas reportan lo mismo | Cross-reference entre blogs técnicos + foros + docs |
-| **5 — Fuente única con evidencia** | Un source verificable pero sin corroboración | Blog de investigador con evidencia reproducible |
-| **6 — Sin verificar** | Afirmación sin respaldo, rumor, especulación | NO usar como hecho en un documento |
+| **1 — Direct primary** | Official document, direct capture, observed data | Real HTTP response, source code, DB dump, screenshot |
+| **2 — Official primary** | Official statement, public documentation, filing | SEC filing, CVE entry, official changelog, press release |
+| **3 — Reputable secondary** | Established outlet, peer-reviewed paper, curated database | NVD, Wordfence, OWASP, Reuters, arXiv |
+| **4 — Multiple independent sources** | 3+ unrelated sources report the same | Cross-reference across tech blogs + forums + docs |
+| **5 — Single source with evidence** | One verifiable source but no corroboration | Researcher blog with reproducible evidence |
+| **6 — Unverified** | Unsupported claim, rumor, speculation | Do NOT use as fact in a document |
 
-**Regla:** un documento profesional solo usa niveles 1–4 para afirmaciones factuales. Nivel 5 para contexto o citas directas, marcado como tal. Nivel 6 no se publica.
+**Rule:** a professional document only uses levels 1–4 for factual claims. Level 5 for context or direct quotes, marked as such. Level 6 is not published.
 
 ---
 
 ## Source verification protocol (NPR + Princeton triangulation)
 
-### Step 1: The direct knowledge test (antes de citar)
+### Step 1: The direct knowledge test (before citing)
 
-Preguntar sobre cada fuente:
+Ask about each source:
 
-- **First-hand:** ¿La fuente presenció el evento, participó directamente, o tiene documentación? → Fuerte, pero requiere corroboración
-- **Second-hand:** ¿La fuente escuchó de alguien más? → Útil para leads, insuficiente para publicar
-- **Third-hand+:** ¿Rumor, hearsay, especulación? → No publicable como hecho
+- **First-hand:** Did the source witness the event, participate directly, or have documentation? → Strong, but requires corroboration
+- **Second-hand:** Did the source hear it from someone else? → Useful for leads, insufficient to publish
+- **Third-hand+:** Rumor, hearsay, speculation? → Not publishable as fact
 
 ### Step 2: Triangulation (Princeton method)
 
-Cruce cada afirmación contra múltiples fuentes independientes:
+Cross-check each claim against multiple independent sources:
 
 ```
-Afirmación: "WordPress 6.7 tiene una vulnerabilidad X"
-  → Fuente A: advisory oficial de WordPress
-  → Fuente B: entrada en NVD/CVE
-  → Fuente C: análisis de Wordfence o similar
-  → ¿Coinciden? → VERIFICADO
-  → ¿Solo una fuente? → NO VERIFICADO
+Claim: "WordPress 6.7 has vulnerability X"
+  → Source A: official WordPress advisory
+  → Source B: entry in NVD/CVE
+  → Source C: Wordfence or similar analysis
+  → Do they agree? → VERIFIED
+  → Only one source? → NOT VERIFIED
 ```
 
 ### Step 3: Bias and agenda assessment (NPR)
 
-Por cada fuente, identificar:
+For each source, identify:
 
-- **Financial interest:** ¿La fuente se beneficia económicamente de una narrativa particular?
-- **Professional interest:** ¿Su reputación/carrera depende de cierto resultado?
-- **Personal relationships:** ¿Amigos, familia, enemigos del sujeto?
-- **Funding:** ¿Quién financia a la fuente? ¿Qué intereses tiene ese financiador?
+- **Financial interest:** Does the source benefit financially from a particular narrative?
+- **Professional interest:** Does their reputation/career depend on a certain outcome?
+- **Personal relationships:** Friends, family, enemies of the subject?
+- **Funding:** Who funds the source? What interests does that funder have?
 
 ### Step 4: The five-minute background check (NPR)
 
-Cuando hay poco tiempo:
+When time is short:
 
-1. Leer bio y "About" de la fuente
-2. Identificar quién financia o respalda
-3. Buscar patrones de comportamiento o reclamos previos
-4. Verificar si hay conflictos de interés visibles
+1. Read the source's bio and "About" page
+2. Identify who funds or backs them
+3. Look for behavior patterns or prior claims
+4. Verify if there are visible conflicts of interest
 
 ---
 
-## Verification tiers (adaptado de OSINT + War Intel Hub)
+## Verification tiers (adapted from OSINT + War Intel Hub)
 
-Cada afirmación en el documento debe tener un tier asignado:
+Every claim in the document must have an assigned tier:
 
-| Tier | Label | Requisito | Color en documento |
+| Tier | Label | Requirement | Color in document |
 |------|-------|-----------|-------------------|
-| ✓ | **VERIFIED** | 2+ fuentes primarias o 1 primaria + evidencia directa | Normal (sin marca) |
-| o | **CORROBORATED** | Multiples fuentes independientes reportan lo mismo, sin fuente primaria directa | Normal (sin marca) |
-| X | **UNVERIFIED** | Fuente unica o no confirmable | Marcar explicitamente "no verificado" o no incluir |
+| ✓ | **VERIFIED** | 2+ primary sources or 1 primary + direct evidence | Normal (no mark) |
+| o | **CORROBORATED** | Multiple independent sources report the same, without direct primary source | Normal (no mark) |
+| X | **UNVERIFIED** | Single source or unconfirmable | Explicitly mark "unverified" or don't include |
 
-**Regla:** en documentos profesionales, todo lo que se publica sin marca debe ser VERIFIED o CORROBORATED. Lo UNVERIFIED se omite o se declara como tal.
+**Rule:** in professional documents, everything published without a mark must be VERIFIED or CORROBORATED. UNVERIFIED is omitted or declared as such.
 
 ---
 
-## Anti-hallucination checklist (basado en Vectara HHEM benchmarks 2026)
+## Anti-hallucination checklist (based on Vectara HHEM benchmarks 2026)
 
-Los LLMs alucinan 15-20% del tiempo en consultas factuales (fuente: Prompt Guardrails, Vectara benchmark March 2026). Los modelos de razonamiento alucinan más que los estándar en summarization (DeepSeek-R1: 14.3% vs V3: 6.1%).
+LLMs hallucinate 15-20% of the time on factual queries (source: Prompt Guardrails, Vectara benchmark March 2026). Reasoning models hallucinate more than standard ones in summarization (DeepSeek-R1: 14.3% vs V3: 6.1%).
 
-Antes de escribir cualquier afirmación, pasar por este filtro:
+Before writing any claim, run it through this filter:
 
-| Pregunta | Check |
+| Question | Check |
 |----------|-------|
-| ¿Este número tiene fuente verificable? | |
-| ¿Esta fecha está confirmada en fuente primaria? | |
-| ¿Este nombre/versión existe realmente? | |
-| ¿Esta cita es textual y verificable? | |
-| ¿Este CVE/ID es real y corresponde a lo que digo? | |
-| ¿Esta estadística viene de un estudio real? | |
-| ¿Estoy inventando un "estudio demuestra" para dar peso? | |
-| ¿Esta afirmación sobre el modelo/framework es cierta hoy? | |
+| Does this number have a verifiable source? | |
+| Is this date confirmed by a primary source? | |
+| Does this name/version actually exist? | |
+| Is this quote verbatim and verifiable? | |
+| Is this CVE/ID real and does it match what I'm saying? | |
+| Does this statistic come from a real study? | |
+| Am I making up a "study shows" to add weight? | |
+| Is this claim about the model/framework true today? | |
 
 ---
 
-## Categorías comunes de datos inventados por IA (research flags)
+## Common categories of AI-invented data (research flags)
 
-| Categoría | Señal de alerta | Qué hacer |
+| Category | Red flag | What to do |
 |-----------|----------------|-----------|
-| **Versiones** | "WordPress 6.8 tiene..." sin advisory | Verificar en wordpress.org/news/releases |
-| **CVEs** | CVE-2026-XXXX sin entrada en NVD | Buscar en nvd.nist.gov |
-| **Estadísticas** | "El 80% de los sitios..." sin estudio | No usar sin fuente |
-| **Fechas** | Fechas de parches, lanzamientos | Verificar en changelog oficial |
-| **Citas textuales** | "Como dijo X: '...'" | Confirmar que X realmente dijo eso |
-| **Métricas de seguridad** | Tiempos de explotación, tasas | Buscar en informes reales (Veracode, Splunk, etc.) |
-| **Nombres de herramientas** | Herramientas que no existen o versiones incorrectas | Verificar homepage oficial o repositorio |
+| **Versions** | "WordPress 6.8 has..." with no advisory | Check wordpress.org/news/releases |
+| **CVEs** | CVE-2026-XXXX with no NVD entry | Search nvd.nist.gov |
+| **Statistics** | "80% of sites..." with no study | Don't use without a source |
+| **Dates** | Patch dates, release dates | Verify in official changelog |
+| **Quotes** | "As X said: '...'" | Confirm X actually said that |
+| **Security metrics** | Exploit times, rates | Search real reports (Veracode, Splunk, etc.) |
+| **Tool names** | Non-existent tools or wrong versions | Verify official homepage or repository |
 
 ---
 
 ## Context adaptation by document type
 
-No todos los documentos necesitan el mismo nivel de verificación. Ajustar según el tipo:
+Not all documents need the same verification level. Adjust by type:
 
-| Tipo de documento | Prioridad de verificación | Campos críticos | Tolerancia |
+| Document type | Verification priority | Critical fields | Tolerance |
 |-------------------|---------------------------|-----------------|------------|
-| **Pentest / Security** | Máxima | CVEs, versiones, fechas, capturas, exploits | Cero. Un CVE falso invalida el informe |
-| **White paper / Técnico** | Alta | Estadísticas, citas, fechas, versiones, nombres de herramientas | Baja. Citas inventadas destruyen credibilidad |
-| **One-pager / Ejecutivo** | Media | Métricas principales, nombres de clientes, fechas clave | Media. Errores menores tolerables si el mensaje central es correcto |
-| **Resume / CV** | Máxima en datos personales | Fechas de empleo, títulos, empresas, logros cuantificables | Cero en datos personales. Las afirmaciones de logros pueden ser contextuales |
-| **Letter / Carta** | Baja | Nombres, cargos, fechas | Alta. El tono importa más que la precisión factual |
-| **Slides / Deck** | Media | Estadísticas clave, citas textuales, nombres | Media. El contexto visual prima sobre el detalle |
+| **Pentest / Security** | Maximum | CVEs, versions, dates, screenshots, exploits | Zero. A fake CVE invalidates the report |
+| **White paper / Technical** | High | Statistics, quotes, dates, versions, tool names | Low. Made-up quotes destroy credibility |
+| **One-pager / Executive** | Medium | Core metrics, client names, key dates | Medium. Minor errors tolerable if the central message is correct |
+| **Resume / CV** | Maximum in personal data | Employment dates, titles, companies, quantifiable achievements | Zero in personal data. Achievement claims can be contextual |
+| **Letter** | Low | Names, titles, dates | High. Tone matters more than factual precision |
+| **Slides / Deck** | Medium | Key statistics, verbatim quotes, names | Medium. Visual context takes priority over detail |
 
-Regla: si el documento va a un cliente externo o tiene implicaciones legales/de seguridad, usar verificación máxima siempre.
+Rule: if the document goes to an external client or has legal/security implications, always use maximum verification.
 
 ## Document pipeline integration
-- Una versión específica de software → buscar changelog oficial
-- Un CVE o vulnerabilidad → buscar en NVD + advisory oficial
-- Una estadística o métrica → buscar fuente primaria o no incluir
-- Una cita textual → confirmar que existe
-- Una fecha de evento → verificar en fuente oficial
-- Un nombre de persona/herramienta/empresa → verificar que existe y está bien escrito
+- A specific software version → check official changelog
+- A CVE or vulnerability → search NVD + official advisory
+- A statistic or metric → find primary source or don't include
+- A verbatim quote → confirm it exists
+- An event date → verify in official source
+- A person/tool/company name → verify it exists and is spelled correctly
 
 ---
 
@@ -155,7 +155,7 @@ Regla: si el documento va a un cliente externo o tiene implicaciones legales/de 
 - Heuer & Pherson, *Structured Analytic Techniques for Intelligence Analysis* (CIA Sherman Kent School)
 - US Government, *A Tradecraft Primer: Structured Analytic Techniques for Improving Intelligence Analysis* (2009)
 - NPR Training, "Don't just check the facts, check the source: a guide to verification" (March 2026)
-- Princeton University Library, guia "Triangulation and Media Literacy" (2025)
+- Princeton University Library, guide "Triangulation and Media Literacy" (2025)
 - War Intel Hub, "OSINT Verification Methodology"
 - Vectara HHEM hallucination benchmark leaderboard (March 2026)
 - Prompt Guardrails, "AI Hallucination Detection and Prevention Guide" (2026)

@@ -69,16 +69,16 @@ if ($RESULTS.Count -eq 0) {
 $RESULTS = $RESULTS | Sort-Object { if ($_.Source -eq "Recent") { 0 } else { $_.Score } } -Descending | Select-Object -First $Limit
 
 if ($RESULTS.Count -eq 0) {
-    Write-Host "No hay datos en memoria aun." -ForegroundColor Yellow
+    Write-Host "No memory data yet." -ForegroundColor Yellow
     return
 }
 
-Write-Host "Recupere contexto de $($RESULTS.Count) entradas:" -ForegroundColor Cyan
+Write-Host "Retrieved context from $($RESULTS.Count) entries:" -ForegroundColor Cyan
 foreach ($r in $RESULTS) {
     $c = if ($r.Source -eq "ChromaDB") { "Green" } else { "DarkGray" }
     Write-Host ""
     Write-Host "[$($r.Source)] $($r.Session)" -ForegroundColor $c
-    if ($r.Project) { Write-Host "  Proyecto: $($r.Project)" -ForegroundColor DarkGray }
+    if ($r.Project) { Write-Host "  Project: $($r.Project)" -ForegroundColor DarkGray }
     if ($r.Tags) { Write-Host "  Tags: $($r.Tags)" -ForegroundColor DarkGray }
     $preview = if ($r.Text.Length -gt 200) { $r.Text.Substring(0, 200) + "..." } else { $r.Text }
     Write-Host "  $preview" -ForegroundColor White

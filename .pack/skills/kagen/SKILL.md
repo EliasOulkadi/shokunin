@@ -114,41 +114,41 @@ table tr {
 
 ### Visual patterns by document type
 
-Cada tipo de documento necesita su propio conjunto de patrones visuales. Aplicar segun corresponda:
+Each document type needs its own set of visual patterns. Apply accordingly:
 
-| Tipo | Patrones obligatorios | Patrones opcionales |
+| Type | Required patterns | Optional patterns |
 |------|----------------------|---------------------|
-| **Pentest / Security report** | Severity badges (rojo/naranja/verde), risk bar, bloques de codigo con borde izquierdo, cajas impacto/remediacion | Finding-header con metadatos, tabla de hallazgos con badges |
-| **One-pager / Executive summary** | Glance grid (4 metricas), lead paragraph, takeaway box, cover con titulo grande + linea decorativa | Callout para dato clave, footer con contacto |
-| **White paper / Long doc** | Chapter breaks en secciones densas, tabla de contenidos, callouts, keep-together en bloques criticos | Quotes, diagramas, appendix |
-| **Letter** | Margenes amplios (25mm), saludo y cierre formales, sin columnas, sin tablas | Membrete, firma |
-| **Resume** | Dense body (9.2pt), metric row, project bullets con accion + resultado | Timeline, skills grid |
-| **Slides** | Assertion-evidence titles, una idea por slide, bullets de una linea, pinned callout | Code cards, 2x2 table |
+| **Pentest / Security report** | Severity badges (red/orange/green), risk bar, code blocks with left border, impact/remediation boxes | Finding-header with metadata, findings table with badges |
+| **One-pager / Executive summary** | Glance grid (4 metrics), lead paragraph, takeaway box, cover with large title + decorative line | Callout for key data point, footer with contact |
+| **White paper / Long doc** | Chapter breaks in dense sections, table of contents, callouts, keep-together on critical blocks | Quotes, diagrams, appendix |
+| **Letter** | Wide margins (25mm), formal greeting and closing, no columns, no tables | Letterhead, signature |
+| **Resume** | Dense body (9.2pt), metric row, project bullets with action + result | Timeline, skills grid |
+| **Slides** | Assertion-evidence titles, one idea per slide, one-line bullets, pinned callout | Code cards, 2x2 table |
 
-**Regla:** si el tipo de documento no esta en la tabla, elegir el mas cercano y adaptar.
+**Rule:** if the document type isn't in the table, choose the closest one and adapt.
 
 ### Near-empty pages prevention
 
-Nada queda mas amateur que una pagina con 2 lineas. Causas y soluciones:
+Nothing looks more amateur than a page with 2 lines. Causes and solutions:
 
-| Causa | Solucion | Deteccion automatica |
+| Cause | Solution | Auto-detection |
 |-------|----------|---------------------|
-| Heading con 1 parrafo corto al final | Fusionar con seccion anterior | Si un capitulo tiene solo 1 h2 + 1 p, no merece pagina propia |
-| `break-before: page` en cada seccion | Solo usar en capitulos con >1/3 pagina de contenido | Contar parrafos + tablas + listas. Si suman menos de 5 elementos, no forzar salto |
-| `break-inside: avoid` en bloque grande que no entra | Relajar `break-inside` o dividir el bloque | Si un keep-together mide mas de 1 pagina, no forzarlo |
-| Lista de fuentes al final que sobra en pagina aparte | Mover al capitulo de fuentes consolidado | Las fuentes van en un solo lugar, no repetidas en cada capitulo |
+| Heading with 1 short paragraph at the end | Merge with previous section | If a chapter has only 1 h2 + 1 p, it doesn't deserve its own page |
+| `break-before: page` on every section | Only use on chapters with >1/3 page of content | Count paragraphs + tables + lists. If they add up to less than 5 elements, don't force a break |
+| `break-inside: avoid` on large block that doesn't fit | Relax `break-inside` or split the block | If a keep-together measures more than 1 page, don't force it |
+| Source list at the end spilling onto a separate page | Move to consolidated sources chapter | Sources go in one place, not repeated in each chapter |
 
-### Anti-patterns de IA en documentos
+### AI anti-patterns in documents
 
-Validar que el contenido heredado de Kami no tenga estas marcas:
+Validate that content inherited from Kami doesn't have these marks:
 
-| Anti-pattern | Problema | Fix |
+| Anti-pattern | Problem | Fix |
 |-------------|----------|-----|
-| Em dash `—` repetido como separador label/valor | `Black Box — sin credenciales`, varias lineas seguidas | Parentesis, coma, dos puntos. El dash es para incisos genuinos, no para separar labels |
-| Tablas uniformes sin color | Todas las filas iguales, sin indicacion visual de severidad o prioridad | Badges de color, zebra rows suaves, primera columna destacada |
-| Bloques de code sin contraste | Se mezclan con el body, no se ven como codigo | Borde izquierdo azul, fondo ivory, monospace, padding generoso |
-| Misma estructura en cada pagina | Todas las paginas son titulo + tabla o titulo + lista | Variar: caja de hallazgo, risk bar, flowchart, callout. Alternar ritmo |
-| Afirmaciones sin fuente | "Los LLM alucinan 15-20%" sin atribucion | "Segun Vectara HHEM 2026, los LLM..." |
+| Repeated em dash `—` as label/value separator | `Black Box — no credentials`, multiple lines in a row | Parentheses, comma, colon. The dash is for genuine asides, not for separating labels |
+| Uniform tables without color | All rows identical, no visual indication of severity or priority | Color badges, subtle zebra rows, highlighted first column |
+| Code blocks without contrast | They blend with the body, don't look like code | Left blue border, ivory background, monospace, generous padding |
+| Same structure on every page | Every page is title + table or title + list | Vary: finding box, risk bar, flowchart, callout. Alternate rhythm |
+| Claims without source | "LLMs hallucinate 15-20%" without attribution | "According to Vectara HHEM 2026, LLMs..." |
 
 ### Best practices from professionals
 
@@ -219,7 +219,7 @@ Place font files relative to the HTML and use relative `src` paths. Chromium res
 | White background instead of parchment | Add `printColorAdjust: exact` in CSS and `printBackground: true` in JS |
 | Fonts not rendering | Use relative paths in `@font-face`, check font file exists |
 | Page breaks wrong | Check `break-inside: avoid` on tables, pre, callout |
-| Near-empty page (2 lines sola) | Fusionar sección corta con anterior; evitar `break-before: page` en capítulos ligeros |
+| Near-empty page (2 lines alone) | Merge short section with previous; avoid `break-before: page` on light chapters |
 | Content overflow | Use `page-break-inside: avoid` on large blocks |
 | Chinese chars as boxes | Include CJK font in `@font-face` or use system CJK fallback |
 | PDF too large | Remove unnecessary images, compress embedded fonts |
@@ -227,7 +227,7 @@ Place font files relative to the HTML and use relative `src` paths. Chromium res
 
 ### CSS visual pattern snippets
 
-Patrones concretos para incluir en el HTML segun el tipo de documento:
+Concrete patterns to include in the HTML by document type:
 
 ```css
 /* Severity badges (pentest, security) */
@@ -263,44 +263,44 @@ pre { border-left: 2.5pt solid #1B365D; border-radius: 3pt; background: #faf9f5;
 
 ### Self-review protocol (mandatory)
 
-No generar el PDF sin pasar esta checklist. Cada item es un fallo real documentado en iteraciones anteriores.
+Don't generate the PDF without passing this checklist. Each item is a real failure documented in previous iterations.
 
-### Estructurales (bloqueantes)
-- [ ] Cada capitulo tiene contenido suficiente para ocupar >1/3 de pagina
-- [ ] No hay secciones con solo heading + 1 parrafo corto (fusionar)
-- [ ] No hay paginas casi vacias (2 lineas solas)
-- [ ] `break-before: page` solo en capitulos con contenido denso
+### Structural (blocking)
+- [ ] Each chapter has enough content to fill >1/3 of a page
+- [ ] No sections with just heading + 1 short paragraph (merge)
+- [ ] No near-empty pages (2 lines alone)
+- [ ] `break-before: page` only on chapters with dense content
 
-### Visuales (alta prioridad)
-- [ ] Los elementos visuales corresponden al tipo de documento (badges, risk bars, code blocks, etc.)
-- [ ] Las tablas tienen el estilo adecuado (zebra opcional, padding, headers claros)
-- [ ] Los bloques de codigo se distinguen del cuerpo (borde, fondo, monospace)
-- [ ] No hay em dashes `—` usados como separadores label/valor repetidos
-- [ ] Hay variedad de ritmo visual (no todas las paginas iguales)
+### Visual (high priority)
+- [ ] Visual elements match the document type (badges, risk bars, code blocks, etc.)
+- [ ] Tables have proper styling (optional zebra, padding, clear headers)
+- [ ] Code blocks are distinguishable from body (border, background, monospace)
+- [ ] No repeated em dashes `—` used as label/value separators
+- [ ] There's variety in visual rhythm (not all pages the same)
 
-### Contenido (alta prioridad)
-- [ ] Cada afirmacion categorica tiene su fuente visible ("segun X...")
-- [ ] Se distingue metodologia interna de hecho verificado (disclaimer si aplica)
-- [ ] No hay contenido redundante entre capitulos (fuentes, listas repetidas)
-- [ ] Cada parrafo es necesario (si se puede eliminar sin perdida, eliminar)
+### Content (high priority)
+- [ ] Every categorical claim has its visible source ("according to X...")
+- [ ] Internal methodology is distinguished from verified fact (disclaimer if applicable)
+- [ ] No redundant content between chapters (sources, repeated lists)
+- [ ] Every paragraph is necessary (if it can be removed without loss, remove it)
 
-### Tecnicos (bloqueantes)
-- [ ] `printBackground: true` en la configuracion de Playwright
-- [ ] `-webkit-print-color-adjust: exact` en CSS
-- [ ] `widows: 4; orphans: 4` en @page y body
-- [ ] `break-inside: avoid` en pre, table, blockquote, callout
-- [ ] `table tr { break-inside: avoid }` para que las tablas no partan filas
+### Technical (blocking)
+- [ ] `printBackground: true` in Playwright configuration
+- [ ] `-webkit-print-color-adjust: exact` in CSS
+- [ ] `widows: 4; orphans: 4` in @page and body
+- [ ] `break-inside: avoid` on pre, table, blockquote, callout
+- [ ] `table tr { break-inside: avoid }` so tables don't split rows
 
 ## Complete HTML example
 
-Template minimo funcional que incluye todos los patrones esenciales. Copiar y adaptar:
+Minimum functional template that includes all essential patterns. Copy and adapt:
 
 ```html
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Titulo del Documento</title>
+<title>Document Title</title>
 <style>
   @page { size: A4; margin: 24mm 26mm 26mm 26mm; background: #f5f4ed; widows: 4; orphans: 4; }
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-print-color-adjust: exact; }
@@ -323,25 +323,25 @@ Template minimo funcional que incluye todos los patrones esenciales. Copiar y ad
   .callout { background: var(--ivory); border-left: 2pt solid var(--brand); padding: 10pt 14pt; border-radius: 3pt; margin: 12pt 0; break-inside: avoid; }
   .keep-together { break-inside: avoid; }
   .break { break-before: page; }
-  /* Anadir patrones visuales segun tipo de documento (badges, risk bar, etc.) */
+  /* Add visual patterns by document type (badges, risk bar, etc.) */
 </style>
 </head>
 <body>
 <!-- Cover -->
 <section style="min-height:240mm;display:flex;flex-direction:column;justify-content:space-between;padding:40mm 0 0 0;break-after:page;">
   <div>
-    <div style="font-size:10pt;color:var(--brand);letter-spacing:2pt;text-transform:uppercase;margin-bottom:18pt;">Tipo de Documento</div>
-    <div style="font-size:40pt;font-weight:500;line-height:1.12;margin-bottom:16pt;">Titulo Principal</div>
+    <div style="font-size:10pt;color:var(--brand);letter-spacing:2pt;text-transform:uppercase;margin-bottom:18pt;">Document Type</div>
+    <div style="font-size:40pt;font-weight:500;line-height:1.12;margin-bottom:16pt;">Main Title</div>
     <div style="width:60pt;height:2pt;background:var(--brand);margin:20pt 0;border-radius:1pt;"></div>
-    <div style="font-size:14pt;color:var(--olive);max-width:85%;">Subtitulo o descripcion</div>
+    <div style="font-size:14pt;color:var(--olive);max-width:85%;">Subtitle or description</div>
   </div>
-  <div style="font-size:10pt;color:var(--stone);">Autor · Fecha</div>
+  <div style="font-size:10pt;color:var(--stone);">Author · Date</div>
 </section>
 <!-- Chapter -->
 <section class="break">
-  <h1>Titulo del Capitulo</h1>
-  <p>Contenido del documento. Verificar fuentes (research), humanizar texto (humanize), disenar con Kami.</p>
-  <!-- Tablas, listas, callouts segun necesidad -->
+  <h1>Chapter Title</h1>
+  <p>Document content. Verify sources (research), humanize text (humanize), design with Kami.</p>
+  <!-- Tables, lists, callouts as needed -->
 </section>
 </body>
 </html>

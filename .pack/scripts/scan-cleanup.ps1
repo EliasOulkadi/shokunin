@@ -54,7 +54,7 @@ function Classify-File {
     $name = $Info.Name.ToLower()
     $ext = $Info.Extension.ToLower()
 
-    if ($Info.FullName -match "(memory|chroma_db|sessions)\\") { return @("protect","CONSERVAR","Ruta protegida") }
+    if ($Info.FullName -match "(memory|chroma_db|sessions)\\") { return @("protect","KEEP","Protected path") }
 
     $isAiPdf = $false
     if ($Info.IsPdf) {
@@ -65,40 +65,40 @@ function Classify-File {
     $isArchive = @(".zip",".rar",".7z",".tar.gz",".tar",".gz") -contains $ext
 
     if ($isAiPdf) {
-        if ($Info.DaysSinceModified -le 1) { return @("review","REVISA","AI-generated, reciente") }
-        return @("safe","PAPELERA","AI-generated, en GitHub")
+        if ($Info.DaysSinceModified -le 1) { return @("review","REVIEW","AI-generated, recent") }
+        return @("safe","TRASH","AI-generated, on GitHub")
     }
     if ($isInstaller) {
-        if ($Info.DaysSinceModified -gt 30) { return @("safe","PAPELERA","Instalador obsoleto") }
-        return @("review","REVISA","Instalador reciente")
+        if ($Info.DaysSinceModified -gt 30) { return @("safe","TRASH","Outdated installer") }
+        return @("review","REVIEW","Recent installer")
     }
     if ($isArchive) {
-        if ($Info.DaysSinceModified -gt 60) { return @("safe","PAPELERA","Comprimido antiguo") }
-        return @("review","REVISA","Comprimido reciente")
+        if ($Info.DaysSinceModified -gt 60) { return @("safe","TRASH","Old compressed file") }
+        return @("review","REVIEW","Recent compressed file")
     }
     if ($Info.Directory -eq (Split-Path -Leaf ([Environment]::GetFolderPath('Desktop')))) {
-        if ($Info.DaysSinceModified -gt 30) { return @("review","REVISA","Archivo suelto en Desktop") }
-        return @("keep","CONSERVAR","En Desktop, reciente")
+        if ($Info.DaysSinceModified -gt 30) { return @("review","REVIEW","Loose file on Desktop") }
+        return @("keep","KEEP","On Desktop, recent")
     }
     if ($Info.FullName -match "\\Temp\\") {
-        if ($Info.DaysSinceModified -gt 7) { return @("safe","PAPELERA","Temporal antiguo") }
-        return @("review","REVISA","Temporal reciente")
+        if ($Info.DaysSinceModified -gt 7) { return @("safe","TRASH","Old temp file") }
+        return @("review","REVIEW","Recent temp file")
     }
-    if ($Info.DaysSinceModified -le 3) { return @("keep","CONSERVAR","Reciente") }
-    return @("review","REVISA","Sin clasificar")
+    if ($Info.DaysSinceModified -le 3) { return @("keep","KEEP","Recent") }
+    return @("review","REVIEW","Unclassified")
 }
 
 function Write-Report {
     param($Groups)
     $g = [System.Char]::ConvertFromUtf32(0x1F7E2); $y = [System.Char]::ConvertFromUtf32(0x1F7E1); $r = [System.Char]::ConvertFromUtf32(0x1F534)
-    if ($Groups.Keys.Count -eq 0) { Write-Host "Nada que limpiar." -ForegroundColor Green; return }
+    if ($Groups.Keys.Count -eq 0) { Write-Host "Nothing to clean." -ForegroundColor Green; return }
 
-    Write-Host "Escaneando $env:USERPROFILE..." -ForegroundColor Cyan
+    Write-Host "Scanning $env:USERPROFILE..." -ForegroundColor Cyan
     foreach ($dir in ($Groups.Keys | Sort-Object)) {
         $files = $Groups[$dir]
         if ($files.Count -eq 0) { continue }
         Write-Host ""
-        Write-Host "--- $dir ($($files.Count) archivos) ---" -ForegroundColor Yellow
+        Write-Host "--- $dir ($($files.Count) files) ---" -ForegroundColor Yellow
         foreach ($f in $files) {
             $verdict = Classify-File -Info $f
             $v = $verdict[0]

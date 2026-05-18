@@ -5,8 +5,8 @@
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
-# Tarea semanal: Sunday Health Check
-# Corre cada domingo a las 21:00 via Task Scheduler
+# Weekly task: Sunday Health Check
+# Runs every Sunday at 21:00 via Task Scheduler
 
 Write-Host "=== Shokunin Sunday Health Check ===" -ForegroundColor Cyan
 $date = Get-Date -Format "yyyy-MM-dd HH:mm"

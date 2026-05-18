@@ -18,19 +18,19 @@ $script:sourceDir = if ($PSScriptRoot) { $PSScriptRoot } else { (Get-Location).P
 function Write-Log { param([string]$Msg, [string]$Color = "White") Write-Host "  $Msg" -ForegroundColor $Color }
 function Write-Step { param([string]$Msg) Write-Host "`n[$($script:step++)] $Msg" -ForegroundColor Cyan }
 function Write-OK { Write-Host "    OK" -ForegroundColor Green }
-function Write-Skip { Write-Host "    SKIP (ya existe)" -ForegroundColor Yellow }
+function Write-Skip { Write-Host "    SKIP (already exists)" -ForegroundColor Yellow }
 function Write-Fail { Write-Host "    FAIL" -ForegroundColor Red }
 
 # ============================================================
 # SECTION 2: PREREQUISITES CHECK
 # ============================================================
 function Test-Prerequisites {
-    Write-Step "Verificando requisitos..."
+    Write-Step "Checking prerequisites..."
     $allOk = $true
 
     # Windows
     if ($PSVersionTable.PSVersion.Major -lt 5) {
-        Write-Log "PowerShell 5+ requerido" Red; $allOk = $false
+        Write-Log "PowerShell 5+ required" Red; $allOk = $false
     } else { Write-Log "PowerShell $($PSVersionTable.PSVersion.ToString())" Green }
 
     # Node.js
@@ -39,7 +39,7 @@ function Test-Prerequisites {
         $ver = [Version]($nodeVer -replace '^v')
         if ($ver.Major -lt 18) { throw "version too low" }
         Write-Log "Node.js $nodeVer" Green
-    } catch { Write-Log "Node.js 18+ requerido (https://nodejs.org)" Red; $allOk = $false }
+    } catch { Write-Log "Node.js 18+ required (https://nodejs.org)" Red; $allOk = $false }
 
     # Python (check python first, then py)
     try {
@@ -47,14 +47,14 @@ function Test-Prerequisites {
         if (-not ($pyVer -match '(\d+)\.(\d+)')) { $pyVer = py --version 2>&1 }
         if ($pyVer -match '(\d+)\.(\d+)') {
             $major = [int]$Matches[1]; $minor = [int]$Matches[2]
-            if ($major -ge 3 -and $minor -ge 11) { Write-Log "Python $major.$minor+ encontrado" Green }
+            if ($major -ge 3 -and $minor -ge 11) { Write-Log "Python $major.$minor+ found" Green }
             else { throw "version too low" }
         } else { throw "not found" }
-    } catch { Write-Log "Python 3.11+ requerido (https://python.org)" Red; $allOk = $false }
+    } catch { Write-Log "Python 3.11+ required (https://python.org)" Red; $allOk = $false }
 
     # Git
-    try { git --version 2>$null | Out-Null; Write-Log "Git instalado" Green }
-    catch { Write-Log "Git requerido (winget install Git.Git)" Red; $allOk = $false }
+    try { git --version 2>$null | Out-Null; Write-Log "Git installed" Green }
+    catch { Write-Log "Git required (winget install Git.Git)" Red; $allOk = $false }
 
     # OpenCode
     try {
@@ -65,12 +65,12 @@ function Test-Prerequisites {
         Write-Log "OpenCode no detectado. Instalando..." Yellow
         try {
             npm install -g opencode 2>&1 | Out-Null
-            Write-Log "OpenCode instalado" Green
-        } catch { Write-Log "No se pudo instalar OpenCode. npm install -g opencode manualmente" Red; $allOk = $false }
+            Write-Log "OpenCode installed" Green
+        } catch { Write-Log "Could not install OpenCode. Run npm install -g opencode manually" Red; $allOk = $false }
     }
 
     if (-not $allOk) {
-        Write-Host "`n  Requisitos no cumplidos. Instala lo que falta y vuelve a ejecutar." -ForegroundColor Red
+        Write-Host "`n  Requirements not met. Install what's missing and run again." -ForegroundColor Red
         exit 1
     }
 }
@@ -79,11 +79,11 @@ function Test-Prerequisites {
 # SECTION 3: INSTALL DEPENDENCIES
 # ============================================================
 function Install-Dependencies {
-    Write-Step "Instalando dependencias Python..."
+    Write-Step "Installing Python dependencies..."
     pip install chromadb
     Write-OK
 
-    Write-Step "Instalando MCP servers (npx)..."
+    Write-Step "Installing MCP servers (npx)..."
     npm install -g @modelcontextprotocol/server-filesystem @modelcontextprotocol/server-fetch 2>&1 | Out-Null
     Write-OK
 }
@@ -92,7 +92,7 @@ function Install-Dependencies {
 # SECTION 4: INSTALL SKILLS
 # ============================================================
 function Install-Skills {
-    Write-Step "Instalando 62 skills..."
+    Write-Step "Installing 62 skills..."
     $repoSkills = Join-Path $script:sourceDir ".pack\skills"
 
     if (-not (Test-Path $script:skillsDir)) {
@@ -109,9 +109,9 @@ function Install-Skills {
         $count++
     }
 
-    if ($count -gt 0) { Write-Log "$count skills instaladas en $script:skillsDir" Green }
+    if ($count -gt 0) { Write-Log "$count skills installed in $script:skillsDir" Green }
     else {
-        Write-Log "No se encontraron skills en el repositorio. Clonando..." Yellow
+        Write-Log "No skills found in repository. Cloning..." Yellow
         git clone --depth 1 https://github.com/EliasOulkadi/shokunin.git "$env:TEMP\shokunin-tmp" 2>&1 | Out-Null
         $skillsPath = "$env:TEMP\shokunin-tmp\.pack\skills"
         if (Test-Path $skillsPath) {
@@ -123,7 +123,7 @@ function Install-Skills {
             }
         }
         Remove-Item -Recurse -Force "$env:TEMP\shokunin-tmp" -ErrorAction SilentlyContinue
-        Write-Log "$count skills instaladas" Green
+        Write-Log "$count skills installed" Green
     }
 }
 
@@ -131,14 +131,14 @@ function Install-Skills {
 # SECTION 5: MEMORY SYSTEM (ChromaDB)
 # ============================================================
 function Install-MemorySystem {
-    Write-Step "Instalando sistema de memoria (ChromaDB)..."
+    Write-Step "Installing memory system (ChromaDB)..."
 
     # Create directories
     @("memory","memory\chroma_db","memory\sessions","backups","scripts","logs") | ForEach-Object {
         $d = Join-Path $script:installDir $_
         if (-not (Test-Path $d)) { New-Item -ItemType Directory -Path $d -Force | Out-Null }
     }
-    Write-Log "Directorios creados en $script:installDir" Green
+    Write-Log "Directories created in $script:installDir" Green
 
     # Copy MCP server
     $mcpSrc = Join-Path $script:sourceDir ".pack\memory\mcp-server.py"
@@ -156,14 +156,14 @@ function Install-MemorySystem {
         Copy-Item $hcSrc (Join-Path $script:installDir "scripts\weekly-healthcheck.ps1") -Force
     }
 
-    Write-Log "Sistema de memoria instalado" Green
+    Write-Log "Memory system installed" Green
 }
 
 # ============================================================
 # SECTION 6: NEW SCRIPTS (v4.0)
 # ============================================================
 function Install-NewScripts {
-    Write-Step "Instalando scripts v4.0..."
+    Write-Step "Installing scripts v4.0..."
 
     $scriptsDir = Join-Path $script:installDir "scripts"
     New-Item -ItemType Directory -Path $scriptsDir -Force | Out-Null
@@ -189,19 +189,19 @@ function Install-NewScripts {
                 Invoke-WebRequest -Uri $url -OutFile (Join-Path $scriptsDir $script) -ErrorAction SilentlyContinue
                 $count++
             } catch {
-                Write-Log "  No se pudo descargar $script" Yellow
+                Write-Log "  Could not download $script" Yellow
             }
         }
     }
 
-    Write-Log "$count scripts instalados en $scriptsDir" Green
+    Write-Log "$count scripts installed in $scriptsDir" Green
 }
 
 # ============================================================
 # SECTION 7: OPencode CONFIG
 # ============================================================
 function Setup-OpenCodeConfig {
-    Write-Step "Configurando OpenCode..."
+    Write-Step "Configuring OpenCode..."
 
     $configDir = "$env:USERPROFILE\.config\opencode"
     if (-not (Test-Path $configDir)) { New-Item -ItemType Directory -Path $configDir -Force | Out-Null }
@@ -210,7 +210,7 @@ function Setup-OpenCodeConfig {
     if (Test-Path $configFile) {
         $backup = "$configFile.shokunin-backup-$(Get-Date -Format 'yyyyMMdd-HHmmss')"
         Copy-Item $configFile $backup
-        Write-Log "Backup de config existente: $backup" Green
+        Write-Log "Backup of existing config: $backup" Green
     }
 
     # Generate config with proper paths
@@ -220,7 +220,7 @@ function Setup-OpenCodeConfig {
     } else {
         $url = "https://raw.githubusercontent.com/EliasOulkadi/shokunin/master/.pack/opencode.json"
         $template = (Invoke-WebRequest -Uri $url).Content
-        Write-Log "Template descargado desde GitHub" Yellow
+        Write-Log "Template downloaded from GitHub" Yellow
     }
     $jsonPath = $env:USERPROFILE.Replace('\', '\\')
     $template = $template -replace "{{MCP_ROOT_PATH}}", $jsonPath
@@ -234,14 +234,14 @@ function Setup-OpenCodeConfig {
     if (-not $nvKey) {
         Write-Host @"
 
-  Para la IA necesitas una API key gratis de NVIDIA:
-  1. Ve a https://build.nvidia.com/ (registro gratis)
-  2. Genera una API key
-  3. Pegala abajo (o deja vacio para configurar despues)
+  For the AI you need a free NVIDIA API key:
+  1. Go to https://build.nvidia.com/ (free signup)
+  2. Generate an API key
+  3. Paste it below (or leave empty to configure later)
 
 "@ -ForegroundColor Yellow
         try {
-            $nvKeyInput = Read-Host "  NVIDIA API Key (deja vacio para despues)"
+            $nvKeyInput = Read-Host "  NVIDIA API Key (leave empty for later)"
         } catch {
             Write-Log "Non-interactive mode, skipping NVIDIA API key" Yellow
             $nvKeyInput = $null
@@ -252,14 +252,14 @@ function Setup-OpenCodeConfig {
     }
 
     $template | Set-Content $configFile -Force
-    Write-Log "Config generada: $configFile" Green
+    Write-Log "Config generated: $configFile" Green
 }
 
 # ============================================================
 # SECTION 8: POWERSSHELL PROFILE
 # ============================================================
 function Setup-PowerShellProfile {
-    Write-Step "Configurando PowerShell profile..."
+    Write-Step "Configuring PowerShell profile..."
 
     $profileContent = @'
 $localScript = "$env:USERPROFILE\.shokunin\scripts\profile.ps1"
@@ -272,20 +272,20 @@ if (Test-Path $localScript) {
     if (Test-Path $PROFILE) {
         $backup = "$PROFILE.shokunin-backup-$(Get-Date -Format 'yyyyMMdd-HHmmss')"
         Copy-Item $PROFILE $backup
-        Write-Log "Backup de perfil existente: $backup" Green
+        Write-Log "Backup of existing profile: $backup" Green
 
         # Append if not already installed
         $existing = Get-Content $PROFILE -Raw
         if ($existing -notmatch "Shokunin") {
             Add-Content $PROFILE "`n# Shokunin AI Ecosystem`n" -Encoding UTF8
             Add-Content $PROFILE $profileContent -Encoding UTF8
-            Write-Log "Perfil actualizado (Shokunin anadido al final)" Green
-        } else { Write-Log "Shokunin ya existe en el perfil" Yellow }
+            Write-Log "Profile updated (Shokunin appended)" Green
+        } else { Write-Log "Shokunin already in profile" Yellow }
     } else {
         $profileDir = Split-Path $PROFILE -Parent
         if (-not (Test-Path $profileDir)) { New-Item -ItemType Directory -Path $profileDir -Force | Out-Null }
         $profileContent | Set-Content $PROFILE -Encoding UTF8 -Force
-        Write-Log "Nuevo perfil creado" Green
+        Write-Log "New profile created" Green
     }
 }
 
@@ -293,7 +293,7 @@ if (Test-Path $localScript) {
 # SECTION 9: CLAUDE.md / AGENTS.md
 # ============================================================
 function Setup-Instructions {
-    Write-Step "Configurando instrucciones globales..."
+    Write-Step "Configuring global instructions..."
 
     # CLAUDE.md
     $claudeDir = "$env:USERPROFILE\.claude"
@@ -307,7 +307,7 @@ function Setup-Instructions {
             Copy-Item "$claudeDir\CLAUDE.md" $backup
         }
         $claudeContent | Set-Content "$claudeDir\CLAUDE.md" -Force -Encoding UTF8
-        Write-Log "CLAUDE.md configurado" Green
+        Write-Log "CLAUDE.md configured" Green
     }
 
     # AGENTS.md
@@ -315,7 +315,7 @@ function Setup-Instructions {
     if (Test-Path $agentsTemplate) {
         $agentsContent = Get-Content $agentsTemplate -Raw
         $agentsContent | Set-Content "$env:USERPROFILE\AGENTS.md" -Force -Encoding UTF8
-        Write-Log "AGENTS.md configurado" Green
+        Write-Log "AGENTS.md configured" Green
     }
 }
 
@@ -323,7 +323,7 @@ function Setup-Instructions {
 # SECTION 10: SCHEDULED TASKS
 # ============================================================
 function Setup-ScheduledTasks {
-    Write-Step "Configurando tareas programadas..."
+    Write-Step "Configuring scheduled tasks..."
 
     $healthcheckScript = Join-Path $script:installDir "scripts\weekly-healthcheck.ps1"
     $taskName = "ShokuninWeeklyMaintenance"
@@ -334,9 +334,9 @@ function Setup-ScheduledTasks {
         $trigger = New-ScheduledTaskTrigger -Weekly -DaysOfWeek Sunday -At 21:00
         $principal = New-ScheduledTaskPrincipal -UserId $env:USERNAME -RunLevel Limited
         Register-ScheduledTask -TaskName $taskName -Action $action -Trigger $trigger -Principal $principal -Force | Out-Null
-        Write-Log "Tarea '$taskName' creada (domingos 21:00)" Green
+        Write-Log "Task '$taskName' created (Sundays 21:00)" Green
     } else {
-        Write-Log "Tarea '$taskName' ya existe" Yellow
+        Write-Log "Task '$taskName' already exists" Yellow
     }
 }
 
@@ -344,7 +344,7 @@ function Setup-ScheduledTasks {
 # SECTION 11: EXTRAS (WezTerm, bookmarklet, dashboard)
 # ============================================================
 function Setup-Extras {
-    Write-Step "Instalando herramientas adicionales..."
+    Write-Step "Installing additional tools..."
 
     # WezTerm config
     $weztermSrc = Join-Path $script:sourceDir ".pack\wezterm.lua"
@@ -352,7 +352,7 @@ function Setup-Extras {
         if (-not (Test-Path "$env:USERPROFILE\.wezterm.lua")) {
             Copy-Item $weztermSrc "$env:USERPROFILE\.wezterm.lua" -Force
             Write-Log "WezTerm config: .wezterm.lua" Green
-        } else { Write-Log "WezTerm config ya existe" Yellow }
+        } else { Write-Log "WezTerm config already exists" Yellow }
     }
 
     # Bookmarklet
@@ -377,40 +377,40 @@ function Show-Summary {
     Write-Host @"
 
 â•”â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•—
-â•‘        Shokunin AI Ecosystem â€” Instalado         â•‘
+â•‘        Shokunin AI Ecosystem â€” Installed         â•‘
 â•šâ•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
-  Skills:       $((Get-ChildItem $script:skillsDir -Directory).Count) instaladas
-  Memoria:      ChromaDB v4.0 (3 capas de captura)
+  Skills:       $((Get-ChildItem $script:skillsDir -Directory).Count) installed
+  Memory:       ChromaDB v4.0 (3 capture layers)
   Scripts:      run-opencode, chroma-helper, test-memory
 
-  NVIDIA API:   $(if ([Environment]::GetEnvironmentVariable('NVIDIA_API_KEY','User')) { 'Configurada' } else { 'PENDIENTE' })
-  PowerShell:   Perfil personalizado con aliases
+  NVIDIA API:   $(if ([Environment]::GetEnvironmentVariable('NVIDIA_API_KEY','User')) { 'Configured' } else { 'PENDING' })
+  PowerShell:   Custom profile with aliases
   MCP:          filesystem, fetch, memory
 
-  Mantenimiento: Domingos 21:00 (backup + limpieza)
+  Maintenance:  Sundays 21:00 (backup + cleanup)
   Bookmarklet:  $env:USERPROFILE\shokunin-bookmarklet.html
   Dashboard:    $env:USERPROFILE\shokunin-dashboard.html
 
-  COMANDOS RAPIDOS:
+  QUICK COMMANDS:
   opencode                    Iniciar OpenCode
   gst, ga, gc, gp, gl        Git aliases
   ni, nrd, nrb, nt           npm aliases
   dps, dlog, dstop           Docker aliases
-  mkcd, touch, which, admin  Utilidades
+  mkcd, touch, which, admin  Utilities
 
-  SIGUIENTES PASOS:
-  1. Si dejaste la API de NVIDIA pendiente:
+  NEXT STEPS:
+  1. If you left the NVIDIA API pending:
      [Environment]::SetEnvironmentVariable('NVIDIA_API_KEY','tu-key','User')
-     y edita ~\.config\opencode\opencode.json con tu key
+     and edit ~\.config\opencode\opencode.json with your key
 
-  2. Reinicia tu terminal o recarga tu perfil: . $PROFILE
+  2. Restart your terminal or reload your profile: . $PROFILE
 
-  3. Abre un NUEVO terminal para cargar el perfil
+  3. Open a NEW terminal to load the profile
 
-  4. Ejecuta: .\run-opencode.ps1 (o solo opencode para sesion simple)
+  4. Run: .\run-opencode.ps1 (or just opencode for simple session)
 
-  Mas informacion: https://github.com/EliasOulkadi/shokunin
+  More info: https://github.com/EliasOulkadi/shokunin
 "@ -ForegroundColor Cyan
 }
 
@@ -425,17 +425,17 @@ Write-Host @"
 â•‘         github.com/EliasOulkadi/shokunin         â•‘
 â•šâ•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
-  Este instalador configura tu PC como estacion de trabajo
-  AI Engineer con 62 skills, memoria persistente,
-  y automatizaciones — todo gratis y open source.
+  This installer sets up your PC as an AI workstation
+  AI Engineer with 62 skills, persistent memory,
+  and automations — all free and open source.
 
   Requiere: Windows 10/11, Node.js 18+, Python 3.11+
   Tiempo estimado: 2-5 minutos
 
 "@ -ForegroundColor Cyan
 
-$confirm = Read-Host "  Continuar? (s/n)"
-if ($confirm -ne "s") { Write-Host "  Instalacion cancelada."; exit 0 }
+$confirm = Read-Host "  Continue? (y/n)"
+if ($confirm -ne "y") { Write-Host "  Installation cancelled."; exit 0 }
 
 $script:step = 1
 Test-Prerequisites
