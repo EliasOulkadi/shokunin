@@ -4,7 +4,7 @@ Protocol: JSON-RPC 2.0
 Transport: stdin/stdout
 Version: 2024-11-05
 
-## Tools
+## Tools (9 total)
 
 ### store_context
 Store text in persistent memory.

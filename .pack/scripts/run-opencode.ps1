@@ -1,4 +1,5 @@
 #!/usr/bin/env pwsh
+#Requires -Version 5.1
 <#
 .SYNOPSIS
     Wrapper for opencode CLI with session tracking, checkpointing, buffer capture, and ChromaDB saving.

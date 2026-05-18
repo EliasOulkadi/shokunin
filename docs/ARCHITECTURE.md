@@ -1,7 +1,7 @@
 # Shokunin Architecture
 
 ## Overview
-Shokunin is an AI coding ecosystem for Windows. It provides persistent memory (ChromaDB), 62+ skills, MCP servers, and automation scripts.
+Shokunin is an AI coding ecosystem for Windows and Linux. It provides persistent memory (ChromaDB), 62 skills (all with Workflow, Error Handling, Sources, and Anti-Patterns sections), MCP servers, freshness decay, claim verification, and automation scripts.
 
 ## Directory Structure
 - `.shokunin/` — Installed ecosystem (runtime)
