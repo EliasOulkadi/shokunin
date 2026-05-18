@@ -125,9 +125,12 @@
 <header class="hero">
   <h1>62 Skills</h1>
   <p>Every skill in the Shokunin ecosystem. Browse by domain, search by name, expand to read full content.</p>
-  <div class="search-wrap">
-    <span class="search-icon" aria-hidden="true">⌕</span>
-    <input type="search" class="search-input" id="search" placeholder="Filter skills..." aria-label="Search skills">
+  <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:24px">
+    <div class="search-wrap" style="flex:1;min-width:280px">
+      <span class="search-icon" aria-hidden="true">&#8981;</span>
+      <input type="search" class="search-input" id="search" placeholder="Filter skills..." aria-label="Search skills">
+    </div>
+    <code style="font-size:12px;color:var(--stone);white-space:nowrap">irm https://raw.githubusercontent.com/EliasOulkadi/shokunin/master/install-skills.ps1 | iex</code>
   </div>
   <p class="no-results" id="no-results">No skills found</p>
 </header>
