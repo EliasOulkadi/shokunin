@@ -68,6 +68,15 @@
 
   .skip-link { position: absolute; top: -100%; left: 16px; background: var(--ink-blue); color: #fff; padding: 8px 16px; border-radius: 4px; z-index: 100000; font-size: 14px; }
   .skip-link:focus { top: 8px; }
+  .theme-toggle { position: fixed; bottom: 24px; right: 24px; z-index: 10000; width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--border); background: var(--ivory); color: var(--near-black); cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1), box-shadow 160ms cubic-bezier(0.23, 1, 0.32, 1), background 200ms ease; }
+  .theme-toggle:hover { transform: scale(1.08); box-shadow: 0 4px 16px rgba(0,0,0,0.12); }
+  .theme-toggle:active { transform: scale(0.95); }
+  .theme-toggle:focus-visible { outline: 2px solid var(--ink-blue); outline-offset: 2px; }
+  .theme-icon-moon { display: none; }
+  .theme-icon-sun { display: block; }
+  [data-theme="dark"] .theme-icon-moon { display: block; }
+  [data-theme="dark"] .theme-icon-sun { display: none; }
+  [data-theme="dark"] .theme-toggle { background: #222; border-color: #333; color: #e8e6e0; }
 
   .section { padding: clamp(80px, 12vh, 160px) 24px; max-width: var(--max-width); margin: 0 auto; perspective: 1200px; }
   .section-divider { width: 48px; height: 1px; margin: 0 auto; background: linear-gradient(90deg, transparent, var(--border), transparent); }
@@ -311,7 +320,7 @@
   }
 
   @media (prefers-color-scheme: dark) {
-    :root {
+    :root:not([data-theme="light"]) {
       --parchment: #0c0c0c;
       --ivory: #161616;
       --ink-blue: #7ca3d8;
@@ -324,23 +333,50 @@
       --border: #2a2a28;
       --border-soft: #252523;
     }
-    body::after { opacity: 0.06; }
-    .hero-bg { color: var(--ink-blue); }
-    .splash { background: var(--parchment); }
-    .splash-text { color: #3a3a38; }
-    .btn-primary { background: var(--ink-blue); color: #0d0d0d; }
-    .btn-secondary-text { color: var(--ink-light); }
-    .feature-card, .bench-highlight-item, .bench-callout, .bench-chart, .bench-footnote { background: var(--ivory); border-color: var(--border); }
-    .hero-install pre { background: var(--ivory); border-color: var(--border); color: var(--near-black); }
-    .arch-diagram { background: var(--ivory); border-color: var(--border); color: var(--dark-warm); }
-    .section-mesh { background-image: radial-gradient(ellipse 60% 40% at 30% 50%, rgba(124,163,216,0.06) 0%, transparent 60%); }
-    .faq-q { color: var(--ink-light); }
-    details.faq-item summary { color: var(--ink-light); }
+    :root:not([data-theme="light"]) body::after { opacity: 0.06; }
+    :root:not([data-theme="light"]) .hero-bg { color: var(--ink-blue); }
+    :root:not([data-theme="light"]) .splash { background: var(--parchment); }
+    :root:not([data-theme="light"]) .splash-text { color: #3a3a38; }
+    :root:not([data-theme="light"]) .btn-primary { background: var(--ink-blue); color: #0d0d0d; }
+    :root:not([data-theme="light"]) .btn-secondary-text { color: var(--ink-light); }
+    :root:not([data-theme="light"]) .feature-card, :root:not([data-theme="light"]) .bench-highlight-item, :root:not([data-theme="light"]) .bench-callout, :root:not([data-theme="light"]) .bench-chart, :root:not([data-theme="light"]) .bench-footnote { background: var(--ivory); border-color: var(--border); }
+    :root:not([data-theme="light"]) .hero-install pre { background: var(--ivory); border-color: var(--border); color: var(--near-black); }
+    :root:not([data-theme="light"]) .arch-diagram { background: var(--ivory); border-color: var(--border); color: var(--dark-warm); }
+    :root:not([data-theme="light"]) .section-mesh { background-image: radial-gradient(ellipse 60% 40% at 30% 50%, rgba(124,163,216,0.06) 0%, transparent 60%); }
+    :root:not([data-theme="light"]) .faq-q { color: var(--ink-light); }
+    :root:not([data-theme="light"]) details.faq-item summary { color: var(--ink-light); }
   }
+
+  [data-theme="dark"] {
+    --parchment: #0c0c0c;
+    --ivory: #161616;
+    --ink-blue: #7ca3d8;
+    --ink-light: #5a8bc4;
+    --ink-tag: #1a2a42;
+    --near-black: #e8e6e0;
+    --dark-warm: #b0ada5;
+    --olive: #8a877f;
+    --stone: #8a8880;
+    --border: #2a2a28;
+    --border-soft: #252523;
+  }
+  [data-theme="dark"] body::after { opacity: 0.06; }
+  [data-theme="dark"] .hero-bg { color: var(--ink-blue); }
+  [data-theme="dark"] .splash { background: var(--parchment); }
+  [data-theme="dark"] .splash-text { color: #3a3a38; }
+  [data-theme="dark"] .btn-primary { background: var(--ink-blue); color: #0d0d0d; }
+  [data-theme="dark"] .btn-secondary-text { color: var(--ink-light); }
+  [data-theme="dark"] .feature-card, [data-theme="dark"] .bench-highlight-item, [data-theme="dark"] .bench-callout, [data-theme="dark"] .bench-chart, [data-theme="dark"] .bench-footnote { background: var(--ivory); border-color: var(--border); }
+  [data-theme="dark"] .hero-install pre { background: var(--ivory); border-color: var(--border); color: var(--near-black); }
+  [data-theme="dark"] .arch-diagram { background: var(--ivory); border-color: var(--border); color: var(--dark-warm); }
+  [data-theme="dark"] .section-mesh { background-image: radial-gradient(ellipse 60% 40% at 30% 50%, rgba(124,163,216,0.06) 0%, transparent 60%); }
+  [data-theme="dark"] .faq-q { color: var(--ink-light); }
+  [data-theme="dark"] details.faq-item summary { color: var(--ink-light); }
 </style>
 </head>
 <body>
   <a href="#main" class="skip-link">Skip to content</a>
+<button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode"><svg class="theme-icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg><svg class="theme-icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button>
   <div class="splash" id="splash" aria-hidden="true"><span class="splash-text japanese">職人</span></div>
 
 <main id="main">
@@ -608,6 +644,21 @@ get_session_summary — summarize all entries in a given session
 
 <script defer>
 (function() {
+  // Theme toggle: persist in localStorage, respect OS preference
+  const toggle = document.getElementById('theme-toggle');
+  const root = document.documentElement;
+  const saved = localStorage.getItem('theme');
+  if (saved) { root.setAttribute('data-theme', saved); }
+  else if (window.matchMedia('(prefers-color-scheme: dark)').matches) { root.setAttribute('data-theme', 'dark'); }
+  if (toggle) {
+    toggle.addEventListener('click', () => {
+      const current = root.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      root.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+    });
+  }
+
   const splash = document.getElementById('splash');
   if (splash && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
     setTimeout(() => { splash.classList.add('hide'); }, 2200);

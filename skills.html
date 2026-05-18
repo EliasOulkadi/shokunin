@@ -98,6 +98,15 @@
   .skill-desc { font-size: 14px; color: var(--dark-warm); line-height: 1.5; }
   .skip-link { position: absolute; top: -100%; left: 16px; background: var(--ink-blue); color: #fff; padding: 8px 16px; border-radius: 4px; z-index: 100000; font-size: 14px; font-family: var(--serif); }
   .skip-link:focus { top: 8px; }
+  .theme-toggle { position: fixed; bottom: 24px; right: 24px; z-index: 10000; width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--border); background: var(--ivory); color: var(--near-black); cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1), box-shadow 160ms cubic-bezier(0.23, 1, 0.32, 1), background 200ms ease; }
+  .theme-toggle:hover { transform: scale(1.08); box-shadow: 0 4px 16px rgba(0,0,0,0.12); }
+  .theme-toggle:active { transform: scale(0.95); }
+  .theme-toggle:focus-visible { outline: 2px solid var(--ink-blue); outline-offset: 2px; }
+  .theme-icon-moon { display: none; }
+  .theme-icon-sun { display: block; }
+  [data-theme="dark"] .theme-icon-moon { display: block; }
+  [data-theme="dark"] .theme-icon-sun { display: none; }
+  [data-theme="dark"] .theme-toggle { background: #222; border-color: #333; color: #e8e6e0; }
   .skill-body { padding: 0 24px; overflow: hidden; }
   .skill-closed { max-height: 0; opacity: 0; padding-top: 0; padding-bottom: 0; overflow: hidden; transition: max-height 0.4s cubic-bezier(0.23, 1, 0.32, 1), opacity 0.2s ease, padding 0.3s ease; }
   .skill-body:not(.skill-closed) { max-height: 50vh; opacity: 1; padding: 0 24px 24px; transition: max-height 0.4s cubic-bezier(0.23, 1, 0.32, 1), opacity 0.3s ease 0.1s; overflow-y: auto; }
@@ -126,6 +135,8 @@
   @media (prefers-color-scheme: dark) {
     :root {
       --parchment: #0c0c0c;
+      :root:not([data-theme="light"]) {
+      --parchment: #0c0c0c;
       --ivory: #161616;
       --ink-blue: #7ca3d8;
       --ink-light: #5a8bc4;
@@ -135,17 +146,36 @@
       --stone: #8a8880;
       --border: #2a2a28;
     }
-    body::after { opacity: 0.06; }
-    .skill-trigger:hover { background: #1e1e1c; }
-    .skill-content { background: #1a1a18; }
-    .search-input { background: var(--ivory); border-color: var(--border); color: var(--near-black); }
-    .search-input:focus { border-color: var(--ink-blue); }
-    .skill-card:hover { box-shadow: 0 4px 12px rgba(124,163,216,0.08); }
+    :root:not([data-theme="light"]) body::after { opacity: 0.06; }
+    :root:not([data-theme="light"]) .skill-trigger:hover { background: #1e1e1c; }
+    :root:not([data-theme="light"]) .skill-content { background: #1a1a18; }
+    :root:not([data-theme="light"]) .search-input { background: var(--ivory); border-color: var(--border); color: var(--near-black); }
+    :root:not([data-theme="light"]) .search-input:focus { border-color: var(--ink-blue); }
+    :root:not([data-theme="light"]) .skill-card:hover { box-shadow: 0 4px 12px rgba(124,163,216,0.08); }
   }
+
+  [data-theme="dark"] {
+    --parchment: #0c0c0c;
+    --ivory: #161616;
+    --ink-blue: #7ca3d8;
+    --ink-light: #5a8bc4;
+    --ink-tag: #1a2a42;
+    --near-black: #e8e6e0;
+    --dark-warm: #b0ada5;
+    --stone: #8a8880;
+    --border: #2a2a28;
+  }
+  [data-theme="dark"] body::after { opacity: 0.06; }
+  [data-theme="dark"] .skill-trigger:hover { background: #1e1e1c; }
+  [data-theme="dark"] .skill-content { background: #1a1a18; }
+  [data-theme="dark"] .search-input { background: var(--ivory); border-color: var(--border); color: var(--near-black); }
+  [data-theme="dark"] .search-input:focus { border-color: var(--ink-blue); }
+  [data-theme="dark"] .skill-card:hover { box-shadow: 0 4px 12px rgba(124,163,216,0.08); }
 </style>
 </head>
 <body>
 <a href="#skills-container" class="skip-link">Skip to content</a>
+<button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode"><svg class="theme-icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg><svg class="theme-icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button>
 <nav class="nav">
   <a href="./" class="nav-logo">Shokunin</a>
   <a href="./" class="nav-link">Back home</a>
@@ -5721,6 +5751,21 @@ Add
 
 <script>
 (function() {
+  // Theme toggle
+  var toggle = document.getElementById('theme-toggle');
+  var root = document.documentElement;
+  var saved = localStorage.getItem('theme');
+  if (saved) { root.setAttribute('data-theme', saved); }
+  else if (window.matchMedia('(prefers-color-scheme: dark)').matches) { root.setAttribute('data-theme', 'dark'); }
+  if (toggle) {
+    toggle.addEventListener('click', function() {
+      var current = root.getAttribute('data-theme');
+      var next = current === 'dark' ? 'light' : 'dark';
+      root.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+    });
+  }
+
   // Accordion
   document.querySelectorAll('.skill-trigger').forEach(function(btn) {
     btn.addEventListener('click', function() {
