@@ -136,6 +136,18 @@ El wrapper setea estas variables:
 - `$env:SHOKUNIN_MCP_HEALTHY` - "1" si MCP funciona, "0" si no
 También escribe `~/.shokunin/current-session.json` con la info de sesión.
 
+### CLAIM VERIFICATION — INSTRUCCIONES OBLIGATORIAS
+
+When a memory mentions a specific FILE PATH, FUNCTION NAME, or CONFIG FLAG:
+
+1. It is a CLAIM FROM A FROZEN POINT IN TIME — not guaranteed current
+2. BEFORE acting on it, verify the file/funcion/flag still exists
+3. Check: `verify_file_path` MCP tool first, then `grep`/`ls` as fallback
+4. If the path no longer exists, search memory for newer entries that might describe the refactoring that moved/renamed it
+5. Then search the codebase directly to find the current location
+
+NOTE: entry types `claim_file` and `claim_function` with `verified_at` set are pre-verified.
+
 ### IMPORTANTE
 - NUNCA te saltes search_context al inicio
 - NUNCA termines sin guardar session_end

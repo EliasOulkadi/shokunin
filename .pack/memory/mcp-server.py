@@ -4,6 +4,7 @@ from __future__ import annotations
 import importlib.util
 import json
 import logging
+import math
 import os
 import re
 import sys
@@ -82,7 +83,7 @@ def _log_jsonl(session_id: str, entry_type: str, content: str, role: str | None 
         _LOGGER.warning(f"Failed to log jsonl for {session_id}: {e}")
         pass
 
-VALID_TYPES = {"decision", "file", "command", "preference", "checkpoint", "session_end", "general"}
+VALID_TYPES = {"decision", "file", "command", "preference", "checkpoint", "session_end", "general", "claim_file", "claim_function", "claim_flag", "claim_api"}
 
 _TOOLS = {
     "tools": [
@@ -125,6 +126,7 @@ _TOOLS = {
                         "description": "Filter by tags",
                     },
                     "n_results": {"type": "integer", "description": "Number of results (default 10)"},
+                    "freshness_boost": {"type": "number", "description": "Blend between vector similarity (0.0) and recency (1.0). Default 0.0."},
                 },
             },
         },
@@ -149,6 +151,7 @@ _TOOLS = {
                     "query": {"type": "string", "description": "Search query text"},
                     "project": {"type": "string", "description": "Filter by project"},
                     "n_results": {"type": "integer", "description": "Number of results (default 10)"},
+                    "freshness_boost": {"type": "number", "description": "Blend between vector similarity (0.0) and recency (1.0). Default 0.0."},
                     "from_date": {"type": "string", "description": "Filter from ISO date (YYYY-MM-DD)"},
                     "to_date": {"type": "string", "description": "Filter to ISO date (YYYY-MM-DD)"},
                 },
@@ -196,6 +199,17 @@ _TOOLS = {
                     "text": {"type": "string", "description": "Message content"},
                     "session_id": {"type": "string", "description": "Session identifier"},
                     "role": {"type": "string", "description": "user or assistant"},
+                },
+            },
+        },
+        {
+            "name": "verify_file_path",
+            "description": "Verify whether a file or directory path exists on the local filesystem. Supports ~ expansion and relative paths. Use this to validate claims about file locations from old memory entries before acting on them.",
+            "inputSchema": {
+                "type": "object",
+                "required": ["path"],
+                "properties": {
+                    "path": {"type": "string", "description": "File or directory path to verify. Supports ~ for home directory and relative paths."},
                 },
             },
         },
@@ -265,6 +279,7 @@ def handle_search_context(args: dict[str, Any]) -> list[dict[str, Any]]:
     entry_type = args.get("type")
     tags = args.get("tags")
     n_results = min(args.get("n_results", 10), 50)
+    freshness_boost = min(max(args.get("freshness_boost", 0.0), 0.0), 1.0)
 
     where_filter = {}
     if project:
@@ -306,6 +321,20 @@ def handle_search_context(args: dict[str, Any]) -> list[dict[str, Any]]:
             "timestamp": metadata.get("timestamp", ""),
             "similarity": round(1.0 / (1.0 + distance), 4),
         })
+
+    if freshness_boost > 0:
+        now = datetime.now(timezone.utc)
+        for e in entries:
+            ts_str = e.get("timestamp", "")
+            if ts_str:
+                try:
+                    ts = datetime.fromisoformat(ts_str.replace("Z", "+00:00"))
+                    days = (now - ts).total_seconds() / 86400.0
+                    recency = math.exp(-days / 30.0)
+                    e["similarity"] = round((1.0 - freshness_boost) * e["similarity"] + freshness_boost * recency, 4)
+                except (ValueError, TypeError):
+                    pass
+        entries.sort(key=lambda e: e["similarity"], reverse=True)
 
     return entries[:n_results]
 
@@ -369,11 +398,12 @@ def handle_multi_search_context(args: dict[str, Any]) -> dict[str, Any]:
     session_id = args.get("session_id", "")
     _log_jsonl(session_id, "search", query)
     n_results = min(args.get("n_results", 10), 50)
+    freshness_boost = min(max(args.get("freshness_boost", 0.0), 0.0), 1.0)
     from_date = args.get("from_date")
     to_date = args.get("to_date")
     try:
         ch = _get_ch()
-        results = ch.recall(query, project, n_results, from_date, to_date)
+        results = ch.recall(query, project, n_results, from_date, to_date, freshness_boost)
         return {"entries": results, "count": len(results)}
     except Exception as e:
         _LOGGER.exception("multi_search_context failed")
@@ -420,6 +450,29 @@ def handle_save_message(args: dict[str, Any]) -> dict[str, Any]:
         _LOGGER.exception("save_message failed")
         return {"error": str(e), "stored": False}
 
+def handle_verify_file_path(args: dict[str, Any]) -> dict[str, Any]:
+    """Verify whether a file or directory path exists on the local filesystem."""
+    path = args.get("path", "")
+    if not path:
+        return {"exists": False, "error": "path required"}
+    expanded = os.path.expanduser(path) if path.startswith("~") else path
+    if not os.path.isabs(expanded):
+        expanded = os.path.join(os.getcwd(), expanded)
+    exists = os.path.isfile(expanded) or os.path.isdir(expanded)
+    mtime = None
+    if exists:
+        try:
+            mtime = datetime.fromtimestamp(os.path.getmtime(expanded), tz=timezone.utc).isoformat()
+        except OSError:
+            pass
+    kind = None
+    if os.path.isfile(expanded):
+        kind = "file"
+    elif os.path.isdir(expanded):
+        kind = "dir"
+    return {"exists": exists, "path": expanded, "last_modified": mtime, "kind": kind}
+
+
 TOOL_HANDLERS = {
     "store_context": handle_store_context,
     "search_context": handle_search_context,
@@ -429,6 +482,7 @@ TOOL_HANDLERS = {
     "list_sessions": handle_list_sessions,
     "continue_session": handle_continue_session,
     "save_message": handle_save_message,
+    "verify_file_path": handle_verify_file_path,
 }
 
 

@@ -23,6 +23,7 @@ BASE_DIR = os.path.join(_HOME, ".shokunin", "memory")
 CHROMA_PATH = os.path.join(BASE_DIR, "chroma_db")
 SESSIONS_PATH = os.path.join(BASE_DIR, "sessions")
 COLLECTION_NAME = "shokunin_memory"
+RECENCY_HALFLIFE_DAYS = 30
 
 _client: chromadb.PersistentClient | None = None
 _collection: chromadb.Collection | None = None
@@ -40,6 +41,17 @@ def _get_db() -> chromadb.Collection:
 def _sanitize_id(sid: str) -> str:
     safe = re.sub(r'\.\.', '', sid).replace(":", "-").replace("/", "-").replace("\\", "-")
     return re.sub(r'[<>"|?*\0]', '-', safe)
+
+def _freshness_score(timestamp: str, half_life_days: int = RECENCY_HALFLIFE_DAYS) -> float:
+    """Decaying recency score. 1.0 = just stored, approaches 0 for old entries."""
+    if not timestamp:
+        return 0.5
+    try:
+        ts = datetime.fromisoformat(timestamp.replace("Z", "+00:00"))
+        days = (datetime.now(timezone.utc) - ts).total_seconds() / 86400.0
+        return math.exp(-days / max(half_life_days, 1))
+    except (ValueError, TypeError):
+        return 0.5
 
 def save(text: str, session_id: str, entry_type: str = "general", tags: list[str] | None = None, project: str = "") -> dict[str, Any]:
     if not text or not session_id:
@@ -62,7 +74,7 @@ def save(text: str, session_id: str, entry_type: str = "general", tags: list[str
         f.write(f"## {timestamp} | type: {entry_type}\n- **project:** {project}\n- **tags:** {json.dumps(tags)}\n\n{text}\n\n---\n")
     return {"id": entry_id, "stored": True}
 
-def search(query: str, project: str | None = None, n_results: int = 10) -> list[dict[str, Any]]:
+def search(query: str, project: str | None = None, n_results: int = 10, freshness_boost: float = 0.0) -> list[dict[str, Any]]:
     where_filter = {"project": project} if project else None
     try:
         results = _get_db().query(query_texts=[query], n_results=n_results, where=where_filter)
@@ -74,6 +86,12 @@ def search(query: str, project: str | None = None, n_results: int = 10) -> list[
         for i in range(len(results["ids"][0])):
             meta = results["metadatas"][0][i]
             dist = results["distances"][0][i]
+            vector_sim = 1.0 / (1.0 + dist)
+            if freshness_boost > 0:
+                recency = _freshness_score(meta.get("timestamp", ""))
+                sim = round((1.0 - freshness_boost) * vector_sim + freshness_boost * recency, 4)
+            else:
+                sim = round(vector_sim, 4)
             entries.append({
                 "text": results["documents"][0][i][:500],
                 "type": meta.get("type", "general"),
@@ -81,8 +99,9 @@ def search(query: str, project: str | None = None, n_results: int = 10) -> list[
                 "project": meta.get("project", ""),
                 "session_id": meta.get("session_id", ""),
                 "timestamp": meta.get("timestamp", ""),
-                "similarity": round(1.0 / (1.0 + dist), 4),
+                "similarity": sim,
             })
+    entries.sort(key=lambda e: e["similarity"], reverse=True)
     return entries
 
 def _tokenize(text: str) -> list[str]:
@@ -142,8 +161,8 @@ def _rrf_fuse(ranked_lists: list[tuple[list[dict[str, Any]], str]], k: int = 60)
             seen.add(sid)
     return result
 
-def recall(query: str, project: str | None = None, n_results: int = 10, from_date: str | None = None, to_date: str | None = None) -> list[dict[str, Any]]:
-    vector_results = search(query, project, n_results * 2)
+def recall(query: str, project: str | None = None, n_results: int = 10, from_date: str | None = None, to_date: str | None = None, freshness_boost: float = 0.0) -> list[dict[str, Any]]:
+    vector_results = search(query, project, n_results * 2, freshness_boost=freshness_boost)
     vector_results = [e for e in vector_results if _in_date_range(e, from_date, to_date)]
 
     sessions_dir = SESSIONS_PATH
@@ -428,7 +447,8 @@ if __name__ == "__main__":
         query = sys.argv[2]
         project = sys.argv[3] if len(sys.argv) > 3 else None  # type: ignore[assignment]
         n_results = int(sys.argv[4]) if len(sys.argv) > 4 else 10
-        result: Any = search(query, project, n_results)  # type: ignore[no-redef]
+        freshness_boost = float(sys.argv[5]) if len(sys.argv) > 5 else 0.0
+        result: Any = search(query, project, n_results, freshness_boost)  # type: ignore[no-redef]
         print(json.dumps(result))
     elif cmd == "recall" and len(sys.argv) >= 3:
         query = sys.argv[2]
@@ -436,7 +456,8 @@ if __name__ == "__main__":
         n_results = int(sys.argv[4]) if len(sys.argv) > 4 else 10
         from_date = sys.argv[5] if len(sys.argv) > 5 else None
         to_date = sys.argv[6] if len(sys.argv) > 6 else None
-        result: Any = recall(query, project, n_results, from_date, to_date)  # type: ignore[no-redef]
+        freshness_boost = float(sys.argv[7]) if len(sys.argv) > 7 else 0.0
+        result: Any = recall(query, project, n_results, from_date, to_date, freshness_boost)  # type: ignore[no-redef]
         print(json.dumps(result))
     elif cmd == "consolidate":
         project = sys.argv[2] if len(sys.argv) > 2 else None  # type: ignore[assignment]
