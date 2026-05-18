@@ -54,7 +54,6 @@
 
   @keyframes heroIn { from { opacity: 0; transform: translateY(30px) rotateX(8deg) scale(0.96); } to { opacity: 1; transform: translateY(0) rotateX(0) scale(1); } }
   @keyframes heroSubIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-  @keyframes barGrow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -273,7 +272,7 @@
   .bench-row:last-child { margin-bottom: 0; }
   .bench-label { font-size: 13px; color: var(--dark-warm); font-weight: 500; text-align: right; }
   .bench-track { height: 24px; background: var(--border-soft); border-radius: 4px; overflow: hidden; }
-  .bench-bar { height: 100%; border-radius: 4px; transform: scaleX(0); transform-origin: left; transition: transform 1s var(--ease-out); }
+  .bench-bar { height: 100%; border-radius: 4px; width: 0%; transition: width 1s var(--ease-out); }
   .bench-bar.vec { background: var(--bench-vec); }
   .bench-bar.mul { background: var(--bench-mul); }
   .bench-val { font-size: 12px; font-weight: 500; color: var(--near-black); font-variant-numeric: tabular-nums; white-space: nowrap; }
@@ -737,26 +736,13 @@ get_session_summary — summarize all entries in a given session
     });
   }
 
-  // ViewTimeline progressive enhancement for benchmark bars
-  if ('animationTimeline' in document.documentElement.style) {
-    try {
-      document.querySelectorAll('.bench-bar').forEach(bar => {
-        bar.style.animationTimeline = 'view()';
-        bar.style.animationRange = 'entry 0% entry 100%';
-        bar.style.animationName = 'barGrow';
-        bar.style.animationFillMode = 'both';
-        bar.style.animationTimingFunction = 'linear';
-      });
-    } catch(e) {}
-  }
-
-  // Benchmark bars: scaleX + counter animation
+  // Benchmark bars: width + counter animation
   const benchObs = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
         entry.target.querySelectorAll('.bench-bar').forEach(bar => {
           const pct = parseFloat(bar.dataset.pct || '0');
-          bar.style.transform = 'scaleX(' + (pct / 100) + ')';
+          bar.style.width = pct + '%';
         });
         if (!prefersReduced) {
           entry.target.querySelectorAll('.bench-val').forEach(el => {
