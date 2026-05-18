@@ -123,6 +123,41 @@ npx skills init my-xyz-skill
 | User requests a skill for a niche domain with no ecosystem coverage | No skill exists yet. Offer to help directly. Propose creating a custom skill with `npx skills init`. Show the skill-creator workflow if the user wants to build and publish it. |
 | Skill install conflicts with an existing skill of the same name | Two skills share a namespace. The CLI will refuse to overwrite. Uninstall the old one first: `npx skills remove <old-package>`. Verify the old skill isn't needed before removing. |
 
+## Skill Discovery Methodology
+
+### Finding skills in the ecosystem
+```bash
+# List installed skills with version + line count
+npx skills list
+
+# Search marketplace by keyword
+npx skills find "docker" "kubernetes" "security"
+
+# Check what's available
+npx skills check
+```
+
+### Quality Evaluation Framework
+
+Rate skills on 5 criteria before installing:
+1. **Trigger clarity**: Does the description clearly define when to activate?
+2. **Workflow completeness**: Numbered steps or procedural sections?
+3. **Error handling**: Does it document common failures and fixes?
+4. **Sources cited**: Verifiable references or just opinions?
+5. **Anti-patterns**: Explicit warnings about what NOT to do?
+
+Minimum threshold for production: 4 of 5 criteria met.
+
+### Installation Troubleshooting
+
+| Error | Cause | Fix |
+|-------|-------|-----|
+| `SKILL.md not found` | Directory missing from registry | Check if skill exists at source repository |
+| `permission denied` | Plugin directory not writable | `chmod 755 ~/.config/opencode/skills/` |
+| `skill already installed` | Version conflict or duplicate | `npx skills remove <name>` then reinstall |
+| `trigger not matching` | Description too generic or too narrow | Edit frontmatter `description:` field and re-test |
+| `npm ERR!` during install | npm registry issue or network | Retry. If persistent, clone manually from GitHub |
+
 ## Sources
 
 - Skills CLI documentation (skills.sh/docs) — package manager usage, publish flow, and repository structure

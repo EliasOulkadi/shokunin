@@ -167,6 +167,54 @@ Subject line: 30-50 chars. Start with verb or number. No ALL CAPS. A/B test 20%.
 | No proof | Back every claim with data |
 | Selling too early | Build trust before the ask |
 
+## Headline Formulas by Platform
+
+### Blog Headings
+- "How to [Achieve Outcome] [Timeframe]" (How to Ship Faster in 30 Days)
+- "[Number] [Adjective] Ways to [Solve Problem]" (7 Proven Ways to Reduce Churn)
+- "Why [Common Belief] Is Wrong (And What to Do Instead)" 
+- "[Year] Guide to [Topic]: [Specific Angle]" (2026 Guide to SEO: GEO Edition)
+
+### Newsletter Subject Lines
+- Questions: "Is your [metric] where it should be?"
+- Urgency: "[Name], [deadline] is tomorrow"
+- Social proof: "How [company] grew [metric] by [number]%"
+- Curiosity gap: "The [industry] secret nobody talks about"
+
+### Twitter/X Threads
+- Hook line 1: Contrarian take or surprising statistic
+- Line 2-3: Expand with evidence
+- Line 4-6: Steps/methods (numbered)
+- Line 7-8: Results/social proof
+- Last line: Call to action + link
+
+### LinkedIn
+- Line 1: Statement that challenges assumption
+- Line 2-3: Story with specific numbers
+- Line 4-5: Lesson learned
+- Last line: Question to drive comments
+
+## Newsletter Deliverability
+
+### Authentication
+```
+DNS Records:
+TXT  @   "v=spf1 include:mail.provider.com ~all"
+TXT  _dmarc  "v=DMARC1; p=quarantine; rua=mailto:dmarc@domain.com"
+CNAME  selector1._domainkey  selector1.provider.com
+CNAME  selector2._domainkey  selector2.provider.com
+```
+
+### Deliverability Checklist
+- SPF record covers all sending IPs
+- DKIM signed with 2048-bit key
+- DMARC policy at minimum `p=none` (monitor), eventually `p=reject`
+- Custom tracking domain (not shared with other senders)
+- Sender reputation > 95% (Google Postmaster Tools)
+- Spam rate < 0.1% (Google threshold is 0.3%)
+- Unsubscribe link visible in every email (CAN-SPAM/GDPR requirement)
+- List cleaned monthly: remove addresses that haven't opened in 90 days
+
 ## Sources
 
 - Ogilvy on Advertising

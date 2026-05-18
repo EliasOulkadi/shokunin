@@ -159,6 +159,72 @@ Translate **meaning**, not words. If the reader can tell it's a translation, it 
 | Ignoring expansion (German +25%) | Design flexible containers. Test with longest string. |
 | RTL as afterthought | Use CSS logical properties from day 1 |
 
+## ICU MessageFormat Advanced Patterns
+
+### Plurals (per-language rules)
+```
+// EN: 1 item, 2 items
+{count, plural, one {# item} other {# items}}
+
+// AR: 0 عناصر, 1 عنصر, 2 عنصران, 3-10 عناصر, 11+ عنصر
+{count, plural, zero {# عناصر} one {# عنصر} two {# عنصران} few {# عناصر} many {# عنصر}}
+
+// JA: 日本語は複数形がない（単純）
+{count}個
+```
+
+### Gender
+```
+// ES
+{gender, select, male {Estimado} female {Estimada} other {Estimado/a}}
+
+// FR
+{gender, select, male {Cher} female {Chère} other {Cher/Chère}}
+```
+
+### Select with nested plural
+```
+{gender, select,
+  male {{count, plural, one {Il a # livre} other {Il a # livres}}}
+  female {{count, plural, one {Elle a # livre} other {Elle a # livres}}}
+}
+```
+
+### Date/Number Locale Formatting
+
+```python
+# Python babel
+from babel.dates import format_date, format_datetime
+format_date(date, locale='de_DE')    # 18.05.2026
+format_date(date, locale='en_US')    # May 18, 2026
+format_date(date, locale='ja_JP')    # 2026/05/18
+
+from babel.numbers import format_number, format_currency
+format_number(1234567, locale='en_US')   # 1,234,567
+format_number(1234567, locale='de_DE')   # 1.234.567
+format_currency(49.99, 'EUR', locale='de_DE')  # 49,99 €
+```
+
+```javascript
+// JavaScript Intl
+new Intl.DateTimeFormat('ja-JP').format(new Date())        // 2026/5/18
+new Intl.DateTimeFormat('ar-SA', { dateStyle: 'full' }).format(new Date())
+new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(49.99)  // 49,99 €
+```
+
+### RTL CSS Patterns
+
+```css
+/* Logical properties (direction-aware) */
+.element {
+  margin-inline-start: 16px;   /* margin-left in LTR, margin-right in RTL */
+  padding-inline-end: 8px;
+  border-inline-start: 2px solid;
+  text-align: start;
+}
+/* Avoid: margin-left, padding-right, text-align: left */
+```
+
 ## Sources
 
 - ATA (American Translators Association)

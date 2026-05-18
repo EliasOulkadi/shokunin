@@ -100,6 +100,65 @@ The agent should automatically:
 | Assuming memory entries are immutable truth | Entries represent frozen-in-time claims. Code may have changed since then. | Always verify file paths and function names before acting. Use `verify_file_path` or grep to confirm. |
 | Skipping session search at conversation start | Loses all context from prior work, forcing the agent to re-discover already-solved problems | Mandatory step: always run `session list` and search before responding to any task. |
 
+## Advanced ChromaDB Patterns
+
+### Collection Management
+```python
+# List collections
+collections = client.list_collections()
+for c in collections: print(c.name, c.count())
+
+# Create collection with custom embedding function
+from chromadb.utils import embedding_functions
+ef = embedding_functions.OpenAIEmbeddingFunction(api_key="...", model_name="text-embedding-3-small")
+collection = client.create_collection(name="custom", embedding_function=ef)
+
+# Delete by metadata filter
+collection.delete(where={"project": "test-project"})
+
+# Peek at stored data
+sample = collection.peek(limit=5)
+```
+
+### Embedding Model Selection
+
+| Model | Dimensions | Speed | Accuracy |
+|-------|-----------|-------|----------|
+| all-MiniLM-L6-v2 (default/ONNX) | 384 | Fastest | Good for short text |
+| text-embedding-3-small (OpenAI) | 1536 | API-dependent | Excellent |
+| text-embedding-3-large (OpenAI) | 3072 | API-dependent | Best (expensive) |
+
+Default ONNX model (`all-MiniLM-L6-v2`) runs locally, no API key needed. Downloads once (~79MB).
+
+### Performance Tuning
+
+```python
+# Batch inserts (100x faster than single inserts)
+batch_size = 100
+for i in range(0, len(documents), batch_size):
+    collection.add(
+        documents=documents[i:i+batch_size],
+        metadatas=metadatas[i:i+batch_size],
+        ids=ids[i:i+batch_size]
+    )
+
+# Limit query results
+results = collection.query(query_texts=["query"], n_results=10)
+
+# Get with limit (prevents OOM)
+all_data = collection.get(limit=500, include=["documents", "metadatas"])
+```
+
+### Storage Monitoring
+```python
+import os
+
+db_path = "~/.shokunin/memory/chroma_db"
+size = sum(os.path.getsize(os.path.join(root, f)) for root, _, files in os.walk(db_path) for f in files)
+print(f"Database size: {size / 1024 / 1024:.1f} MB")
+print(f"Collection count: {collection.count()}")
+```
+
 ## Sources
 
 - ChromaDB documentation (docs.trychroma.com) — vector database setup, embedding models, and query best practices

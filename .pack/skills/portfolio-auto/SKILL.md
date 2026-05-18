@@ -127,6 +127,68 @@ Sync complete:
 | Supabase API insert fails with foreign key or schema constraint | Portfolio schema might differ from the auto-generated payload shape. Read the Supabase table schema first. Map fields explicitly (not spread operator). Validate with a dry-run POST that returns 200 before committing. |
 | `last-sync.json` is corrupted or manually edited | Parse as JSON in a try-catch. On failure, rename to `last-sync.json.bak` and start fresh sync from scratch. Warn user that incremental detection is lost. |
 
+## GitHub API Patterns
+
+### Repository Discovery
+```python
+import requests, os
+
+headers = {"Authorization": f"token {os.environ['GITHUB_TOKEN']}"}
+
+# Fetch all repos (paginated)
+repos = []
+page = 1
+while True:
+    r = requests.get(f"https://api.github.com/user/repos?per_page=100&page={page}&sort=updated", headers=headers)
+    batch = r.json()
+    if not batch: break
+    repos.extend(batch)
+    page += 1
+
+# Filter: only non-fork, non-archived, has description
+candidates = [r for r in repos if not r["fork"] and not r["archived"] and r["description"]]
+```
+
+### Rate Limiting
+- GitHub API: 5,000 requests/hour (authenticated). Check `X-RateLimit-Remaining` header.
+- For repos with 500+ repos: use conditional requests (`If-None-Match` with ETag)
+- Sleep 1s between screenshot captures (avoid GitHub rate limit on assets)
+
+### Playwright Screenshot Pattern
+```python
+from playwright.sync_api import sync_playwright
+
+def capture(url, output_path):
+    with sync_playwright() as p:
+        browser = p.chromium.launch()
+        page = browser.new_page(viewport={"width": 1280, "height": 800})
+        page.goto(url, timeout=15000, wait_until="networkidle")
+        page.screenshot(path=output_path, full_page=False)
+        browser.close()
+```
+
+### Error Recovery
+- Timeout on page load -> retry once, skip if still fails (mark in output)
+- Private repo -> skip (cannot screenshot without auth)
+- Page crashes -> capture error state as screenshot
+- DNS failure -> skip with log message
+
+### Caching Strategy
+```python
+import hashlib, json, os
+cache_file = ".sync-cache.json"
+cache = json.load(open(cache_file)) if os.path.exists(cache_file) else {}
+
+for repo in repos:
+    key = hashlib.md5(f"{repo['full_name']}:{repo['pushed_at']}".encode()).hexdigest()
+    if cache.get(repo['full_name']) == key:
+        continue  # Skip: no changes since last sync
+    # ... capture screenshot, update entry ...
+    cache[repo['full_name']] = key
+
+json.dump(cache, open(cache_file, 'w'))
+```
+
 ## Sources
 
 - GitHub REST API v3 documentation (docs.github.com/en/rest/repos/repos) — repository listing, filtering, and pagination

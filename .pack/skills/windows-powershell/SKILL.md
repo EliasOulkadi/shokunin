@@ -140,6 +140,108 @@ See [references/powershell-mastery.md](references/powershell-mastery.md) for com
 | No aliases for common commands | Use the profile template |
 | Running without admin when needed | Use `admin` alias for elevated commands |
 
+## Advanced Patterns
+
+### Desired State Configuration (DSC)
+
+```powershell
+Configuration WebServer {
+    Import-DscResource -ModuleName PSDesiredStateConfiguration
+    Node "localhost" {
+        WindowsFeature IIS { Name = "Web-Server"; Ensure = "Present" }
+        File WebContent {
+            Ensure = "Present"
+            SourcePath = "C:\inetpub\wwwroot"
+            DestinationPath = "C:\inetpub\wwwroot"
+            DependsOn = "[WindowsFeature]IIS"
+        }
+    }
+}
+WebServer -OutputPath C:\DSC
+Start-DscConfiguration -Path C:\DSC -Wait -Verbose
+```
+
+### Just Enough Administration (JEA)
+
+```powershell
+# Create a restricted endpoint that only allows Get-Service + Restart-Service
+New-PSSessionConfigurationFile -Path .\HelpDesk.pssc -SessionType RestrictedRemoteServer `
+    -VisibleCmdlets @{ Name = 'Get-Service'; Parameters = @{ Name = 'Name' }},
+                    @{ Name = 'Restart-Service'; Parameters = @{ Name = 'Name' }}
+Register-PSSessionConfiguration -Name HelpDesk -Path .\HelpDesk.pssc -Force
+```
+
+### PSRemoting
+
+```powershell
+# Enable on target machine (admin)
+Enable-PSRemoting -Force
+Set-Item WSMan:\localhost\Client\TrustedHosts -Value "192.168.1.100"
+
+# Connect from source
+$session = New-PSSession -ComputerName 192.168.1.100 -Credential (Get-Credential)
+Invoke-Command -Session $session -ScriptBlock { Get-Process }
+Remove-PSSession $session
+```
+
+### Script Signing
+
+```powershell
+# Generate self-signed certificate
+$cert = New-SelfSignedCertificate -Subject "CN=PowerShell Code Signing" -Type CodeSigningCert -CertStoreLocation Cert:\CurrentUser\My
+
+# Sign a script
+Set-AuthenticodeSignature -FilePath .\script.ps1 -Certificate $cert
+
+# Verify
+Get-AuthenticodeSignature .\script.ps1
+
+# Enforce in session
+Set-ExecutionPolicy AllSigned -Scope Process
+```
+
+### Module Manifests
+
+```powershell
+New-ModuleManifest -Path .\MyModule.psd1 -RootModule MyModule.psm1 -Author "YourName" `
+    -CompanyName "Company" -Description "Module description" -PowerShellVersion "5.1" `
+    -FunctionsToExport @("Get-Data","Set-Data") -RequiredModules @("Az","SqlServer")
+```
+
+### Error Handling Patterns
+
+```powershell
+# Pattern 1: Try/Catch/Finally with resource cleanup
+try {
+    $conn = New-Object System.Data.SqlClient.SqlConnection($connString)
+    $conn.Open()
+    # Work
+} catch [System.Data.SqlClient.SqlException] {
+    Write-Error "Database error: $_"
+} catch {
+    Write-Error "Unexpected: $_"
+} finally {
+    if ($conn) { $conn.Dispose() }
+}
+
+# Pattern 2: -ErrorAction with $ErrorActionPreference
+Get-ChildItem -Path $path -ErrorAction Stop
+# or globally
+$ErrorActionPreference = "Stop"
+
+# Pattern 3: $LASTEXITCODE for native commands
+& python script.py
+if ($LASTEXITCODE -ne 0) {
+    throw "Python script failed with exit code $LASTEXITCODE"
+}
+
+# Pattern 4: $? for PowerShell commands
+Get-Item $path -ErrorAction SilentlyContinue
+if (-not $?) {
+    Write-Warning "Path not found, using default"
+}
+```
+
 ## Sources
 
 - Microsoft PowerShell docs (learn.microsoft.com/powershell)

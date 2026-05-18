@@ -109,6 +109,52 @@ If the model name is unrecognized, ask for the exact model ID.
 | Delegating to the same model the user is already talking to | If user says "review with sonnet" and master agent IS sonnet, this is circular. | Use a different model than the one running the master agent. |
 | Requesting review of unchanged code | cross-review only works on changes made in the current conversation. | If the user wants PR review from git, use the `code-review` skill directly. |
 
+## Model Comparison Methodology
+
+### When to use which model
+
+| Model | Strengths | Best for |
+|-------|-----------|----------|
+| Claude Opus 4 | Deep reasoning, security analysis, architectural review | Complex refactors, auth code |
+| GPT-5 Codex | Code generation patterns, syntax accuracy | Implementation review, template checking |
+| Gemini 2.5 Pro | Multi-modal, context window size | Large PRs (200+ files), full-repo context |
+| DeepSeek V4 | Fast, cost-effective, strong at bug detection | Routine PRs, quick checks |
+
+### Confidence Scoring
+
+Assign confidence (0.0-1.0) to each finding:
+```
+confidence = (models_agreeing / total_models) * evidence_score
+
+evidence_score:
+  1.0 = exact line + code excerpt proves the bug
+  0.7 = logic analysis suggests probable issue
+  0.4 = speculative (pattern matching without code walk)
+  0.1 = style preference
+```
+
+Findings with confidence < 0.5 should be:
+- Marked as "suggestion" not "finding"
+- Never block a merge
+- Phrased as questions: "Did you consider...?"
+
+### Result Merging Strategy
+
+1. Group by file + line range (+-5 lines)
+2. If all 3 models agree: high confidence, use as primary finding
+3. If 2 of 3 agree: medium confidence, note the dissenting model's view in details
+4. If 1 of 3: low confidence, verify against code manually before including
+5. Merge descriptions: take the most specific one, append key insights from others
+6. Remove duplicates: same finding described differently -> keep clearest description
+
+### Handling Conflicts
+
+When models disagree:
+- Don't default to majority -- investigate the code yourself
+- The dissenting model may have caught something the others missed
+- Present both views: "Claude suggests X, Gemini suggests Y"
+- Let the human reviewer decide
+
 ## Sources
 
 - MCP Protocol specification (modelcontextprotocol.io) — subprocess agent spawning and message passing

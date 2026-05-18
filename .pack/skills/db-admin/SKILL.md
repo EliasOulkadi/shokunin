@@ -127,6 +127,90 @@ See [references/postgres-admin.md](references/postgres-admin.md) for streaming a
 | No replication monitoring | Check lag, WAL generation rate |
 | Running out of disk for WAL | Monitor WAL directory, tune archiving |
 
+## Streaming Replication Setup
+
+### Primary server (postgresql.conf)
+```
+wal_level = replica
+max_wal_senders = 5
+wal_keep_size = 1024    # MB of WAL to retain
+hot_standby = on        # Allow read-only queries on replica
+```
+
+### Primary server (pg_hba.conf)
+```
+host replication replicator 192.168.0.0/24 md5
+```
+
+### Replica setup
+```bash
+# 1. Create base backup
+pg_basebackup -h primary_host -D /var/lib/postgresql/data -U replicator -P -R
+
+# 2. Start replica
+pg_ctl start -D /var/lib/postgresql/data
+
+# 3. Verify replication
+psql -c "SELECT client_addr, state, sync_state FROM pg_stat_replication;"
+```
+
+### PITR (Point-in-Time Recovery)
+
+```bash
+# On primary: configure WAL archiving
+archive_mode = on
+archive_command = 'cp %p /archive/%f'
+
+# Take base backup
+pg_basebackup -h localhost -D /backup/base -Ft -z -P
+
+# Restore to point in time
+# 1. Stop PostgreSQL
+# 2. Restore base backup to data directory
+# 3. Create recovery.signal file
+# 4. Set recovery_target_time in postgresql.conf:
+#    recovery_target_time = '2026-05-18 14:30:00'
+# 5. Start PostgreSQL
+```
+
+### Vacuum Strategy
+
+```sql
+-- Check table bloat
+SELECT schemaname, relname, n_live_tup, n_dead_tup,
+       round(n_dead_tup * 100.0 / NULLIF(n_live_tup + n_dead_tup, 0), 2) AS dead_ratio
+FROM pg_stat_user_tables
+ORDER BY n_dead_tup DESC LIMIT 10;
+
+-- Aggressive autovacuum for high-write tables
+ALTER TABLE events SET (autovacuum_vacuum_scale_factor = 0.01, autovacuum_vacuum_cost_limit = 2000);
+
+-- Manual VACUUM (non-blocking)
+VACUUM (VERBOSE, ANALYZE) events;
+
+-- VACUUM FULL (blocking, recovers disk space)
+VACUUM FULL events;  -- Requires table lock. Only use during maintenance windows.
+```
+
+### Monitoring Queries
+
+```sql
+-- Active connections
+SELECT state, count(*) FROM pg_stat_activity GROUP BY state;
+
+-- Long-running queries (>5 min)
+SELECT pid, now() - query_start AS duration, query
+FROM pg_stat_activity WHERE state != 'idle' AND now() - query_start > INTERVAL '5 minutes';
+
+-- Cache hit ratio (should be >95%)
+SELECT sum(blks_hit) * 100.0 / NULLIF(sum(blks_hit) + sum(blks_read), 0) AS cache_hit_ratio
+FROM pg_stat_database WHERE datname = current_database();
+
+-- Dead tuples accumulating
+SELECT relname, n_dead_tup, last_autovacuum
+FROM pg_stat_user_tables WHERE n_dead_tup > 10000 ORDER BY n_dead_tup DESC;
+```
+
 ## Sources
 
 - PostgreSQL docs — Backup/Restore (postgresql.org/docs)

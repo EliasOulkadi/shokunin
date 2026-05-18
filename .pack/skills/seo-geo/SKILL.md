@@ -120,6 +120,76 @@ Place at `/.well-known/llms.txt`. This is how AI crawlers (GPTBot, Claude, Gemin
 | Ignoring Core Web Vitals | Performance is a ranking factor. |
 | No E-E-A-T signals | Author bios, citations, credentials, about page. |
 
+## Technical SEO
+
+### Core Web Vitals Thresholds
+
+| Metric | Good | Needs Work | Poor |
+|--------|------|------------|------|
+| LCP (Largest Contentful Paint) | < 2.5s | 2.5-4.0s | > 4.0s |
+| INP (Interaction to Next Paint) | < 200ms | 200-500ms | > 500ms |
+| CLS (Cumulative Layout Shift) | < 0.1 | 0.1-0.25 | > 0.25 |
+
+Measure with: Lighthouse, PageSpeed Insights, Web Vitals extension, CrUX dashboard.
+
+### Crawl Budget Optimization
+
+```robots.txt
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /*?*
+Disallow: /search
+Sitemap: https://example.com/sitemap.xml
+```
+
+Rules:
+- Block faceted navigation URLs with `?` parameters
+- Block internal search pages (no SEO value, consumes budget)
+- Keep sitemap under 50,000 URLs or split into sitemap index
+- Set `lastmod` accurately (Google prioritizes recently-changed URLs)
+- Use `<priority>` sparingly (Google largely ignores it)
+
+### Hreflang for Multilingual Sites
+
+```html
+<link rel="alternate" hreflang="en" href="https://example.com/en/page" />
+<link rel="alternate" hreflang="es" href="https://example.com/es/pagina" />
+<link rel="alternate" hreflang="x-default" href="https://example.com/" />
+```
+
+Rules:
+- Every language must link to every other language (bidirectional)
+- `x-default` for language selector page or auto-redirect
+- Use ISO 639-1 codes (en, es, fr, de, ja, zh)
+- Verify with Google Search Console International Targeting report
+
+### Schema.org Nesting Patterns
+
+```json
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "Title",
+  "author": { "@type": "Person", "name": "Author" },
+  "publisher": { "@type": "Organization", "name": "Site", "logo": { "@type": "ImageObject", "url": "logo.png" } },
+  "mainEntityOfPage": { "@type": "WebPage", "@id": "https://example.com/article" }
+}
+```
+
+Nest entities, don't flatten. Google prefers deeply-nested schema over flat arrays.
+
+### GEO Optimization (Generative Engine)
+
+For AI search engines (ChatGPT, Gemini, Perplexity, Google AI Overviews):
+
+1. `llms.txt` at `/.well-known/llms.txt` with structured content
+2. Entity clarity: every page must answer "who, what, where, when" in first 100 words
+3. Citability: include statistics with source links (AI Overviews prefer cited content)
+4. Direct answers: format answers as Q&A pairs (AI extracts these verbatim)
+5. Long-form depth: AI favors pages > 1,500 words with clear section headers
+6. Markdown structure: AI parses `##` headers better than `<h2>` tags
+
 ## Sources
 
 - Google Search Central

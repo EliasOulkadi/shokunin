@@ -189,6 +189,122 @@ When reviewing Dockerfiles, use Before | After | Why format:
 | `CMD ["npm", "start"]` | Use `node server.js` directly | Avoids npm overhead in production. Use process manager (dumb-init, tini) for signal forwarding. |
 | No `.dockerignore` | `.dockerignore` with `node_modules/`, `.git/`, `*.log`, `Dockerfile*` | Reduces build context size by 60-90%. Prevents leaking secrets from local `.env`. |
 
+### Go multi-stage template
+
+```dockerfile
+# syntax=docker/dockerfile:1.4
+FROM golang:1.24-alpine AS builder
+WORKDIR /app
+COPY go.mod go.sum ./
+RUN --mount=type=cache,target=/go/pkg/mod go mod download
+COPY . .
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o /server ./cmd/server
+
+FROM gcr.io/distroless/static-debian12
+COPY --from=builder /server /server
+EXPOSE 8080
+USER nonroot
+HEALTHCHECK --interval=30s CMD ["/server", "-health"] || exit 1
+ENTRYPOINT ["/server"]
+```
+
+Key decisions:
+- `CGO_ENABLED=0` for static binary (no glibc dependency)
+- `-ldflags="-s -w"` strips debug symbols (reduces binary by 30%)
+- `gcr.io/distroless/static-debian12` for CA certs + timezone data (needed for HTTPS/TLS)
+- If the binary needs nothing: use `scratch` (smaller, but no CA certs)
+
+### Python multi-stage template
+
+```dockerfile
+# syntax=docker/dockerfile:1.4
+FROM python:3.12-slim AS builder
+WORKDIR /app
+COPY requirements.txt .
+RUN --mount=type=cache,target=/root/.cache/pip pip install --user -r requirements.txt
+
+FROM python:3.12-slim
+WORKDIR /app
+COPY --from=builder /root/.local /root/.local
+COPY src ./src
+ENV PATH=/root/.local/bin:$PATH
+EXPOSE 8000
+RUN useradd -m app && chown -R app /app
+USER app
+HEALTHCHECK --interval=30s CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"
+CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:8000", "src.main:app"]
+```
+
+Key decisions:
+- `pip install --user` avoids polluting /usr/local in builder
+- `gunicorn` with multiple workers handles concurrent requests
+- `useradd` creates a non-root user (distroless Python not available)
+
+### Rust multi-stage template
+
+```dockerfile
+# syntax=docker/dockerfile:1.4
+FROM rust:1.85-slim AS builder
+WORKDIR /app
+RUN apt-get update && apt-get install -y musl-tools && rm -rf /var/lib/apt/lists/*
+COPY Cargo.toml Cargo.lock ./
+RUN mkdir src && echo "fn main() {}" > src/main.rs
+RUN --mount=type=cache,target=/usr/local/cargo/registry cargo build --release --target x86_64-unknown-linux-musl
+RUN rm -rf src
+COPY src ./src
+RUN cargo build --release --target x86_64-unknown-linux-musl
+
+FROM scratch
+COPY --from=builder /app/target/x86_64-unknown-linux-musl/release/server /server
+EXPOSE 8080
+ENTRYPOINT ["/server"]
+```
+
+Key decisions:
+- `musl-tools` for static linking (no glibc dependency)
+- Dummy main.rs trick: compiles deps first, then source (cache deps)
+- `scratch` base: smallest possible, no shell, no tools
+
+### Seccomp profiles
+
+Docker applies a default seccomp profile that blocks 44/300+ syscalls. Customize for your app:
+
+```json
+{
+  "defaultAction": "SCMP_ACT_ERRNO",
+  "architectures": ["SCMP_ARCH_X86_64"],
+  "syscalls": [
+    { "names": ["read","write","open","close","fstat","mmap","mprotect","munmap","brk","rt_sigaction","rt_sigprocmask","rt_sigreturn","ioctl","pread64","pwrite64","readv","writev","access","pipe","select","sched_yield","mremap","msync","mincore","madvise","shmget","shmat","shmctl","dup","dup2","pause","nanosleep","getitimer","setitimer","alarm","getpid","sendfile","socket","connect","accept","sendto","recvfrom","sendmsg","recvmsg","shutdown","bind","listen","getsockname","getpeername","socketpair","setsockopt","getsockopt","clone","fork","vfork","execve","exit","wait4","kill","uname","semget","semop","semctl","shmdt","msgget","msgsnd","msgrcv","msgctl","fcntl","flock","fsync","fdatasync","truncate","ftruncate","getdents","getcwd","chdir","fchdir","rename","mkdir","rmdir","creat","link","unlink","symlink","readlink","chmod","fchmod","chown","fchown","lchown","umask","gettimeofday","getrlimit","getrusage","sysinfo","times","preadv","pwritev","rt_sigtimedwait","futex","set_robust_list","get_robust_list","epoll_wait","epoll_ctl","epoll_create","epoll_pwait","epoll_create1","eventfd","signalfd","timerfd_create","timerfd_gettime","timerfd_settime","prctl","getcpu","process_vm_readv","process_vm_writev"], "action": "SCMP_ACT_ALLOW" }
+  ]
+}
+```
+
+Usage: `docker run --security-opt seccomp=profile.json myapp`
+
+### CVE scanning pipeline
+
+```bash
+# Full scan pipeline
+docker build -t myapp:latest .
+trivy image --severity HIGH,CRITICAL --exit-code 1 myapp:latest
+docker scout cves --exit-code myapp:latest
+
+# CI integration (GitHub Actions)
+- uses: aquasecurity/trivy-action@master
+  with:
+    image-ref: myapp:latest
+    format: sarif
+    output: trivy-results.sarif
+    severity: HIGH,CRITICAL
+    exit-code: 1
+
+# Continuous monitoring
+docker scout enroll myorg/myapp
+docker scout watch myapp:latest
+```
+
+If CVEs found: switch base image to newer distroless tag, rebuild, re-scan. Track with `docker scout recommendations`.
+
 ## Sources
 
 - Dockerfile best practices (docs.docker.com)
