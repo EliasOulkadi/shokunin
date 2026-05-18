@@ -34,4 +34,4 @@ Open a GitHub issue with:
 - Shell scripts: `set -euo pipefail`, error messages, portable syntax
 - Python: type hints, f-strings, 3.10+ syntax
 
-Questions? Open an issue or reach out to oulkadielias8@icloud.com.
+Questions? Open an issue or reach out to elias@cyberian.online.
