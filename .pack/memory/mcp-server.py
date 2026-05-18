@@ -50,9 +50,9 @@ def _get_ch() -> Any:
     global _ch_stub
     if _ch_stub is None:
         stub_path = os.path.join(os.path.dirname(BASE_DIR), "scripts", "chroma_helper_stub.py")
-        spec = importlib.util.spec_from_file_location("chroma_helper_stub", stub_path)
-        _ch_stub = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(_ch_stub)
+        spec = importlib.util.spec_from_file_location("chroma_helper_stub", stub_path)  # type: ignore[arg-type]
+        _ch_stub = importlib.util.module_from_spec(spec)  # type: ignore[arg-type]
+        spec.loader.exec_module(_ch_stub)  # type: ignore[union-attr]
     return _ch_stub
 
 def _safe_id(sid: str) -> str:
@@ -276,9 +276,9 @@ def handle_search_context(args: dict[str, Any]) -> list[dict[str, Any]]:
         )
     except Exception as e:
         _LOGGER.error(f"Search query failed: {e}")
-        return {"error": "Search query failed", "entries": []}
+        return []
 
-    entries = []
+    entries: list[dict[str, Any]] = []
     if not results.get("ids") or not results["ids"][0]:
         return entries
 

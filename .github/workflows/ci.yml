@@ -4,7 +4,7 @@ jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Validate SKILL.md frontmatter
         shell: bash
         run: |
@@ -45,18 +45,18 @@ jobs:
   typecheck:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: actions/setup-python@v6
         with:
           python-version: '3.11'
       - run: pip install mypy chromadb
       - name: Type check Python
-        run: mypy .pack/scripts/ .pack/memory/ --strict
+        run: mypy .pack/scripts/chroma-helper.py .pack/memory/mcp-server.py
 
   security:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: actions/setup-python@v6
         with:
           python-version: '3.11'

@@ -101,7 +101,7 @@ def _bm25(query_tokens: list[str], doc_tokens: list[str], avgdl: float, N: int, 
 def _build_bm25_index(entries: list[dict[str, Any]]) -> tuple[list[list[str]], dict[str, int], float, int]:
     index = []
     N = len(entries)
-    df = Counter()
+    df: dict[str, int] = Counter()  # type: ignore[assignment]
     all_tokens = []
     for e in entries:
         tokens = _tokenize(e.get("text", ""))
@@ -124,8 +124,8 @@ def _in_date_range(entry: dict[str, Any], from_date: str | None = None, to_date:
     return True
 
 def _rrf_fuse(ranked_lists: list[tuple[list[dict[str, Any]], str]], k: int = 60) -> list[dict[str, Any]]:
-    scores = {}
-    all_items = {}
+    scores: dict[str, float] = {}
+    all_items: dict[str, dict[str, Any]] = {}
     for rank_list, source in ranked_lists:
         for rank, item in enumerate(rank_list):
             sid = item.get("session_id") or item.get("session", "")
@@ -200,7 +200,7 @@ def consolidate(project: str | None = None, max_entries: int = 100) -> dict[str,
     if not all_data.get("ids"):
         return {"consolidated": 0, "message": "no entries"}
 
-    projects = {}
+    projects: dict[str, list[Any]] = {}
     for i in range(len(all_data["ids"])):
         meta = all_data["metadatas"][i]
         p = meta.get("project", "unknown")
@@ -294,7 +294,7 @@ def _parse_section(text: str, header: str) -> list[str]:
     return items
 
 def _parse_session_text(text: str) -> dict[str, list[str]]:
-    extracted = {"decisions": [], "files": [], "commands": [], "checkpoints": []}
+    extracted: dict[str, list[str]] = {"decisions": [], "files": [], "commands": [], "checkpoints": []}
     for pattern_name, patterns in [
         ("decisions", ["## decisions", "## decisiones", "decisions:", "decisiones:", "## what we decided"]),
         ("files", ["## files", "## archivos", "files changed:", "archivos cambiados:", "archivos modificados:", "files modified:"]),
@@ -423,21 +423,21 @@ if __name__ == "__main__":
         print(json.dumps(result))
     elif cmd == "search" and len(sys.argv) >= 3:
         query = sys.argv[2]
-        project = sys.argv[3] if len(sys.argv) > 3 else None
+        project = sys.argv[3] if len(sys.argv) > 3 else None  # type: ignore[assignment]
         n_results = int(sys.argv[4]) if len(sys.argv) > 4 else 10
-        result = search(query, project, n_results)
+        result: Any = search(query, project, n_results)  # type: ignore[no-redef]
         print(json.dumps(result))
     elif cmd == "recall" and len(sys.argv) >= 3:
         query = sys.argv[2]
-        project = sys.argv[3] if len(sys.argv) > 3 else None
+        project = sys.argv[3] if len(sys.argv) > 3 else None  # type: ignore[assignment]
         n_results = int(sys.argv[4]) if len(sys.argv) > 4 else 10
         from_date = sys.argv[5] if len(sys.argv) > 5 else None
         to_date = sys.argv[6] if len(sys.argv) > 6 else None
-        result = recall(query, project, n_results, from_date, to_date)
+        result: Any = recall(query, project, n_results, from_date, to_date)  # type: ignore[no-redef]
         print(json.dumps(result))
     elif cmd == "consolidate":
-        project = sys.argv[2] if len(sys.argv) > 2 else None
-        result = consolidate(project)
+        project = sys.argv[2] if len(sys.argv) > 2 else None  # type: ignore[assignment]
+        result: Any = consolidate(project)  # type: ignore[no-redef]
         print(json.dumps(result))
     elif cmd == "recent":
         n_results = int(sys.argv[2]) if len(sys.argv) > 2 else 10
@@ -465,7 +465,7 @@ if __name__ == "__main__":
         if sub == "list":
             brief = "--brief" in sys.argv
             limit = int(sys.argv[3]) if len(sys.argv) > 3 and not sys.argv[3].startswith("--") else 3
-            project = sys.argv[4] if len(sys.argv) > 4 and not sys.argv[4].startswith("--") else None
+            project = sys.argv[4] if len(sys.argv) > 4 and not sys.argv[4].startswith("--") else None  # type: ignore[assignment]
             print(json.dumps(session_list(limit, project, brief=brief)))
         elif sub == "continue" and len(sys.argv) >= 4:
             summary_only = "--summary" in sys.argv

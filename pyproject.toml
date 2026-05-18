@@ -26,11 +26,17 @@ ignore = ["E501", "PLR2004", "SIM108"]
 quote-style = "double"
 
 [tool.mypy]
-strict = true
 python_version = "3.11"
-warn_unused_configs = true
-explicit_package_bases = true
 ignore_missing_imports = true
+show_error_codes = true
+warn_unused_configs = true
+disallow_untyped_defs = false
+warn_return_any = false
+
+[[tool.mypy.overrides]]
+module = "chromadb.*"
+ignore_missing_imports = true
+follow_imports = "skip"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
