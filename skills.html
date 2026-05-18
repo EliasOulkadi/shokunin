@@ -132,13 +132,28 @@
     .skill-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(27,54,93,0.08); }
   }
   @media (max-width: 640px) {
-    .skill-trigger { padding: 16px; }
+    .theme-toggle { top: 12px; right: 12px; }
+    .nav { padding: 16px; }
+    .hero { padding: clamp(40px, 8vh, 80px) 16px clamp(24px, 4vh, 40px); }
+    .hero h1 { font-size: clamp(32px, 8vw, 48px); }
+    .hero p { font-size: clamp(15px, 3vw, 18px); }
+    .skill-trigger { padding: 14px 16px; }
     .skill-body:not(.skill-closed) { padding: 0 16px 16px; }
+    .skill-content { font-size: 11px; padding: 12px; }
+    .search-input { font-size: 15px; }
+    .domain { margin-bottom: 40px; }
+  }
+  @media (max-width: 480px) {
+    .hero h1 { font-size: clamp(28px, 10vw, 40px); }
+    .hero p { font-size: clamp(14px, 3.5vw, 16px); }
+    .skill-trigger { padding: 12px 14px; }
+    .skill-name { font-size: 15px; }
+    .skill-desc { font-size: 13px; }
+    .skill-lines { font-size: 11px; }
+    code { font-size: 11px; }
   }
   @media (prefers-color-scheme: dark) {
-    :root {
-      --parchment: #0c0c0c;
-      :root:not([data-theme="light"]) {
+    :root:not([data-theme="light"]) {
       --parchment: #0c0c0c;
       --ivory: #161616;
       --ink-blue: #7ca3d8;
