@@ -15,6 +15,15 @@ allowed-tools: Read Bash Write Grep
 
 Design fast, reliable, and secure CI/CD pipelines across GitHub Actions, GitLab CI, and CircleCI. Follows Google's DevOps capabilities and DORA metrics.
 
+## Decision Framework
+
+Before building a CI/CD pipeline, answer:
+- Where is the code hosted? → If GitHub, start with GitHub Actions. If GitLab, use GitLab CI. On-prem? Consider self-hosted.
+- What's the deployment target? → Cloud (use OIDC), on-prem (use self-hosted runner), multi-cloud (use environment-specific jobs)
+- Is the team size 1-3? → Simple single-workflow. 10+? → Separate build, test, deploy workflows with artifact passing.
+- Do you need matrix builds (multiple OS/versions)? → Yes for libraries, no for single-platform apps.
+- Is the deploy target production? → Require manual approval gates. Non-prod: automatic on merge.
+
 ## Workflow
 
 ### Step 1: Choose platform
@@ -196,6 +205,17 @@ See [references/self-hosted-runners.md](references/self-hosted-runners.md) for K
 | No healthcheck after deploy | Auto-rollback on failure |
 | Deploy on every main push | Gated approval + environment protection |
 
+## Pipeline Review Format (Required)
+
+When reviewing CI/CD pipelines, use Before | After | Why format:
+
+| Before | After | Why |
+|--------|-------|-----|
+| Static cloud credentials in secrets | OIDC with `id-token: write` permission | Static credentials never expire. OIDC issues short-lived tokens per workflow run. |
+| Sequential test jobs | Matrix build + test sharding (`strategy: matrix: shard: [1/4, 2/4, 3/4, 4/4]`) | Sequential tests bottleneck the pipeline. Sharding parallelizes across runners. |
+| `terraform apply` from laptop | CI plan → manual approval → CI apply | Laptop applies bypass audit trail and state locking. CI enforces process. |
+| No cache on dependencies | `actions/cache` for `node_modules/`, `pip cache`, `go mod cache` | Uncached dependencies add 2-5 minutes per run. Caching cuts this to seconds. |
+
 ## Sources
 
 - GitHub Actions docs (docs.github.com/actions)
@@ -205,3 +225,19 @@ See [references/self-hosted-runners.md](references/self-hosted-runners.md) for K
 - Docker BuildKit cache type
 - AWS IAM OIDC identity providers
 - Flagger documentation (flagger.app)
+
+## Pre-Deploy Checklist
+
+Before merging to production:
+
+- [ ] All tests pass (unit, integration, E2E)
+- [ ] Security scan passes (no HIGH/CRITICAL vulnerabilities)
+- [ ] Lint and type checks pass with zero errors
+- [ ] Build artifact produced and validated
+- [ ] Deploy plan reviewed (IaC plan output, migration plan)
+- [ ] Rollback plan documented and tested
+- [ ] Environment protection rules active (require approvals for production)
+- [ ] Concurrency control enabled (prevent simultaneous deploys)
+- [ ] Healthcheck endpoint verified post-deploy
+- [ ] Monitoring alerts configured for the new version
+- [ ] Database migrations tested with a copy of production data

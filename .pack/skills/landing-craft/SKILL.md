@@ -441,40 +441,6 @@ Before launching, verify:
 
 ---
 
-## Workflow
-
-### Step 1: Research the audience
-Identify the target audience, their pain points, and what action you want them to take. Gather existing brand assets, copy, and analytics if available.
-
-### Step 2: Define the conversion goal
-Specify the primary CTA and micro-conversions. Map the user journey from arrival to conversion.
-
-### Step 3: Select the page structure
-Choose from proven patterns: hero-centric, social-proof, feature-benefit, problem-solution, or comparison. Match to audience sophistication.
-
-### Step 4: Write the copy
-Apply the LIFT model (Clarity, Relevance, Urgency, Anxiety reduction). Write headlines that communicate value in under 10 words. Craft CTAs that describe the outcome, not the action.
-
-### Step 5: Design the visual hierarchy
-Place the most important element in the visual center. Use contrast, whitespace, and directional cues to guide attention. Mobile-first: stack vertically, prioritize above the fold.
-
-### Step 6: Optimize and test
-Compress images, lazy-load below-fold content, minify CSS/JS. Set up A/B testing for headlines and CTAs. Monitor Core Web Vitals (LCP, INP, CLS).
-
-## Error Handling
-
-| Cause | Fix |
-|-------|-----|
-| Low conversion rate | Review headline clarity. A/B test CTA copy and placement. Check mobile experience. |
-| High bounce rate | Improve above-fold content. Reduce load time. Match headline to ad/source. |
-| Form abandonment | Reduce fields. Add progress indicator. Show validation errors inline. |
-| Slow load time (LCP > 2.5s) | Optimize hero image. Use srcset. Defer non-critical JS. Preload key fonts. |
-| CLS issues (layout shift) | Reserve space for images/embeds. Use aspect-ratio. Avoid injecting content above fold. |
-| INP issues (slow interaction) | Break up long tasks. Debounce input handlers. Use requestAnimationFrame. |
-| Mobile renders broken | Test at 375px. Use container queries. Simplify navigation. |
-
----
-
 ## Sources
 
 - Unbounce Conversion Benchmark Report (44,000+ A/B tests analyzed)

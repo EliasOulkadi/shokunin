@@ -53,6 +53,12 @@ Record a message in session transcript.
 - `session_id` (string, required)
 - `role` (string, optional, default `"user"`)
 
+### verify_file_path
+Verify whether a file or directory exists on the local filesystem.
+- `path` (string, required): File or directory path. Supports ~ expansion and relative paths.
+
+Returns: {exists: boolean, path: string, last_modified: string|null, kind: string|null ("file"|"dir")}
+
 ## Example
 ```json
 {"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}

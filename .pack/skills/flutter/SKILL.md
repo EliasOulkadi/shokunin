@@ -14,7 +14,17 @@ metadata:
 
 # Flutter Architect
 
+**Widgets are functions of state. Keep them pure. Compose, don't inherit.**
+
 Production Flutter apps with Clean Architecture, Riverpod, GoRouter, Impeller, and platform channels. Based on Flutter docs, Riverpod patterns, and production experience.
+
+## Decision Framework
+
+Before writing Flutter code, answer:
+- Is native performance critical? (animations, camera, maps) → Flutter is a strong fit
+- Is the team already experienced with Dart? → Proceed. If React/TypeScript, consider react-native skill
+- Is the app content-heavy with standard platform UI? → Consider native or react-native
+- Does the app need platform-specific features not available in packages? → Verify pub.dev coverage first
 
 ## Workflow
 
@@ -149,9 +159,21 @@ Run: `dart run pigeon --input battery.dart --dart_out lib/battery.dart`
 - `const` constructors everywhere
 - `Consumer` at leaf level (not entire screen)
 - `ListView.builder` / `GridView.builder` (lazy)
-- `cached_network_image` or `expo-image`
+- `cached_network_image`
 - Profile: `flutter run --profile`, DevTools
 - Avoid `RepaintBoundary` overuse
+
+## Perceived Performance
+
+Flutter renders at 60fps on most devices and 120fps on ProMotion displays. Performance perception differs:
+
+| Technique | Perception impact | Implementation |
+|-----------|------------------|----------------|
+| Skeleton loaders | Feels faster than spinners. Shows structure immediately. | `shimmer` package with matching layout shape |
+| `const` constructors | Widgets that never change skip rebuild entirely. Cumulative gain on deep trees. | `const Text('...')`, `const SizedBox(...)`, `const Icon(...)` |
+| `extent estimation` on scrollables | Eliminates jank from recalculating item sizes during scroll. | `ListView.builder(itemExtent: 56.0, ...)` |
+| `AnimatedSwitcher` vs `Visibility` | Fade transitions feel smoother than instant appear/disappear. | Wrap changing content in `AnimatedSwitcher(duration: 200ms)` |
+| `RepaintBoundary` | Isolates repaint of frequently-changing widgets (timers, animations) from rest of tree. | Wrap animated clock/progress bar in `RepaintBoundary` |
 
 ## Error Handling
 
@@ -192,6 +214,16 @@ Run: `dart run pigeon --input battery.dart --dart_out lib/battery.dart`
 | No error handling in AsyncValue | Handle loading/error/data explicitly |
 | One giant GoRouter file | Split routes into feature modules |
 
+## Review Format (Required)
+
+When reviewing Flutter code, use Before | After | Why format:
+
+| Before | After | Why |
+|--------|-------|-----|
+| `setState(() { count++; })` in large widget | `ref.watch(counterProvider.notifier).increment()` | setState triggers full widget rebuild; Riverpod isolates state changes |
+| `ListView(children: items.map((e) => Widget(e)).toList())` | `ListView.builder(itemCount: items.length, itemBuilder: (_, i) => Widget(items[i]))` | Builder lazily constructs only visible items; map builds all upfront |
+| `Navigator.push(context, MaterialPageRoute(builder: (_) => Screen()))` | `context.go('/route/${id}')`  | GoRouter enables deep linking, typed params, and auth guards |
+
 ## Sources
 
 - Flutter Documentation (flutter.dev)
@@ -200,3 +232,20 @@ Run: `dart run pigeon --input battery.dart --dart_out lib/battery.dart`
 - GoRouter Documentation
 - Impeller Rendering Engine
 - Pigeon Plugin
+
+## Pre-Flight Checklist
+
+Before submitting Flutter code:
+
+- [ ] All widgets use `const` constructors where possible (check with `dart analyze`)
+- [ ] Long lists use `ListView.builder` or `SliverList.builder`, never `ListView(children: [...])`
+- [ ] `ref.watch` only in build methods; `ref.read` only in callbacks
+- [ ] Routes use GoRouter typed parameters, not manual string parsing
+- [ ] AsyncValue has `.when(data:, loading:, error:)` — all three branches covered
+- [ ] Platform channels use Pigeon-generated code, never manual MethodChannel
+- [ ] `android/app/build.gradle` has `renderingEngine = "impeller"` (Android 14+)
+- [ ] No `console.log` or `print()` statements in production code
+- [ ] `flutter analyze` passes with zero errors or warnings
+- [ ] Tested on real Android device (not just iOS simulator or vice versa)
+- [ ] App works correctly when process is killed and restarted (state restoration)
+- [ ] Safe areas respected: `MediaQuery.of(context).padding` or `SafeArea` widget

@@ -201,15 +201,3 @@ Rule: if the document goes to an external client or has legal/security implicati
 | Including level 5 (single source) claims without marking them | Reader assumes verified when it's actually unconfirmed. | Explicitly mark any level 5 claim: "[Source: single report, not independently confirmed]". |
 | Treating all sources as equally credible | A Reddit comment ≠ a peer-reviewed paper ≠ an NVD entry. | Apply evidence hierarchy. Weight sources by type, not by what supports the desired narrative. |
 | Skipping verification because the claim "sounds right" | Confirmation bias. LLMs are confident and wrong simultaneously. | Verify every factual claim. "Sounds right" is how hallucinations reach production documents. |
-
-- Heuer & Pherson, *Structured Analytic Techniques for Intelligence Analysis* (CIA Sherman Kent School)
-- US Government, *A Tradecraft Primer: Structured Analytic Techniques for Improving Intelligence Analysis* (2009)
-- NPR Training, "Don't just check the facts, check the source: a guide to verification" (March 2026)
-- Princeton University Library, guide "Triangulation and Media Literacy" (2025)
-- War Intel Hub, "OSINT Verification Methodology"
-- Vectara HHEM hallucination benchmark leaderboard (March 2026)
-- Prompt Guardrails, "AI Hallucination Detection and Prevention Guide" (2026)
-- News Factory, "News Fact-Checking in 2026: Hallucination Benchmarks, RAG, and Verification Tools"
-- Reuters / AP sourcing standards
-- GlobalX Publications, "Fact-Checking, Triangulation, and Evidence Reliability in Research"
-- NHMRC evidence hierarchy framework

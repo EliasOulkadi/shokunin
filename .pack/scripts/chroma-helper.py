@@ -7,6 +7,7 @@ import math
 import os
 import re
 import sys
+import threading
 import uuid
 from collections import Counter
 from datetime import datetime, timezone
@@ -27,15 +28,18 @@ RECENCY_HALFLIFE_DAYS = 30
 
 _client: chromadb.PersistentClient | None = None
 _collection: chromadb.Collection | None = None
+_lock = threading.Lock()
 
 def _get_db() -> chromadb.Collection:
     global _client, _collection
     if _client is None:
-        _client = chromadb.PersistentClient(
-            path=CHROMA_PATH,
-            settings=Settings(anonymized_telemetry=False),
-        )
-        _collection = _client.get_or_create_collection(name=COLLECTION_NAME)
+        with _lock:
+            if _client is None:
+                _client = chromadb.PersistentClient(
+                    path=CHROMA_PATH,
+                    settings=Settings(anonymized_telemetry=False),
+                )
+                _collection = _client.get_or_create_collection(name=COLLECTION_NAME)
     return _collection
 
 def _sanitize_id(sid: str) -> str:
@@ -92,10 +96,14 @@ def search(query: str, project: str | None = None, n_results: int = 10, freshnes
                 sim = round((1.0 - freshness_boost) * vector_sim + freshness_boost * recency, 4)
             else:
                 sim = round(vector_sim, 4)
+            try:
+                entry_tags = json.loads(meta.get("tags", "[]"))
+            except (json.JSONDecodeError, TypeError):
+                entry_tags = []
             entries.append({
                 "text": results["documents"][0][i][:500],
                 "type": meta.get("type", "general"),
-                "tags": json.loads(meta.get("tags", "[]")),
+                "tags": entry_tags,
                 "project": meta.get("project", ""),
                 "session_id": meta.get("session_id", ""),
                 "timestamp": meta.get("timestamp", ""),
@@ -147,7 +155,9 @@ def _rrf_fuse(ranked_lists: list[tuple[list[dict[str, Any]], str]], k: int = 60)
     all_items: dict[str, dict[str, Any]] = {}
     for rank_list, source in ranked_lists:
         for rank, item in enumerate(rank_list):
-            key = f"{source}:{rank}"
+            sid = item.get("session_id") or item.get("session", "")
+            txt = item.get("text", "")[:80]
+            key = f"{sid}:{hash(txt)}"
             scores[key] = scores.get(key, 0) + 1.0 / (k + rank)
             all_items[key] = item
     ranked = sorted(scores.items(), key=lambda x: -x[1])
@@ -362,10 +372,14 @@ def session_continue(session_id: str, summary_only: bool = False) -> dict[str, A
         meta = all_data["metadatas"][i]
         text = all_data["documents"][i]
         etype = meta.get("type", "")
+        try:
+            entry_tags = json.loads(meta.get("tags", "[]"))
+        except (json.JSONDecodeError, TypeError):
+            entry_tags = []
         entry = {
             "text": text[:400] if summary_only else text[:2000],
             "type": etype,
-            "tags": json.loads(meta.get("tags", "[]")),
+            "tags": entry_tags,
             "project": meta.get("project", ""),
             "timestamp": meta.get("timestamp", ""),
         }
@@ -471,10 +485,14 @@ if __name__ == "__main__":
             if all_results.get("ids"):
                 for i in range(len(all_results["ids"])):
                     meta = all_results["metadatas"][i]
+                    try:
+                        entry_tags = json.loads(meta.get("tags", "[]"))
+                    except (json.JSONDecodeError, TypeError):
+                        entry_tags = []
                     entries.append({
                         "text": all_results["documents"][i][:500],
                         "type": meta.get("type", "general"),
-                        "tags": json.loads(meta.get("tags", "[]")),
+                        "tags": entry_tags,
                         "project": meta.get("project", ""),
                         "session_id": meta.get("session_id", ""),
                         "timestamp": meta.get("timestamp", ""),

@@ -26,18 +26,23 @@ Check if the user provided a GitHub PR link.
 
 Call a subagent to gather all change details, save the diff, and checkout the correct branch.
 
-**CRITICAL**: You MUST spawn a subagent for this step. Do NOT perform the diff-gathering, branch detection, or complexity assessment yourself. Do NOT read the file `<SKILL_DIRECTORY>/fetch-diff.md` yourself. The subagent must read it and follow its instructions.
+**CRITICAL**: You MUST spawn a subagent for this step. Do NOT perform the diff-gathering, branch detection, or complexity assessment yourself.
 
 Construct the subagent prompt as follows:
 
 ```
-Read the file `<SKILL_DIRECTORY>/fetch-diff.md` for detailed instructions, then follow them.
+Gather the code change details for a comprehensive code review.
 
 Mode: <PR mode or Local mode>
 <If PR mode: Owner: <OWNER>, Repo: <REPO>, PR Number: <PR_NUMBER>>
 
-IMPORTANT: Do NOT invoke the Skill tool. All instructions you need are in the file specified above.
+Instructions:
+- PR mode: Fetch PR details via GitHub API (title, description, diff). Use `gh pr view <PR_NUMBER> --repo <OWNER>/<REPO> --json title,body` for metadata and `gh pr diff <PR_NUMBER> --repo <OWNER>/<REPO>` for the diff. Save diff to {TEMP_DIR}/review-diff-<branch>.patch.
+- Local mode: Detect the current branch and its base branch (try main, master, develop). Use `git diff <base>...HEAD` for committed changes and `git diff` for uncommitted changes. Combine into {TEMP_DIR}/review-diff-<branch>.patch.
+- Determine complexity: simple (<200 diff lines, single file/module), medium (200-800 lines, 2-5 files), hard (>800 lines, 6+ files, or touches architecture).
+- Return: diff file path, diff line count, title, comprehensive task description, and complexity assessment.
 ```
+
 
 Use a subagent tool to spawn the subagent. Use a powerful model since this involves complex reasoning to assess complexity.
 
@@ -54,24 +59,26 @@ Remember these values for use in subsequent steps.
 
 The review strategy depends on the **complexity** returned by the fetch-diff subagent.
 
-#### Review Criteria and Instruction Files
+#### Review Criteria
 
-Each review criterion has a corresponding instruction file inside this skill's directory:
+Each subagent reviews the diff through one specialized lens:
 
-| Review criterion | Instruction File |
-|-------------|-----------------|
-| architecture | `criteria/architecture.md` |
-| security | `criteria/security.md` |
-| performance | `criteria/performance.md` |
-| code-quality | `criteria/code-quality.md` |
-| requirements-compliance | `criteria/requirements-compliance.md` |
-| bugs | `criteria/bugs.md` |
+| Criterion | What to review |
+|-----------|---------------|
+| architecture | Module boundaries, dependency direction, design patterns, SOLID principles, separation of concerns, circular dependencies, appropriate abstraction levels |
+| security | OWASP Top 10, input validation, authentication/authorization, secret handling, injection risks, insecure deserialization, logging of sensitive data |
+| performance | N+1 queries, unnecessary allocations, blocking operations, missing indexes, bundle size impact, render-blocking resources, memory leaks |
+| code-quality | Readability, naming conventions, function length, error handling patterns, type safety, testability, consistent coding style |
+| requirements-compliance | Does the change satisfy the stated task requirements? Are edge cases covered? Does it handle all user stories? Are acceptance criteria met? |
+| bugs | Logic errors, off-by-one, null/undefined handling, race conditions, incorrect state transitions, missing error handling, incorrect assumptions |
+
+> **Note:** This skill is self-contained. Referenced files (criteria/*.md, fetch-diff.md, scripts/post_review.js) are placeholders for future expansion. All review instructions and criteria are defined inline above.
 
 #### Strategy A: Simple complexity
 
 For **simple** PRs, perform the review yourself (the root agent) without calling subagents.
 
-1. Read **all 6** criteria instruction files from `<SKILL_DIRECTORY>/criteria/`.
+1. Read the Review Criteria table above to understand each review lens.
 2. Read the diff file.
 3. Apply all criteria to review the change yourself, producing findings as a flat list without priorities (same format as subagents would). You will assign priorities in Step 4.
 
@@ -79,14 +86,14 @@ For **simple** PRs, perform the review yourself (the root agent) without calling
 
 For **medium** PRs, launch **6 parallel subagent calls** — one per review criterion.
 
-**CRITICAL**: You MUST spawn subagents for this step. Do NOT read the criteria instruction files yourself. Do NOT perform the reviews yourself. Each subagent must read its own instruction file.
+**CRITICAL**: You MUST spawn subagents for this step. Do NOT perform the reviews yourself.
 
 Use a subagent tool to spawn each subagent. Select the single most powerful model from each available provider. Alternate these models across the 6 criteria (e.g., provider A's best model for criteria 1, 3, 5 and provider B's best model for criteria 2, 4, 6). If only 1 provider is available, use its most powerful model for all 6.
 
 Construct prompts for subagents as follows:
 
 ```
-Read the file `<INSTRUCTION_FILE>` for detailed review instructions, then follow them to review the following change.
+Review the following change through the {criterion} lens. Apply the criteria defined in the Review Criteria table for this category.
 
 ## <title>
 
@@ -96,16 +103,14 @@ Read the file `<INSTRUCTION_FILE>` for detailed review instructions, then follow
 ### Diff
 Read the diff from file: <absolute path to diff file> (total lines: <diff line count>)
 
-IMPORTANT: Do NOT invoke the Skill tool. Do NOT run tests, builds, linters, or type-checks — your review is based on static analysis only. All review instructions are in the file specified above.
+IMPORTANT: Do NOT invoke the Skill tool. Do NOT run tests, builds, linters, or type-checks — your review is based on static analysis only.
 ```
-
-Where `<INSTRUCTION_FILE>` is the absolute path to the instruction file (e.g. `<SKILL_DIRECTORY>/criteria/architecture.md`).
 
 #### Strategy C: Hard complexity
 
 For **hard** PRs, launch **2 parallel subagent calls per criterion** (12 total) — one per criterion per model, using 2 different models from different providers for diverse perspectives.
 
-**CRITICAL**: You MUST spawn subagents for this step. Do NOT read the criteria instruction files yourself. Do NOT perform the reviews yourself. Each subagent must read its own instruction file.
+**CRITICAL**: You MUST spawn subagents for this step. Do NOT perform the reviews yourself.
 
 **Model selection**: Choose exactly 2 models — the single most powerful model from each of 2 different providers. If only 1 provider is available, use its most powerful model for all 12 calls (fall back to Strategy B behavior with 2 calls per criterion).
 
@@ -115,7 +120,7 @@ For each of the 6 criteria, launch 2 subagents — one with each model.
 Use following prompt:
 
 ```
-Read the file `<INSTRUCTION_FILE>` for detailed review instructions, then follow them to review the following change.
+Review the following change through the {criterion} lens. Apply the criteria defined in the Review Criteria table for this category.
 
 ## <title>
 
@@ -125,10 +130,8 @@ Read the file `<INSTRUCTION_FILE>` for detailed review instructions, then follow
 ### Diff
 Read the diff from file: <absolute path to diff file> (total lines: <diff line count>)
 
-IMPORTANT: Do NOT invoke the Skill tool. Do NOT run tests, builds, linters, or type-checks — your review is based on static analysis only. All review instructions are in the file specified above.
+IMPORTANT: Do NOT invoke the Skill tool. Do NOT run tests, builds, linters, or type-checks — your review is based on static analysis only.
 ```
-
-Where `<INSTRUCTION_FILE>` is the absolute path to the instruction file (e.g. `<SKILL_DIRECTORY>/criteria/architecture.md`).
 
 All 12 calls should be launched in parallel.
 
@@ -217,7 +220,7 @@ For each finding the user chose "Fix":
 
 **Skip this step entirely if no findings were marked "Post comment".**
 
-Only applies in PR mode. Post line-specific comments via the `post_review.js` script.
+Only applies in PR mode. Post line-specific comments via the GitHub API.
 
 #### 7a. Build the review payload JSON
 
@@ -251,11 +254,13 @@ Save the JSON to a file named `{TEMP_DIR}/review_payload-<branch-name>.json`.
 
 #### 7b. Post via the script
 
+Post each comment via the GitHub API using `gh api`:
+
 ```bash
-node <SKILL_DIRECTORY>/scripts/post_review.js <OWNER>/<REPO> <PR_NUMBER> <diff-file-path> {TEMP_DIR}/review_payload-<branch-name>.json
+gh api repos/<OWNER>/<REPO>/pulls/<PR_NUMBER>/reviews --method POST -F "commit_id=$(gh pr view <PR_NUMBER> --repo <OWNER>/<REPO> --json headRefOid --jq .headRefOid)" -F "event=COMMENT" -F "body=<review-body>" -F "comments=<comments-json>"
 ```
 
-The script validates comment line numbers against the diff, adjusts them to the nearest valid diff line when close, and moves out-of-range comments to the review body. You don't need to validate line numbers manually. The script logs progress and any errors (even if they were recoverable). It outputs in the end whether the review was posted successfully.
+Validate comment line numbers against the diff before posting. Adjust line numbers to the nearest valid diff line when close, and move out-of-range comments to the review body.
 
 ## Error Handling
 
@@ -263,12 +268,12 @@ The script validates comment line numbers against the diff, adjusts them to the 
 |-------|-----|
 | Subagent fails to spawn (timeout, model unavailable, API error) | Retry with a different model from another provider. If all models fail, fall back to Strategy A (root agent reviews all 6 criteria) and note reduced coverage in output |
 | Diff file is empty or contains only binary/image changes | Report to user: "No reviewable text changes found." Skip subagents entirely. Do not force a review on empty or binary-only diffs |
-| `fetch-diff.md` subagent cannot determine base branch for local mode | Try `main` first, then `master`, then `develop`. If none exist, report error to user with the branches found and ask them to specify the base |
+| Fetch-diff subagent cannot determine base branch for local mode | Try `main` first, then `master`, then `develop`. If none exist, report error to user with the branches found and ask them to specify the base |
 | Subagent returns findings without file:line references | Re-run that specific subagent with explicit instruction: "You MUST include file path and line number for every finding. Findings without location context cannot be used." |
 | PR posting script fails with GitHub API authentication error (401/403) | Verify `GITHUB_TOKEN` env var is set with `repo` scope. For private repos, use a Personal Access Token with full repo access. Check token hasn't expired |
 | Duplicate findings from parallel subagents cannot be auto-merged with confidence | Flag to user: "N findings reduced to M unique after deduplication. Manual review recommended for findings where subagents disagreed on severity or scope" |
 | Diff exceeds 10,000 lines (hard complexity) — reviews take too long | Warn user before proceeding: "Diff is very large (N lines). Review quality decreases with size. Consider splitting into smaller PRs. Continue anyway?" |
-| Posted PR comment line number doesn't match any diff hunk exactly | The `post_review.js` script auto-adjusts to nearest valid line. If adjustment fails (line too far from any hunk), comment moves to review body instead |
+| Posted PR comment line number doesn't match any diff hunk exactly | Auto-adjust to nearest valid line. If adjustment fails (line too far from any hunk), comment moves to review body instead |
 
 ## Anti-Patterns
 

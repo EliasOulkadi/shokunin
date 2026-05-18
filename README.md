@@ -44,7 +44,7 @@ OpenCode + VS Code + WezTerm
 
 62 skills across 10 domains. Each skill teaches the agent how to handle a specific domain: with decision tables, error patterns, production checklists, anti-patterns, and cited sources. Not generic prompts. Real engineering guides.
 
-The Docker skill is 6,300 words with multi-stage build templates for Node, Go, Python and Rust, BuildKit cache optimization, distroless base images, seccomp profiles, and CVE scanning. The auth skill references OWASP directly. The database one has real EXPLAIN ANALYZE output. Frontend skills include Emil Kowalski patterns (Sonner, Vaul), Paul Bakaus principles (Impeccable), and Leon Lin variance engines (Taste). Skills are validated by CI on every push: frontmatter, workflow, error handling, sources. All mandatory.
+The Docker skill is 1,422 words with a multi-stage Node.js template, BuildKit cache optimization, distroless base images, and CVE scanning. The auth skill references OWASP directly. The database one has real EXPLAIN ANALYZE output. Frontend skills include Emil Kowalski patterns (Sonner, Vaul), Paul Bakaus principles (Impeccable), and Leon Lin variance engines (Taste). Skills are validated by CI on every push: frontmatter, workflow, error handling, sources. All mandatory.
 
 | Domain | Skills | Version |
 |--------|--------|---------|
@@ -76,7 +76,7 @@ Each skill includes: trigger-optimized descriptions, procedural workflows, error
 | **Bookmarklet** | Send web pages to OpenCode |
 | **Dashboard** | Local ecosystem status viewer |
 | **WezTerm config** | GPU terminal with Catppuccin theme |
-| **SQLite templates** | Zero-install local database |
+| **ChromaDB (SQLite-backed)** | Zero-install local vector database |
 
 ## Requirements
 
@@ -134,7 +134,7 @@ source ~/.bashrc
 opencode
 ```
 
-## Memory System v4.2.1
+## Memory System v4.2.2
 
 Multi-strategy recall (vector + BM25 + temporal + reciprocal rank fusion). Session management with explicit continue (no guessing which session to resume).
 

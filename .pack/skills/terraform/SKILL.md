@@ -273,6 +273,17 @@ jobs:
 | Secrets in state outputs | Mark `sensitive = true`, use external secrets manager |
 | No preconditions/postconditions | Add for security-critical resources |
 
+## Plan Review Format (Required)
+
+When reviewing `terraform plan` output, verify these checks:
+
+| Before | After | Why |
+|--------|-------|-----|
+| Blind `terraform apply` without reviewing plan | Read plan output fully. Check for `forces replacement` on stateful resources (DBs, disks). | Replacement destroys and recreates the resource, losing data. Flag it before applying. |
+| `latest` provider version in `required_providers` | Pin to `~> 5.0` or specific version | Provider updates can change resource defaults silently. Pin for reproducibility. |
+| Local state file (`terraform.tfstate`) in team project | Remote backend with S3/GCS + DynamoDB locking | Local state causes conflicts. Remote state with locking prevents simultaneous applies. |
+| Workspaces for environment isolation | Separate directories per environment or Terraform Stacks | Workspaces share the same backend and code. Accidental `terraform workspace select production` when targeting staging is a real risk. |
+
 ## Error Handling
 
 | Scenario | Cause | Diagnosis | Fix |
@@ -292,3 +303,19 @@ jobs:
 - HashiCorp Learn: moved blocks
 - AWS Well-Architected IaC patterns
 - Gruntwork — Terraform best practices
+
+## Pre-Apply Checklist
+
+Before `terraform apply`:
+
+- [ ] `terraform fmt -recursive` passes — all files consistently formatted
+- [ ] `terraform validate` passes — syntax and reference errors caught
+- [ ] `terraform plan` reviewed — no unexpected resource replacements
+- [ ] Stateful resources (RDS, S3, disks) have `prevent_destroy = true` in lifecycle block
+- [ ] Remote backend configured with state locking (DynamoDB for S3, etc.)
+- [ ] Provider versions pinned (`~> X.Y` or exact version), never `latest`
+- [ ] Preconditions/postconditions on critical resources (e.g., `condition = var.instance_count > 0`)
+- [ ] `moved` blocks for renamed resources (never `terraform state mv` manually)
+- [ ] Sensitive outputs marked with `sensitive = true`
+- [ ] Plan file reviewed by a second person for production changes
+- [ ] `terraform apply` runs from CI/CD, not a developer laptop

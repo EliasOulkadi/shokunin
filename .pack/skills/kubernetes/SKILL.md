@@ -33,6 +33,16 @@ triggers:
 
 Production-grade Kubernetes: deployments, Gateway API, zero-trust networking, service mesh, eBPF observability, and debugging. Follows NSA/CISA hardening guidelines.
 
+## Decision Framework
+
+Before deploying to Kubernetes, answer:
+- Does the app need horizontal scaling (3+ replicas)? → Kubernetes
+- Is it a single-instance app with simple needs? → Docker Compose or VPS
+- Is the team already familiar with Kubernetes? → Proceed. If not, consider managed (EKS, GKE, AKS)
+- Does the app need advanced networking (service mesh, ingress routing)? → Kubernetes + Gateway API
+- Is the infrastructure budget tight? → Single-node k3s or Docker Compose for dev
+- Multiple services with different scaling profiles? → Kubernetes (HPA per service)
+
 ## Workflow
 
 ### Step 1: Determine deployment type
@@ -237,6 +247,17 @@ scripts/debug-pod.sh api-7d8f9c-abc  # describes pod, shows logs, checks events,
 | No NetworkPolicy | Default-deny per namespace |
 | Legacy Ingress resource | Migrate to Gateway API |
 
+## Review Format (Required)
+
+When reviewing Kubernetes manifests, use Before | After | Why format:
+
+| Before | After | Why |
+|--------|-------|-----|
+| `image: myapp:latest` | `image: myapp@sha256:abc...` | `latest` is a floating tag. Digest pinning ensures the same image every deploy. |
+| No `resources` block | `resources: { requests: { cpu: "100m", memory: "128Mi" }, limits: { cpu: "500m", memory: "256Mi" } }` | Without requests, the scheduler can't place pods. Without limits, one pod can starve others. |
+| `imagePullPolicy: Always` | `imagePullPolicy: IfNotPresent` (with digest tag) or `Always` (with floating tag only if intentional) | `Always` forces a registry pull on every start, adding latency. Use with digest tags only for rolling updates. |
+| Legacy Ingress | Gateway API `Gateway` + `HTTPRoute` | Ingress is deprecated. Gateway API supports traffic splitting, header matching, and multi-tenancy. |
+
 ## Sources
 
 - Kubernetes docs (kubernetes.io/docs)
@@ -245,3 +266,20 @@ scripts/debug-pod.sh api-7d8f9c-abc  # describes pod, shows logs, checks events,
 - Helm (helm.sh)
 - NSA/CISA Kubernetes Hardening Guide
 - OWASP Kubernetes Security
+
+## Hardening Checklist
+
+Before deploying to production:
+
+- [ ] All containers run as non-root (`securityContext: { runAsNonRoot: true, readOnlyRootFilesystem: true }`)
+- [ ] Pod Security Standard `restricted` applied to all namespaces
+- [ ] NetworkPolicy `default-deny-all` with explicit allow rules for each service
+- [ ] Image pinned by digest, not tag (`image: myapp@sha256:...`)
+- [ ] Resource requests AND limits set on every container
+- [ ] `readinessProbe` AND `livenessProbe` configured with different thresholds
+- [ ] `PodDisruptionBudget` set with `minAvailable: 1` (or higher for multi-replica services)
+- [ ] Secrets stored in external manager (Vault, Sealed Secrets, External Secrets), not plain K8s secrets
+- [ ] `automountServiceAccountToken: false` unless the pod genuinely needs API access
+- [ ] `allowPrivilegeEscalation: false` on all containers
+- [ ] TLS enabled on ingress with cert-manager auto-renewal
+- [ ] Audit logging enabled on API server and critical namespaces

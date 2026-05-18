@@ -8,6 +8,7 @@ import math
 import os
 import re
 import sys
+import threading
 import uuid
 from datetime import datetime, timezone
 from typing import Any
@@ -35,15 +36,18 @@ _LOGGER = logging.getLogger("shokunin.memory")
 
 _client: chromadb.PersistentClient | None = None
 _collection: chromadb.Collection | None = None
+_lock = threading.Lock()
 
 def _get_db() -> chromadb.Collection:
     global _client, _collection
     if _client is None:
-        _client = chromadb.PersistentClient(
-            path=CHROMA_PATH,
-            settings=Settings(anonymized_telemetry=False),
-        )
-        _collection = _client.get_or_create_collection(name=COLLECTION_NAME)
+        with _lock:
+            if _client is None:
+                _client = chromadb.PersistentClient(
+                    path=CHROMA_PATH,
+                    settings=Settings(anonymized_telemetry=False),
+                )
+                _collection = _client.get_or_create_collection(name=COLLECTION_NAME)
     return _collection
 
 _ch_stub = None
@@ -246,7 +250,7 @@ def handle_store_context(args: dict[str, Any]) -> dict[str, Any]:
     tags = args.get("tags", [])
     project = args.get("project", "")
     session_id = args.get("session_id", "unknown")
-    _log_jsonl(session_id, "store", text[:500], role=entry_type)
+    _log_jsonl(session_id, "store", text[:500])
     entry_id = str(uuid.uuid4())
     timestamp = datetime.now(timezone.utc).isoformat()
 
@@ -274,7 +278,8 @@ def handle_search_context(args: dict[str, Any]) -> list[dict[str, Any]]:
     query = args.get("query", "")
     project = args.get("project")
     session_id = args.get("session_id", "")
-    _log_jsonl(session_id, "search", query)
+    if session_id:
+        _log_jsonl(session_id, "search", query)
     entry_type = args.get("type")
     tags = args.get("tags")
     n_results = min(args.get("n_results", 10), 50)
@@ -303,7 +308,10 @@ def handle_search_context(args: dict[str, Any]) -> list[dict[str, Any]]:
         document = results["documents"][0][i]
         distance = results["distances"][0][i]
 
-        entry_tags = json.loads(metadata.get("tags", "[]"))
+        try:
+            entry_tags = json.loads(metadata.get("tags", "[]"))
+        except (json.JSONDecodeError, TypeError):
+            entry_tags = []
         entry_type_value = metadata.get("type", "general")
 
         if entry_type and entry_type_value != entry_type:
@@ -359,10 +367,14 @@ def handle_get_session_summary(args: dict[str, Any]) -> dict[str, Any]:
         metadata = all_results["metadatas"][i]
         document = all_results["documents"][i]
         truncated = document[:200] + "..." if len(document) > 200 else document
+        try:
+            entry_tags = json.loads(metadata.get("tags", "[]"))
+        except (json.JSONDecodeError, TypeError):
+            entry_tags = []
         entries.append({
             "text": truncated,
             "type": metadata.get("type", "general"),
-            "tags": json.loads(metadata.get("tags", "[]")),
+            "tags": entry_tags,
             "project": metadata.get("project", ""),
             "timestamp": metadata.get("timestamp", ""),
         })
@@ -395,7 +407,8 @@ def handle_multi_search_context(args: dict[str, Any]) -> dict[str, Any]:
     query = args.get("query", "")
     project = args.get("project")
     session_id = args.get("session_id", "")
-    _log_jsonl(session_id, "search", query)
+    if session_id:
+        _log_jsonl(session_id, "search", query)
     n_results = min(args.get("n_results", 10), 50)
     freshness_boost = min(max(args.get("freshness_boost", 0.0), 0.0), 1.0)
     from_date = args.get("from_date")
