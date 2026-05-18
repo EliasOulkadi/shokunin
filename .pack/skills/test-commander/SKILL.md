@@ -214,6 +214,56 @@ If a test flakes more than once: fix it same day or skip it with `test.skip()` +
 - [ ] Accessibility: `axe-core` in E2E for key pages
 - [ ] Coverage: not a metric. Focus on behavior coverage, not line coverage.
 
+## Test Data Factories
+
+```typescript
+import { faker } from '@faker-js/faker'
+
+function createUser(overrides: Partial<User> = {}): User {
+  return {
+    id: faker.string.uuid(),
+    name: faker.person.fullName(),
+    email: faker.internet.email(),
+    role: faker.helpers.arrayElement(['admin', 'editor', 'viewer']),
+    createdAt: faker.date.recent({ days: 30 }).toISOString(),
+    ...overrides
+  }
+}
+
+// Edge cases
+const adminUser = createUser({ role: 'admin' })
+const emptyEmail = createUser({ email: '' })
+const longName = createUser({ name: 'a'.repeat(256) })
+const futureDate = createUser({ createdAt: faker.date.future().toISOString() })
+```
+
+## Visual Regression Testing
+
+```typescript
+// Playwright
+test('homepage visual check', async ({ page }) => {
+  await page.goto('/')
+  await expect(page).toHaveScreenshot('homepage.png', {
+    fullPage: true,
+    maxDiffPixelRatio: 0.01,
+  })
+})
+
+// CI update: npx playwright test --update-snapshots
+```
+
+## Flaky Test Protocol
+
+| Symptom | Root cause | Fix |
+|---------|------------|-----|
+| Passes locally, fails CI | Timing, different env | Use `waitFor`/`findBy*` instead of fixed timeouts |
+| Fails randomly | Shared mutable state | Reset state in `beforeEach`. Use fresh factories. |
+| Network-dependent flake | API response timing | MSW mocks all network. No real API calls. |
+| Visual diff flake | Anti-aliasing, OS differences | `maxDiffPixelRatio: 0.01`. Run on same OS in CI. |
+| Flaky test not reproducible | Race condition in test setup | Add `await`s. Ensure fixtures are resolved before assertions. |
+
+Rule: one flake = fix today. Two flakes = skip with `test.skip()` + comment. Never let flaky tests accumulate.
+
 ## Sources
 
 - Kent C. Dodds — Testing Trophy (kentcdodds.com)

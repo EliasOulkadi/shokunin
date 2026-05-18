@@ -216,6 +216,55 @@ When reviewing CI/CD pipelines, use Before | After | Why format:
 | `terraform apply` from laptop | CI plan → manual approval → CI apply | Laptop applies bypass audit trail and state locking. CI enforces process. |
 | No cache on dependencies | `actions/cache` for `node_modules/`, `pip cache`, `go mod cache` | Uncached dependencies add 2-5 minutes per run. Caching cuts this to seconds. |
 
+## Matrix Build Optimization
+
+```yaml
+# GitHub Actions: parallel test shards
+strategy:
+  matrix:
+    shard: [1, 2, 3, 4]
+steps:
+  - run: npx vitest --shard=${{ matrix.shard }}/${{ strategy.job-total }}
+
+# Parallel OS/version testing
+strategy:
+  matrix:
+    os: [ubuntu-latest, windows-latest]
+    node: [18, 20, 22]
+```
+
+## Canary Deployment with Flagger
+
+```yaml
+# Canary resource (Flagger CRD)
+apiVersion: flagger.app/v1beta1
+kind: Canary
+spec:
+  service: myapp
+  analysis:
+    interval: 30s; threshold: 5; maxWeight: 50; stepWeight: 10
+    metrics:
+    - name: request-success-rate; threshold: 99
+    - name: request-duration; threshold: 500
+```
+
+Flow: deploy canary (10% traffic) → analyze metrics → if healthy, increase to 20%, 30%, 50% → promote to 100%.
+
+## Pipeline Approval Gates
+
+```yaml
+# GitHub Environments with protection rules
+deploy-prod:
+  needs: deploy-staging
+  environment: production
+  steps: [ - run: ./deploy.sh ]
+
+# Environment settings (GitHub UI):
+# - Required reviewers: 2
+# - Wait timer: 0 minutes
+# - Deployment branches: main only
+```
+
 ## Sources
 
 - GitHub Actions docs (docs.github.com/actions)

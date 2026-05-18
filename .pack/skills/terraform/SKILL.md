@@ -295,6 +295,58 @@ When reviewing `terraform plan` output, verify these checks:
 | Backend unreachable | S3 bucket deleted, IAM role expired, network partition | `terraform init` or `terraform plan` fails with "Failed to load backend" | Verify S3 bucket exists and IAM role has `s3:GetObject` + `s3:PutObject` + `dynamodb:GetItem` + `dynamodb:PutItem`. Check `~/.aws/credentials`. Restore bucket from backup if deleted. |
 | Workspace inconsistency | Wrong workspace selected (`default` vs `prod`), stale plan file | Apply fails on unexpected resource diffs or destroys | Always `terraform workspace show` before plan/apply. Use directory-per-environment to eliminate workspace risk. Delete stale `.tfplan` files after apply. |
 
+## State Surgery
+
+```bash
+# List resources in state
+terraform state list
+
+# Show specific resource
+terraform state show aws_instance.web
+
+# Move resource between state files
+terraform state mv -state-out=prod.tfstate aws_instance.web aws_instance.web
+
+# Remove resource from state (keeps real resource)
+terraform state rm aws_instance.old_server
+
+# Import existing resource into state
+terraform import aws_instance.web i-1234567890abcdef0
+```
+
+## Provider Pinning Strategy
+
+```hcl
+terraform {
+  required_providers {
+    aws = { source = "hashicorp/aws"; version = "~> 5.0" }
+    kubernetes = { source = "hashicorp/kubernetes"; version = ">= 2.20, < 3.0" }
+  }
+}
+```
+
+Rules: `~>` for minor updates (5.0-5.x). `>= X, < Y` for explicit ranges. Never `latest`.
+
+## Cost Estimation
+
+```bash
+# Infracost (open source)
+infracost breakdown --path . --format table
+
+# Terraform Cloud cost estimation (paid)
+# Enabled automatically in Terraform Cloud workspaces
+
+# Manual: cost per resource type
+# EC2: instance_type * hours * region_price
+# RDS: instance_class * hours + storage_gb * 0.115
+# S3: gb_stored * 0.023 + requests * 0.0004
+
+# Tag for cost allocation
+resource "aws_instance" "web" {
+  tags = { CostCenter = "engineering", Environment = "production" }
+}
+```
+
 ## Sources
 
 - Terraform Documentation (developer.hashicorp.com/terraform)

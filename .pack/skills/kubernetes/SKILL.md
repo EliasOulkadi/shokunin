@@ -258,6 +258,53 @@ When reviewing Kubernetes manifests, use Before | After | Why format:
 | `imagePullPolicy: Always` | `imagePullPolicy: IfNotPresent` (with digest tag) or `Always` (with floating tag only if intentional) | `Always` forces a registry pull on every start, adding latency. Use with digest tags only for rolling updates. |
 | Legacy Ingress | Gateway API `Gateway` + `HTTPRoute` | Ingress is deprecated. Gateway API supports traffic splitting, header matching, and multi-tenancy. |
 
+## Helm Charts
+
+```bash
+# Create chart
+helm create myapp
+# Chart structure: Chart.yaml, values.yaml, templates/deployment.yaml, templates/service.yaml, templates/hpa.yaml
+
+# Install
+helm install myapp ./myapp -f values-prod.yaml --namespace production
+
+# Template values: {{ .Values.replicaCount }}, {{ .Values.image.tag }}
+# Conditional blocks: {{- if .Values.ingress.enabled }}
+# Loops: {{- range .Values.env }}
+```
+
+## Kustomize Overlays
+
+```yaml
+# base/kustomization.yaml
+resources: [deployment.yaml, service.yaml]
+
+# overlays/prod/kustomization.yaml
+bases: [../../base]
+patchesStrategicMerge: [replicas-patch.yaml]
+images: [{ name: myapp, newTag: "v1.2.3" }]
+```
+
+Apply: `kubectl apply -k overlays/prod/`
+
+## Pod Hardening (NSA/CISA)
+
+```yaml
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  fsGroup: 1000
+containers:
+- name: app
+  securityContext:
+    allowPrivilegeEscalation: false
+    readOnlyRootFilesystem: true
+    capabilities: { drop: [ALL] }
+    seccompProfile: { type: RuntimeDefault }
+```
+
+Rule: every production pod must pass all 6 checks above.
+
 ## Sources
 
 - Kubernetes docs (kubernetes.io/docs)

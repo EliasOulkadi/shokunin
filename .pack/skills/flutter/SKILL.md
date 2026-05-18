@@ -224,6 +224,22 @@ When reviewing Flutter code, use Before | After | Why format:
 | `ListView(children: items.map((e) => Widget(e)).toList())` | `ListView.builder(itemCount: items.length, itemBuilder: (_, i) => Widget(items[i]))` | Builder lazily constructs only visible items; map builds all upfront |
 | `Navigator.push(context, MaterialPageRoute(builder: (_) => Screen()))` | `context.go('/route/${id}')`  | GoRouter enables deep linking, typed params, and auth guards |
 
+## Perceived Performance (Extended)
+
+Flutter renders at 60fps on most devices, 120fps on ProMotion displays.
+
+| Technique | Perception | Implementation |
+|-----------|-----------|----------------|
+| `const` constructors | Widgets that never change skip rebuild entirely | `const Text(...)`, `const SizedBox(...)` |
+| `RepaintBoundary` | Isolates frequently-changing widgets (timers, animations) | Wrap clock/progress bar in `RepaintBoundary` |
+| Skeleton loaders | Shows structure immediately (feels faster than spinners) | `shimmer` package with matching layout |
+| `itemExtent` on lists | Eliminates jank from recalculating sizes during scroll | `ListView.builder(itemExtent: 56.0)` |
+| `AnimatedSwitcher` | Fade transitions feel smoother than instant appear/disappear | Wrap changing content, set duration: 200ms |
+| Hero animations | Create continuity between screens | `Hero(tag: 'avatar', child: ...)` on source and destination |
+| Pre-cache images | Eliminates flash-of-placeholder on revisit | `precacheImage(NetworkImage(url), context)` in initState |
+
+**Rule**: The user feels the slowest frame. Optimize for worst case, not average.
+
 ## Sources
 
 - Flutter Documentation (flutter.dev)

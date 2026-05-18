@@ -224,6 +224,36 @@ Always assume positive intent. Phrase findings as observations: "This path retur
 | Padding review with praise or filler | Wastes author's reading time | Keep it concise. Verdict, findings table, details for P0/P1 only. |
 | Not reading surrounding code for context | Misses callers, importers, and downstream effects | Read changed files fully. Search for dependents. Understand the blast radius. |
 
+## Security Review Checklist
+
+- [ ] Input validation: all user input validated at boundary
+- [ ] SQL: parameterized queries (no string interpolation)
+- [ ] Authentication: every endpoint checks auth
+- [ ] Authorization: resource ownership verified server-side
+- [ ] Secrets: no API keys, tokens, or passwords in code
+- [ ] Error messages: no stack traces or internal paths exposed
+- [ ] File uploads: type validated, size limited, stored outside webroot
+- [ ] Rate limiting: on auth, password reset, and email endpoints
+- [ ] Dependencies: `npm audit` or `pip check` passes with zero HIGH/CRITICAL
+
+## Performance Review Patterns
+
+- [ ] Database: no N+1 queries. Check ORM eager loading.
+- [ ] Caching: expensive computations cached. Cache invalidation strategy documented.
+- [ ] Bundle size: new dependency impact checked. Tree-shaking verified.
+- [ ] Lazy loading: heavy modules split into dynamic imports
+- [ ] Memory: no unbounded arrays or maps. Large datasets use pagination/cursors.
+- [ ] Network: requests batched. No waterfall of sequential API calls.
+- [ ] Render: no unnecessary re-renders. Memoization where appropriate.
+
+## Architectural Review Guidelines
+
+- [ ] Single responsibility: each module has one reason to change
+- [ ] Dependency direction: high-level modules don't depend on low-level details
+- [ ] Testing: new code has tests. Tests cover happy path + error + edge cases.
+- [ ] Documentation: public APIs documented. Complex logic has inline comments explaining WHY.
+- [ ] Migration: breaking changes have clear migration path or compatibility layer.
+
 ## Sources
 
 - Google Engineering Practices — "How to Do a Code Review" (google.github.io/eng-practices)
