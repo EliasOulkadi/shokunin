@@ -15,6 +15,12 @@ __pycache__/
 # Node
 node_modules/
 
+# Ruff
+.ruff_cache/
+
+# Benchmarks
+benchmarks/results/
+
 # IDE
 .vscode/
 .idea/

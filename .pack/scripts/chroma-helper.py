@@ -1,3 +1,6 @@
+"""Shokunin ChromaDB Memory CLI."""
+from __future__ import annotations
+
 import json
 import math
 import os
@@ -6,9 +9,14 @@ import sys
 import uuid
 from collections import Counter
 from datetime import datetime, timezone
+from typing import Any
 
 import chromadb
 from chromadb.config import Settings
+
+import logging as _logging
+_LOGGER = _logging.getLogger("shokunin.chroma")
+_LOGGER.setLevel(_logging.WARNING)
 
 _HOME = os.getenv("USERPROFILE") or os.getenv("HOME") or os.path.expanduser("~")
 BASE_DIR = os.path.join(_HOME, ".shokunin", "memory")
@@ -16,14 +24,24 @@ CHROMA_PATH = os.path.join(BASE_DIR, "chroma_db")
 SESSIONS_PATH = os.path.join(BASE_DIR, "sessions")
 COLLECTION_NAME = "shokunin_memory"
 
-client = chromadb.PersistentClient(path=CHROMA_PATH, settings=Settings(anonymized_telemetry=False))
-collection = client.get_or_create_collection(name=COLLECTION_NAME)
+_client: chromadb.PersistentClient | None = None
+_collection: chromadb.Collection | None = None
 
-def _sanitize_id(sid):
-    safe = sid.replace("..", "").replace(":", "-").replace("/", "-").replace("\\", "-")
+def _get_db() -> chromadb.Collection:
+    global _client, _collection
+    if _client is None:
+        _client = chromadb.PersistentClient(
+            path=CHROMA_PATH,
+            settings=Settings(anonymized_telemetry=False),
+        )
+        _collection = _client.get_or_create_collection(name=COLLECTION_NAME)
+    return _collection
+
+def _sanitize_id(sid: str) -> str:
+    safe = re.sub(r'\.\.', '', sid).replace(":", "-").replace("/", "-").replace("\\", "-")
     return re.sub(r'[<>"|?*\0]', '-', safe)
 
-def save(text, session_id, entry_type="general", tags=None, project=""):
+def save(text: str, session_id: str, entry_type: str = "general", tags: list[str] | None = None, project: str = "") -> dict[str, Any]:
     if not text or not session_id:
         return {"error": "text and session_id required", "stored": False}
     tags = tags or []
@@ -36,7 +54,7 @@ def save(text, session_id, entry_type="general", tags=None, project=""):
         "session_id": session_id,
         "timestamp": timestamp,
     }
-    collection.add(documents=[text], metadatas=[metadata], ids=[entry_id])
+    _get_db().add(documents=[text], metadatas=[metadata], ids=[entry_id])
     os.makedirs(SESSIONS_PATH, exist_ok=True)
     safe_id = _sanitize_id(session_id)
     filepath = os.path.join(SESSIONS_PATH, f"{safe_id}.md")
@@ -44,11 +62,12 @@ def save(text, session_id, entry_type="general", tags=None, project=""):
         f.write(f"## {timestamp} | type: {entry_type}\n- **project:** {project}\n- **tags:** {json.dumps(tags)}\n\n{text}\n\n---\n")
     return {"id": entry_id, "stored": True}
 
-def search(query, project=None, n_results=10):
+def search(query: str, project: str | None = None, n_results: int = 10) -> list[dict[str, Any]]:
     where_filter = {"project": project} if project else None
     try:
-        results = collection.query(query_texts=[query], n_results=n_results, where=where_filter)
-    except Exception:
+        results = _get_db().query(query_texts=[query], n_results=n_results, where=where_filter)
+    except Exception as e:
+        _LOGGER.warning(f"Search query failed: {e}")
         return []
     entries = []
     if results.get("ids") and results["ids"][0]:
@@ -66,10 +85,10 @@ def search(query, project=None, n_results=10):
             })
     return entries
 
-def _tokenize(text):
+def _tokenize(text: str) -> list[str]:
     return re.findall(r'\w+', text.lower())
 
-def _bm25(query_tokens, doc_tokens, avgdl, N, df, k1=1.5, b=0.75):
+def _bm25(query_tokens: list[str], doc_tokens: list[str], avgdl: float, N: int, df: dict[str, int], k1: float = 1.5, b: float = 0.75) -> float:
     score = 0.0
     for qt in set(query_tokens):
         if qt not in df or df[qt] == 0:
@@ -79,7 +98,7 @@ def _bm25(query_tokens, doc_tokens, avgdl, N, df, k1=1.5, b=0.75):
         score += idf * (tf * (k1 + 1)) / (tf + k1 * (1 - b + b * len(doc_tokens) / max(avgdl, 1)))
     return score
 
-def _build_bm25_index(entries):
+def _build_bm25_index(entries: list[dict[str, Any]]) -> tuple[list[list[str]], dict[str, int], float, int]:
     index = []
     N = len(entries)
     df = Counter()
@@ -93,7 +112,7 @@ def _build_bm25_index(entries):
     avgdl = len(all_tokens) / max(N, 1)
     return index, df, avgdl, N
 
-def _in_date_range(entry, from_date=None, to_date=None):
+def _in_date_range(entry: dict[str, Any], from_date: str | None = None, to_date: str | None = None) -> bool:
     ts = entry.get("timestamp", "")
     if not ts:
         return True
@@ -104,7 +123,7 @@ def _in_date_range(entry, from_date=None, to_date=None):
         return False
     return True
 
-def _rrf_fuse(ranked_lists, k=60):
+def _rrf_fuse(ranked_lists: list[tuple[list[dict[str, Any]], str]], k: int = 60) -> list[dict[str, Any]]:
     scores = {}
     all_items = {}
     for rank_list, source in ranked_lists:
@@ -121,7 +140,7 @@ def _rrf_fuse(ranked_lists, k=60):
             seen.add(sid)
     return result
 
-def recall(query, project=None, n_results=10, from_date=None, to_date=None):
+def recall(query: str, project: str | None = None, n_results: int = 10, from_date: str | None = None, to_date: str | None = None) -> list[dict[str, Any]]:
     vector_results = search(query, project, n_results * 2)
     vector_results = [e for e in vector_results if _in_date_range(e, from_date, to_date)]
 
@@ -136,19 +155,21 @@ def recall(query, project=None, n_results=10, from_date=None, to_date=None):
                         content = f.read()
                     if content.strip():
                         md_entries.append({"text": content, "session": fname.replace(".md", "")})
-                except Exception:
+                except Exception as e:
+                    _LOGGER.warning(f"Failed to read md file {fname}: {e}")
                     pass
 
     try:
         where_filter = {"project": project} if project else None
-        chroma_data = collection.get(limit=500, where=where_filter)
+        chroma_data = _get_db().get(limit=500, where=where_filter)
         chroma_entries = []
         if chroma_data.get("ids"):
             for i in range(len(chroma_data["ids"])):
                 sid = chroma_data["metadatas"][i].get("session_id", "")
                 if sid and sid != "unknown":
                     chroma_entries.append({"text": chroma_data["documents"][i], "session_id": sid})
-    except Exception:
+    except Exception as e:
+        _LOGGER.warning(f"Failed to get chroma data: {e}")
         chroma_entries = []
 
     bm25_results = []
@@ -169,10 +190,10 @@ def recall(query, project=None, n_results=10, from_date=None, to_date=None):
     return fused[:n_results]
 
 
-def consolidate(project=None, max_entries=100):
+def consolidate(project: str | None = None, max_entries: int = 100) -> dict[str, Any]:
     try:
         where_filter = {"project": project} if project else None
-        all_data = collection.get(limit=max_entries, where=where_filter)
+        all_data = _get_db().get(limit=max_entries, where=where_filter)
     except Exception:
         return {"consolidated": 0, "message": "query failed"}
 
@@ -205,10 +226,10 @@ def consolidate(project=None, max_entries=100):
     return {"consolidated": consolidated}
 
 
-def session_list(limit=5, project=None, page=1, per_page=10, brief=False):
+def session_list(limit: int = 5, project: str | None = None, page: int = 1, per_page: int = 10, brief: bool = False) -> list[dict[str, Any]]:
     try:
         where_filter = {"project": project} if project else None
-        all_data = collection.get(limit=500, where=where_filter)
+        all_data = _get_db().get(limit=500, where=where_filter)
     except Exception:
         return []
 
@@ -256,7 +277,7 @@ def session_list(limit=5, project=None, page=1, per_page=10, brief=False):
     return sessions[start:start + per_page][:limit]
 
 
-def _parse_section(text, header):
+def _parse_section(text: str, header: str) -> list[str]:
     lines = text.split("\n")
     in_section = False
     items = []
@@ -272,7 +293,7 @@ def _parse_section(text, header):
             items.append(stripped.lstrip("- * ")[:300])
     return items
 
-def _parse_session_text(text):
+def _parse_session_text(text: str) -> dict[str, list[str]]:
     extracted = {"decisions": [], "files": [], "commands": [], "checkpoints": []}
     for pattern_name, patterns in [
         ("decisions", ["## decisions", "## decisiones", "decisions:", "decisiones:", "## what we decided"]),
@@ -302,10 +323,10 @@ def _parse_session_text(text):
             extracted["files"].append(stripped.lstrip("- * ")[:300])
     return extracted
 
-def session_continue(session_id, summary_only=False):
+def session_continue(session_id: str, summary_only: bool = False) -> dict[str, Any]:
     if not session_id:
         return {"error": "session_id required", "entries": []}
-    all_data = collection.get(where={"session_id": session_id})
+    all_data = _get_db().get(where={"session_id": session_id})
     if not all_data.get("ids"):
         return {"session_id": session_id, "entry_count": 0, "entries": []}
 
@@ -368,7 +389,8 @@ def session_continue(session_id, summary_only=False):
                     line = line.strip()
                     if line:
                         jsonl_messages.append(json.loads(line))
-        except Exception:
+        except Exception as e:
+            _LOGGER.warning(f"Failed to read jsonl for {session_id}: {e}")
             pass
     result["jsonl_count"] = len(jsonl_messages)
     if not summary_only and jsonl_messages:
@@ -376,7 +398,7 @@ def session_continue(session_id, summary_only=False):
     return result
 
 
-def session_save(text, session_id, role="user"):
+def session_save(text: str, session_id: str, role: str = "user") -> dict[str, Any]:
     if not text or not session_id:
         return {"error": "text and session_id required", "stored": False}
     ts = datetime.now(timezone.utc).isoformat()
@@ -420,7 +442,7 @@ if __name__ == "__main__":
     elif cmd == "recent":
         n_results = int(sys.argv[2]) if len(sys.argv) > 2 else 10
         try:
-            all_results = collection.get(limit=n_results)
+            all_results = _get_db().get(limit=n_results)
             entries = []
             if all_results.get("ids"):
                 for i in range(len(all_results["ids"])):
@@ -437,7 +459,7 @@ if __name__ == "__main__":
         except Exception as e:
             print(json.dumps({"error": str(e)}))
     elif cmd == "count":
-        print(json.dumps({"count": collection.count()}))
+        print(json.dumps({"count": _get_db().count()}))
     elif cmd == "session" and len(sys.argv) >= 3:
         sub = sys.argv[2]
         if sub == "list":

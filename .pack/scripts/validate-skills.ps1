@@ -1,4 +1,13 @@
-param([switch]$CI)
+<#
+.SYNOPSIS
+    Validates all installed skills for required sections, size, and referenced script existence.
+#>
+param(
+    [CmdletBinding()]
+    [switch]$CI
+)
+Set-StrictMode -Version Latest
+$ErrorActionPreference = "Stop"
 
 $SKILLS_DIR = "$env:USERPROFILE\.config\opencode\skills"
 $BASE_DIR = "$env:USERPROFILE\AppData\Local\Temp\opencode\shokunin"

@@ -9,6 +9,8 @@ metadata:
   version: 2.0.0
 ---
 
+> **Note:** Helper scripts (helpers.js, analyzer.js, validators.js, run.js) and reference docs (references/*.md) are deployed with the full distribution. Core Playwright interactions work without them.
+
 Intelligent browser automation executor. Analyzes the user's request, selects the optimal pattern from 30+ built-in templates, generates production-grade Playwright code, and executes it with real-time reporting.
 
 ## Trigger Decision Tree

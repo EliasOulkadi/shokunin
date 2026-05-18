@@ -1,4 +1,13 @@
-param([switch]$Force)
+<#
+.SYNOPSIS
+    Imports session markdown files from disk into ChromaDB for the first time.
+#>
+param(
+    [CmdletBinding()]
+    [switch]$Force
+)
+Set-StrictMode -Version Latest
+$ErrorActionPreference = "Stop"
 
 $HELPER = "$env:USERPROFILE\.shokunin\scripts\chroma-helper.py"
 $SESSIONS = "$env:USERPROFILE\.shokunin\memory\sessions"

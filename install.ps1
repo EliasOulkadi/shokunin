@@ -2,6 +2,7 @@
 # One-command installer for the complete Shokunin AI ecosystem
 # Requires: Windows 10/11, PowerShell 5.1+, Node.js 18+, Python 3.11+
 
+Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 $Host.UI.RawUI.WindowTitle = "Shokunin AI Ecosystem Installer v4.2.2"
 $script:version = "4.2.2"
@@ -9,7 +10,7 @@ $script:installDir = "$env:USERPROFILE\.shokunin"
 $script:skillsDir = "$env:USERPROFILE\.config\opencode\skills"
 $script:startupDir = [Environment]::GetFolderPath('Startup')
 $script:logFile = "$env:TEMP\shokunin-install-$(Get-Date -Format 'yyyyMMdd-HHmmss').log"
-$script:sourceDir = if ($PSScriptRoot) { $PSScriptRoot } else { "" }
+$script:sourceDir = if ($PSScriptRoot) { $PSScriptRoot } else { (Get-Location).Path }
 
 # ============================================================
 # SECTION 1: LOGGING & DISPLAY
@@ -239,7 +240,12 @@ function Setup-OpenCodeConfig {
   3. Pegala abajo (o deja vacio para configurar despues)
 
 "@ -ForegroundColor Yellow
-        $nvKeyInput = Read-Host "  NVIDIA API Key (deja vacio para despues)"
+        try {
+            $nvKeyInput = Read-Host "  NVIDIA API Key (deja vacio para despues)"
+        } catch {
+            Write-Log "Non-interactive mode, skipping NVIDIA API key" Yellow
+            $nvKeyInput = $null
+        }
         if ($nvKeyInput) {
             [Environment]::SetEnvironmentVariable('NVIDIA_API_KEY', $nvKeyInput, 'User')
         }
@@ -398,6 +404,7 @@ function Show-Summary {
      [Environment]::SetEnvironmentVariable('NVIDIA_API_KEY','tu-key','User')
      y edita ~\.config\opencode\opencode.json con tu key
 
+  2. Reinicia tu terminal o recarga tu perfil: . $PROFILE
 
   3. Abre un NUEVO terminal para cargar el perfil
 

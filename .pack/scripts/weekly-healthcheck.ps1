@@ -1,3 +1,10 @@
+<#
+.SYNOPSIS
+    Weekly health check — disk space, memory backup, ChromaDB size, skills count, OpenCode config.
+#>
+Set-StrictMode -Version Latest
+$ErrorActionPreference = "Stop"
+
 # Tarea semanal: Sunday Health Check
 # Corre cada domingo a las 21:00 via Task Scheduler
 

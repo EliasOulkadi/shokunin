@@ -1,5 +1,6 @@
 ---
 name: humanize
+description: Rewrite AI-generated text to sound natural, remove AI tells, and adjust tone. Use when user asks to make text less robotic, more natural, or humanize AI output. Covers tone matrix, filler words, sentence rhythm, and anti-AI-slop patterns.
 ---
 # humanize · 人間
 

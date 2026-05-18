@@ -3,6 +3,8 @@ name: shokunin-update
 description: Detect drift, plan updates, and apply changes to the Shokunin AI Ecosystem. Use this when user asks to update, fix, sync, or verify the ecosystem.
 ---
 
+> **Note:** The `shokunin-update.ps1` script lives in `.pack/scripts/` and is deployed to `~/.shokunin/scripts/` by the installer.
+
 # Shokunin Update System
 
 Maintains the Shokunin ecosystem by detecting drift between the declarative manifest and the actual filesystem state.

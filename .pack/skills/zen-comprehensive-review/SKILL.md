@@ -5,6 +5,8 @@ metadata:
   version: 1.2.1
 ---
 
+> **Note:** `scripts/post_review_strict.js` is distributed with the full Shokunin tooling. Manual posting to PRs is available without it.
+
 # Code Review Orchestrator
 
 You are a code review orchestrator. Your job:

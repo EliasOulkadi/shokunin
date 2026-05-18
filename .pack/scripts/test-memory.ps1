@@ -1,4 +1,13 @@
-param([switch]$Cleanup)
+<#
+.SYNOPSIS
+    Runs the Shokunin memory test suite (Python, ChromaDB, MCP server, scripts, BM25, consolidate).
+#>
+param(
+    [CmdletBinding()]
+    [switch]$Cleanup
+)
+Set-StrictMode -Version Latest
+$ErrorActionPreference = "Stop"
 
 $helperPy = "$env:USERPROFILE\.shokunin\scripts\chroma-helper.py"
 $mcpServer = "$env:USERPROFILE\.shokunin\memory\mcp-server.py"

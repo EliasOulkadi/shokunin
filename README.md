@@ -1,12 +1,17 @@
 ﻿# 職人 · Shokunin
 
 [![CI](https://github.com/EliasOulkadi/shokunin/actions/workflows/ci.yml/badge.svg)](https://github.com/EliasOulkadi/shokunin/actions/workflows/ci.yml)
+[![Memory Tests](https://github.com/EliasOulkadi/shokunin/actions/workflows/memory-tests.yml/badge.svg)](https://github.com/EliasOulkadi/shokunin/actions/workflows/memory-tests.yml)
+[![Release](https://github.com/EliasOulkadi/shokunin/actions/workflows/release.yml/badge.svg)](https://github.com/EliasOulkadi/shokunin/actions/workflows/release.yml)
+
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 [![Windows](https://img.shields.io/badge/Windows-11-0078D6?logo=windows)](https://www.microsoft.com/windows)
 [![Linux](https://img.shields.io/badge/Linux-FCC624?logo=linux&logoColor=black)](https://github.com/EliasOulkadi/shokunin)
-[![OpenCode](https://img.shields.io/badge/OpenCode-1.15-6B46C1?logo=openai)](https://opencode.ai)
+[![OpenCode](https://img.shields.io/badge/OpenCode-latest-6B46C1?logo=openai)](https://opencode.ai)
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/EliasOulkadi/shokunin/graphs/commit-activity)
+[![Changelog](https://img.shields.io/badge/Changelog-CHANGELOG.md-blue)](CHANGELOG.md)
+[![Architecture](https://img.shields.io/badge/Architecture-docs/ARCHITECTURE.md-blue)](docs/ARCHITECTURE.md)
 
 **Persistent AI memory for developers.** 62 skills, multi-strategy recall (vector + BM25 + temporal), ChromaDB memory, MCP servers, declarative self-updates. Zero servers, zero API costs, fully offline.
 

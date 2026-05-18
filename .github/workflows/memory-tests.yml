@@ -11,7 +11,7 @@ on:
       - 'install.ps1'
       - 'install.sh'
       - 'tests/**'
-      - 'ruff.toml'
+      - 'pyproject.toml'
   pull_request:
     paths:
       - '.pack/memory/**'
@@ -22,7 +22,7 @@ jobs:
   lint-python:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v4
       - uses: actions/setup-python@v6
         with:
           python-version: '3.11'
@@ -33,11 +33,11 @@ jobs:
   test-python:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v4
       - uses: actions/setup-python@v6
         with:
           python-version: '3.11'
-      - run: pip install chromadb pytest
+      - run: pip install chromadb --break-system-packages pytest pytest-asyncio pytest-mock pytest-cov
       - name: Setup installed paths for pytest
         run: |
           mkdir -p ~/.shokunin/scripts/
@@ -59,15 +59,17 @@ jobs:
           echo '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"search_context","arguments":{"query":"CI integration test"}}}' | python .pack/memory/mcp-server.py | grep -q "$SID" && echo "MCP search OK" || { echo "MCP search FAILED"; exit 1; }
       - name: Run pytest integration tests
         run: python -m pytest tests/ -v
+      - name: Run tests with coverage
+        run: python -m pytest tests/ --cov=.pack/scripts/ --cov=.pack/memory/ --cov-report=term-missing
 
   test-scripts:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v4
       - uses: actions/setup-python@v6
         with:
           python-version: '3.11'
-      - run: pip install chromadb
+      - run: pip install chromadb --break-system-packages
       - name: Validate all PS1 scripts parse
         shell: pwsh
         run: |
@@ -88,7 +90,7 @@ jobs:
   test-linux:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v4
       - name: Validate bash scripts syntax
         run: |
           for script in .pack/scripts/linux/*.sh; do
@@ -103,7 +105,7 @@ jobs:
   validate-config:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v4
       - name: Validate opencode.json is valid JSON
         run: python -c "import json; json.load(open('.pack/opencode.json')); print('JSON OK')"
       - name: Validate all SKILL.md have required fields

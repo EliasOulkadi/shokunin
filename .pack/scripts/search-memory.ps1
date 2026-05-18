@@ -1,8 +1,15 @@
+<#
+.SYNOPSIS
+    Searches ChromaDB memory via semantic search with keyword fallback, returns top N results.
+#>
 param(
+    [CmdletBinding()]
     [string]$Query = "",
     [string]$Project = "",
     [int]$Limit = 5
 )
+Set-StrictMode -Version Latest
+$ErrorActionPreference = "Stop"
 
 $HELPER = "$env:USERPROFILE\.shokunin\scripts\chroma-helper.py"
 $RESULTS = @()

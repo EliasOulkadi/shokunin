@@ -1,7 +1,14 @@
-# Shokunin AI Ecosystem â€” PowerShell Profile
+<#
+.SYNOPSIS
+    PowerShell profile for the Shokunin AI Ecosystem - aliases, PSReadLine, Telegram bot, Oh My Posh.
+#>
+Set-StrictMode -Version Latest
+$ErrorActionPreference = "Stop"
+
+# Shokunin AI Ecosystem - PowerShell Profile
 # Documentation: https://github.com/EliasOulkadi/shokunin
 
-# Aliases â€” Git
+# Aliases - Git
 function gst { git status }
 function ga { git add -A }
 function gcm { param($m) git commit -m "$m" }
@@ -10,18 +17,18 @@ function gl { git pull --ff-only }
 function gb { git branch }
 function gco { git checkout }
 
-# Aliases â€” npm
+# Aliases - npm
 function ni { npm install }
 function nrd { npm run dev }
 function nrb { npm run build }
 function nt { npm test }
 
-# Aliases â€” Docker
+# Aliases - Docker
 function dps { docker ps }
 function dlog { docker logs -f }
 function dstop { docker stop }
 
-# Aliases â€” Utils
+# Aliases - Utils
 Set-Alias -Name ll -Value "Get-ChildItem"
 function mkcd { param($Path) New-Item -ItemType Directory -Path $Path -Force | Set-Location }
 function touch { param($File) New-Item -ItemType File -Path $File -Force }

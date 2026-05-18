@@ -16,7 +16,7 @@ jobs:
 
       - name: Generate release notes
         run: |
-          PREVIOUS_TAG=$(git tag --sort=-version:refname | head -2 | tail -1)
+          PREVIOUS_TAG=$(git tag --list 'v*' | sort -V | tail -2 | head -1)
           if [ -z "$PREVIOUS_TAG" ]; then
             echo "RELEASE_NOTES=Initial release" >> $GITHUB_ENV
           else

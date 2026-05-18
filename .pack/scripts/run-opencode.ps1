@@ -1,5 +1,11 @@
 #!/usr/bin/env pwsh
+<#
+.SYNOPSIS
+    Wrapper for opencode CLI with session tracking, checkpointing, buffer capture, and ChromaDB saving.
+#>
 param()
+Set-StrictMode -Version Latest
+$ErrorActionPreference = "Continue"
 
 $CHECKPOINT_INTERVAL_MS = 300000
 $BUFFER_MAX_LINES = 9999

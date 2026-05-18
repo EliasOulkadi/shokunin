@@ -1,5 +1,6 @@
 ---
 name: research
+description: Deep research with web search, source verification, and fact-checking. Runs before humanize + kami in the document pipeline. Use when user asks to research a topic, verify facts, gather sources, or do deep web investigation. Covers source validation, citation, and evidence hierarchy.
 ---
 # research · 調査
 

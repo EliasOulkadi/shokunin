@@ -195,9 +195,9 @@ if [ -f "$CONFIG_SRC" ]; then
     PYTHON_BIN="python3"
     command -v python3 &>/dev/null || PYTHON_BIN="python"
 
-    sed "s|{{MCP_ROOT_PATH}}|$HOME|g; \
-         s|{{PYTHON_BIN}}|$PYTHON_BIN|g; \
-         s|{{MCP_MEMORY_PATH}}|$CORES_DIR/memory/mcp-server.py|g" \
+    sed "s#{{MCP_ROOT_PATH}}#$HOME#g; \
+         s#{{PYTHON_BIN}}#$PYTHON_BIN#g; \
+         s#{{MCP_MEMORY_PATH}}#$CORES_DIR/memory/mcp-server.py#g" \
       "$CONFIG_SRC" > "$CONFIG_DIR/opencode.json" 2>/dev/null || cp "$CONFIG_SRC" "$CONFIG_DIR/opencode.json"
 
     if grep -q "{{MCP_\|{{PYTHON_BIN}}" "$CONFIG_DIR/opencode.json" 2>/dev/null; then
@@ -209,6 +209,7 @@ NVIDIA_PROFILE=""
 if [ -f "$HOME/.zshrc" ]; then NVIDIA_PROFILE="$HOME/.zshrc"
 elif [ -f "$HOME/.bashrc" ]; then NVIDIA_PROFILE="$HOME/.bashrc"
 elif [ -f "$HOME/.bash_profile" ]; then NVIDIA_PROFILE="$HOME/.bash_profile"
+elif [ -f "$HOME/.profile" ]; then NVIDIA_PROFILE="$HOME/.profile"
 fi
 if [ -n "$NVIDIA_KEY" ] && [ -n "$NVIDIA_PROFILE" ] && ! grep -q "NVIDIA_API_KEY" "$NVIDIA_PROFILE" 2>/dev/null; then
     printf 'export NVIDIA_API_KEY="%s"\n' "$NVIDIA_KEY" >> "$NVIDIA_PROFILE"
@@ -237,6 +238,7 @@ PROFILE_FILE=""
 if [ -f "$HOME/.zshrc" ]; then PROFILE_FILE="$HOME/.zshrc"
 elif [ -f "$HOME/.bashrc" ]; then PROFILE_FILE="$HOME/.bashrc"
 elif [ -f "$HOME/.bash_profile" ]; then PROFILE_FILE="$HOME/.bash_profile"
+elif [ -f "$HOME/.profile" ]; then PROFILE_FILE="$HOME/.profile"
 fi
 
 if [ -n "$PROFILE_FILE" ]; then

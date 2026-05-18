@@ -1,10 +1,17 @@
+<#
+.SYNOPSIS
+    Saves an entry to ChromaDB memory (fallback to markdown file if ChromaDB unavailable).
+#>
 param(
+    [CmdletBinding()]
     [string]$Text,
     [string[]]$Tags = @(),
     [string]$Project = "",
     [string]$SessionId = "",
     [string]$Type = "general"
 )
+Set-StrictMode -Version Latest
+$ErrorActionPreference = "Stop"
 
 $HELPER_PY = "$env:USERPROFILE\.shokunin\scripts\chroma-helper.py"
 $LOG_DIR = "$env:USERPROFILE\.shokunin\memory\sessions"

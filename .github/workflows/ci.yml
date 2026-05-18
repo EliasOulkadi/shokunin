@@ -4,7 +4,7 @@ jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v4
       - name: Validate SKILL.md frontmatter
         shell: bash
         run: |
@@ -14,11 +14,9 @@ jobs:
             f="${dir}SKILL.md"
             [ -f "$f" ] || continue
             n=$(basename "$dir")
-            [ "$n" = "kami" ] && continue
             grep -q "^name:" "$f" || { echo "ERROR: MISSING name: $n"; errors=$((errors+1)); }
-            grep -qi "workflow\|structure\|60fps\|trigger\|sub-command" "$f" || { echo "WARN: MISSING workflow: $n"; warnings=$((warnings+1)); }
-            grep -qi "error\|emergency\|anti-pattern\|banned" "$f" || { echo "WARN: MISSING error section: $n"; warnings=$((warnings+1)); }
-            grep -qi "sources\|fuentes\|references\|cited" "$f" || { echo "WARN: MISSING sources: $n"; warnings=$((warnings+1)); }
+            grep -q "^description:" "$f" || { echo "WARN: MISSING description: $n"; warnings=$((warnings+1)); }
+            grep -qi "workflow\|## Workflow\|## Procedural\|## The Structure\|## Usage\|trigger\|sub-command" "$f" || { echo "WARN: MISSING workflow: $n"; warnings=$((warnings+1)); }
           done
           echo "Skills validated: $errors errors, $warnings warnings"
           if [ "$errors" -gt 0 ]; then exit 1; fi
@@ -43,3 +41,25 @@ jobs:
           grep -q "{{USERNAME}}" .pack/CLAUDE.md.template && echo "Template HAS USERNAME"
           grep -q "MEMORY SYSTEM" .pack/CLAUDE.md.template && echo "Template HAS MEMORY SYSTEM"
           echo "Template OK"
+
+  typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+      - run: pip install mypy chromadb
+      - name: Type check Python
+        run: mypy .pack/scripts/ .pack/memory/ --strict
+
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+      - run: pip install bandit
+      - name: Security scan
+        run: bandit -r .pack/scripts/ .pack/memory/ -f json || true

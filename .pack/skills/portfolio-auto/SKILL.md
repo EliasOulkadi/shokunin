@@ -9,6 +9,8 @@ metadata:
   version: "2.0"
 ---
 
+> **Note:** `last-sync.json` state file is auto-created on first successful sync. Ignore "missing file" warnings on first run.
+
 # Portfolio Auto-Sync
 
 Automatically sync GitHub repositories to your portfolio website.

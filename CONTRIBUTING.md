@@ -1,37 +1,43 @@
 # Contributing to Shokunin
 
-Thanks for your interest in contributing. Here's what you need to know.
+## Dev Setup
 
-## How to contribute skills
+1. Clone the repo
+2. Install Python 3.11+ and Node.js 18+
+3. Install dependencies: `pip install chromadb`
+4. Run tests: `.\test-memory.ps1`
 
-Each skill lives in its own directory with a `SKILL.md` file at the root.
+## Code Standards
 
-1. Create a new directory under `.pack/skills/` with a descriptive name (e.g. `.pack/skills/my-skill/`)
-2. Write a `SKILL.md` following the existing format:
-   - YAML frontmatter with `name` and `description`
-   - Section-based workflow with steps
-   - Clear examples and anti-patterns
-3. Submit a Pull Request
+### Python
+- Format: `ruff format .`
+- Lint: `ruff check .` (full rule set, strict)
+- Types: `mypy . --strict`
+- No bare `except:` — always specify exception type
+- Type hints on all functions
+- F-strings preferred over `%` or `.format()`
 
-## How to report issues
+### PowerShell
+- `Set-StrictMode -Version Latest` at top of every script
+- `[CmdletBinding()]` on all advanced functions
+- `$ErrorActionPreference = 'Stop'` for critical operations
+- Verbose naming: `Get-*`, `Set-*`, `Test-*`, etc.
+- CRLF line endings (Windows convention)
 
-Open a GitHub issue with:
-- A clear title
-- Steps to reproduce (if bug)
-- Expected vs actual behavior
-- Environment details (OS, runtime versions)
+### Git
+- Conventional commits: `feat:`, `fix:`, `docs:`, `refactor:`, `test:`, `ci:`
+- Keep commits atomic — one logical change per commit
+- Branch from `master`, PR back to `master`
 
-## Pull request process
-
-1. Fork the repo and create a branch
+## PR Process
+1. Create a feature branch: `feat/short-description` or `fix/short-description`
 2. Make your changes
-3. Test that the install script still works
-4. Open a PR with a clear description of what and why
+3. Run lint/typecheck: `ruff check . && mypy .`
+4. Run memory tests: `.\test-memory.ps1`
+5. Submit a PR against `master`
+6. CI runs automatically (lint, typecheck, security, memory tests)
 
-## Code style
-
-- Markdown: 80 char lines, ATX headings, fenced code blocks
-- Shell scripts: `set -euo pipefail`, error messages, portable syntax
-- Python: type hints, f-strings, 3.10+ syntax
-
-Questions? Open an issue or reach out to elias@cyberian.online.
+## Testing
+- Memory tests: `.\test-memory.ps1` (Windows) or `./test-memory.sh` (Linux)
+- Healthcheck: `.\memory-healthcheck.ps1`
+- All PRs must pass CI before merge

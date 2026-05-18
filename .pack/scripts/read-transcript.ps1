@@ -1,4 +1,14 @@
-param([string]$RawText, [string]$SessionId)
+<#
+.SYNOPSIS
+    Parses a raw session transcript and extracts decisions, commands, and conversation log to markdown.
+#>
+param(
+    [CmdletBinding()]
+    [string]$RawText,
+    [string]$SessionId
+)
+Set-StrictMode -Version Latest
+$ErrorActionPreference = "Stop"
 
 $MAX_PREVIEW_LENGTH = 200
 $MAX_COMMAND_LENGTH = 100

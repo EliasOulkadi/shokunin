@@ -1,4 +1,13 @@
-param([switch]$CI)
+<#
+.SYNOPSIS
+    Runs a full healthcheck for the Shokunin memory system (Python, ChromaDB, MCP, scripts, config).
+#>
+param(
+    [CmdletBinding()]
+    [switch]$CI
+)
+Set-StrictMode -Version Latest
+$ErrorActionPreference = "Continue"
 
 $PASS = 0
 $FAIL = 0

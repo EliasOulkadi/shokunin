@@ -1,0 +1,11 @@
+# Default owners
+* @EliasOulkadi
+
+# Python files
+*.py @EliasOulkadi
+
+# PowerShell scripts
+*.ps1 @EliasOulkadi
+
+# CI/CD
+.github/ @EliasOulkadi

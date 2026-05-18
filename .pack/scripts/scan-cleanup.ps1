@@ -1,8 +1,15 @@
+<#
+.SYNOPSIS
+    Scans Downloads, Desktop, and Temp for files to classify (keep/review/trash) and optionally move to Recycle Bin.
+#>
 param(
+    [CmdletBinding()]
     [switch]$Scan,
     [string[]]$Clean,
     [string]$LogDir = "$env:USERPROFILE\.shokunin\logs"
 )
+Set-StrictMode -Version Latest
+$ErrorActionPreference = "Continue"
 
 New-Item -ItemType Directory -Path $LogDir -Force | Out-Null
 
