@@ -211,17 +211,29 @@ def _build_whitepaper(pdf):
 
 
 if __name__ == "__main__":
-    input_file = sys.argv[1] if len(sys.argv) > 1 else None
-    output_file = sys.argv[2] if len(sys.argv) > 2 else "output.pdf"
-    title = None
-    for i, arg in enumerate(sys.argv):
-        if arg == "--title" and i + 1 < len(sys.argv):
-            title = sys.argv[i + 1]
-    if title is None and "--title" not in sys.argv:
-        title = None
+    input_file = None
+    output_file = "output.pdf"
+    title = "Shokunin Technical Overview v4.2.2"
+    args = sys.argv[1:]
+    i = 0
+    while i < len(args):
+        if args[i] == "--title" and i + 1 < len(args):
+            title = args[i + 1]; i += 2
+        elif args[i] == "--output" and i + 1 < len(args):
+            output_file = args[i + 1]; i += 2
+        elif args[i] == "--input" and i + 1 < len(args):
+            input_file = args[i + 1]; i += 2
+        elif not args[i].startswith("--"):
+            if input_file is None:
+                input_file = args[i]
+            else:
+                output_file = args[i]
+            i += 1
+        else:
+            i += 1
 
     build_pdf(
-        input_md=input_file if input_file and input_file != "--title" else None,
-        output_pdf=output_file if output_file != "--title" else "output.pdf",
-        title=title or "Shokunin Technical Overview v4.2.2",
+        input_md=input_file,
+        output_pdf=output_file,
+        title=title,
     )
