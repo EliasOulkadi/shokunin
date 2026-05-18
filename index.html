@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
 <title>Shokunin — Persistent AI Memory for Developers</title>
 <meta name="description" content="Multi-strategy memory for AI agents across sessions. 62 skills + BM25 + vector search + temporal filtering + reciprocal rank fusion. Open source, single-command install.">
 <meta name="theme-color" content="#f5f4ed">
@@ -47,8 +48,9 @@
     --mono: "JetBrains Mono", "SF Mono", "Fira Code", Consolas, Monaco, monospace;
   }
 
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-  @keyframes fadeInUp { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes heroIn { from { opacity: 0; transform: translateY(30px) rotateX(8deg) scale(0.96); } to { opacity: 1; transform: translateY(0) rotateX(0) scale(1); } }
+  @keyframes heroSubIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes barGrow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -64,11 +66,14 @@
   h2 { font-size: var(--font-h2); letter-spacing: -0.01em; }
   h3 { font-size: clamp(18px, 2vw, 22px); }
 
+  .skip-link { position: absolute; top: -100%; left: 16px; background: var(--ink-blue); color: #fff; padding: 8px 16px; border-radius: 4px; z-index: 100000; font-size: 14px; }
+  .skip-link:focus { top: 8px; }
+
   .section { padding: clamp(80px, 12vh, 160px) 24px; max-width: var(--max-width); margin: 0 auto; perspective: 1200px; }
   .section-divider { width: 48px; height: 1px; margin: 0 auto; background: linear-gradient(90deg, transparent, var(--border), transparent); }
   .section-divider--foot { width: 80px; height: 1px; margin: 0 auto clamp(40px, 6vh, 80px); background: linear-gradient(90deg, transparent, var(--border), transparent); }
 
-  .reveal { opacity: 0; transform: translateY(40px) rotateX(2deg) scale(0.98); transition: opacity 0.7s var(--ease-out), transform 0.7s var(--ease-out); }
+  .reveal { opacity: 0; transform: translateY(30px) rotateX(1.5deg) scale(0.98); transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1); will-change: transform, opacity; }
   .reveal.visible { opacity: 1; transform: translateY(0) rotateX(0) scale(1); }
   .reveal-delay-1 { transition-delay: 0.1s; }
   .reveal-delay-2 { transition-delay: 0.2s; }
@@ -80,17 +85,18 @@
   @keyframes rain-slow { 0% { transform: translateY(0); opacity: 0.2; } 50% { opacity: 0.1; } 100% { transform: translateY(85vh); opacity: 0; } }
 
   /* HERO */
-  .hero { min-height: 85dvh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 80px 24px 24px; position: relative; overflow: hidden; max-width: var(--max-width); margin: 0 auto; }
+  .hero { min-height: 85dvh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 80px 24px 24px; position: relative; overflow: hidden; max-width: var(--max-width); margin: 0 auto; perspective: 800px; transform-style: preserve-3d; }
+  .hero::before { content: ''; position: absolute; top: 15%; left: 30%; width: 40%; height: 50%; background: radial-gradient(ellipse at center, oklch(55% 0.12 260 / 0.08) 0%, transparent 70%); transform: translate(var(--hero-glow-x, 0px), var(--hero-glow-y, 0px)); transition: transform 0.3s cubic-bezier(0.23, 1, 0.32, 1); pointer-events: none; z-index: 0; }
   .hero-bg { position: absolute; top: 5%; left: 0; right: 0; width: fit-content; margin-inline: auto; font-size: clamp(120px, 18vw, 280px); color: var(--ink-blue); opacity: 0.12; pointer-events: none; font-weight: 500; line-height: 1; white-space: nowrap; will-change: transform; }
-  .hero h1 { font-size: var(--font-display); animation: fadeIn 0.8s var(--ease-out) both; letter-spacing: -0.03em; }
-  .hero-sub { font-size: clamp(17px, 1.3vw, 21px); color: var(--dark-warm); max-width: 540px; margin: 0 auto 32px; line-height: 1.5; letter-spacing: 0.01em; animation: fadeIn 0.8s var(--ease-out) 0.2s both; }
+  .hero h1 { font-size: var(--font-display); animation: heroIn 1s cubic-bezier(0.16, 1, 0.3, 1) both; letter-spacing: -0.03em; }
+  .hero-sub { font-size: clamp(17px, 1.3vw, 21px); color: var(--dark-warm); max-width: 540px; margin: 0 auto 32px; line-height: 1.5; letter-spacing: 0.01em; animation: heroSubIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both; }
 
   /* Social proof */
-  .hero-proof { display: flex; align-items: center; gap: 16px; justify-content: center; flex-wrap: wrap; animation: fadeInUp 0.8s var(--ease-out) 0.3s both; margin-bottom: 28px; font-size: 14px; color: var(--stone); }
+  .hero-proof { display: flex; align-items: center; gap: 16px; justify-content: center; flex-wrap: wrap; animation: heroSubIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.35s both; margin-bottom: 28px; font-size: 14px; color: var(--stone); }
   .hero-proof span { display: inline-flex; align-items: center; gap: 4px; }
   .hero-proof svg { width: 14px; height: 14px; }
 
-  .hero-install { animation: fadeInUp 0.8s var(--ease-out) 0.4s both; width: 100%; max-width: 580px; margin: 0 auto 20px; }
+  .hero-install { animation: heroSubIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.45s both; width: 100%; max-width: 580px; margin: 0 auto 20px; }
   .hero-install pre { background: var(--ivory); border-radius: 8px; padding: 16px 20px; font-size: var(--font-mono); color: var(--near-black); white-space: normal; overflow-wrap: break-word; word-break: break-all; text-align: left; border: 1px solid var(--border); position: relative; }
   .hero-install .copy-btn { position: absolute; top: 12px; right: 12px; background: var(--ink-tag); color: var(--ink-blue); border: none; border-radius: 4px; padding: 4px 10px; font-size: 12px; font-family: var(--serif); cursor: pointer; transition: background 0.15s var(--ease-decel), transform 0.1s var(--ease-out-strong); }
   .hero-install .copy-btn:hover { background: var(--ink-blue); color: #fff; }
@@ -98,8 +104,8 @@
   a:focus-visible, button:focus-visible { outline: 2px solid var(--ink-blue); outline-offset: 2px; border-radius: 2px; }
   .hero-install .copy-btn:focus-visible { background: var(--ink-blue); color: #fff; }
 
-  .hero-cta { display: flex; flex-direction: column; align-items: center; gap: 12px; animation: fadeInUp 0.8s var(--ease-out) 0.6s both; }
-  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 12px 28px; border-radius: 6px; font-family: Charter, Georgia, serif; font-size: 15px; font-weight: 500; cursor: pointer; text-decoration: none; transition: transform 0.12s var(--ease-out-strong), box-shadow 0.12s var(--ease-out-strong); will-change: transform; min-height: 44px; }
+  .hero-cta { display: flex; flex-direction: column; align-items: center; gap: 12px; animation: heroSubIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.55s both; }
+  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 12px 28px; border-radius: 6px; font-family: Charter, Georgia, serif; font-size: 15px; font-weight: 500; cursor: pointer; text-decoration: none; transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1), box-shadow 160ms cubic-bezier(0.23, 1, 0.32, 1); will-change: transform; min-height: 44px; }
   .btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(27, 54, 93, 0.12); }
   .btn:active { transform: scale(0.97); }
   .btn-primary { background: var(--ink-blue); color: #fff; }
@@ -116,16 +122,26 @@
   .stats-line strong { color: var(--ink-blue); font-weight: 500; }
   .sep { color: var(--border); margin: 0 2px; }
 
-  .arch-diagram { background: var(--ivory); border-radius: 8px; padding: 24px 28px; border: 1px solid var(--border); font-family: var(--mono); font-size: var(--font-mono); overflow-x: auto; white-space: pre; text-align: center; color: var(--dark-warm); }
+  .arch-diagram { background: var(--ivory); border-radius: 8px; padding: 24px 28px; border: 1px solid var(--border); font-family: var(--mono); font-size: var(--font-mono); overflow-x: auto; white-space: pre; text-align: center; color: var(--dark-warm); position: relative; }
+  @keyframes gentleFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+  .arch-diagram.reveal { transform: translateY(30px) rotateX(1.5deg) scale(0.98); }
+  .arch-diagram.visible { opacity: 1; transform: translateY(0) rotateX(0) scale(1); animation: gentleFloat 6s ease-in-out infinite; }
+  @media (prefers-reduced-motion: reduce) { .arch-diagram.visible { animation: none; } }
 
   table { width: 100%; border-collapse: collapse; font-size: 14px; margin-top: 24px; }
   table th { text-align: left; color: var(--dark-warm); font-weight: 500; padding: 12px 16px; border-bottom: 2px solid var(--border); font-size: 13px; }
   table td { padding: 12px 16px; border-bottom: 1px solid var(--border-soft); vertical-align: top; }
   table td:first-child { font-weight: 500; white-space: nowrap; }
 
-  .faq-item { border-bottom: 1px solid var(--border); padding: 20px 0; }
-  .faq-q { font-weight: 500; color: var(--ink-blue); cursor: pointer; font-size: 17px; }
-  .faq-a { color: var(--dark-warm); margin-top: 8px; line-height: 1.55; font-size: 15px; }
+  .faq-item { border-bottom: 1px solid var(--border); padding: 0; }
+  details.faq-item { border-bottom: 1px solid var(--border); padding: 0; }
+  details.faq-item summary { list-style: none; cursor: pointer; padding: 20px 0; font-weight: 500; color: var(--ink-blue); font-size: 17px; display: flex; align-items: center; justify-content: space-between; }
+  details.faq-item summary::after { content: '+'; font-family: var(--mono); font-size: 20px; color: var(--stone); transition: transform 0.25s cubic-bezier(0.23, 1, 0.32, 1); flex-shrink: 0; margin-left: 12px; }
+  details.faq-item[open] summary::after { transform: rotate(45deg); }
+  details.faq-item summary::-webkit-details-marker { display: none; }
+  details.faq-item .faq-a { padding: 0 0 20px; }
+  .faq-q { font-weight: 500; color: var(--ink-blue); font-size: 17px; }
+  .faq-a { color: var(--dark-warm); line-height: 1.55; font-size: 15px; }
 
   footer { text-align: center; padding: clamp(40px, 6vh, 60px) 24px; color: var(--stone); font-size: 14px; border-top: 1px solid var(--border); max-width: var(--max-width); margin: 0 auto; }
   footer a { color: var(--ink-blue); }
@@ -141,9 +157,10 @@
     .tool-icon { opacity: 1 !important; transform: none !important; }
     .hero-bg { transform: none !important; }
     .rain-drop, .rain-drop--slow { animation: none !important; opacity: 0 !important; }
+    .hero::before { display: none; }
   }
   @media (pointer: coarse) {
-    .btn, .faq-q, button { min-height: 44px; }
+    .btn, button { min-height: 44px; }
     .features-grid { gap: 16px; }
   }
   @media (max-width: 768px) {
@@ -171,7 +188,6 @@
 
     .faq-q { font-size: 15px; }
     .faq-a { font-size: 14px; }
-    .faq-item { padding: 16px 0; }
 
     h1 { font-size: clamp(28px, 7vw, 42px); }
     h2 { font-size: clamp(22px, 5vw, 30px); }
@@ -219,7 +235,6 @@
   body { max-width: 100vw; }
   .hero-install pre { overflow-wrap: anywhere; }
   .features-grid { max-width: 100%; }
-  .arch-diagram { white-space: pre-wrap; word-break: break-word; }
   table { max-width: 100%; display: block; }
 
   .bench-highlight { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 32px; }
@@ -285,12 +300,50 @@
     .feature-card:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(27, 54, 93, 0.10); }
     .bench-highlight-item:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(27, 54, 93, 0.08); }
   }
+
+  @supports (color: oklch(0 0 0)) {
+    :root {
+      --ink-blue: oklch(38% 0.12 260);
+      --ink-light: oklch(48% 0.12 260);
+      --ink-tag: oklch(90% 0.04 260);
+      --stone: oklch(45% 0.01 80);
+    }
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --parchment: #0c0c0c;
+      --ivory: #161616;
+      --ink-blue: #7ca3d8;
+      --ink-light: #5a8bc4;
+      --ink-tag: #1a2a42;
+      --near-black: #e8e6e0;
+      --dark-warm: #b0ada5;
+      --olive: #8a877f;
+      --stone: #8a8880;
+      --border: #2a2a28;
+      --border-soft: #252523;
+    }
+    body::after { opacity: 0.06; }
+    .hero-bg { color: var(--ink-blue); }
+    .splash { background: var(--parchment); }
+    .splash-text { color: #3a3a38; }
+    .btn-primary { background: var(--ink-blue); color: #0d0d0d; }
+    .btn-secondary-text { color: var(--ink-light); }
+    .feature-card, .bench-highlight-item, .bench-callout, .bench-chart, .bench-footnote { background: var(--ivory); border-color: var(--border); }
+    .hero-install pre { background: var(--ivory); border-color: var(--border); color: var(--near-black); }
+    .arch-diagram { background: var(--ivory); border-color: var(--border); color: var(--dark-warm); }
+    .section-mesh { background-image: radial-gradient(ellipse 60% 40% at 30% 50%, rgba(124,163,216,0.06) 0%, transparent 60%); }
+    .faq-q { color: var(--ink-light); }
+    details.faq-item summary { color: var(--ink-light); }
+  }
 </style>
 </head>
 <body>
+  <a href="#main" class="skip-link">Skip to content</a>
   <div class="splash" id="splash" aria-hidden="true"><span class="splash-text japanese">職人</span></div>
 
-<main>
+<main id="main">
 <!-- HERO -->
 <section class="hero">
   <span class="hero-bg japanese" aria-hidden="true">職人</span>
@@ -516,26 +569,26 @@ get_session_summary — summarize all entries in a given session
 <!-- FAQ -->
 <section class="section">
   <h2 class="reveal">FAQ</h2>
-  <div class="faq-item reveal reveal-delay-1">
-    <p class="faq-q">Does it work offline?</p>
+  <details class="faq-item reveal reveal-delay-1">
+    <summary class="faq-q">Does it work offline?</summary>
     <p class="faq-a">Yes. Everything runs locally. No cloud dependency, no API calls per memory operation, no telemetry.</p>
-  </div>
-  <div class="faq-item reveal reveal-delay-2">
-    <p class="faq-q">What runtimes are supported?</p>
+  </details>
+  <details class="faq-item reveal reveal-delay-2">
+    <summary class="faq-q">What runtimes are supported?</summary>
     <p class="faq-a">OpenCode, Claude Code, Cursor, Cline, Continue.dev, and Windsurf. MCP templates included for each.</p>
-  </div>
-  <div class="faq-item reveal reveal-delay-2">
-    <p class="faq-q">Do I need an NVIDIA API key?</p>
+  </details>
+  <details class="faq-item reveal reveal-delay-2">
+    <summary class="faq-q">Do I need an NVIDIA API key?</summary>
     <p class="faq-a">No. OpenCode Go is the default provider and works without any key. NVIDIA is optional.</p>
-  </div>
-  <div class="faq-item reveal reveal-delay-3">
-    <p class="faq-q">How is this different from Hindsight?</p>
+  </details>
+  <details class="faq-item reveal reveal-delay-3">
+    <summary class="faq-q">How is this different from Hindsight?</summary>
     <p class="faq-a">Shokunin is local-first (no servers, no Docker). Hindsight is enterprise (better benchmarks, heavier infrastructure). They solve overlapping problems at different scales.</p>
-  </div>
-  <div class="faq-item reveal reveal-delay-3">
-    <p class="faq-q">How do I install?</p>
+  </details>
+  <details class="faq-item reveal reveal-delay-3">
+    <summary class="faq-q">How do I install?</summary>
     <p class="faq-a">Full install (Windows): <code>irm https://raw.githubusercontent.com/EliasOulkadi/shokunin/master/install.ps1 | iex</code>. Linux: <code>bash &lt;(curl -sL https://raw.githubusercontent.com/EliasOulkadi/shokunin/master/install.sh)</code>. <br>Skills-only (no ChromaDB): <code>irm https://raw.githubusercontent.com/EliasOulkadi/shokunin/master/install-skills.ps1 | iex</code></p>
-  </div>
+  </details>
 </section>
 
 <div class="section-divider" aria-hidden="true"></div>
@@ -595,6 +648,20 @@ get_session_summary — summarize all entries in a given session
     }, { passive: true });
   }
 
+  // Magnetic hero glow on mouse
+  if (!prefersReduced && !window.matchMedia('(max-width: 768px)').matches) {
+    const hero = document.querySelector('.hero');
+    if (hero) {
+      hero.addEventListener('mousemove', (e) => {
+        const rect = hero.getBoundingClientRect();
+        const x = ((e.clientX - rect.left) / rect.width - 0.5) * 20;
+        const y = ((e.clientY - rect.top) / rect.height - 0.5) * 10;
+        hero.style.setProperty('--hero-glow-x', x + 'px');
+        hero.style.setProperty('--hero-glow-y', y + 'px');
+      });
+    }
+  }
+
   // 3D card tilt (desktop only)
   if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
     document.querySelectorAll('.feature-card, .bench-highlight-item').forEach(card => {
@@ -606,6 +673,19 @@ get_session_summary — summarize all entries in a given session
       });
       card.addEventListener('mouseleave', () => { card.style.transform = ''; });
     });
+  }
+
+  // ViewTimeline progressive enhancement for benchmark bars
+  if ('animationTimeline' in document.documentElement.style) {
+    try {
+      document.querySelectorAll('.bench-bar').forEach(bar => {
+        bar.style.animationTimeline = 'view()';
+        bar.style.animationRange = 'entry 0% entry 100%';
+        bar.style.animationName = 'barGrow';
+        bar.style.animationFillMode = 'both';
+        bar.style.animationTimingFunction = 'linear';
+      });
+    } catch(e) {}
   }
 
   // Benchmark bars: scaleX + counter animation

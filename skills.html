@@ -6,6 +6,7 @@
 <title>Shokunin — 62 Skills Browser</title>
 <meta name="description" content="Browse all 62 expert skills in the Shokunin ecosystem.">
 <meta name="theme-color" content="#f5f4ed">
+<meta name="color-scheme" content="light dark">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22 fill=%22%231B365D%22>職</text></svg>">
 <style>
   :root {
@@ -95,7 +96,11 @@
   .skill-name { font-size: 16px; color: var(--ink-blue); display: inline; }
   .skill-lines { font-size: 12px; color: var(--stone); margin-left: 8px; }
   .skill-desc { font-size: 14px; color: var(--dark-warm); line-height: 1.5; }
-  .skill-body { padding: 0 24px 24px; }
+  .skip-link { position: absolute; top: -100%; left: 16px; background: var(--ink-blue); color: #fff; padding: 8px 16px; border-radius: 4px; z-index: 100000; font-size: 14px; font-family: var(--serif); }
+  .skip-link:focus { top: 8px; }
+  .skill-body { padding: 0 24px; overflow: hidden; }
+  .skill-closed { max-height: 0; opacity: 0; padding-top: 0; padding-bottom: 0; overflow: hidden; transition: max-height 0.4s cubic-bezier(0.23, 1, 0.32, 1), opacity 0.2s ease, padding 0.3s ease; }
+  .skill-body:not(.skill-closed) { max-height: 50vh; opacity: 1; padding: 0 24px 24px; transition: max-height 0.4s cubic-bezier(0.23, 1, 0.32, 1), opacity 0.3s ease 0.1s; overflow-y: auto; }
   .skill-content { font-size: 12px; line-height: 1.6; color: var(--dark-warm); white-space: pre-wrap; max-height: 50vh; overflow-y: auto; background: #fafaf8; padding: 16px; border-radius: 4px; border: 1px solid var(--border); }
 
   /* Footer */
@@ -104,19 +109,43 @@
   .footer span { opacity: 0.5; margin: 0 8px; }
 
   /* Reveal on scroll */
-  .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.6s var(--ease-out), transform 0.6s var(--ease-out); }
+  .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.6s var(--ease-out), transform 0.6s var(--ease-out); will-change: transform, opacity; }
   .reveal.visible { opacity: 1; transform: translateY(0); }
 
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
   }
+  @media (hover: hover) and (pointer: fine) {
+    .skill-card { transition: transform 200ms cubic-bezier(0.23, 1, 0.32, 1), box-shadow 200ms cubic-bezier(0.23, 1, 0.32, 1); transform-style: preserve-3d; }
+    .skill-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(27,54,93,0.08); }
+  }
   @media (max-width: 640px) {
     .skill-trigger { padding: 16px; }
-    .skill-body { padding: 0 16px 16px; }
+    .skill-body:not(.skill-closed) { padding: 0 16px 16px; }
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --parchment: #0c0c0c;
+      --ivory: #161616;
+      --ink-blue: #7ca3d8;
+      --ink-light: #5a8bc4;
+      --ink-tag: #1a2a42;
+      --near-black: #e8e6e0;
+      --dark-warm: #b0ada5;
+      --stone: #8a8880;
+      --border: #2a2a28;
+    }
+    body::after { opacity: 0.06; }
+    .skill-trigger:hover { background: #1e1e1c; }
+    .skill-content { background: #1a1a18; }
+    .search-input { background: var(--ivory); border-color: var(--border); color: var(--near-black); }
+    .search-input:focus { border-color: var(--ink-blue); }
+    .skill-card:hover { box-shadow: 0 4px 12px rgba(124,163,216,0.08); }
   }
 </style>
 </head>
 <body>
+<a href="#skills-container" class="skip-link">Skip to content</a>
 <nav class="nav">
   <a href="./" class="nav-logo">Shokunin</a>
   <a href="./" class="nav-link">Back home</a>
@@ -151,7 +180,7 @@
             </div>
             <p class="skill-desc">Optimize Docker images with multi-stage builds, distroless bases, BuildKit cache mounts, multi-arch builds, compose watch, security hardening (non-root, seccomp, capabilities drop), and vulnerability ...</p>
           </button>
-          <div class="skill-body" hidden>
+          <div class="skill-body skill-closed">
             <pre class="skill-content">---
 name: docker
 description: Optimize Docker images with multi-stage builds, distroless bases, BuildKit cache mounts, multi-arch builds, compose watch, security hardening (non-root, seccomp, capabilities drop), and vulnerability scanning via docker scout/trivy. Use when user asks to write a Dockerfile, optimize image size, set up docker-compose, debug containers, harden container security, or scan for CVEs. Do NOT use for Kubernetes deployments (use kubernetes), CI/CD pipeline design (use ci-cd), or Terraform (use terraform).
@@ -231,7 +260,7 @@ FRO
             </div>
             <p class="skill-desc">Deploy, manage, and debug Kubernetes in production — Deployments, Services, Gateway API, Service Mesh (Istio/Linkerd/Cilium), eBPF observability (Cilium Hubble), security hardening (Pod Security Stand...</p>
           </button>
-          <div class="skill-body" hidden>
+          <div class="skill-body skill-closed">
             <pre class="skill-content">---
 name: kubernetes
 description: Deploy, manage, and debug Kubernetes in production — Deployments, Services, Gateway API, Service Mesh (Istio/Linkerd/Cilium), eBPF observability (Cilium Hubble), security hardening (Pod Security Standards, OPA/Kyverno, seccomp, runtime security with Falco/Tetragon), Helm, HPA, PDB, topology spread, and debugging. Use when user asks to write K8s manifests, deploy to a cluster, debug pods, set up Gateway API, configure autoscaling, or harden cluster security. Do NOT use for Dockerfiles (use docker), CI/CD pipeline design (use ci-cd), or Terraform infrastructure (use terraform).
@@ -320,7 +349,7 @@ The scaffold script above generates raw manifests. For more complex deployments,
             </div>
             <p class="skill-desc">Design and manage infrastructure as code with Terraform — modules, remote state (S3 + DynamoDB), Stacks (deployments), test framework, preconditions/postconditions, moved/removed blocks, and CI/CD pla...</p>
           </button>
-          <div class="skill-body" hidden>
+          <div class="skill-body skill-closed">
             <pre class="skill-content">---
 name: terraform
 description: Design and manage infrastructure as code with Terraform — modules, remote state (S3 + DynamoDB), Stacks (deployments), test framework, preconditions/postconditions, moved/removed blocks, and CI/CD plan/apply separation. Use when user asks to write Terraform config, set up remote state, design modules, manage state, or automate infrastructure. Do NOT use for Kubernetes (use kubernetes), Docker (use docker), or CI/CD pipeline design (use ci-cd).
@@ -447,7 +476,7 @@ moved {
             </div>
             <p class="skill-desc">Design CI/CD pipelines for GitHub Actions, GitLab CI, and CircleCI with matrix builds, test sharding, caching, Docker layer caching, OIDC auth, deployment strategies (rolling, blue-green, canary), aut...</p>
           </button>
-          <div class="skill-body" hidden>
+          <div class="skill-body skill-closed">
             <pre class="skill-content">---
 name: ci-cd
 description: Design CI/CD pipelines for GitHub Actions, GitLab CI, and CircleCI with matrix builds, test sharding, caching, Docker layer caching, OIDC auth, deployment strategies (rolling, blue-green, canary), auto-rollback, self-hosted runners, and environment protection with manual approvals. Use when user asks to set up CI/CD, write a pipeline, configure GitHub Actions/GitLab CI/CircleCI, automate deployments, or set up build/test/deploy workflows. Do NOT use for Dockerfile authoring (use docker), K8s manifests (use kubernetes), or Terraform config (use terraform).
@@ -520,7 +549,7 @@ This generates a production-ready pipeline with:
             </div>
             <p class="skill-desc">PostgreSQL database administration — backup/restore (pg_dump, PITR, WAL archiving), health monitoring (connections, bloat, cache hit ratio, dead tuples), connection pooling (PgBouncer), replication (s...</p>
           </button>
-          <div class="skill-body" hidden>
+          <div class="skill-body skill-closed">
             <pre class="skill-content">---
 name: db-admin
 description: PostgreSQL database administration — backup/restore (pg_dump, PITR, WAL archiving), health monitoring (connections, bloat, cache hit ratio, dead tuples), connection pooling (PgBouncer), replication (streaming, logical), vacuum/autovacuum tuning, and scheduled backups with retention. Use when user asks to backup a database, restore from backup, monitor database health, set up replication, or perform DBA tasks. Do NOT use for schema design (use db-sculptor), query optimization (use db-sculptor), or migration planning (use db-sculptor).
@@ -635,7 +664,7 @@ See [references/postgres-admin.md](references/postgres-admin.md) for streaming a
             </div>
 <p class="skill-desc">Design REST/GraphQL APIs with OpenAPI 3.1, error handling, pagination, rate limiting, webhooks, and idempotency. Use when user asks to design an API, create endpoints, define REST/GraphQL schema, or generate OpenAPI spec.</p>
           </button>
-          <div class="skill-body" hidden>
+          <div class="skill-body skill-closed">
             <pre class="skill-content">---
 name: api-forge
 description: Design REST/GraphQL APIs with OpenAPI 3.1, error handling, pagination, rate limiting, webhooks, and idempotency. Use when user asks to design an API, create endpoints, define REST/GraphQL schema, or generate OpenAPI spec. Do NOT use for database schema design, frontend API integration, or non-HTTP protocols (gRPC, WebSocket, MQTT).
@@ -739,7 +768,7 @@ Stripe-style standard envelope:
             </div>
             <p class="skill-desc">Implement authentication and authorization with OWASP Top 10 standards, OAuth 2.0 + OIDC, WebAuthn/Passkeys, session management, and RBAC/ABAC. Use when user asks to implement login, signup, authentic...</p>
           </button>
-          <div class="skill-body" hidden>
+          <div class="skill-body skill-closed">
             <pre class="skill-content">---
 name: auth-architect
 description: Implement authentication and authorization with OWASP Top 10 standards, OAuth 2.0 + OIDC, WebAuthn/Passkeys, session management, and RBAC/ABAC. Use when user asks to implement login, signup, authentication, authorization, JWT, OAuth, SSO, passkeys, MFA, or role-based access. Do NOT use for API key management (use api-forge), encryption at rest, or network-level security (firewalls, WAF).
@@ -830,7 +859,7 @@ Production authentication following OWASP Top 10, NIST SP 800-63B, and patterns 
             </div>
 <p class="skill-desc">Design database schemas with Prisma/Drizzle, PostgreSQL index strategy (B-tree, GIN, GiST, BRIN, Hash), query optimization (EXPLAIN ANALYZE), migration safety (expand/contract, zero-downtime), and sharding/partitioning.</p>
           </button>
-          <div class="skill-body" hidden>
+          <div class="skill-body skill-closed">
             <pre class="skill-content">---
 name: db-sculptor
 description: Design database schemas with Prisma/Drizzle, PostgreSQL index strategy (B-tree, GIN, GiST, BRIN, Hash), query optimization (EXPLAIN ANALYZE), migration safety (expand/contract, zero-downtime), and sharding/partitioning. Use when user asks to design schema, create migrations, optimize slow queries, add indexes, choose between SQL/NoSQL, or set up Prisma/Drizzle. Do NOT use for data warehouse dimensional modeling, ETL pipeline design, or non-relational (MongoDB, DynamoDB) schema design.
@@ -905,7 +934,7 @@ Design performant database schemas. Model for access patterns first, normalize l
             </div>
             <p class="skill-desc">Design error handling, structured logging, and observability with OpenTelemetry (traces, metrics, logs), error classification, recovery patterns (retry with jitter, circuit breaker, bulkhead, timeout)...</p>
           </button>
-          <div class="skill-body" hidden>
+          <div class="skill-body skill-closed">
             <pre class="skill-content">---
 name: error-handler
 description: Design error handling, structured logging, and observability with OpenTelemetry (traces, metrics, logs), error classification, recovery patterns (retry with jitter, circuit breaker, bulkhead, timeout), error budgets/SLOs with burn rate alerts, and production incident triage. Use when user asks to implement error handling, logging, monitoring, observability, OpenTelemetry, error boundaries, circuit breakers, retry logic, or SLO tracking. Do NOT use for incident runbooks (use runbook-gen), vendor-specific APM setup (Datadog, Sentry agent config), or K8s debugging.
@@ -983,7 +1012,7 @@ const sdk = new NodeSDK({
             </div>
             <p class="skill-desc">Guides and best practices for working with Neon Serverless Postgres. Covers getting started, local development with Neon, choosing a connection method, Neon features, authentication (@neondatabase/aut...</p>
           </button>
-          <div class="skill-body" hidden>
+          <div class="skill-body skill-closed">
             <pre class="skill-content">---
 name: neon-postgres
 description: Guides and best practices for working with Neon Serverless Postgres. Covers getting started, local development with Neon, choosing a connection method, Neon features, authentication (@neondatabase/auth), PostgREST-style data API (@neondatabase/neon-js), Neon CLI, and Neon&#x27;s Platform API/SDKs. Use for any Neon-related questions.
@@ -1071,7 +1100,7 @@ Link: https://neon.com/docs/ai/ski
             </div>
             <p class="skill-desc">Build production-grade components for React, Vue 3, and Svelte 5 with all states (loading, empty, error, success, idle), TypeScript strict, WCAG 2.2 accessibility, server components (RSC), and compoun...</p>
           </button>
-          <div class="skill-body" hidden>
+          <div class="skill-body skill-closed">
             <pre class="skill-content">---
 name: component-forge
 description: Build production-grade components for React, Vue 3, and Svelte 5 with all states (loading, empty, error, success, idle), TypeScript strict, WCAG 2.2 accessibility, server components (RSC), and compound component patterns. Includes scaffold script, reference patterns, and template files for React and Vue. Use when user asks to create a UI component, frontend module, or design system component. Do NOT use for page layouts (use landing-craft), routing, or state management architecture (global stores).
@@ -1168,7 +1197,7 @@ See [references/a11y-patterns.md](reference
             </div>
 <p class="skill-desc">Design multi-device layouts with Container Queries, clamp() fluid typography, :has() selector, subgrid, and modern CSS units (dvh/svh/lvh).</p>
           </button>
-          <div class="skill-body" hidden>
+          <div class="skill-body skill-closed">
             <pre class="skill-content">---
 name: responsive-engine
 description: Design multi-device layouts with Container Queries, clamp() fluid typography, :has() selector, subgrid, and modern CSS units (dvh/svh/lvh). Use when user asks to make a layout responsive, handle mobile/tablet/desktop breakpoints, create fluid typography, or use Container Queries. Do NOT use for full-page layouts (use landing-craft), component design (use component-forge), or animation-specific responsive (use motion-craft).
@@ -1293,7 +1322,7 @@ Detect the device type, not just width.
             </div>
             <p class="skill-desc">Design GPU-accelerated animations with Web Animations API (WAAPI), Scroll-Driven Animations (ScrollTimeline/ViewTimeline), FLIP technique, easing systems, and accessibility (prefers-reduced-motion). U...</p>
           </button>
-          <div class="skill-body" hidden>
+          <div class="skill-body skill-closed">
             <pre class="skill-content">---
 name: motion-craft
 description: Design GPU-accelerated animations with Web Animations API (WAAPI), Scroll-Driven Animations (ScrollTimeline/ViewTimeline), FLIP technique, easing systems, and accessibility (prefers-reduced-motion). Use when user asks to create animations, transitions, scroll effects, page transitions, or interactive motion for web UIs. Do NOT use for canvas-based animations (Three.js, PixiJS), video editing, or non-web (native mobile) motion design.
@@ -1366,7 +1395,7 @@ Every animation must have a clear answer to &quot;why does this animate?&quot;
             </div>
             <p class="skill-desc">Build conversion-optimized landing pages with CRO frameworks (Conversion Research, LIFT Model), scroll effects, A/B testing, personalization, form optimization, and Core Web Vitals (INP, LCP, CLS). Us...</p>
           </button>
-          <div class="skill-body" hidden>
+          <div class="skill-body skill-closed">
             <pre class="skill-content">---
 name: landing-craft
 description: Build conversion-optimized landing pages with CRO frameworks (Conversion Research, LIFT Model), scroll effects, A/B testing, personalization, form optimization, and Core Web Vitals (INP, LCP, CLS). Use when user asks to create a landing page, sales page, lead generation page, or improve conversion rates. Do NOT use for full product design (use component-forge), animation-specific (use motion-craft), or brand identity (use design).
@@ -1434,7 +1463,7 @@ Headline under 10 words. One CTA above fold. Social proof near top. Use PAS fram
             </div>
             <p class="skill-desc">&gt;</p>
           </button>
-          <div class="skill-body" hidden>
+          <div class="skill-body skill-closed">
             <pre class="skill-content">---
 name: Aesthetic Web Design
 description: &gt;
@@ -1512,7 +1541,7 @@ Identify before designing. Priority: (1) task cue (&quot;landing page&quot; vs &
             </div>
             <p class="skill-desc">UI/UX design intelligence. 67 styles, 96 palettes, 57 font pairings, 25 charts, 13 stacks (React, Next.js, Vue, Svelte, SwiftUI, React Native, Flutter, Tailwind, shadcn/ui). Actions: plan, build, crea...</p>
           </button>
-          <div class="skill-body" hidden>
+          <div class="skill-body skill-closed">
             <pre class="skill-content">---
 name: ui-ux-pro-max
 description: &quot;UI/UX design intelligence. 67 styles, 96 palettes, 57 font pairings, 25 charts, 13 stacks (React, Next.js, Vue, Svelte, SwiftUI, React Native, Flutter, Tailwind, shadcn/ui). Actions: plan, build, create, design, implement, review, fix, improve, optimize, enhance, refactor, check UI/UX code. Projects: website, landing page, dashboard, admin panel, e-commerce, SaaS, portfolio, blog, mobile app, .html, .tsx, .vue, .svelte. Elements: button, modal, navbar, sidebar, card, table, form, chart. Styles: glassmorphism, claymorphism, minimalism, brutalism, neumorphism, bento grid, dark mode, responsive, skeuomorphism, flat design. Topics: color palette, accessibility, animation, layout, typography, font pairing, spacing, hover, shadow, gradient. Integrations: shadcn/ui MCP for component search and examples.&quot;
@@ -1570,7 +1599,7 @@ Reference these guidelines when:
             </div>
             <p class="skill-desc">Encode Emil Kowalski&#x27;s philosophy on UI polish, component design, animation decisions, and the invisible details that make software feel great. From the creator of Sonner (13M+ weekly npm downloads), ...</p>
           </button>
-          <div class="skill-body" hidden>
+          <div class="skill-body skill-closed">
             <pre class="skill-content">---
 name: emil-design-eng
 description: Encode Emil Kowalski&#x27;s philosophy on UI polish, component design, animation decisions, and the invisible details that make software feel great. From the creator of Sonner (13M+ weekly npm downloads), Vaul, animations.dev, and Linear&#x27;s web team. Use when user wants to polish UI, audit animations, review component interactions, add micro-feedback, or elevate motion quality.
@@ -1637,7 +1666,7 @@ When reviewing UI code, you MUST use a markdown table with Before | After | Why 
             </div>
             <p class="skill-desc">Use when the user wants to design, redesign, shape, critique, audit, polish, clarify, distill, harden, optimize, adapt, animate, colorize, extract, or otherwise improve a frontend interface. Covers de...</p>
           </button>
-          <div class="skill-body" hidden>
+          <div class="skill-body skill-closed">
             <pre class="skill-content">---
 name: impeccable
 description: &quot;Use when the user wants to design, redesign, shape, critique, audit, polish, clarify, distill, harden, optimize, adapt, animate, colorize, extract, or otherwise improve a frontend interface. Covers design systems, anti-pattern detection, brand vs product registers, typography, color (OKLCH), spacing, motion, copy, and accessibility. By Paul Bakaus (ex-Google, ex-Disney, ex-Unity). Full version includes 23 sub-commands, CLI detection, Chrome extension, and E2E test suite: npx skills add pbakaus/impeccable&quot;
@@ -1713,7 +1742,7 @@ Match-and-refuse. If you&#x27;re about to write any of these, rewrite with diffe
             </div>
             <p class="skill-desc">Senior UI/UX Engineer. Architect digital interfaces overriding default LLM biases. Enforces metric-based rules, strict component architecture, hardware-accelerated CSS, and balanced design engineering...</p>
           </button>
-          <div class="skill-body" hidden>
+          <div class="skill-body skill-closed">
             <pre class="skill-content">---
 name: taste
 description: &quot;Senior UI/UX Engineer. Architect digital interfaces overriding default LLM biases. Enforces metric-based rules, strict component architecture, hardware-accelerated CSS, and balanced design engineering. By Leon Lin &amp; blueemi. Multi-runtime improved by shokunin.&quot;
@@ -1784,7 +1813,7 @@ These are the standard baselines. ALWAYS listen to the user: adapt these values 
             </div>
             <p class="skill-desc">High-end visual design like a premium agency. Defines exact fonts, spacing, shadows, card structures, and animations that make a website feel expensive. Blocks common defaults that make AI designs loo...</p>
           </button>
-          <div class="skill-body" hidden>
+          <div class="skill-body skill-closed">
             <pre class="skill-content">---
 name: taste-soft
 description: &quot;High-end visual design like a premium agency. Defines exact fonts, spacing, shadows, card structures, and animations that make a website feel expensive. Blocks common defaults that make AI designs look cheap or generic. Based on taste-skill by Leon Lin &amp; blueemi, improved by shokunin.&quot;
@@ -1838,7 +1867,7 @@ Select ONE combination per project to ensure unique output:
             </div>
             <p class="skill-desc">Clean editorial-style interfaces. Warm monochrome palette, typographic contrast, flat bento grids, muted pastels. No gradients, no heavy shadows. Based on taste-skill by Leon Lin &amp; blueemi, improved b...</p>
           </button>
-          <div class="skill-body" hidden>
+          <div class="skill-body skill-closed">
             <pre class="skill-content">---
 name: taste-minimalist
 description: &quot;Clean editorial-style interfaces. Warm monochrome palette, typographic contrast, flat bento grids, muted pastels. No gradients, no heavy shadows. Based on taste-skill by Leon Lin &amp; blueemi, improved by shokunin.&quot;
@@ -1926,7 +1955,7 @@ Based on: Apple Notes, Linear, Notion, Basecamp, iA Writer, and premium editoria
             </div>
             <p class="skill-desc">Build production Flutter apps with Clean Architecture, Riverpod (preferred over Bloc/Provider), GoRouter navigation, Impeller rendering engine, Dart 3.7+ patterns, platform channels via Pigeon, and Ap...</p>
           </button>
-          <div class="skill-body" hidden>
+          <div class="skill-body skill-closed">
             <pre class="skill-content">---
 name: flutter
 description: Build production Flutter apps with Clean Architecture, Riverpod (preferred over Bloc/Provider), GoRouter navigation, Impeller rendering engine, Dart 3.7+ patterns, platform channels via Pigeon, and App Store/Play Store deployment.
@@ -1993,7 +2022,7 @@ lib/
             </div>
             <p class="skill-desc">Build production React Native apps with Expo SDK 53+, Expo Router (file-based navigation), New Architecture (Fabric + TurboModules), FlashList, Reanimated 4, Zustand for state, Hermes, EAS Build, and ...</p>
           </button>
-          <div class="skill-body" hidden>
+          <div class="skill-body skill-closed">
             <pre class="skill-content">---
 name: react-native
 description: Build production React Native apps with Expo SDK 53+, Expo Router (file-based navigation), New Architecture (Fabric + TurboModules), FlashList, Reanimated 4, Zustand for state, Hermes, EAS Build, and App Store/Play Store deployment.
@@ -2102,7 +2131,7 @@ app/
             </div>
             <p class="skill-desc">Generate unit, integration, E2E, and visual regression tests following the Testing Trophy methodology (80% integration). Covers Vitest/Jest, Testing Library, Playwright, MSW for API mocking, snapshot strategy, visual regression, test factories with Faker, and CI sharding.</p>
           </button>
-          <div class="skill-body" hidden>
+          <div class="skill-body skill-closed">
             <pre class="skill-content">
 name: test-commander
 description: Generate unit, integration, E2E, and visual regression tests following the Testing Trophy methodology (80% integration). Covers Vitest/Jest, Testing Library, Playwright, MSW for API mocking, snapshot strategy, visual regression (Chromatic/Percy/Playwright), test factories with Faker, and CI sharding. Use when user asks to write tests, set up testing framework, mock API/dependencies, improve coverage, or add visual regression. Do NOT use for performance/load testing, production monitoring, or type testing (covered by TypeScript).
@@ -2192,7 +2221,7 @@ describe(&#x27;UserProfile&#x27;, () =&gt; {
             </div>
             <p class="skill-desc">Performance profiling and optimization for web apps — Core Web Vitals (LCP, INP, CLS), Lighthouse audits, bundle analysis, backend profiling (CPU, memory, DB queries), N+1 detection, caching strategie...</p>
           </button>
-          <div class="skill-body" hidden>
+          <div class="skill-body skill-closed">
             <pre class="skill-content">---
 name: performance-profiler
 description: Performance profiling and optimization for web apps — Core Web Vitals (LCP, INP, CLS), Lighthouse audits, bundle analysis, backend profiling (CPU, memory, DB queries), N+1 detection, caching strategies (Redis, CDN, HTTP), and performance budgets. Use when user asks to improve performance, run Lighthouse audit, profile a Node.js app, optimize Core Web Vitals, reduce bundle size, or investigate slow response times. Do NOT use for database schema optimization (use db-sculptor), Docker image optimization (use docker), or CDN configuration.
@@ -2284,7 +2313,7 @@ Target scores:
             </div>
             <p class="skill-desc">Review code changes for correctness, security, performance, and code quality. Use when the user asks to review a diff, review code changes, review commits, or perform a code review. Input can be: (1) ...</p>
           </button>
-          <div class="skill-body" hidden>
+          <div class="skill-body skill-closed">
             <pre class="skill-content">---
 name: code-review
 description: &quot;Review code changes for correctness, security, performance, and code quality. Use when the user asks to review a diff, review code changes, review commits, or perform a code review. Input can be: (1) a text diff pasted directly, (2) one or more git commit hashes to extract the diff from, or (3) a git range like abc123..def456. The user may also provide task description or requirements that motivated the change.&quot;
@@ -2366,7 +2395,7 @@ Review against two tiers using the checklist below.
             </div>
             <p class="skill-desc">Comprehensive code review using parallel specialized subagents. If a PR URL is provided, fetches PR details and can post comments. If no PR is provided, reviews the diff between the current branch and...</p>
           </button>
-          <div class="skill-body" hidden>
+          <div class="skill-body skill-closed">
             <pre class="skill-content">---
 name: comprehensive-review
 description: &quot;Comprehensive code review using parallel specialized subagents. If a PR URL is provided, fetches PR details and can post comments. If no PR is provided, reviews the diff between the current branch and its base branch plus any uncommitted changes. CRITICAL: this skill is costly, don&#x27;t use it unless user explicitly requested to use it.&quot;
@@ -2433,7 +2462,7 @@ The subagent will return:
             </div>
             <p class="skill-desc">Delegate code review to a subagent running a specific model. Use ONLY when user explicitly names a model to review changes (&quot;review with opus&quot;, &quot;use sonnet to review&quot;, &quot;review with gemini&quot;). The root ...</p>
           </button>
-          <div class="skill-body" hidden>
+          <div class="skill-body skill-closed">
             <pre class="skill-content">---
 name: cross-review
 description: Delegate code review to a subagent running a specific model. Use ONLY when user explicitly names a model to review changes (&quot;review with opus&quot;, &quot;use sonnet to review&quot;, &quot;review with gemini&quot;). The root agent reconstructs changes from conversation history and spawns a subagent with the code-review skill using the specified model. Do NOT use for general code review (use code-review skill instead), for reviewing PRs from git history, or when no model is specified by the user.
@@ -2531,7 +2560,7 @@ When user says &quot;review with [model name]&quot;, map to a valid model ID:
             </div>
             <p class="skill-desc">Expert code reviewer. Analyze PR changes for correctness, security, performance, and quality. Returns findings as JSON. CRITICAL: this skill is costly, don&#x27;t use it unless user explicitly requested to...</p>
           </button>
-          <div class="skill-body" hidden>
+          <div class="skill-body skill-closed">
             <pre class="skill-content">---
 name: zen-review
 description: &quot;Expert code reviewer. Analyze PR changes for correctness, security, performance, and quality. Returns findings as JSON. CRITICAL: this skill is costly, don&#x27;t use it unless user explicitly requested to use it.&quot;
@@ -2604,7 +2633,7 @@ Do NOT read existing PR comments or reviews — form your own independent opinio
             </div>
             <p class="skill-desc">Orchestrate a multi-model code review: spawn 3 review subagents, merge findings. In PR mode, posts GitHub PR comments with reactions. In local mode, outputs findings directly. CRITICAL: this skill is ...</p>
           </button>
-          <div class="skill-body" hidden>
+          <div class="skill-body skill-closed">
             <pre class="skill-content">---
 name: zen-comprehensive-review
 description: &quot;Orchestrate a multi-model code review: spawn 3 review subagents, merge findings. In PR mode, posts GitHub PR comments with reactions. In local mode, outputs findings directly. CRITICAL: this skill is costly, don&#x27;t use it unless user explicitly requested to use it.&quot;
@@ -2688,7 +2717,7 @@ For each subagent, set the prompt to:
             </div>
             <p class="skill-desc">&gt;</p>
           </button>
-          <div class="skill-body" hidden>
+          <div class="skill-body skill-closed">
             <pre class="skill-content">---
 name: communication
 description: &gt;
@@ -2779,7 +2808,7 @@ Professional writing that gets results. Based on Harvard Business Review, Radica
             </div>
             <p class="skill-desc">&gt;</p>
           </button>
-          <div class="skill-body" hidden>
+          <div class="skill-body skill-closed">
             <pre class="skill-content">---
 name: content-marketing
 description: &gt;
@@ -2869,7 +2898,7 @@ Lead types:
             </div>
             <p class="skill-desc">Generate sales outreach sequences, proposals, SOWs, investor pitch decks, and RFP responses. Covers cold email sequences, proposal structure, pricing tiers (Good-Better-Best), scope of work with exclu...</p>
           </button>
-          <div class="skill-body" hidden>
+          <div class="skill-body skill-closed">
             <pre class="skill-content">---
 name: business-proposals
 description: Generate sales outreach sequences, proposals, SOWs, investor pitch decks, and RFP responses. Covers cold email sequences, proposal structure, pricing tiers (Good-Better-Best), scope of work with exclusions, and 10-slide pitch deck.
@@ -2958,7 +2987,7 @@ If you cannot do level 2, do not send the email.
             </div>
             <p class="skill-desc">SEO + Generative Engine Optimization (GEO) for 2026 — technical SEO, on-page optimization, structured data (JSON-LD, schema.org), Core Web Vitals, citability scoring (llms.txt, entity clarity), AI sea...</p>
           </button>
-          <div class="skill-body" hidden>
+          <div class="skill-body skill-closed">
             <pre class="skill-content">---
 name: seo-geo
 description: SEO + Generative Engine Optimization (GEO) for 2026 — technical SEO, on-page optimization, structured data (JSON-LD, schema.org), Core Web Vitals, citability scoring (llms.txt, entity clarity), AI search engine optimization (ChatGPT, Gemini, Perplexity, Claude, Google AI Overviews), and brand authority building. Use when user asks to optimize a site for search engines, improve SEO, write SEO content, implement structured data, optimize for AI search/GEO, audit a page, or improve Google rankings. Do NOT use for content writing strategy (use content-marketing), performance optimization beyond Core Web Vitals (use performance-profiler), or paid ad strategy.
@@ -3056,7 +3085,7 @@ Place a
             </div>
             <p class="skill-desc">Professional translation and localization for 8 languages (ES, JA, FR, DE, PT, ZH, KO, AR). Covers tone matrix, formality levels, i18n patterns (react-intl, i18next, ICU), RTL layout, cultural adaptation, and locale formatting.</p>
           </button>
-          <div class="skill-body" hidden>
+          <div class="skill-body skill-closed">
             <pre class="skill-content">
 name: translate-craft
 description: Professional translation and localization for 8 languages (ES, JA, FR, DE, PT, ZH, KO, AR). Covers tone matrix, formality levels, i18n patterns (react-intl, i18next, ICU), RTL layout, cultural adaptation, and locale formatting. Use when user asks to translate text, localize an app, adapt tone, review translations, add i18n, or set up RTL.
@@ -3143,7 +3172,7 @@ Translate **meaning**, not words. If the reader can tell it&#x27;s a translation
             </div>
             <p class="skill-desc">&gt;</p>
           </button>
-          <div class="skill-body" hidden>
+          <div class="skill-body skill-closed">
             <pre class="skill-content">---
 name: documentation
 description: &gt;
@@ -3275,7 +3304,7 @@ Title: as a question user would
             </div>
             <p class="skill-desc">Automate the complete Git development workflow — create feature branches with conventional naming, atomic commits with conventional commit messages, interactive rebase, squash merges, PR body generati...</p>
           </button>
-          <div class="skill-body" hidden>
+          <div class="skill-body skill-closed">
             <pre class="skill-content">---
 name: git-workflow
 description: Automate the complete Git development workflow — create feature branches with conventional naming, atomic commits with conventional commit messages, interactive rebase, squash merges, PR body generation from commit history, branch cleanup, and git worktree patterns. Use when user asks to create a branch, commit changes, make a PR, rebase, squash, clean up branches, or follow a Git workflow. Do NOT use for CI/CD pipeline configuration (use ci-cd), code review (use code-review), or GitHub Actions workflows.
@@ -3391,7 +3420,7 @@ gh pr create --title &quot;feat(auth): add user authentication&quot; --body-file
             </div>
             <p class="skill-desc">Windows 11 system administration with PowerShell — system info reporting, hardware monitoring, package management (winget/scoop), disk cleanup, performance optimization, environment configuration, Pow...</p>
           </button>
-          <div class="skill-body" hidden>
+          <div class="skill-body skill-closed">
             <pre class="skill-content">---
 name: windows-powershell
 description: Windows 11 system administration with PowerShell — system info reporting, hardware monitoring, package management (winget/scoop), disk cleanup, performance optimization, environment configuration, PowerShell profile setup with aliases and autocomplete, and Task Scheduler automation. Use when user asks to check system info, install tools on Windows, clean up disk space, set up PowerShell profile, or automate Windows tasks. Do NOT use for Linux administration, cross-platform scripting, or network infrastructure management.
@@ -3499,7 +3528,7 @@ schtasks /Create /SC WEEKLY /D SUN /TN &quot;SystemCleanup&quot; /TR &quot;power
             </div>
             <p class="skill-desc">Generate operations runbooks and post-mortems for incident response — severity matrix, decision trees, escalation paths, war room setup (Slack/Zoom), status page updates, customer comms templates, and blameless post-mortems with action items.</p>
           </button>
-          <div class="skill-body" hidden>
+          <div class="skill-body skill-closed">
             <pre class="skill-content">
 name: runbook-gen
 description: Generate operations runbooks and post-mortems for incident response — severity matrix, decision trees, escalation paths, war room setup (Slack/Zoom), status page updates, customer comms templates, and blameless post-mortems with action items.
@@ -3588,7 +3617,7 @@ How this incident is typically discovered:
             </div>
             <p class="skill-desc">Run structured brainstorming sessions (divergent/convergent), improve prompts with 7-dimension framework, and apply decision frameworks (RICE, weighted scoring, first principles, pre-mortem).</p>
           </button>
-          <div class="skill-body" hidden>
+          <div class="skill-body skill-closed">
             <pre class="skill-content">---
 name: strategy
 description: Run structured brainstorming sessions (divergent/convergent), improve prompts with 7-dimension framework, and apply decision frameworks (RICE, weighted scoring, first principles, pre-mortem).
@@ -3672,7 +3701,7 @@ Run the Production Checklist before delivering. If any item is unchecked, return
             </div>
             <p class="skill-desc">Generate brand guidelines, design systems with design tokens (W3C format), creative direction (SCAMPER, Design Thinking, TRIZ), and design briefs with scope and success criteria.</p>
           </button>
-          <div class="skill-body" hidden>
+          <div class="skill-body skill-closed">
             <pre class="skill-content">---
 name: design
 description: Generate brand guidelines, design systems with design tokens (W3C format), creative direction (SCAMPER, Design Thinking, TRIZ), and design briefs with scope and success criteria.
@@ -3756,7 +3785,7 @@ A complete brand system has 9 sections:
             </div>
             <p class="skill-desc">&gt;-</p>
           </button>
-          <div class="skill-body" hidden>
+          <div class="skill-body skill-closed">
             <pre class="skill-content">---
 name: finance
 description: &gt;-
@@ -3879,7 +3908,7 @@ Follow in order. Skip pillars already covered.
             </div>
             <p class="skill-desc">Structured legal reference for GDPR, EU AI Act, DSA/DMA, CCPA/CPRA, HIPAA (2026 updates), ADA/WCAG digital accessibility, DMCA, US state privacy laws (15+ states), and contract review.</p>
           </button>
-          <div class="skill-body" hidden>
+          <div class="skill-body skill-closed">
             <pre class="skill-content">
 name: legal-counsel
 description: &gt;-
@@ -3954,7 +3983,7 @@ When asked a legal compliance question, follow these steps:
             </div>
             <p class="skill-desc">Automatically notify the user when long-running terminal commands finish (npm test, docker build, git push, etc.). The agent monitors command execution and sends a desktop notification on completion i...</p>
           </button>
-          <div class="skill-body" hidden>
+          <div class="skill-body skill-closed">
             <pre class="skill-content">---
 name: whendone-plus
 description: Automatically notify the user when long-running terminal commands finish (npm test, docker build, git push, etc.). The agent monitors command execution and sends a desktop notification on completion if the command ran longer than threshold (default 10s). Use when user asks to &quot;notify me when done&quot;, &quot;desktop notification when command finishes&quot;, &quot;alert when done&quot;, or &quot;tell me when this completes&quot;. Do NOT use for interactive commands (vim, nano, less, htop), commands that always complete in &lt;5s, or streaming commands (tail -f).
@@ -4054,7 +4083,7 @@ $balloon.Dispo
             </div>
             <p class="skill-desc">Generate PDFs, resumes, CVs, letters, slide decks, portfolios, one-pagers, white papers, and professional documents. Use when user asks to create a PDF, make a resume, write a letter, design slides, f...</p>
           </button>
-          <div class="skill-body" hidden>
+          <div class="skill-body skill-closed">
             <pre class="skill-content">---
 name: kami
 description: &#x27;Generate PDFs, resumes, CVs, letters, slide decks, portfolios, one-pagers, white papers, and professional documents. Use when user asks to create a PDF, make a resume, write a letter, design slides, format a document, typeset a report, build a portfolio, make a presentation, or create a one-pager. Warm parchment, ink-blue accent, serif-led hierarchy. CN uses TsangerJinKai02, EN uses Charter, JA uses YuMincho (best-effort). Triggers on Chinese: &quot;做 PDF / 排版 / 一页纸 / 白皮书 / 作品集 / 简历 / PPT / slides&quot;. Do NOT use for code formatting, data charts, or wireframes.&#x27;
@@ -4112,7 +4141,7 @@ Before
             </div>
             <p class="skill-desc">Convert Kami HTML templates to production-grade PDF via Chromium/Playwright. Complements Kami (design) with PDF rendering. Use when user asks to generate PDF files, render HTML to PDF, or export docum...</p>
           </button>
-          <div class="skill-body" hidden>
+          <div class="skill-body skill-closed">
             <pre class="skill-content">---
 name: kagen
 description: Convert Kami HTML templates to production-grade PDF via Chromium/Playwright. Complements Kami (design) with PDF rendering. Use when user asks to generate PDF files, render HTML to PDF, or export documents.
@@ -4224,7 +4253,7 @@ blockquote, .finding-header, .takeaway
             </div>
             <p class="skill-desc">Auto-sync GitHub repos to portfolio website. Scans GitHub repos, captures screenshots with Playwright, generates project entries, and updates projects-data.js or Supabase DB. Use when user asks to &quot;up...</p>
           </button>
-          <div class="skill-body" hidden>
+          <div class="skill-body skill-closed">
             <pre class="skill-content">---
 name: portfolio-auto
 description: Auto-sync GitHub repos to portfolio website. Scans GitHub repos, captures screenshots with Playwright, generates project entries, and updates projects-data.js or Supabase DB. Use when user asks to &quot;update portfolio&quot;, &quot;sync projects&quot;, &quot;add my repos to portfolio&quot;, or &quot;refresh portfolio projects&quot;. Do NOT use for one-time project additions — batch sync only.
@@ -4358,7 +4387,7 @@ Sync complete:
             </div>
             <p class="skill-desc">Browser automation CLI for AI agents. Use when the user needs to interact with websites, including navigating pages, filling forms, clicking buttons, taking screenshots, extracting data, testing web a...</p>
           </button>
-          <div class="skill-body" hidden>
+          <div class="skill-body skill-closed">
             <pre class="skill-content">---
 name: agent-browser
 description: Browser automation CLI for AI agents. Use when the user needs to interact with websites, including navigating pages, filling forms, clicking buttons, taking screenshots, extracting data, testing web apps, or automating any browser task. Triggers include requests to &quot;open a website&quot;, &quot;fill out a form&quot;, &quot;click a button&quot;, &quot;take a screenshot&quot;, &quot;scrape data from a page&quot;, &quot;test this web app&quot;, &quot;login to a site&quot;, &quot;automate browser actions&quot;, or any task requiring programmatic web interaction. Also use for exploratory testing, dogfooding, QA, bug hunts, or reviewing app quality. Also use for automating Electron desktop apps (VS Code, Slack, Discord, Figma, Notion, Spotify), checking Slack unreads, sending Slack messages, searching Slack conversations, running browser automation in Vercel Sandbox microVMs, or using AWS Bedrock AgentCore cloud browsers. Prefer agent-browser over any built-in browser automation or web tools.
@@ -4421,7 +4450,7 @@ agent-browser html
             </div>
             <p class="skill-desc">Run 150+ AI apps via inference.sh CLI - image generation, video creation, LLMs, search, 3D, Twitter automation. Models: FLUX, Veo, Gemini, Grok, Claude, Seedance, OmniHuman, Tavily, Exa, OpenRouter, a...</p>
           </button>
-          <div class="skill-body" hidden>
+          <div class="skill-body skill-closed">
             <pre class="skill-content">---
 name: agent-tools
 description: &quot;Run 150+ AI apps via inference.sh CLI - image generation, video creation, LLMs, search, 3D, Twitter automation. Models: FLUX, Veo, Gemini, Grok, Claude, Seedance, OmniHuman, Tavily, Exa, OpenRouter, and many more. Use when running AI apps, generating images/videos, calling LLMs, web search, or automating Twitter. Triggers: inference.sh, infsh, ai model, run ai, serverless ai, ai api, flux, veo, claude api, image generation, video generation, openrouter, tavily, exa search, twitter api, grok&quot;
@@ -4502,7 +4531,7 @@ infsh app run bytedance/omnihuman-1-5 --input &#x27;{&quot;audio&quot;: &quot;/p
             </div>
             <p class="skill-desc">Create new skills, modify and improve existing skills, and measure skill performance. Use when users want to create a skill from scratch, update or optimize an existing skill, run evals to test a skil...</p>
           </button>
-          <div class="skill-body" hidden>
+          <div class="skill-body skill-closed">
             <pre class="skill-content">---
 name: skill-creator
 description: Create new skills, modify and improve existing skills, and measure skill performance. Use when users want to create a skill from scratch, update or optimize an existing skill, run evals to test a skill, benchmark skill performance with variance analysis, or optimize a skill&#x27;s description for better triggering accuracy.
@@ -4570,7 +4599,7 @@ Start by understanding the user&#x27;s intent. The current conversation might al
             </div>
             <p class="skill-desc">Browser automation, web scraping, E2E testing, and visual regression with Playwright. Covers 30+ patterns: login flows, form testing, responsive design checks, broken link validation, API mocking, dat...</p>
           </button>
-          <div class="skill-body" hidden>
+          <div class="skill-body skill-closed">
             <pre class="skill-content">---
 name: playwright
 description: &quot;Browser automation, web scraping, E2E testing, and visual regression with Playwright. Covers 30+ patterns: login flows, form testing, responsive design checks, broken link validation, API mocking, data extraction, PDF generation, accessibility audits (axe-core), performance budgets (Lighthouse), visual diffing, multi-browser testing (Chromium/Firefox/WebKit), mobile emulation, infinite scroll, shadow DOM, iframes, file downloads, auth state reuse, cookie consent handling, WebSocket monitoring, console error detection, HAR export, trace viewer, Docker CI, GitHub Actions, and parallel sharding. Use when user asks to test a website, take screenshots, check responsive design, automate a browser task, scrape data, validate forms, check broken links, test login, audit accessibility, or measure page performance. Do NOT use for unit testing, API-only testing, or static analysis. Requires Node.js 18+.&quot;
@@ -4660,7 +4689,7 @@ Before writing any code, determine what&#x27;s available:
             </div>
             <p class="skill-desc">&gt;</p>
           </button>
-          <div class="skill-body" hidden>
+          <div class="skill-body skill-closed">
             <pre class="skill-content">---
 name: Web Security
 description: &gt;
@@ -4746,7 +4775,7 @@ if (order.userId !== req.user.id) return 403
             </div>
             <p class="skill-desc">Planning agent for task breakdown and implementation planning. Use via spawn_subagent with skill=&#x27;plan&#x27; when you need to explore a codebase and design an implementation approach before writing code.</p>
           </button>
-          <div class="skill-body" hidden>
+          <div class="skill-body skill-closed">
             <pre class="skill-content">---
 name: plan
 description: &quot;Planning agent for task breakdown and implementation planning. Use via spawn_subagent with skill=&#x27;plan&#x27; when you need to explore a codebase and design an implementation approach before writing code.&quot;
@@ -4851,7 +4880,7 @@ Goal: Write the final plan. Include:
             </div>
             <p class="skill-desc">Search the agent skills ecosystem to discover and install skills that extend AI coding agent capabilities. Use when user asks &quot;how do I do X&quot; (X being a common task), &quot;find a skill for X&quot;, &quot;is there a...</p>
           </button>
-          <div class="skill-body" hidden>
+          <div class="skill-body skill-closed">
             <pre class="skill-content">---
 name: find-skills
 description: Search the agent skills ecosystem to discover and install skills that extend AI coding agent capabilities. Use when user asks &quot;how do I do X&quot; (X being a common task), &quot;find a skill for X&quot;, &quot;is there a skill that can...&quot;, or expresses interest in extending agent capabilities. Triggers on &quot;find a skill&quot;, &quot;install a skill&quot;, &quot;skill for [task]&quot;, &quot;can you do X&quot;, &quot;I need help with [domain]&quot;, &quot;how do I [task]&quot;. Do NOT use when user has explicitly asked to proceed without a skill, or when the task is better handled by agent&#x27;s built-in capabilities (file operations, git, basic coding).
@@ -4951,7 +4980,7 @@ npx skills add &lt;owner/repo@skill&gt; -g -y
             </div>
             <p class="skill-desc">&gt;</p>
           </button>
-          <div class="skill-body" hidden>
+          <div class="skill-body skill-closed">
             <pre class="skill-content">---
 name: Efficient Coding
 description: &gt;
@@ -5037,7 +5066,7 @@ tokens than any other cause. Attack it first.
             </div>
             <p class="skill-desc">&gt;</p>
           </button>
-          <div class="skill-body" hidden>
+          <div class="skill-body skill-closed">
             <pre class="skill-content">---
 name: Senior Engineer Coding
 description: &gt;
@@ -5146,7 +5175,7 @@ s
             </div>
             <p class="skill-desc">Detect drift, plan updates, and apply changes to the Shokunin AI Ecosystem. Use this when user asks to update, fix, sync, or verify the ecosystem.</p>
           </button>
-          <div class="skill-body" hidden>
+          <div class="skill-body skill-closed">
             <pre class="skill-content">---
 name: shokunin-update
 description: Detect drift, plan updates, and apply changes to the Shokunin AI Ecosystem. Use this when user asks to update, fix, sync, or verify the ecosystem.
@@ -5233,7 +5262,7 @@ This automatically:
             </div>
             <p class="skill-desc">Manage the ChromaDB vector database that stores the ecosystem&#x27;s persistent memory. Use when user asks to check memory storage, backup memory, search stored entries, delete entries, or reset the vector...</p>
           </button>
-          <div class="skill-body" hidden>
+          <div class="skill-body skill-closed">
             <pre class="skill-content">---
 name: chromadb
 description: Manage the ChromaDB vector database that stores the ecosystem&#x27;s persistent memory. Use when user asks to check memory storage, backup memory, search stored entries, delete entries, or reset the vector database. Do NOT use for general question answering about past sessions (use the memory skill for that).
@@ -5344,7 +5373,7 @@ Remove-Item -
             </div>
             <p class="skill-desc">Persistent memory across AI sessions using ChromaDB vector database. Stores and retrieves context from past conversations, decisions, and code. Use when user asks to remember something, search past co...</p>
           </button>
-          <div class="skill-body" hidden>
+          <div class="skill-body skill-closed">
             <pre class="skill-content">---
 name: memory
 description: Persistent memory across AI sessions using ChromaDB vector database. Stores and retrieves context from past conversations, decisions, and code. Use when user asks to remember something, search past conversations, recall what was done before, save context for later, or find information from previous sessions. Do NOT use for git history or file-based notes.
@@ -5443,7 +5472,7 @@ The agent should automatically:
             </div>
             <p class="skill-desc">Rewrite AI-generated text to sound natural, remove AI tells, and adjust tone. Use when user asks to make text less robotic, more natural, or humanize AI output. Covers tone matrix, filler words, sente...</p>
           </button>
-          <div class="skill-body" hidden>
+          <div class="skill-body skill-closed">
             <pre class="skill-content">---
 name: humanize
 description: Rewrite AI-generated text to sound natural, remove AI tells, and adjust tone. Use when user asks to make text less robotic, more natural, or humanize AI output. Covers tone matrix, filler words, sentence rhythm, and anti-AI-slop patterns.
@@ -5525,7 +5554,7 @@ AI never takes a position. Sounds like a wiki.
             </div>
             <p class="skill-desc">Deep research with web search, source verification, and fact-checking. Runs before humanize + kami in the document pipeline. Use when user asks to research a topic, verify facts, gather sources, or do...</p>
           </button>
-          <div class="skill-body" hidden>
+          <div class="skill-body skill-closed">
             <pre class="skill-content">---
 name: research
 description: Deep research with web search, source verification, and fact-checking. Runs before humanize + kami in the document pipeline. Use when user asks to research a topic, verify facts, gather sources, or do deep web investigation. Covers source validation, citation, and evidence hierarchy.
@@ -5594,7 +5623,7 @@ Claim: &quot;WordPress 6.7 has vulnerability X&quot;
             </div>
             <p class="skill-desc">Use when the user asks to initialize a repo, create AGENTS.md, generate contributor guidelines, or set up agent-oriented documentation for a codebase.</p>
           </button>
-          <div class="skill-body" hidden>
+          <div class="skill-body skill-closed">
             <pre class="skill-content">---
 name: init
 description: &quot;Use when the user asks to initialize a repo, create AGENTS.md, generate contributor guidelines, or set up agent-oriented documentation for a codebase.&quot;
@@ -5699,7 +5728,7 @@ Add
       var body = card.querySelector('.skill-body');
       var expanded = card.getAttribute('aria-expanded') === 'true';
       card.setAttribute('aria-expanded', !expanded);
-      body.hidden = expanded;
+      body.classList.toggle('skill-closed');
       btn.querySelector('.skill-arrow').textContent = expanded ? '+' : '−';
     });
   });
