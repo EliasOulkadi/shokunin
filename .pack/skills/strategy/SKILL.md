@@ -232,6 +232,23 @@ Before delivering a strategy artifact (session output, prompt, decision document
 | Using ICE without confidence check | False precision — confidence is often guessed | Calibrate confidence: "how sure are you on a 1-10?" and average across 3 people |
 | Skipping opportunity cost | Overcommit to first good option | Before finalizing, ask: "What else could these resources do?" |
 
+## Advanced Decision Frameworks
+
+### RICE Scoring
+Score features: `Score = (Reach * Impact * Confidence) / Effort`
+- Reach: how many users affected (1-1000+)
+- Impact: 0.25 (minimal), 0.5 (low), 1 (medium), 2 (high), 3 (massive)
+- Confidence: 20% (gut), 50% (some data), 80% (quantified), 100% (A/B tested)
+- Effort: person-months
+
+### Kano Model
+Classify features: Basic (expected, absence = dissatisfaction), Performance (more = better), Delighter (unexpected, absence = neutral). Prioritize: Basic → Performance → Delighter.
+
+### OKR-to-Task Decomposition
+- Objective: qualitative, inspiring, time-bound (quarter)
+- Key Results: 3-5 quantitative outcomes
+- Tasks: decompose each KR into 2-3 actionable tasks per week
+
 ## Sources
 
 - Alex Osborn "Applied Imagination"

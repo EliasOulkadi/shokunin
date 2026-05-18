@@ -239,6 +239,49 @@ Before marking a runbook complete, verify every item:
 | Post-mortem blames people | Blame culture kills incident reporting | "What broke the system?" not "Who broke it?" |
 | Skipping customer comms | Stakeholders hear "we're down" from social media | Draft customer email as part of template |
 
+## Incident Timeline Template
+
+```
+[HH:MM] Alert triggered: <alert name> from <monitoring system>
+[HH:MM] On-call acknowledged: <name>
+[HH:MM] War room opened: <Slack channel/Zoom link>
+[HH:MM] Initial diagnosis: <symptoms observed>
+[HH:MM] Impact confirmed: <users affected, services degraded>
+[HH:MM] Mitigation applied: <action taken>
+[HH:MM] Monitoring confirms recovery
+[HH:MM] All-clear declared
+[HH:MM+1] Post-mortem scheduled: <date>
+```
+
+## Post-Mortem Template
+
+```
+# Incident Post-Mortem: <title>
+Date: YYYY-MM-DD | Duration: Xh Ym | Severity: Sev1/2/3
+
+## Timeline
+[HH:MM] ...
+
+## Root Cause
+What system/process failure caused this.
+
+## Impact
+Users affected, data loss, revenue impact.
+
+## Detection
+How was this found? (alert, user report, manual)
+
+## Resolution
+What fixed it.
+
+## Action Items
+| # | Action | Owner | Due |
+|---|--------|-------|-----|
+
+## Lessons Learned
+What would prevent this next time.
+```
+
 ## Sources
 
 - Google SRE Book: "Monitoring Distributed Systems"

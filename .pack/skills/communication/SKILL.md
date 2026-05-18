@@ -179,15 +179,28 @@ Rules:
 
 ## Cross-Cultural Communication
 
-| Culture | Style | Email approach |
-|---------|-------|---------------|
-| US/UK | Direct, task-focused | Clear ask, bullet points |
-| Japan | Indirect, relationship-first | Polite preamble, implicit ask. Use です・ます form. |
-| Germany | Direct, formal | Structured, complete information. Sie for new contacts. |
-| France | Debate-oriented, formal | Context first, then ask. Vous for professional. |
-| Brazil | Warm, relationship-first | Personal greeting, then business |
-| Korea | Hierarchical, indirect | Honorific language. Respect titles. |
-| Nordics | Flat, consensus-driven | Direct but collaborative |
+| Culture | Directness | Formality | Time | Feedback |
+|---------|-----------|-----------|------|----------|
+| US | Direct | Informal | Strict deadlines | Direct + positive |
+| Japan | Indirect | Formal | Punctual | Indirect, private |
+| Germany | Direct | Formal | Strict | Direct, factual |
+| Brazil | Indirect | Relationship-first | Flexible | Indirect, relationship |
+| India | Context-dependent | Formal with seniors | Flexible | Indirect, hierarchical |
+
+## Async Communication Protocols
+
+1. Default to async: assume response within 24h (not instant)
+2. No "hi" messages: include context + question in first message
+3. Status updates: visible in project tool, not via DM
+4. Meeting notes: posted within 1h. Action items with owners + deadlines.
+5. Decision log: key decisions documented with rationale + date + decider.
+
+## Meeting Facilitation
+
+- Agenda sent 24h before. Start with purpose + desired outcome.
+- Timebox: 15min (standup), 30min (decision), 60min max (workshop)
+- Parking lot: off-topic items written down for later
+- Round-robin: every voice heard before discussion
 
 ---
 

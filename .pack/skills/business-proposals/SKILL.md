@@ -220,6 +220,24 @@ Before delivering any document, verify:
 | Pricing before value explained | Always state problem + solution + outcome before price |
 | Generic subject lines | "Let's connect" / "Partnership opportunity" → spam folder |
 
+## Pricing Psychology
+
+### Good-Better-Best
+| Tier | Role | Price anchor |
+|------|------|-------------|
+| Good | Makes Best look reasonable | 30-40% below Best |
+| Better | The one you want them to buy | Midpoint (highlighted/default) |
+| Best | Price anchor | Highest |
+
+### Decoy Effect
+Add a third option that makes the target option look better: Option A ($10, basic) + Option B ($25, pro) + Option C ($24, pro-lite) → C makes B look like a deal.
+
+### Bundling
+Bundle complementary services at 20-30% discount vs individual. Never discount individual items below bundled price.
+
+### Legalese Templates
+"Payment terms: Net 30. Late payments accrue 1.5% monthly. All deliverables remain property of Provider until full payment. Either party may terminate with 30 days written notice. Liability capped at fees paid in prior 12 months."
+
 ## Sources
 - Sequoia Capital pitch deck template
 - Y Combinator Startup School

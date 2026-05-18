@@ -162,6 +162,29 @@ Rules: One action per step. Bold UI labels exactly as they appear. Max 15 words 
 | KB with no expected result | End every step with "You should see..." |
 | Example code with secrets | Use placeholder env vars. Never real values. |
 
+## API Documentation Patterns
+
+### OpenAPI → Docs
+```bash
+npx @redocly/cli build-docs openapi.yaml -o docs.html
+npx @scalar/api-reference openapi.yaml
+```
+
+### README Template
+1. Title + one-liner, 2. Quick start (install + first command), 3. Features (bullets), 4. Architecture (diagram), 5. API (link), 6. Contributing (link), 7. License
+
+## Changelog Automation
+
+```bash
+# Generate from conventional commits
+npx standard-version
+npx changelogen --from v1.0.0 --to HEAD
+
+# Keep a Changelog format
+## [version] - YYYY-MM-DD
+### Added | Changed | Deprecated | Removed | Fixed | Security
+```
+
 ## Sources
 
 - Standard Readme specification

@@ -257,6 +257,32 @@ Score min 3 axes at 7+ to proceed.
 
 ---
 
+## Design Token Architecture
+
+```json
+{
+  "color": {
+    "primary": { "value": "#1B365D", "type": "color" },
+    "primary-light": { "value": "#2D5A8A", "type": "color" }
+  },
+  "spacing": {
+    "xs": { "value": "4px", "type": "spacing" },
+    "sm": { "value": "8px" }, "md": { "value": "16px" }, "lg": { "value": "24px" }
+  },
+  "typography": {
+    "heading": { "value": { "fontFamily": "Charter", "fontWeight": 500, "fontSize": "clamp(32px,5vw,56px)" } }
+  }
+}
+```
+
+Export as W3C Design Token format for Figma Tokens plugin, Style Dictionary, or token-transformer.
+
+## Figma-to-Code Handoff
+1. Dev Mode: inspect spacing (8px grid), colors (variables), typography (named styles)
+2. Export assets: SVG for icons, PNG @2x for raster
+3. Component mapping: `FigmaComponent → ReactComponent` documented before build
+4. Responsive: Figma frames at 375px (mobile), 768px (tablet), 1440px (desktop)
+
 ## Sources
 
 - Pentagram — brand identity project standards
