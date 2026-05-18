@@ -148,7 +148,7 @@ Test-Step -Name "Recall@5 finds exact match in top results" -ScriptBlock {
         $true
     } else {
         Write-Host " (recall@5: MISS)" -ForegroundColor Yellow
-        $true
+        $false
     }
 }
 

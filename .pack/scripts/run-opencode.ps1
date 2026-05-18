@@ -10,7 +10,7 @@ $ErrorActionPreference = "Continue"
 $CHECKPOINT_INTERVAL_MS = 300000
 $BUFFER_MAX_LINES = 9999
 $BUFFER_READ_LINES = 5000
-$REAL_OPENCODE = if (Get-Command opencode -ErrorAction SilentlyContinue) { (Get-Command opencode).Source } else { "opencode" }
+$REAL_OPENCODE = if (Get-Command opencode -CommandType Application -ErrorAction SilentlyContinue) { (Get-Command opencode -CommandType Application).Source } else { "opencode" }
 $SHOKUNIN_DIR = "$env:USERPROFILE\.shokunin"
 $LOG_DIR = "$SHOKUNIN_DIR\memory\sessions"
 $HELPER_PY = "$SHOKUNIN_DIR\scripts\chroma-helper.py"
@@ -75,7 +75,7 @@ try {
     & $REAL_OPENCODE
 } catch {
     Write-Host "  opencode exited with error: $_" -ForegroundColor Yellow
-    try { & opencode.exe } catch { & opencode }
+    try { & opencode.exe } catch { Write-Host "  Fallback also failed" -ForegroundColor Red }
 }
 
 $endTime = Get-Date

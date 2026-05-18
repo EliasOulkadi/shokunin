@@ -66,9 +66,9 @@ if (Test-Path $ompPath) {
 function global:opencode {
     $wrapper = "$env:USERPROFILE\.shokunin\scripts\run-opencode.ps1"
     if (Test-Path $wrapper) {
-        & $wrapper
+        & $wrapper @args
     } else {
-        & "$env:USERPROFILE\AppData\Roaming\npm\opencode.ps1"
+        & "$env:USERPROFILE\AppData\Roaming\npm\opencode.ps1" @args
     }
 }
 

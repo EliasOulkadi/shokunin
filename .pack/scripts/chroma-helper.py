@@ -81,7 +81,7 @@ def search(query: str, project: str | None = None, n_results: int = 10) -> list[
                 "project": meta.get("project", ""),
                 "session_id": meta.get("session_id", ""),
                 "timestamp": meta.get("timestamp", ""),
-                "similarity": round(1.0 - dist, 4),
+                "similarity": round(1.0 / (1.0 + dist), 4),
             })
     return entries
 
@@ -128,15 +128,17 @@ def _rrf_fuse(ranked_lists: list[tuple[list[dict[str, Any]], str]], k: int = 60)
     all_items: dict[str, dict[str, Any]] = {}
     for rank_list, source in ranked_lists:
         for rank, item in enumerate(rank_list):
-            sid = item.get("session_id") or item.get("session", "")
-            scores[sid] = scores.get(sid, 0) + 1.0 / (k + rank)
-            all_items[sid] = item
+            key = f"{source}:{rank}"
+            scores[key] = scores.get(key, 0) + 1.0 / (k + rank)
+            all_items[key] = item
     ranked = sorted(scores.items(), key=lambda x: -x[1])
     result = []
     seen = set()
-    for sid, _ in ranked:
+    for key, _ in ranked:
+        item = all_items[key]
+        sid = item.get("session_id") or item.get("session", "")
         if sid and sid not in seen:
-            result.append(all_items[sid])
+            result.append(item)
             seen.add(sid)
     return result
 
@@ -173,7 +175,8 @@ def recall(query: str, project: str | None = None, n_results: int = 10, from_dat
         chroma_entries = []
 
     bm25_results = []
-    all_entries = md_entries + chroma_entries
+    chroma_session_ids = {e.get("session_id", "") for e in chroma_entries}
+    all_entries = chroma_entries + [e for e in md_entries if e["session"] not in chroma_session_ids]
     if all_entries:
         index, df, avgdl, N = _build_bm25_index(all_entries)
         qt = _tokenize(query)

@@ -50,9 +50,11 @@ def _get_ch() -> Any:
     global _ch_stub
     if _ch_stub is None:
         stub_path = os.path.join(os.path.dirname(BASE_DIR), "scripts", "chroma_helper_stub.py")
-        spec = importlib.util.spec_from_file_location("chroma_helper_stub", stub_path)  # type: ignore[arg-type]
-        _ch_stub = importlib.util.module_from_spec(spec)  # type: ignore[arg-type]
-        spec.loader.exec_module(_ch_stub)  # type: ignore[union-attr]
+        spec = importlib.util.spec_from_file_location("chroma_helper_stub", stub_path)
+        if spec is None or spec.loader is None:
+            raise RuntimeError(f"Cannot load chroma_helper_stub from {stub_path}")
+        _ch_stub = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(_ch_stub)
     return _ch_stub
 
 def _safe_id(sid: str) -> str:
@@ -288,14 +290,16 @@ def handle_search_context(args: dict[str, Any]) -> list[dict[str, Any]]:
         distance = results["distances"][0][i]
 
         entry_tags = json.loads(metadata.get("tags", "[]"))
-        entry_type = metadata.get("type", "general")
+        entry_type_value = metadata.get("type", "general")
 
-        if entry_type and tags and not any(t in entry_tags for t in tags):
+        if entry_type and entry_type_value != entry_type:
+            continue
+        if tags and not any(t in entry_tags for t in tags):
             continue
 
         entries.append({
             "text": document[:500],
-            "type": entry_type,
+            "type": entry_type_value,
             "tags": entry_tags,
             "project": metadata.get("project", ""),
             "session_id": metadata.get("session_id", ""),
@@ -303,7 +307,7 @@ def handle_search_context(args: dict[str, Any]) -> list[dict[str, Any]]:
             "similarity": round(1.0 / (1.0 + distance), 4),
         })
 
-    return entries[:5]
+    return entries[:n_results]
 
 
 def handle_get_session_summary(args: dict[str, Any]) -> dict[str, Any]:
@@ -432,6 +436,9 @@ def _dispatch(request: dict[str, Any]) -> dict[str, Any] | None:
     method = request.get("method", "")
     params = request.get("params", {})
     req_id = request.get("id")
+
+    if req_id is None:
+        return None  # notifications must not receive a response
 
     if method == "initialize":
         return {

@@ -122,9 +122,8 @@ Check -Name "sessions dir writable" -ScriptBlock {
     Remove-Item "$d\.write-test" -Force
 }
 
-Check -Name "current-session.json writable" -ScriptBlock {
-    $info = @{ test = $true } | ConvertTo-Json
-    $info | Out-File -FilePath "$env:USERPROFILE\.shokunin\current-session.json" -Encoding UTF8 -Force
+Check -Name "current-session.json exists" -ScriptBlock {
+    if (-not (Test-Path "$env:USERPROFILE\.shokunin\current-session.json")) { throw "not found" }
 }
 
 # Summary
