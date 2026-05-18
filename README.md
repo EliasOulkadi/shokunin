@@ -29,6 +29,16 @@ irm https://raw.githubusercontent.com/EliasOulkadi/shokunin/master/install.ps1 |
 bash <(curl -sL https://raw.githubusercontent.com/EliasOulkadi/shokunin/master/install.sh)
 ```
 
+```powershell
+# Skills-only install (Windows — no ChromaDB, no MCP)
+irm https://raw.githubusercontent.com/EliasOulkadi/shokunin/master/install-skills.ps1 | iex
+```
+
+```bash
+# Skills-only install (Linux)
+bash <(curl -sL https://raw.githubusercontent.com/EliasOulkadi/shokunin/master/install-skills.sh)
+```
+
 ## Ecosystem
 
 ```
