@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Shokunin Technical Overview v4.2.2</title>
+<meta name="author" content="Elias Oulkadi">
+<meta name="description" content="Multi-strategy AI memory with 62 expert skills. BM25 + vector + temporal + RRF. Zero servers. One command.">
+<meta name="keywords" content="shokunin, AI memory, ChromaDB, MCP, skills, persistent memory, BM25, vector search, RRF">
+<meta name="generator" content="Kami">
+<style>
+  @page { size: A4; margin: 22mm 24mm 24mm 24mm; background: #f5f4ed; widows: 4; orphans: 4; }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  :root {
+    --parchment: #f5f4ed; --ivory: #faf9f5; --near-black: #141413;
+    --dark-warm: #3d3d3a; --olive: #504e49; --stone: #6b6a64;
+    --brand: #1B365D; --brand-light: #2D5A8A; --border: #e8e6dc; --border-soft: #e5e3d8;
+    --tag-bg: #E4ECF5; --red: #a83030; --green: #2a7a4a;
+    --serif: Charter, Georgia, Palatino, "Times New Roman", serif;
+    --mono: "JetBrains Mono", "SF Mono", Consolas, Monaco, monospace;
+  }
+  body { font-family: var(--serif); font-size: 10.5pt; line-height: 1.65; color: var(--near-black); background: var(--parchment); widows: 4; orphans: 4; }
+  @media screen { body { max-width: 210mm; margin: 0 auto; padding: 22mm 24mm; } }
+
+  h1 { font-size: 24pt; font-weight: 500; border-left: 2.5pt solid var(--brand); padding-left: 10pt; margin: 0 0 14pt 0; line-height: 1.15; break-after: avoid; letter-spacing: -0.3pt; }
+  h2 { font-size: 15pt; font-weight: 500; color: var(--brand); margin: 28pt 0 10pt 0; break-after: avoid; }
+  h3 { font-size: 12pt; font-weight: 500; color: var(--near-black); margin: 18pt 0 6pt 0; break-after: avoid; }
+  p { margin: 0 0 10pt 0; widows: 3; orphans: 3; }
+  ul, ol { margin: 6pt 0 12pt 18pt; }
+  li { margin: 0 0 4pt 0; }
+  a { color: var(--brand); text-decoration: none; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 9.5pt; margin: 12pt 0; break-inside: avoid; }
+  table th { text-align: left; padding: 7pt 8pt; border-bottom: 1.5pt solid var(--border); background: var(--ivory); font-weight: 500; color: var(--dark-warm); font-size: 9pt; }
+  table td { padding: 6pt 8pt; border-bottom: 0.3pt solid var(--border-soft); vertical-align: top; }
+  table tr { break-inside: avoid; }
+
+  pre { border-left: 2.5pt solid var(--brand); border-radius: 3pt; background: var(--ivory); padding: 10pt 14pt; font-size: 9pt; font-family: var(--mono); break-inside: avoid; margin: 6pt 0 10pt 0; line-height: 1.5; overflow-wrap: break-word; white-space: pre-wrap; }
+  code { font-family: var(--mono); font-size: 9pt; background: var(--tag-bg); padding: 1pt 4pt; border-radius: 2pt; }
+
+  .callout { background: var(--ivory); border-left: 2pt solid var(--brand); padding: 12pt 14pt; border-radius: 3pt; margin: 14pt 0; break-inside: avoid; }
+  .callout.wide { border-left-color: var(--stone); }
+  .callout .label { font-size: 8.5pt; letter-spacing: 0.8pt; text-transform: uppercase; font-weight: 500; color: var(--brand); margin-bottom: 4pt; }
+  .callout p { margin-bottom: 4pt; }
+
+  .badge { display: inline-block; padding: 2pt 7pt; border-radius: 3pt; font-size: 8pt; font-weight: 500; text-transform: uppercase; }
+  .badge-blue { background: var(--tag-bg); color: var(--brand); }
+  .badge-green { background: #e8f2ec; color: var(--green); }
+  .badge-stone { background: #edecea; color: var(--olive); }
+
+  .break { break-before: page; }
+
+  .cover { min-height: 240mm; display: flex; flex-direction: column; justify-content: space-between; padding: 40mm 0 0 0; break-after: page; }
+  .cover-eyebrow { font-size: 10pt; color: var(--brand); letter-spacing: 2pt; text-transform: uppercase; font-weight: 500; margin-bottom: 18pt; }
+  .cover-title { font-size: 40pt; font-weight: 500; line-height: 1.12; letter-spacing: -0.5pt; margin-bottom: 16pt; }
+  .cover-line { width: 60pt; height: 2pt; background: var(--brand); margin: 20pt 0; border-radius: 1pt; }
+  .cover-sub { font-size: 14pt; color: var(--olive); line-height: 1.5; max-width: 85%; }
+  .cover-meta { font-size: 10pt; color: var(--stone); }
+
+  .toc { break-after: page; }
+  .toc h1 { border-left: none; padding-left: 0; }
+  .toc-list { list-style: none; margin: 0; padding: 0; }
+  .toc-list li { padding: 4pt 0; border-bottom: 0.3pt solid var(--border-soft); font-size: 10.5pt; }
+  .toc-list li span { color: var(--stone); float: right; }
+
+  .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10pt; margin: 14pt 0; break-inside: avoid; }
+  .stat-box { background: var(--ivory); border: 0.5pt solid var(--border); border-radius: 4pt; padding: 14pt 12pt; text-align: center; }
+  .stat-box .num { font-size: 22pt; font-weight: 500; color: var(--brand); line-height: 1.1; }
+  .stat-box .label { font-size: 8.5pt; color: var(--stone); margin-top: 3pt; }
+
+  .arch-layer { display: grid; grid-template-columns: 120pt 1fr; gap: 4pt 12pt; margin: 8pt 0; font-size: 9.5pt; break-inside: avoid; }
+  .arch-layer .name { font-weight: 500; color: var(--brand); font-family: var(--mono); font-size: 9pt; text-align: right; }
+  .arch-layer .desc { color: var(--dark-warm); }
+
+  .comparison-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10pt; margin: 12pt 0; break-inside: avoid; }
+  .comparison-card { background: var(--ivory); border: 0.5pt solid var(--border); border-radius: 4pt; padding: 12pt; }
+  .comparison-card h3 { margin: 0 0 6pt 0; font-size: 11pt; }
+  .comparison-card.winner { border-color: var(--brand); box-shadow: inset 0 0 0 0.5pt var(--brand); }
+
+  .skill-domain { margin: 10pt 0; break-inside: avoid; }
+  .skill-domain h3 { font-size: 10.5pt; color: var(--brand); margin: 0 0 4pt 0; }
+  .skill-domain p { font-size: 9.5pt; color: var(--dark-warm); margin: 0 0 8pt 0; line-height: 1.45; }
+</style>
+</head>
+<body>
+
+<!-- COVER -->
+<section class="cover">
+  <div>
+    <div class="cover-eyebrow">Technical Overview</div>
+    <div class="cover-title">Shokunin</div>
+    <div class="cover-line"></div>
+    <div class="cover-sub">Persistent AI memory with 62 expert skills. Multi-strategy recall. Zero servers. One command.</div>
+  </div>
+  <div class="cover-meta">
+    Version 4.2.2 · May 2026<br>
+    Elias Oulkadi · MIT License
+  </div>
+</section>
+
+<!-- TABLE OF CONTENTS -->
+<section class="toc">
+  <h1>Contents</h1>
+  <ul class="toc-list">
+    <li>1. Executive Summary <span>3</span></li>
+    <li>2. Problem Statement <span>3</span></li>
+    <li>3. Architecture <span>4</span></li>
+    <li>4. Memory System <span>5</span></li>
+    <li>5. MCP Tools Reference <span>6</span></li>
+    <li>6. Skills <span>8</span></li>
+    <li>7. Benchmarks <span>10</span></li>
+    <li>8. Comparison with Hindsight <span>11</span></li>
+    <li>9. Compatibility <span>12</span></li>
+    <li>10. Installation &amp; Quick Start <span>12</span></li>
+  </ul>
+</section>
+
+<!-- 1. EXECUTIVE SUMMARY -->
+<section class="break">
+  <h1>1. Executive Summary</h1>
+
+  <div class="stats-grid">
+    <div class="stat-box"><div class="num">62</div><div class="label">Expert Skills</div></div>
+    <div class="stat-box"><div class="num">9</div><div class="label">MCP Tools</div></div>
+    <div class="stat-box"><div class="num">6</div><div class="label">AI Runtimes</div></div>
+  </div>
+
+  <p>Shokunin is a local-first AI memory system and skills ecosystem that solves three critical problems: context loss between sessions, keyword-blind vector search, and stale memory claims. It provides persistent storage via ChromaDB, multi-strategy retrieval (vector + BM25 + temporal + RRF), and 62 curated engineering skills that auto-activate based on task context.</p>
+
+  <div class="callout">
+    <div class="label">Key Differentiator</div>
+    <p>Multi-strategy search finds real sessions <strong>60% of the time</strong> that vector-only search misses completely, at only +13.8% latency overhead. All data stays on your machine. No cloud, no API keys, no subscriptions.</p>
+  </div>
+</section>
+
+<!-- 2. PROBLEM STATEMENT -->
+<section class="break">
+  <h1>2. Problem Statement</h1>
+
+  <h2>Context Loss</h2>
+  <p>AI coding agents forget everything between sessions. Every conversation starts from scratch — decisions, files modified, commands run, preferences discovered — all gone. The agent cannot recall what it did yesterday.</p>
+
+  <h2>Keyword-Blind Retrieval</h2>
+  <p>Vector similarity search alone misses exact keyword matches. When you search for <code>api-forge</code> or <code>docker</code> or a specific file path like <code>src/auth/middleware.ts</code>, vector search returns semantically similar but lexically different results. Pure BM25 doesn't understand synonyms or intent.</p>
+
+  <h2>Stale Memory Claims</h2>
+  <p>Memory entries are claims from a frozen point in time. A file path remembered three weeks ago may have been refactored out of existence. Without verification, the agent acts on stale information, creating bugs instead of solving them.</p>
+
+  <h2>Vendor Lock-In</h2>
+  <p>Enterprise memory solutions (Hindsight, MemGPT) require PostgreSQL, Docker, and cloud API calls. Developers working offline, on air-gapped machines, or with limited infrastructure cannot use them.</p>
+</section>
+
+<!-- 3. ARCHITECTURE -->
+<section class="break">
+  <h1>3. Architecture</h1>
+
+  <p>Seven layers. Clear boundaries. No server processes. Everything runs on your machine.</p>
+
+  <div class="arch-layer">
+    <div class="name">Config</div>
+    <div class="desc"><code>~/.config/opencode/</code> — Provider setup, MCP servers, agents, commands. Runtime configuration.</div>
+  </div>
+  <div class="arch-layer">
+    <div class="name">Instructions</div>
+    <div class="desc"><code>~/AGENTS.md</code> + <code>CLAUDE.md</code> — Global rules, session startup workflow, mandatory memory check.</div>
+  </div>
+  <div class="arch-layer">
+    <div class="name">Manifest</div>
+    <div class="desc"><code>~/.shokunin/shokunin.json</code> — Declarative manifest for drift detection. Declares which skills, scripts, and configs should exist.</div>
+  </div>
+  <div class="arch-layer">
+    <div class="name">Orchestration</div>
+    <div class="desc"><code>~/.shokunin/scripts/</code> — Session wrapping, health checks, cleanup. The <code>run-opencode.ps1</code> wrapper captures console buffer on exit.</div>
+  </div>
+  <div class="arch-layer">
+    <div class="name">Memory</div>
+    <div class="desc"><code>~/.shokunin/memory/</code> — ChromaDB persistent storage, MCP server (<code>mcp-server.py</code>, 21 KB), auto-log JSONL sessions.</div>
+  </div>
+  <div class="arch-layer">
+    <div class="name">Skills</div>
+    <div class="desc"><code>~/.config/opencode/skills/</code> — 62 SKILL.md files with automatic activation based on task context.</div>
+  </div>
+  <div class="arch-layer">
+    <div class="name">Infrastructure</div>
+    <div class="desc"><code>~/.shokunin/backups/</code> — Database backups, logs, health check outputs.</div>
+  </div>
+
+  <div class="callout wide">
+    <div class="label">Zero Server Dependency</div>
+    <p>ChromaDB uses SQLite as its backing store. No PostgreSQL, no Docker, no Redis. The entire memory system runs as a single Python file (572 lines) communicating over stdin/stdout JSON-RPC. The MCP server starts and stops with each agent session — no daemon process.</p>
+  </div>
+</section>
+
+<!-- 4. MEMORY SYSTEM -->
+<section class="break">
+  <h1>4. Memory System</h1>
+
+  <h2>Entry Types</h2>
+  <p>Every memory entry has a type, tags, project, and session ID. The type system enables filtered retrieval and claim verification:</p>
+
+  <table>
+    <thead><tr><th>Type</th><th>Purpose</th><th>Example</th></tr></thead>
+    <tbody>
+      <tr><td><code>decision</code></td><td>Architectural or design choices</td><td>"Use PostgreSQL for the catalog service"</td></tr>
+      <tr><td><code>file</code></td><td>Files created, modified, or deleted</td><td>"Modified src/auth/middleware.ts"</td></tr>
+      <tr><td><code>command</code></td><td>CLI commands and their results</td><td>"npm run migrate → 3 migrations applied"</td></tr>
+      <tr><td><code>preference</code></td><td>User preferences discovered during work</td><td>"User prefers tabs over spaces"</td></tr>
+      <tr><td><code>checkpoint</code></td><td>Progress markers during long tasks</td><td>"Completed auth module, starting payments"</td></tr>
+      <tr><td><code>session_end</code></td><td>Full session summary at end</td><td>"Decisions: X, Y. Files: A, B. Next: C"</td></tr>
+      <tr><td><code>claim_file</code></td><td>Verified file path claim</td><td>"src/auth/login.ts exists (verified 2026-05-18)"</td></tr>
+      <tr><td><code>claim_function</code></td><td>Verified function signature claim</td><td>"handleLogin(req, res) exists in auth.ts"</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Freshness Decay</h2>
+  <p>v4.2.2 introduces exponential recency blending with a 30-day half-life:</p>
+  <pre>final_score = (1 - freshness_boost) × vector_similarity + freshness_boost × e^(-days_since / 30)</pre>
+  <p>At <code>freshness_boost = 0</code>, pure vector similarity. At <code>freshness_boost = 1.0</code>, pure recency. Default is 0.0 (no decay). This prevents stale claims from drowning out recent, accurate context.</p>
+
+  <h2>Claim Verification</h2>
+  <p>The <code>verify_file_path</code> MCP tool validates file paths from memory before the agent acts on them. Memory entries are treated as <em>claims from a frozen point in time</em>, not facts. The workflow:</p>
+  <ol>
+    <li>Agent retrieves a memory entry mentioning a file path</li>
+    <li>Agent calls <code>verify_file_path</code> to check if the path still exists</li>
+    <li>If the path exists, mark with <code>verified_at</code> timestamp</li>
+    <li>If the path is gone, search newer memory or the codebase directly</li>
+  </ol>
+
+  <h2>Session Management</h2>
+  <p>Three operations solve the "which session was I in?" problem:</p>
+  <ul>
+    <li><strong>list</strong> — Show recent sessions with date, project, entry count, summary</li>
+    <li><strong>continue</strong> — Load full context from a session, parse decisions/files/commands from text</li>
+    <li><strong>auto-log</strong> — Every MCP tool call writes to <code>sessions/&lt;id&gt;.jsonl</code> automatically</li>
+  </ul>
+</section>
+
+<!-- 5. MCP TOOLS REFERENCE -->
+<section class="break">
+  <h1>5. MCP Tools Reference</h1>
+
+  <p>Nine tools over JSON-RPC 2.0 on stdin/stdout. No HTTP, no cloud.</p>
+
+  <table>
+    <thead><tr><th>Tool</th><th>Purpose</th><th>Key Parameters</th></tr></thead>
+    <tbody>
+      <tr><td><code>store_context</code></td><td>Store text with type, tags, project</td><td>text, session_id, type, tags, project</td></tr>
+      <tr><td><code>search_context</code></td><td>Vector similarity search</td><td>query, project, type, tags, n_results, freshness_boost</td></tr>
+      <tr><td><code>multi_search_context</code></td><td>Vector + BM25 + temporal + RRF fusion</td><td>query, project, n_results, from_date, to_date</td></tr>
+      <tr><td><code>consolidate_memories</code></td><td>Summarize old entries per project</td><td>project (optional)</td></tr>
+      <tr><td><code>list_sessions</code></td><td>List recent sessions with metadata</td><td>limit, project</td></tr>
+      <tr><td><code>continue_session</code></td><td>Load full session context</td><td>session_id</td></tr>
+      <tr><td><code>save_message</code></td><td>Record message in session transcript</td><td>text, session_id, role</td></tr>
+      <tr><td><code>get_session_summary</code></td><td>Summarize all entries in a session</td><td>session_id</td></tr>
+      <tr><td><code>verify_file_path</code></td><td>Validate file/dir path exists</td><td>path</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Protocol</h2>
+  <pre>{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "tools/call",
+  "params": {
+    "name": "multi_search_context",
+    "arguments": {
+      "query": "docker multi-stage build",
+      "project": "myapp",
+      "n_results": 5,
+      "from_date": "2026-05-01"
+    }
+  }
+}</pre>
+
+  <div class="callout">
+    <div class="label">Auto-Logging</div>
+    <p>Every MCP tool call (<code>store_context</code>, <code>search_context</code>, <code>save_message</code>) automatically appends to <code>sessions/&lt;id&gt;.jsonl</code>. The agent doesn't need to coordinate logging — the MCP server handles it transparently.</p>
+  </div>
+
+  <h2>Data Flow</h2>
+  <pre>AI Runtime → JSON-RPC → MCP Server (mcp-server.py)
+                              │
+                              ├──► ChromaDB (vector + metadata)
+                              │      Storage: ~/.shokunin/memory/chroma_db/
+                              │      Embedding: all-MiniLM-L6-v2 (384-dim)
+                              │
+                              ├──► Session JSONL (append-only)
+                              │      ~/.shokunin/memory/sessions/&lt;id&gt;.jsonl
+                              │
+                              └──► Markdown fallback
+                                     ~/.shokunin/memory/sessions/&lt;id&gt;.md</pre>
+</section>
+
+<!-- 6. SKILLS -->
+<section class="break">
+  <h1>6. Skills</h1>
+
+  <p>62 skills across 10 domains. Each is a real engineering guide with decision tables, error patterns, production checklists, anti-patterns, and cited sources. Not generic prompts — structured procedural knowledge.</p>
+
+  <div class="skill-domain">
+    <h3>Infrastructure (5)</h3>
+    <p>docker, kubernetes, terraform, ci-cd, db-admin. Multi-stage builds, Gateway API, state management, OIDC pipelines, PostgreSQL replication.</p>
+  </div>
+  <div class="skill-domain">
+    <h3>Backend (5)</h3>
+    <p>auth-architect, api-forge, db-sculptor, error-handler, neon-postgres. OWASP Top 10, OpenAPI 3.1, EXPLAIN ANALYZE, OpenTelemetry, Serverless Postgres.</p>
+  </div>
+  <div class="skill-domain">
+    <h3>Frontend (11)</h3>
+    <p>component-forge, responsive-engine, motion-craft, landing-craft, aesthetic-web, ui-ux-pro-max, emil-design-eng, impeccable, taste, taste-soft, taste-minimalist. All states, WCAG 2.2, Container Queries, WAAPI, LIFT Model, OKLCH, design variance engines.</p>
+  </div>
+  <div class="skill-domain">
+    <h3>Mobile (2)</h3>
+    <p>flutter, react-native. Riverpod + Impeller, Expo Router + FlashList.</p>
+  </div>
+  <div class="skill-domain">
+    <h3>Quality (7)</h3>
+    <p>test-commander, performance-profiler, code-review, comprehensive-review, cross-review, zen-review, zen-comprehensive-review. Testing Trophy, Lighthouse, P0-P3 review.</p>
+  </div>
+  <div class="skill-domain">
+    <h3>Content &amp; Business (6)</h3>
+    <p>communication, content-marketing, business-proposals, seo-geo, translate-craft, documentation. AIDA, LLMs.txt, i18n, professional PDFs.</p>
+  </div>
+  <div class="skill-domain">
+    <h3>Documents (3)</h3>
+    <p>kami (PDF generation with parchment design system), portfolio-auto (GitHub sync), kagen (Chromium/Playwright PDF rendering).</p>
+  </div>
+  <div class="skill-domain">
+    <h3>Productivity (8)</h3>
+    <p>git-workflow, windows-powershell, strategy, design, runbook-gen, finance, legal-counsel, whendone-plus. Conventional commits, SBI feedback, 5-pillar finance.</p>
+  </div>
+  <div class="skill-domain">
+    <h3>AI Agents (6)</h3>
+    <p>agent-browser, agent-tools, find-skills, skill-creator, research, humanize. 150+ AI apps, Playwright automation, anti-AI-slop rewriting.</p>
+  </div>
+  <div class="skill-domain">
+    <h3>System (9)</h3>
+    <p>memory, chromadb, shokunin-update, init, efficient-coding, senior-engineer, plan, playwright, web-security. OWASP, token optimization, production-grade patterns.</p>
+  </div>
+
+  <div class="callout">
+    <div class="label">Skill Structure v4.0</div>
+    <p>Every skill follows the same structure: YAML frontmatter for auto-discovery, sub-commands (design / audit / optimize), exact specifications (100-160ms for button press, Argon2id memory=19456), Before/After review tables, error handling tables, pre-flight production checklists, banned patterns, and cited sources.</p>
+  </div>
+</section>
+
+<!-- 7. BENCHMARKS -->
+<section class="break">
+  <h1>7. Benchmarks</h1>
+
+  <p>Measured on 15 queries (3 iterations × 5 queries) against 120+ real ChromaDB entries. The multi-strategy approach returns real-world sessions 60% of the time that vector-only misses completely.</p>
+
+  <div class="stats-grid">
+    <div class="stat-box"><div class="num">100%</div><div class="label">Any relevant hit<br>(both strategies)</div></div>
+    <div class="stat-box winner" style="border-color: var(--brand); box-shadow: inset 0 0 0 0.5pt var(--brand);"><div class="num">60%</div><div class="label">Real session hits<br>vs 0% vector-only</div></div>
+    <div class="stat-box"><div class="num">1.4s</div><div class="label">Avg latency<br>+13.8% overhead</div></div>
+  </div>
+
+  <table>
+    <thead><tr><th>Metric</th><th>Vector-only</th><th>Multi-strategy</th></tr></thead>
+    <tbody>
+      <tr><td>Real session hit rate</td><td>0%</td><td style="font-weight:500;color:var(--brand)">60%</td></tr>
+      <tr><td>Any relevant hit</td><td>100%</td><td>100%</td></tr>
+      <tr><td>Synthetic probe hit rate</td><td>100%</td><td>40% (BM25 de-prioritizes probes)</td></tr>
+      <tr><td>Average latency</td><td>1293ms</td><td>1471ms (+13.8%)</td></tr>
+      <tr><td>Storage overhead</td><td>~30 MB</td><td>~30 MB (same ChromaDB)</td></tr>
+      <tr><td>Network calls</td><td>0</td><td>0</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout">
+    <div class="label">Why 40% probe rate is good</div>
+    <p>BM25 correctly de-prioritizes synthetic probes in favor of semantically richer real entries. 100% of queries return at least one relevant result — the difference is that multi-strategy returns the <em>right</em> results: actual sessions with full context, not just keyword matches.</p>
+  </div>
+
+  <p><strong>Configuration:</strong> Embedding: all-MiniLM-L6-v2 (22M, 384-dim). BM25: k1=1.5, b=0.75. Fusion: RRF k=60. <a href="https://github.com/EliasOulkadi/shokunin/tree/master/benchmarks">Full methodology and reproduction steps</a>.</p>
+</section>
+
+<!-- 8. COMPARISON -->
+<section class="break">
+  <h1>8. Comparison with Hindsight</h1>
+
+  <p>Hindsight (vectorize-io/hindsight) leads memory benchmarks (91.4% LongMemEval). Shokunin targets the local-first developer who needs zero infrastructure.</p>
+
+  <div class="comparison-grid">
+    <div class="comparison-card">
+      <h3>Hindsight</h3>
+      <p>PostgreSQL + pgvector. 4 search strategies (semantic, BM25, graph, temporal). RRF + cross-encoder rerank. Requires LLM API for <code>retain()</code> calls. Docker or pip.</p>
+    </div>
+    <div class="comparison-card winner">
+      <h3>Shokunin</h3>
+      <p>ChromaDB (SQLite, 30 MB). 2 strategies (vector, BM25) + temporal. RRF fusion. No LLM dependency for memory ops. One shell script. Full offline.</p>
+    </div>
+  </div>
+
+  <table>
+    <thead><tr><th>Aspect</th><th>Shokunin</th><th>Hindsight</th></tr></thead>
+    <tbody>
+      <tr><td>Storage</td><td>ChromaDB (file, 30 MB)</td><td>PostgreSQL + pgvector</td></tr>
+      <tr><td>Search strategies</td><td>2 (vector + BM25) + temporal</td><td>4 (semantic, BM25, graph, temporal)</td></tr>
+      <tr><td>Result fusion</td><td>Reciprocal Rank Fusion</td><td>RRF + cross-encoder rerank</td></tr>
+      <tr><td>LLM dependency</td><td>None for memory ops</td><td>Required per retain() call</td></tr>
+      <tr><td>Install</td><td>1 shell script</td><td>Docker or pip + PostgreSQL</td></tr>
+      <tr><td>Offline</td><td>Full (no network)</td><td>Partial (needs LLM API)</td></tr>
+      <tr><td>MCP auto-log</td><td>Built-in</td><td>Not available</td></tr>
+      <tr><td>Session mgmt</td><td>list/continue/save + text parsing</td><td>Not available</td></tr>
+      <tr><td>Benchmark</td><td>Real sessions: 60% hit vs 0%</td><td>LongMemEval: 91.4%</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- 9. COMPATIBILITY -->
+<section class="break">
+  <h1>9. Runtime Compatibility</h1>
+
+  <p>The core (skills, memory, scripts) is runtime-agnostic. Only MCP server configuration and instruction files differ.</p>
+
+  <table>
+    <thead><tr><th>Runtime</th><th>Skills</th><th>Memory</th><th>MCP</th><th>Scripts</th><th>Config</th></tr></thead>
+    <tbody>
+      <tr><td><strong>OpenCode</strong></td><td>Native</td><td>Native</td><td>.pack/opencode.json</td><td>.ps1 + .sh</td><td>Built-in</td></tr>
+      <tr><td><strong>Claude Code</strong></td><td>SKILL.md</td><td>Via MCP</td><td>.pack/templates/claude-code.json</td><td>.ps1 + .sh</td><td>Copy template</td></tr>
+      <tr><td><strong>Cline</strong></td><td>SKILL.md</td><td>Via MCP</td><td>.pack/templates/cline-settings.json</td><td>.ps1 + .sh</td><td>VS Code settings</td></tr>
+      <tr><td><strong>Cursor</strong></td><td>SKILL.md</td><td>Via rules</td><td>.pack/templates/cursor-mcp.json</td><td>.ps1 + .sh</td><td>.cursor/ directory</td></tr>
+      <tr><td><strong>Continue.dev</strong></td><td>SKILL.md</td><td>Via rules</td><td>.pack/templates/continue-config.yaml</td><td>.ps1 + .sh</td><td>.continue/ directory</td></tr>
+      <tr><td><strong>Windsurf</strong></td><td>SKILL.md</td><td>Via rules</td><td>.pack/templates/windsurf-mcp.json</td><td>.sh</td><td>Copy template</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- 10. INSTALLATION -->
+<section class="break">
+  <h1>10. Installation &amp; Quick Start</h1>
+
+  <h2>Requirements</h2>
+  <table>
+    <thead><tr><th>Dependency</th><th>Version</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td>OS</td><td>Windows 10/11 or Linux</td><td>Linux: requires bash 4+</td></tr>
+      <tr><td>Node.js</td><td>≥ 18</td><td>Includes npm</td></tr>
+      <tr><td>Python</td><td>≥ 3.11</td><td>For ChromaDB</td></tr>
+      <tr><td>Git</td><td>≥ 2.x</td><td></td></tr>
+    </tbody>
+  </table>
+
+  <h2>Windows Install</h2>
+  <pre>irm https://raw.githubusercontent.com/EliasOulkadi/shokunin/master/install.ps1 | iex</pre>
+
+  <h2>Linux Install</h2>
+  <pre>bash &lt;(curl -sL https://raw.githubusercontent.com/EliasOulkadi/shokunin/master/install.sh)</pre>
+
+  <h2>Skills-Only (No ChromaDB)</h2>
+  <pre>irm https://raw.githubusercontent.com/EliasOulkadi/shokunin/master/install-skills.ps1 | iex</pre>
+
+  <h2>After Install</h2>
+  <pre># Start OpenCode with memory capture
+.\run-opencode.ps1
+
+# List recent sessions
+python ~/.shokunin/scripts/chroma-helper.py session list 3
+
+# Search across all memory
+python ~/.shokunin/scripts/chroma-helper.py recall "docker multi-stage"
+
+# Validate memory system
+.\memory-healthcheck.ps1</pre>
+
+  <div class="callout">
+    <div class="label">Zero Cloud Dependency</div>
+    <p>All data is stored locally at <code>~/.shokunin/memory/</code>. No telemetry, no subscriptions, no API keys required for memory operations. The default provider (OpenCode Go) works without any key. NVIDIA is optional.</p>
+  </div>
+
+  <p style="margin-top: 24pt; font-size: 9pt; color: var(--stone);">Shokunin v4.2.2 · MIT License · github.com/EliasOulkadi/shokunin · eliasoulkadi.github.io/shokunin</p>
+</section>
+
+</body>
+</html>

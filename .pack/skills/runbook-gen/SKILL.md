@@ -1,4 +1,4 @@
-﻿---
+---
 name: runbook-gen
 description: Generate operations runbooks and post-mortems for incident response — severity matrix, decision trees, escalation paths, war room setup (Slack/Zoom), status page updates, customer comms templates, and blameless post-mortems with action items.
 license: MIT

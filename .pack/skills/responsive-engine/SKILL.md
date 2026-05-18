@@ -1,4 +1,4 @@
-﻿---
+---
 name: responsive-engine
 description: Design multi-device layouts with Container Queries, clamp() fluid typography, :has() selector, subgrid, and modern CSS units (dvh/svh/lvh). Use when user asks to make a layout responsive, handle mobile/tablet/desktop breakpoints, create fluid typography, or use Container Queries. Do NOT use for full-page layouts (use landing-craft), component design (use component-forge), or animation-specific responsive (use motion-craft).
 license: MIT

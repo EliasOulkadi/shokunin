@@ -1,4 +1,4 @@
-﻿---
+---
 name: legal-counsel
 description: >-
   Structured legal reference for GDPR, EU AI Act, DSA/DMA, CCPA/CPRA, HIPAA (2026 updates),

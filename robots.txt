@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://eliasoulkadi.github.io/shokunin/sitemap.xml
