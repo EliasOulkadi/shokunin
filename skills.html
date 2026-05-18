@@ -137,20 +137,29 @@
     .hero { padding: clamp(40px, 8vh, 80px) 16px clamp(24px, 4vh, 40px); }
     .hero h1 { font-size: clamp(32px, 8vw, 48px); }
     .hero p { font-size: clamp(15px, 3vw, 18px); }
+    .search-wrap { min-width: 100% !important; }
+    .search-input { font-size: 15px; padding: 10px 14px 10px 40px; }
+    code { font-size: 11px; white-space: normal; word-break: break-all; }
     .skill-trigger { padding: 14px 16px; }
     .skill-body:not(.skill-closed) { padding: 0 16px 16px; }
     .skill-content { font-size: 11px; padding: 12px; }
-    .search-input { font-size: 15px; }
     .domain { margin-bottom: 40px; }
+    .domain-title { font-size: clamp(18px, 5vw, 24px); }
+    .domain-count { font-size: 12px; }
   }
   @media (max-width: 480px) {
+    .nav { padding: 12px; }
+    .hero { padding: 32px 12px 20px; }
     .hero h1 { font-size: clamp(28px, 10vw, 40px); }
-    .hero p { font-size: clamp(14px, 3.5vw, 16px); }
+    .hero p { font-size: clamp(14px, 3.5vw, 16px); margin-bottom: 20px; }
     .skill-trigger { padding: 12px 14px; }
     .skill-name { font-size: 15px; }
     .skill-desc { font-size: 13px; }
     .skill-lines { font-size: 11px; }
-    code { font-size: 11px; }
+    code { font-size: 10px; }
+    .skill-content { font-size: 10px; padding: 10px; }
+    .domain { margin-bottom: 32px; }
+    .footer { padding: 24px 12px 40px; font-size: 13px; }
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
