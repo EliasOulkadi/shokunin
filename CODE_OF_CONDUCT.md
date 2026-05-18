@@ -23,7 +23,7 @@ Project maintainers are responsible for clarifying the standards and will take a
 
 ## Reporting
 
-If you experience or witness unacceptable behavior, please contact the project team at oulkadielias8@icloud.com.
+If you experience or witness unacceptable behavior, please contact the project team at elias@cyberian.online.
 
 ## Attribution
 
