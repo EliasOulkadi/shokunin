@@ -277,6 +277,21 @@ Every auth failure must return a generic message. Never reveal which part of aut
 | Sequential or predictable user IDs | UUIDv4 for all resource IDs. Never auto-increment. |
 | Session fixation | Rotate session ID on login, logout, privilege change. |
 
+## Error Handling
+
+| Cause | Fix |
+|-------|-----|
+| JWT expired but refresh token still valid | Implement silent refresh with retry. Rotate tokens on 401. |
+| OAuth state parameter mismatch | Reject. Log possible CSRF attack. Redirect to login flow. |
+| Rate limit exceeded on auth endpoint | Return 429 with Retry-After header. Exponential backoff on client. |
+| Password reset token reused | Invalidate all existing tokens for user. Force re-login. |
+| WebAuthn registration timeout | Allow retry. Set 60s timeout. Warn user of inactivity. |
+| Session fixation after login | Regenerate session ID. Invalidate old session. |
+| Refresh token reuse detected | Invalidate entire token family. Force full re-authentication. Notify user. |
+| MFA code brute force | Rate limit to 5 attempts per 5 minutes. Account lockout after 10 failures. |
+| OAuth provider returns malformed token | Validate JWT signature and claims before use. Fallback to error state. |
+| Argon2id verification slow under load | Use worker threads. Cache verified sessions. Check memory=19456 config. |
+
 ## Sources
 
 - OWASP Top 10 (2025)

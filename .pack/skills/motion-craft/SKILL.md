@@ -196,6 +196,8 @@ Enter can be slower (user is deciding), exit must be fast (system responding):
 }
 ```
 
+> Note: `@starting-style` and scroll-driven animations (`animation-timeline: view()`, `animation-timeline: scroll()`) are Chrome-only as of 2026. Use JavaScript fallbacks for cross-browser support.
+
 ### Hold-to-delete pattern
 
 ```css

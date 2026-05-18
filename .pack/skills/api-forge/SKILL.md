@@ -1,4 +1,33 @@
----\nname:\ api-forge\ndescription:\ Design\ REST/GraphQL\ APIs\ with\ OpenAPI\ 3\.1,\ error\ handling,\ pagination,\ rate\ limiting,\ webhooks,\ and\ idempotency\.\ Use\ when\ user\ asks\ to\ design\ an\ API,\ create\ endpoints,\ define\ REST/GraphQL\ schema,\ or\ generate\ OpenAPI\ spec\.\ Do\ NOT\ use\ for\ database\ schema\ design,\ frontend\ API\ integration,\ or\ non-HTTP\ protocols\ \(gRPC,\ WebSocket,\ MQTT\)\.\ntriggers:\n\ \ -\ "design\ an\ API"\n\ \ -\ "create\ endpoints"\n\ \ -\ "REST\ API"\n\ \ -\ "GraphQL\ schema"\n\ \ -\ "OpenAPI\ spec"\n\ \ -\ "rate\ limiting"\n\ \ -\ "webhooks"\n\ \ -\ "idempotency"\n\ \ -\ "API\ pagination"\n\ \ -\ "API\ versioning"\n\ \ -\ "API\ security"\nnegatives:\n\ \ -\ "database\ schema"\n\ \ -\ "frontend\ integration"\n\ \ -\ "gRPC"\n\ \ -\ "WebSocket"\n\ \ -\ "MQTT"\n\ \ -\ "database\ design"\nlicense:\ MIT\ncompatibility:\ opencode\nmetadata:\n\ \ workflow:\ backend\n\ \ audience:\ developers\n\ \ version:\ "4\.0"\n\ \ author:\ shokunin\n---
+﻿---
+name: api-forge
+description: Design REST/GraphQL APIs with OpenAPI 3.1, error handling, pagination, rate limiting, webhooks, and idempotency. Use when user asks to design an API, create endpoints, define REST/GraphQL schema, or generate OpenAPI spec. Do NOT use for database schema design, frontend API integration, or non-HTTP protocols (gRPC, WebSocket, MQTT).
+triggers:
+  - "design an API"
+  - "create endpoints"
+  - "REST API"
+  - "GraphQL schema"
+  - "OpenAPI spec"
+  - "rate limiting"
+  - "webhooks"
+  - "idempotency"
+  - "API pagination"
+  - "API versioning"
+  - "API security"
+negatives:
+  - "database schema"
+  - "frontend integration"
+  - "gRPC"
+  - "WebSocket"
+  - "MQTT"
+  - "database design"
+license: MIT
+compatibility: opencode
+metadata:
+  workflow: backend
+  audience: developers
+  version: "4.0"
+  author: shokunin
+---
 
 # API Forge
 
@@ -105,7 +134,7 @@ Every error response includes:
 }
 ```
 
-### Status codes - exact mapping
+### Status codes — exact mapping
 
 | Code | When | What to return |
 |------|------|---------------|
@@ -189,7 +218,7 @@ Sunset: Sat, 12 May 2027 00:00:00 GMT
 
 ### Delivery protocol
 
-- Retry: exponential backoff (1s, 2s, 4s, 8s, 16s, 32s...)
+- Retry: exponential backoff (1s, 2s, 4s, 8s, 16s, 32s…)
 - Max retries: 3. Max TTL: 24 hours.
 - Expect 200 response within 5 seconds.
 - Signature: HMAC-SHA256.
@@ -227,7 +256,7 @@ Return cached response (same status, same body) if same key seen within TTL. Ret
 
 ## API Security Checklist
 
-- [ ] HTTPS enforced (HTTP ? 301 redirect)
+- [ ] HTTPS enforced (HTTP → 301 redirect)
 - [ ] TLS 1.2+ only (no TLS 1.0/1.1)
 - [ ] CORS whitelist per environment, never `*` with credentials
 - [ ] Input validation at boundary (Zod, Joi, Pydantic)
@@ -307,12 +336,12 @@ Every endpoint needs:
 
 ## Sources
 
-- Stripe API Reference - idempotency, pagination, webhooks, error format
-- GitHub REST API - resource naming, versioning
-- Twilio API - webhook signature verification
+- Stripe API Reference — idempotency, pagination, webhooks, error format
+- GitHub REST API — resource naming, versioning
+- Twilio API — webhook signature verification
 - OpenAPI 3.1 Specification (openapis.org)
 - JSON:API Specification (jsonapi.org)
 - GraphQL Relay Connection Specification
-- IETF RFC 7231 - HTTP semantics
-- IETF RFC 6585 - Additional HTTP status codes
-- Slack API - rate limiting headers
+- IETF RFC 7231 — HTTP semantics
+- IETF RFC 6585 — Additional HTTP status codes
+- Slack API — rate limiting headers
