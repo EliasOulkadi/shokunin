@@ -83,8 +83,9 @@ function Install-Dependencies {
     pip install chromadb
     Write-OK
 
-    Write-Step "Installing MCP servers (npx)..."
-    npm install -g @modelcontextprotocol/server-filesystem @modelcontextprotocol/server-fetch 2>&1 | Out-Null
+    Write-Step "Installing MCP servers..."
+    npm install -g @modelcontextprotocol/server-filesystem 2>&1 | Out-Null
+    pip install mcp-server-fetch 2>&1 | Out-Null
     Write-OK
 }
 
