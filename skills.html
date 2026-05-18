@@ -6,7 +6,7 @@
 <title>Shokunin — 62 Skills Browser</title>
 <meta name="description" content="Browse all 62 expert skills in the Shokunin ecosystem.">
 <meta name="theme-color" content="#f5f4ed">
-<meta name="color-scheme" content="light dark">
+<meta name="color-scheme" content="light">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22 fill=%22%231B365D%22>職</text></svg>">
 <style>
   :root {
@@ -29,7 +29,7 @@
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  html { scroll-behavior: smooth; background: var(--parchment); }
+  html { scroll-behavior: smooth; background: var(--parchment); overflow-x: hidden; }
   body {
     background: var(--parchment);
     color: var(--near-black);
@@ -38,6 +38,8 @@
     line-height: 1.55;
     -webkit-font-smoothing: antialiased;
     min-height: 100dvh;
+    overflow-x: hidden;
+    max-width: 100vw;
   }
   body::after { content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 9999; opacity: 0.04; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); background-size: 200px 200px; }
 
@@ -98,16 +100,6 @@
   .skill-desc { font-size: 14px; color: var(--dark-warm); line-height: 1.5; }
   .skip-link { position: absolute; top: -100%; left: 16px; background: var(--ink-blue); color: #fff; padding: 8px 16px; border-radius: 4px; z-index: 100000; font-size: 14px; font-family: var(--serif); }
   .skip-link:focus { top: 8px; }
-.theme-toggle { position: fixed; top: 20px; right: 24px; z-index: 10001; background: none; border: none; color: var(--stone); cursor: pointer; padding: 6px; transition: color 0.3s ease, transform 0.3s cubic-bezier(0.23, 1, 0.32, 1); opacity: 0.5; }
-  .theme-toggle:hover { opacity: 1; color: var(--ink-blue); transform: scale(1.1); }
-  .theme-toggle:active { transform: scale(0.92); }
-  .theme-toggle:focus-visible { outline: 2px solid var(--ink-blue); outline-offset: 2px; border-radius: 2px; opacity: 1; }
-  .theme-icon-moon { display: none; }
-  .theme-icon-sun { display: block; }
-  [data-theme="dark"] .theme-icon-moon { display: block; }
-  [data-theme="dark"] .theme-icon-sun { display: none; }
-  [data-theme="dark"] .theme-toggle { color: var(--stone); opacity: 0.5; }
-  [data-theme="dark"] .theme-toggle:hover { opacity: 1; color: var(--ink-light); }
   html { transition: background-color 0.4s ease; }
   body, body::after { transition: background-color 0.4s ease, color 0.3s ease; }
   .skill-body { padding: 0 24px; overflow: hidden; }
@@ -132,7 +124,6 @@
     .skill-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(27,54,93,0.08); }
   }
   @media (max-width: 640px) {
-    .theme-toggle { top: 12px; right: 12px; }
     .nav { padding: 16px; }
     .hero { padding: clamp(40px, 8vh, 80px) 16px clamp(24px, 4vh, 40px); }
     .hero h1 { font-size: clamp(32px, 8vw, 48px); }
@@ -161,48 +152,10 @@
     .domain { margin-bottom: 32px; }
     .footer { padding: 24px 12px 40px; font-size: 13px; }
   }
-  @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) {
-      --parchment: #0c0c0c;
-      --ivory: #161616;
-      --ink-blue: #7ca3d8;
-      --ink-light: #5a8bc4;
-      --ink-tag: #1a2a42;
-      --near-black: #e8e6e0;
-      --dark-warm: #b0ada5;
-      --stone: #8a8880;
-      --border: #2a2a28;
-    }
-    :root:not([data-theme="light"]) body::after { opacity: 0.06; }
-    :root:not([data-theme="light"]) .skill-trigger:hover { background: #1e1e1c; }
-    :root:not([data-theme="light"]) .skill-content { background: #1a1a18; }
-    :root:not([data-theme="light"]) .search-input { background: var(--ivory); border-color: var(--border); color: var(--near-black); }
-    :root:not([data-theme="light"]) .search-input:focus { border-color: var(--ink-blue); }
-    :root:not([data-theme="light"]) .skill-card:hover { box-shadow: 0 4px 12px rgba(124,163,216,0.08); }
-  }
-
-  [data-theme="dark"] {
-    --parchment: #0c0c0c;
-    --ivory: #161616;
-    --ink-blue: #7ca3d8;
-    --ink-light: #5a8bc4;
-    --ink-tag: #1a2a42;
-    --near-black: #e8e6e0;
-    --dark-warm: #b0ada5;
-    --stone: #8a8880;
-    --border: #2a2a28;
-  }
-  [data-theme="dark"] body::after { opacity: 0.06; }
-  [data-theme="dark"] .skill-trigger:hover { background: #1e1e1c; }
-  [data-theme="dark"] .skill-content { background: #1a1a18; }
-  [data-theme="dark"] .search-input { background: var(--ivory); border-color: var(--border); color: var(--near-black); }
-  [data-theme="dark"] .search-input:focus { border-color: var(--ink-blue); }
-  [data-theme="dark"] .skill-card:hover { box-shadow: 0 4px 12px rgba(124,163,216,0.08); }
 </style>
 </head>
 <body>
 <a href="#skills-container" class="skip-link">Skip to content</a>
-<button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode"><svg class="theme-icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg><svg class="theme-icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button>
 <nav class="nav">
   <a href="./" class="nav-logo">Shokunin</a>
   <a href="./" class="nav-link">Back home</a>
@@ -216,7 +169,7 @@
       <span class="search-icon" aria-hidden="true">&#8981;</span>
       <input type="search" class="search-input" id="search" placeholder="Filter skills..." aria-label="Search skills">
     </div>
-    <code style="font-size:12px;color:var(--stone);white-space:nowrap">irm https://raw.githubusercontent.com/EliasOulkadi/shokunin/master/install-skills.ps1 | iex</code>
+    <code style="font-size:12px;color:var(--stone);white-space:normal;word-break:break-all;overflow-wrap:anywhere">irm https://raw.githubusercontent.com/EliasOulkadi/shokunin/master/install-skills.ps1 | iex</code>
   </div>
   <p class="no-results" id="no-results">No skills found</p>
 </header>
@@ -5778,21 +5731,6 @@ Add
 
 <script>
 (function() {
-  // Theme toggle
-  var toggle = document.getElementById('theme-toggle');
-  var root = document.documentElement;
-  var saved = localStorage.getItem('theme');
-  if (saved) { root.setAttribute('data-theme', saved); }
-  else if (window.matchMedia('(prefers-color-scheme: dark)').matches) { root.setAttribute('data-theme', 'dark'); }
-  if (toggle) {
-    toggle.addEventListener('click', function() {
-      var current = root.getAttribute('data-theme');
-      var next = current === 'dark' ? 'light' : 'dark';
-      root.setAttribute('data-theme', next);
-      localStorage.setItem('theme', next);
-    });
-  }
-
   // Accordion
   document.querySelectorAll('.skill-trigger').forEach(function(btn) {
     btn.addEventListener('click', function() {
