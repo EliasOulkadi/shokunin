@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-VERSION="4.2"
+VERSION="4.2.2"
 CORES_DIR="$HOME/.shokunin"
 SKILLS_DIR="$HOME/.config/opencode/skills"
 CONFIG_DIR="$HOME/.config/opencode"
@@ -168,7 +168,11 @@ for script in run-opencode.sh memory-healthcheck.sh weekly-maintenance.sh profil
         cp "$SRC" "$CORES_DIR/scripts/linux/$script"
         chmod +x "$CORES_DIR/scripts/linux/$script"
     else
-        curl -sL "https://raw.githubusercontent.com/EliasOulkadi/shokunin/master/.pack/scripts/linux/$script" -o "$CORES_DIR/scripts/linux/$script" 2>/dev/null
+         curl -sL "https://raw.githubusercontent.com/EliasOulkadi/shokunin/master/.pack/scripts/linux/$script" -o "$CORES_DIR/scripts/linux/$script" 2>/dev/null
+         for retry in 1 2 3; do
+           curl -sL "https://raw.githubusercontent.com/EliasOulkadi/shokunin/master/.pack/scripts/linux/$script" -o "$CORES_DIR/scripts/linux/$script" 2>/dev/null && break
+           sleep 1
+         done
         chmod +x "$CORES_DIR/scripts/linux/$script" 2>/dev/null || true
     fi
 done
@@ -260,8 +264,12 @@ if command -v crontab &>/dev/null; then
   if crontab -l 2>/dev/null | grep -q "shokunin"; then
       log "Crontab already configured"
   else
-      (crontab -l 2>/dev/null; echo "0 21 * * 0 \$HOME/.shokunin/scripts/linux/weekly-maintenance.sh") | crontab -
-      log "Crontab added (Sunday 21:00)"
+      if [ -f "$HOME/.shokunin/scripts/linux/weekly-maintenance.sh" ]; then
+          (crontab -l 2>/dev/null; echo "0 21 * * 0 \$HOME/.shokunin/scripts/linux/weekly-maintenance.sh") | crontab -
+          log "Crontab added (Sunday 21:00)"
+      else
+          log "weekly-maintenance.sh not found — skipping crontab setup"
+      fi
   fi
 else
   log "crontab not available — weekly maintenance won't auto-schedule"

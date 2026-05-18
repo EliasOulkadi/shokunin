@@ -42,20 +42,6 @@ try {
     Set-PSReadLineKeyHandler -Key Ctrl+Space -Function MenuComplete -ErrorAction Stop
 } catch {}
 
-# Telegram Bot auto-start
-$botJob = Get-Job -Name "ShokuninBot" -ErrorAction SilentlyContinue
-if (-not $botJob) {
-    $token = [Environment]::GetEnvironmentVariable('TELEGRAM_BOT_TOKEN','User')
-    if ($token) {
-        $botScript = "$env:USERPROFILE\.shokunin\telegram\bot.py"
-        if (Test-Path $botScript) {
-            Start-Job -Name "ShokuninBot" -ScriptBlock {
-                param($t, $s) $env:TELEGRAM_BOT_TOKEN = $t; python $s
-            } -ArgumentList $token, $botScript | Out-Null
-        }
-    }
-}
-
 # Oh My Posh prompt
 $ompPath = "$env:LOCALAPPDATA\Programs\oh-my-posh\bin\oh-my-posh.exe"
 if (Test-Path $ompPath) {

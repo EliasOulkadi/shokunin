@@ -81,7 +81,6 @@ def _log_jsonl(session_id: str, entry_type: str, content: str, role: str | None 
             f.write(json.dumps(record, ensure_ascii=False) + "\n")
     except Exception as e:
         _LOGGER.warning(f"Failed to log jsonl for {session_id}: {e}")
-        pass
 
 VALID_TYPES = {"decision", "file", "command", "preference", "checkpoint", "session_end", "general", "claim_file", "claim_function", "claim_flag", "claim_api"}
 
@@ -97,7 +96,7 @@ _TOOLS = {
                     "text": {"type": "string", "description": "The text content to store"},
                     "type": {
                         "type": "string",
-                        "description": "Entry type: decision, file, command, preference, checkpoint, session_end, general",
+                        "description": f"Entry type: {', '.join(sorted(VALID_TYPES))}",
                         "enum": list(VALID_TYPES),
                     },
                     "tags": {
@@ -356,7 +355,7 @@ def handle_get_session_summary(args: dict[str, Any]) -> dict[str, Any]:
         }
 
     entries = []
-    for i in range(len(ids)):
+    for i in range(min(len(ids), 100)):
         metadata = all_results["metadatas"][i]
         document = all_results["documents"][i]
         truncated = document[:200] + "..." if len(document) > 200 else document
@@ -535,22 +534,25 @@ def _dispatch(request: dict[str, Any]) -> dict[str, Any] | None:
 
 def main() -> None:
     _LOGGER.info("MCP Memory Server started")
-    for line in sys.stdin:
-        line = line.strip()
-        if not line:
-            continue
+    try:
+        for line in sys.stdin:
+            line = line.strip()
+            if not line:
+                continue
 
-        try:
-            request = json.loads(line)
-        except json.JSONDecodeError:
-            continue
+            try:
+                request = json.loads(line)
+            except json.JSONDecodeError:
+                continue
 
-        response = _dispatch(request)
-        if response is not None:
-            sys.stdout.write(json.dumps(response) + "\n")
-            sys.stdout.flush()
-
-    _LOGGER.info("MCP Memory Server stopped")
+            response = _dispatch(request)
+            if response is not None:
+                sys.stdout.write(json.dumps(response) + "\n")
+                sys.stdout.flush()
+    except KeyboardInterrupt:
+        pass
+    finally:
+        _LOGGER.info("MCP Memory Server stopped")
 
 
 if __name__ == "__main__":

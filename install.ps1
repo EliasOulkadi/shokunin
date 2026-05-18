@@ -170,6 +170,7 @@ function Install-NewScripts {
 
     $newScripts = @(
         "chroma-helper.py",
+        "chroma_helper_stub.py",
         "run-opencode.ps1",
         "save-memory.ps1",
         "search-memory.ps1",
