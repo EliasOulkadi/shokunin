@@ -133,13 +133,13 @@
 </header>
 
 <main class="section" id="skills-container">
-<section class="domain">
+    <section class="domain">
       <div class="domain-head">
         <h2 class="domain-title">Infrastructure</h2>
         <span class="domain-count">5 skills</span>
       </div>
       <div class="skills-grid">
-        <article class="skill-card" data-name="docker" data-domain="Infrastructure">
+        <article class="skill-card" data-name="docker">
           <button class="skill-trigger" aria-expanded="false">
             <span class="skill-arrow" aria-hidden="true">+</span>
             <div class="skill-info">
@@ -230,51 +230,11 @@ services:
     ports: [&quot;3000:3000&quot;]
     develop:
       watch:
-        - action: sync+restart
-          path: ./src
-          target: /app/src
-    depends_on: [db]
-    healthcheck:
-      test: [&quot;CMD&quot;, &quot;curl&quot;, &quot;-f&quot;, &quot;http://localhost:3000/health&quot;]
-  db:
-    image: postgres:16-alpine
-    volumes: [&quot;pgdata:/var/lib/postgresql/data&quot;]
-volumes: { pgdata: }
-```
-
-Run `docker compose watch` for hot-reload.
-
-See [assets/docker-compose.template.yml](assets/docker-compose.template.yml) for the full template with all services.
-
-### Step 5: Build for multiple platforms
-
-```bash
-docker buildx build \
-  --platform linux/amd64,linux/arm64 \
-  --cache-from=type=gha \
-  --cache-to=type=gha,mode=max \
-  --tag registry/app:latest \
-  --push .
-```
-
-See [references/multi-arch.md](references/multi-arch.md) for QEMU setup and platform-specific optimizations.
-
-### Step 6: Scan for vulnerabilities
-
-```bash
-# Using the provided script
-scripts/scan-image.sh registry/app:latest
-
-# Or manually:
-docker scout cves registry/app:latest
-trivy image registry/app:latest
-```
-
-**If critical CVEs are found**: 
-...[truncated - view full skill on GitHub]</pre>
+        - action: sync+
+...[truncated]</pre>
           </div>
         </article>
-        <article class="skill-card" data-name="kubernetes" data-domain="Infrastructure">
+        <article class="skill-card" data-name="kubernetes">
           <button class="skill-trigger" aria-expanded="false">
             <span class="skill-arrow" aria-hidden="true">+</span>
             <div class="skill-info">
@@ -376,49 +336,11 @@ spec:
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
-metadata: { name: allow-api-ingress }
-spec:
-  podSelector: { matchLabels: { app: api } }
-  ingress:
-    - from:
-        - namespaceSelector: { matchLabels: { name: gateway-system } }
-      ports: [{ port: 3000 }]
-```
-
-**Always start with a default-deny policy.** Then add explicit allow rules.
-
-### Step 4: Add service mesh (if needed)
-
-See [references/service-mesh.md](references/service-mesh.md) for the complete comparison and setup guide.
-
-**Decision matrix:**
-| Need | Recommendation |
-|------|---------------|
-| mTLS + observability | Istio (full-featured) |
-| Simple mTLS + lightweight | Linkerd (low resource overhead) |
-| eBPF-native networking + security | Cilium (no sidecar needed) |
-
-### Step 5: Configure autoscaling and resilience
-
-```yaml
-apiVersion: autoscaling/v2
-kind: HorizontalPodAutoscaler
-metadata: { name: api-hpa }
-spec:
-  scaleTargetRef:
-    apiVersion: apps/v1
-    kind: Deployment
-    name: api
-  minReplicas: 3
-  maxReplicas: 20
-  metrics:
-    - type: Resource
-      resource:
-     
-...[truncated - view full skill on GitHub]</pre>
+metadata: {
+...[truncated]</pre>
           </div>
         </article>
-        <article class="skill-card" data-name="terraform" data-domain="Infrastructure">
+        <article class="skill-card" data-name="terraform">
           <button class="skill-trigger" aria-expanded="false">
             <span class="skill-arrow" aria-hidden="true">+</span>
             <div class="skill-info">
@@ -541,64 +463,11 @@ data &quot;aws_iam_policy_document&quot; &quot;example&quot; {
 # Instead of manual state mv, code-review it:
 moved {
   from = aws_s3_bucket.old
-  to   = module.storage.aws_s3_bucket.main
-}
-
-# To remove a resource from state without destroying it:
-removed {
-  from = aws_instance.legacy
-  lifecycle {
-    destroy = false  # Keep the resource alive
-  }
-}
-```
-
-## Terraform Stacks (2025+)
-
-Stacks enable deployment of multiple configurations with shared state:
-
-```hcl
-# stacks/stack.hcl
-stack &quot;dev&quot; {
-  source = &quot;./infrastructure&quot;
-  path   = &quot;dev&quot;
-}
-
-stack &quot;prod&quot; {
-  source = &quot;./infrastructure&quot;
-  path   = &quot;prod&quot;
-}
-```
-
-## Provider-defined Functions (1.10+)
-
-```hcl
-# Built-in providers now expose functions
-result = provider::aws::arn_parse(&quot;arn:aws:s3:::my-bucket&quot;)
-# or
-result = provider::aws::arn_build(&quot;s3&quot;, &quot;my-bucket&quot;, &quot;&quot;, &quot;us-east-1&quot;)
-```
-
-## Testing Framework
-
-```hcl
-# tests/example.tftest.hcl
-run &quot;create_bucket&quot; {
-  command = apply
-  variables {
-    bucket_name = &quot;test-bucket-${run_id}&quot;
-  }
-  assert {
-    condition     = aws_s3_bucket.main.bucket == &quot;test-bucket-${run_id}&quot;
-    error_message = &quot;Bucket name mismatch&quot;
-  }
-}
-
-run &quot;verify_encry
-...[truncated - view full skill on GitHub]</pre>
+  to   = m
+...[truncated]</pre>
           </div>
         </article>
-        <article class="skill-card" data-name="ci-cd" data-domain="Infrastructure">
+        <article class="skill-card" data-name="ci-cd">
           <button class="skill-trigger" aria-expanded="false">
             <span class="skill-arrow" aria-hidden="true">+</span>
             <div class="skill-info">
@@ -679,38 +548,11 @@ steps:
 
 ### Step 5: Configure deployment strategy
 
-See [references/deployment-strategies.md](references/deployment-strategies.md) for full details.
-
-| Strategy | Rollback | Use when |
-|----------|----------|----------|
-| Rolling update | Manual (undo) | Stateless apps |
-| Blue-green | Instant (LB switch) | Zero-downtime required |
-| Canary | Gradual (traffic % adjust) | High-risk, gradual rollout |
-
-**Always implement healthcheck verification after deploy:**
-```yaml
-- name: Healthcheck
-  run: |
-    for i in {1..30}; do
-      STATUS=$(curl -so /dev/null -w &#x27;%{http_code}&#x27; https://app.example.com/health)
-      if [ &quot;$STATUS&quot; = &quot;200&quot; ]; then exit 0; fi
-      sleep 2
-    done
-    echo &quot;Healthcheck failed, rolling back...&quot;
-    kubectl rollout undo deployment/app
-    exit 1
-```
-
-### Step 6: Set up self-hosted runners (if needed)
-
-See [references/self-hosted-runners.md](references/self-hosted-runners.md) for K8s runners, autoscaling, caching, and security configurations.
-
-**Decision**: Use GitHub-hosted runners for standard builds. Self-hosted if you need:
-- Custom hardwa
-...[truncated - view full skill on GitHub]</pre>
+See [references/deployment-st
+...[truncated]</pre>
           </div>
         </article>
-        <article class="skill-card" data-name="db-admin" data-domain="Infrastructure">
+        <article class="skill-card" data-name="db-admin">
           <button class="skill-trigger" aria-expanded="false">
             <span class="skill-arrow" aria-hidden="true">+</span>
             <div class="skill-info">
@@ -813,26 +655,8 @@ See [references/postgres-admin.md](references/postgres-admin.md) for streaming a
 | Read scaling + HA | Streaming replication |
 | Selective table sync | Logical replication |
 | Upgrade with minimal downtime | Logical replication |
-| Cross-version replication | Logical replication |
-
-## Error Handling
-
-| Scenario | Cause | Fix |
-|----------|-------|-----|
-| Backup fails with &quot;out of memory&quot; | Work_mem too high for dump | Reduce work_mem, increase maintenance_work_mem |
-| PgBouncer rejects connections | pool_size exhausted | Increase default_pool_size, add more connections |
-| Replication lag growing | WAL generation &gt; apply rate | Add replicas, increase max_wal_size, tune apply workers |
-| Long-running query blocking vacuum | snapshot held too long | Kill with pg_terminate_backend, tune idle_in_transaction_session_timeout |
-| WAL directory filling disk | archive_command failing or wal_keep_size too high | Fix archiving, reduce wal_keep_size, increase max_wal_size |
-
-## Production Checklist
-
-- [ ] Automated daily backups with verification
-- [ ] Retention policy configured (7 daily, 4 weekly, 3 monthly)
-- [ ] PgBouncer with transaction pooling
-- [ ] Monitoring dashboard (connection count, cache hit, bloat)
-- [ ] Alerts for: co
-...[truncated - view full skill on GitHub]</pre>
+| Cross-vers
+...[truncated]</pre>
           </div>
         </article>
       </div>
@@ -843,7 +667,7 @@ See [references/postgres-admin.md](references/postgres-admin.md) for streaming a
         <span class="domain-count">4 skills</span>
       </div>
       <div class="skills-grid">
-        <article class="skill-card" data-name="api-forge" data-domain="Backend">
+        <article class="skill-card" data-name="api-forge">
           <button class="skill-trigger" aria-expanded="false">
             <span class="skill-arrow" aria-hidden="true">+</span>
             <div class="skill-info">
@@ -945,42 +769,11 @@ GET /items?cursor=abc123&amp;limit=25
 }
 ```
 
-Cursor must be opaque (base64-encoded compound key). Never expose internal IDs. Maximum limit: 100. Default: 25.
-
-## Error Handling
-
-Every error response includes:
-- `code`: machine-readable error code (`VALIDATION_ERROR`, `NOT_FOUND`, `RATE_LIMITED`)
-- `message`: human-readable summary, max 150 chars
-- `details`: array of field-level errors for validation
-- `request_id`: UUIDv4 for debugging correlation
-- `docs_url`: link to error documentation (optional, strongly recommended)
-
-```json
-{
-  &quot;error&quot;: {
-    &quot;code&quot;: &quot;VALIDATION_ERROR&quot;,
-    &quot;message&quot;: &quot;Email is required&quot;,
-    &quot;details&quot;: [
-      { &quot;field&quot;: &quot;email&quot;, &quot;code&quot;: &quot;required&quot;, &quot;message&quot;: &quot;Email is required&quot; }
-    ],
-    &quot;request_id&quot;: &quot;req_a1b2c3d4e5f6&quot;,
-    &quot;docs_url&quot;: &quot;https://docs.example.com/errors/validation&quot;
-  }
-}
-```
-
-### Status codes — exact mapping
-
-| Code | When | What to return |
-|------|------|---------------|
-| 200 | Success (GET, PUT, PATCH) | Resource + meta |
-| 201 | Created (POST) | Created resource + `Location` header |
-| 204 | No c
-...[truncated - view full skill on GitHub]</pre>
+Cursor must be op
+...[truncated]</pre>
           </div>
         </article>
-        <article class="skill-card" data-name="auth-architect" data-domain="Backend">
+        <article class="skill-card" data-name="auth-architect">
           <button class="skill-trigger" aria-expanded="false">
             <span class="skill-arrow" aria-hidden="true">+</span>
             <div class="skill-info">
@@ -1067,41 +860,11 @@ Production authentication following OWASP Top 10, NIST SP 800-63B, and patterns 
 **Exact values:**
 - Access token: 15 min expiry. Algorithm: RS256 (asymmetric) or HS256 (symmetric, single service).
 - Refresh token: 7 day expiry. Rotation on every use.
-- Refresh token reuse detection: revoke ALL tokens if a used refresh token is presented (theft indicator).
-
-```typescript
-// Refresh rotation + reuse detection
-async function refreshToken(providedRefreshToken: string) {
-  const stored = await db.findRefreshToken(providedRefreshToken)
-
-  if (!stored) {
-    // Token not found — possible reuse. Revoke all user tokens.
-    await db.revokeAllRefreshTokens(extractUserId(providedRefreshToken))
-    throw new AuthError(&#x27;Token family revoked&#x27;)
-  }
-
-  if (stored.used) {
-    // This token was already used — reuse detected. Revoke all.
-    await db.revokeAllRefreshTokens(stored.userId)
-    throw new AuthError(&#x27;Token reuse detected&#x27;)
-  }
-
-  // Mark as used, issue new pair
-  await db.markRefreshTokenUsed(providedRefreshToken)
-  const newToken = await generateRefreshToken(stored.userId)
-  const newAccessToken = await generateAccessToken(stored.userId)
-  return { accessToken: newAccessToken, refreshToken: newToken }
-}
-```
-
-**Storage (CRITICAL):**
-- httpOnly, Secure, SameSite=Strict cookies
-- NEVER localStorage (XSS reads it)
-- NEVER sessionStora
-...[truncated - view full skill on GitHub]</pre>
+- Refresh token reuse detection: revoke ALL tokens if a used refresh token is presented (theft 
+...[truncated]</pre>
           </div>
         </article>
-        <article class="skill-card" data-name="db-sculptor" data-domain="Backend">
+        <article class="skill-card" data-name="db-sculptor">
           <button class="skill-trigger" aria-expanded="false">
             <span class="skill-arrow" aria-hidden="true">+</span>
             <div class="skill-info">
@@ -1172,32 +935,11 @@ Design performant database schemas. Model for access patterns first, normalize l
 | Index type | Use case | Example |
 |-----------|----------|---------|
 | B-tree (default) | Equality, range, sort, ORDER BY | `CREATE INDEX ON users (email)` |
-| Composite | Multi-column WHERE, ORDER BY | `CREATE INDEX ON orders (user_id, status, created_at DESC)` |
-| Partial | Filtered queries (WHERE clause) | `CREATE INDEX ON orders (created_at) WHERE status = &#x27;active&#x27;` |
-| Covering (INCLUDE) | Avoid heap fetches | `CREATE INDEX ON users (email) INCLUDE (name, avatar)` |
-| GIN | FTS, arrays, JSONB, trigram | `CREATE INDEX ON articles USING GIN (to_tsvector(&#x27;english&#x27;, body))` |
-| GiST | Geometric, range queries | `CREATE INDEX ON events USING GiST (tsrange(start_date, end_date))` |
-| BRIN | Very large tables, ordered data | `CREATE INDEX ON events USING BRIN (created_at) WITH (pages_per_range = 32)` |
-
-**Rules:**
-- Max 3-4 indexes per write-heavy table
-- Order composite columns by selectivity (most selective FIRST)
-- Use partial indexes for common WHERE filters
-- Use INCLUDE for read-heavy queries with small related columns
-
-### Step 4: Optimize queries
-
-```sql
-EXPLAIN (ANALYZE, BUFFERS) SELECT * FROM orders WHERE user_id = 123 AND status = &#x27;active&#x27;;
-```
-
-| Scan type | Meaning | Fix |
-|-----------|---------|-----|
-| Seq Scan |
-...[truncated - view full skill on GitHub]</pre>
+| Composite | Multi-column WHERE, ORDER BY | `CREATE INDEX ON orders (user_id, status, 
+...[truncated]</pre>
           </div>
         </article>
-        <article class="skill-card" data-name="error-handler" data-domain="Backend">
+        <article class="skill-card" data-name="error-handler">
           <button class="skill-trigger" aria-expanded="false">
             <span class="skill-arrow" aria-hidden="true">+</span>
             <div class="skill-info">
@@ -1271,46 +1013,8 @@ import { ATTR_SERVICE_NAME } from &#x27;@opentelemetry/semantic-conventions&#x27
 const sdk = new NodeSDK({
   resource: new Resource({
     [ATTR_SERVICE_NAME]: &#x27;api-service&#x27;,
-    &#x27;deployment.environment&#x27;: process.env.NODE_ENV,
-  }),
-  traceExporter: new OTLPTraceExporter({
-    url: process.env.OTEL_EXPORTER_OTLP_ENDPOINT,
-  }),
-  instrumentations: [
-    new HttpInstrumentation(),
-    new ExpressInstrumentation(),
-    new PgInstrumentation(),
-    new RedisInstrumentation(),
-  ],
-})
-
-sdk.start()
-
-process.on(&#x27;SIGTERM&#x27;, async () =&gt; {
-  await sdk.shutdown()
-})
-```
-
-**Sampling strategy:**
-- Dev/staging: AlwaysOn (100%)
-- Production: `ParentBased` + `TraceIdRatioBased(0.1)` (10% head-based)
-- Never sample errors out. Use `AlwaysOn` for traces with `status=ERROR`.
-
-### Step 3: Implement structured error middleware
-
-```typescript
-import { trace, SpanStatusCode } from &#x27;@opentelemetry/api&#x27;
-import { randomUUID } from &#x27;crypto&#x27;
-
-app.use((err: Error, req: Request, res: Response, next: NextFunction) =&gt; {
-  const span = trace.getActiveSpan()
-  const requestId = req.headers[&#x27;x-request-id&#x27;] || randomUUID()
-
-  span?.recordException(err)
-  span?.setStatus({ code: SpanStatusCode.ERROR, message: err.message })
-
-  logger.er
-...[truncated - view full skill on GitHub]</pre>
+    &#x27;deployment.environment&#x27;: process.env.NO
+...[truncated]</pre>
           </div>
         </article>
       </div>
@@ -1321,7 +1025,7 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) =&gt; {
         <span class="domain-count">11 skills</span>
       </div>
       <div class="skills-grid">
-        <article class="skill-card" data-name="component-forge" data-domain="Frontend">
+        <article class="skill-card" data-name="component-forge">
           <button class="skill-trigger" aria-expanded="false">
             <span class="skill-arrow" aria-hidden="true">+</span>
             <div class="skill-info">
@@ -1412,45 +1116,11 @@ function Profile({ userId }: { userId: string }) {
 - [ ] Touch targets ≥ 44×44px
 - [ ] `prefers-reduced-motion` respected
 
-See [references/a11y-patterns.md](references/a11y-patterns.md) for roving tabindex, focus management, screen reader testing, and contrast ratios.
-
-### Step 5: Handle edge cases
-
-| Edge case | Symptom | Fix |
-|-----------|---------|-----|
-| Long text | Layout break | `text-overflow: ellipsis`, `overflow-wrap: anywhere` |
-| Many items (100+) | Slow rendering | Virtualize (react-window, FlashList) |
-| Network retry | Stale data | Show old data + loading indicator |
-| Race condition | Wrong data after fast re-fetch | AbortController, cancel on unmount |
-| null vs undefined vs [] | Wrong empty check | Handle all three explicitly |
-
-See [references/react-patterns.md](references/react-patterns.md) for compound components, RSC patterns, error boundaries, and suspense.
-
----
-
-## Button Architecture
-
-Every button must feel responsive. Emil Kowalski&#x27;s rule: `scale(0.97)` on press.
-
-```css
-.button {
-  transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1);
-}
-.button:active {
-  transform: scale(0.97);
-}
-```
-
-Scale must be subtle: 0.95-0.98. Applied to all pressable elements.
-
-### Button state transitions
-
-| State | CSS |
-|-------|-----
-...[truncated - view full skill on GitHub]</pre>
+See [references/a11y-patterns.md](references/a11y-patterns.md) for roving tabindex, focus management, screen reader testing, and contrast ratio
+...[truncated]</pre>
           </div>
         </article>
-        <article class="skill-card" data-name="responsive-engine" data-domain="Frontend">
+        <article class="skill-card" data-name="responsive-engine">
           <button class="skill-trigger" aria-expanded="false">
             <span class="skill-arrow" aria-hidden="true">+</span>
             <div class="skill-info">
@@ -1571,58 +1241,11 @@ Detect the device type, not just width.
 :root {
   --text-sm:      clamp(0.875rem, 0.8rem + 0.25vw, 1rem);
   --text-base:    clamp(1rem, 0.9rem + 0.35vw, 1.25rem);
-  --text-lg:      clamp(1.25rem, 1rem + 0.75vw, 1.75rem);
-  --text-xl:      clamp(1.5rem, 1rem + 1.5vw, 2.5rem);
-  --text-2xl:     clamp(1.75rem, 1.25rem + 2vw, 3rem);
-  --text-3xl:     clamp(2rem, 1.5rem + 3vw, 4rem);
-  --text-display: clamp(2.5rem, 1.5rem + 5vw, 6rem);
-}
-```
-
-### Fluid spacing
-
-```css
-:root {
-  --space-xs: clamp(0.25rem, 0.2rem + 0.25vw, 0.5rem);
-  --space-sm: clamp(0.5rem, 0.4rem + 0.5vw, 1rem);
-  --space-md: clamp(1rem, 0.8rem + 1vw, 2rem);
-  --space-lg: clamp(2rem, 1.5rem + 2vw, 4rem);
-  --space-xl: clamp(3rem, 2rem + 3vw, 6rem);
-  --space-2xl: clamp(4rem, 3rem + 5vw, 10rem);
-}
-```
-
----
-
-## Subgrid
-
-```css
-.card-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 1rem;
-}
-
-.card {
-  display: grid;
-  grid-template-rows: subgrid;
-  grid-row: span 3;
-}
-```
-
-All children across cards align to the same row heights.
-
----
-
-## Parent-Based Responsive with :has()
-
-```css
-/* Sidebar mode: when parent has class .sidebar */
-.sidebar:has(.card) .c
-...[truncated - view full skill on GitHub]</pre>
+  --text-lg:
+...[truncated]</pre>
           </div>
         </article>
-        <article class="skill-card" data-name="motion-craft" data-domain="Frontend">
+        <article class="skill-card" data-name="motion-craft">
           <button class="skill-trigger" aria-expanded="false">
             <span class="skill-arrow" aria-hidden="true">+</span>
             <div class="skill-info">
@@ -1689,27 +1312,11 @@ Every animation must have a clear answer to &quot;why does this animate?&quot;
 | Constant motion (marquee, progress bar) | linear | `cubic-bezier(0, 0, 1, 1)` |
 | UI interactions (buttons, tooltips, dropdowns) | strong ease-out | `cubic-bezier(0.23, 1, 0.32, 1)` |
 
-**Critical: never use ease-in for UI entering animations.** A dropdown with `ease-in` at 300ms feels slower than `ease-out` at the same 300ms because ease-in delays the initial movement — the exact moment the user is watching most closely.
-
-### 4. How fast should it be?
-
-| Element | Duration | Easing |
-|---------|----------|--------|
-| Button press feedback (scale) | 100-160ms | `cubic-bezier(0.23, 1, 0.32, 1)` |
-| Tooltip enter / exit | 125-200ms | `cubic-bezier(0.23, 1, 0.32, 1)` |
-| Dropdown / select / popover | 150-250ms | `cubic-bezier(0.23, 1, 0.32, 1)` |
-| Hover transform (scale, lift) | 200ms | `cubic-bezier(0.23, 1, 0.32, 1)` |
-| Modal / dialog enter | 200-300ms | `cubic-bezier(0, 0, 0.2, 1)` |
-| Modal / dialog exit | 150-200ms | `cubic-bezier(0.4, 0, 1, 1)` |
-| Drawer / sheet enter | 200-400ms | `cubic-bezier(0.32, 0.72, 0, 1)` (iOS-like) |
-| Toast enter | 300-400ms | `cubic-bezier(0.23, 1, 0.32, 1)` |
-| Toast exit | 200-300ms | `cubic-bezier(0.4, 0, 1, 1)` |
-| Page transition | 300-400ms | `cubic-bezier(0.4, 0, 0.2, 1)` |
-| Scroll reveal (fade + slide up
-...[truncated - view full skill on GitHub]</pre>
+**Critical: never use ease-in for UI entering animations.** A dropdown with `ease
+...[truncated]</pre>
           </div>
         </article>
-        <article class="skill-card" data-name="landing-craft" data-domain="Frontend">
+        <article class="skill-card" data-name="landing-craft">
           <button class="skill-trigger" aria-expanded="false">
             <span class="skill-arrow" aria-hidden="true">+</span>
             <div class="skill-info">
@@ -1775,29 +1382,11 @@ FAQ: answers top 5 objections
 Final CTA: same ask, different context, near scroll bottom
 ```
 
-Every section answers: what does the visitor need to hear RIGHT NOW to move to the next section?
-
----
-
-## Hero Rules (from Unbounce data)
-
-1. **Value in 3 seconds**: headline must communicate core benefit. A/B test headline first — highest-impact element.
-2. **CTA visible without scroll**: primary button above the fold. Above 600px vh.
-3. **One CTA**: one primary action. Secondary links are text only.
-4. **Headline under 10 words**: &quot;Ship 3x faster with automated deployments&quot; not &quot;Welcome to DeployPro — the fastest way to ship code&quot;
-5. **Never center text**: Left-aligned text + right-aligned visual (Split Screen). Centered hero is the #1 AI cliché.
-6. **Supporting visual**: product screenshot, illustration, or demo — never a generic stock photo.
-
-### Hero alt-layouts (not all center)
-
-| Layout | HTML structure | When |
-|--------|---------------|------|
-| Split 50/50 | `&lt;div class=&quot;grid grid-cols-2&quot;&gt;&lt;div&gt;text&lt;/div&gt;&lt;div&gt;visual&lt;/div&gt;&lt;/div&gt;` | Default. Works for everything. |
-| Text-bleed | `&lt;div class=&quot;pl-[5vw]&quot;&gt;&lt;h1 class=&quot;text-[clamp(48px,7vw,120px)]&quot;&gt;Hero text&lt;
-...[truncated - view full skill on GitHub]</pre>
+Every section answers: what does the visitor need to hear RIGHT NOW to move 
+...[truncated]</pre>
           </div>
         </article>
-        <article class="skill-card" data-name="aesthetic-web" data-domain="Frontend">
+        <article class="skill-card" data-name="aesthetic-web">
           <button class="skill-trigger" aria-expanded="false">
             <span class="skill-arrow" aria-hidden="true">+</span>
             <div class="skill-info">
@@ -1871,58 +1460,11 @@ Identify before designing. Priority: (1) task cue (&quot;landing page&quot; vs &
 **Bold display sans** (Leonardo.AI, Monopo):
 - Neue Haas Grotesk Display — definitive display grotesque
 - Cabinet Grotesk (free) — wide, excellent for oversized headlines
-- Bebas Neue (free) — all-caps condensed
-- Anton (free) — punchy, condensed
-- Space Grotesk (free) — tech/futuristic
-
-**Body/UI text** (never as display, never Inter as headline):
-- DM Sans (free, pairs with DM Serif Display)
-- Geist (free, clean, modern)
-- Inter (free, body text only)
-
-### Oversized typography
-
-```css
-.display-hero {
-  font-size: clamp(80px, 12vw, 180px);
-  line-height: 0.9;
-  letter-spacing: -0.03em;
-  font-weight: 700;
-}
-
-.bleed-text {
-  font-size: clamp(120px, 18vw, 280px);
-  line-height: 0.85;
-  white-space: nowrap;
-  overflow: hidden;
-  letter-spacing: -0.04em;
-}
-
-.mixed-headline {
-  font-size: clamp(40px, 6vw, 96px);
-  font-weight: 600;
-  line-height: 1.05;
-}
-.mixed-headline em {
-  font-style: italic;
-  font-weight: 400;
-}
-```
-
-### Fluid type scale
-
-```css
-:root {
-  --text-body:    clamp(15px, 1.1vw, 18px);
-  --text-lead:    clamp(18px, 1.5vw, 24px);
-  --text-h3:      clamp(22px, 2vw, 32px);
-  --text-h2:      clamp(30px, 3.5vw, 56px);
-  --text-h1:      clamp(48px, 7vw, 96px);
-  --text-display: clam
-...[truncated - view full skill on GitHub]</pre>
+- Bebas Neue (free) — all-caps conden
+...[truncated]</pre>
           </div>
         </article>
-        <article class="skill-card" data-name="ui-ux-pro-max" data-domain="Frontend">
+        <article class="skill-card" data-name="ui-ux-pro-max">
           <button class="skill-trigger" aria-expanded="false">
             <span class="skill-arrow" aria-hidden="true">+</span>
             <div class="skill-info">
@@ -1992,52 +1534,11 @@ Reference these guidelines when:
 - `viewport-meta` - width=device-width initial-scale=1
 - `readable-font-size` - Minimum 16px body text on mobile
 - `horizontal-scroll` - Ensure content fits viewport width
-- `z-index-management` - Define z-index scale (10, 20, 30, 50)
-
-### 5. Typography &amp; Color (MEDIUM)
-
-- `line-height` - Use 1.5-1.75 for body text
-- `line-length` - Limit to 65-75 characters per line
-- `font-pairing` - Match heading/body font personalities
-
-### 6. Animation (MEDIUM)
-
-- `duration-timing` - Use 150-300ms for micro-interactions
-- `transform-performance` - Use transform/opacity, not width/height
-- `loading-states` - Skeleton screens or spinners
-
-### 7. Style Selection (MEDIUM)
-
-- `style-match` - Match style to product type
-- `consistency` - Use same style across all pages
-- `no-emoji-icons` - Use SVG icons, not emojis
-
-### 8. Charts &amp; Data (LOW)
-
-- `chart-type` - Match chart type to data type
-- `color-guidance` - Use accessible color palettes
-- `data-table` - Provide table alternative for accessibility
-
-## How to Use
-
-Search specific domains using the CLI tool below.
-
----
-
-
-## Prerequisites
-
-Check if Python is installed:
-
-```bash
-python3 --version || python --version
-```
-
-If Python is not installed, install it based on user&#x27;s OS
-...[truncated - view full skill on GitHub]</pre>
+- `z-index-management` - Define z-index scale (10, 20, 
+...[truncated]</pre>
           </div>
         </article>
-        <article class="skill-card" data-name="emil-design-eng" data-domain="Frontend">
+        <article class="skill-card" data-name="emil-design-eng">
           <button class="skill-trigger" aria-expanded="false">
             <span class="skill-arrow" aria-hidden="true">+</span>
             <div class="skill-info">
@@ -2100,27 +1601,11 @@ People select tools based on the overall experience, not just functionality. Goo
 When reviewing UI code, you MUST use a markdown table with Before | After | Why columns:
 
 | Before | After | Why |
-|--------|-------|-----|
-| `transition: all 300ms` | `transition: transform 200ms ease-out` | Specify exact properties; avoid `all` |
-| `transform: scale(0)` | `transform: scale(0.95); opacity: 0` | Nothing in the real world appears from nothing |
-| `ease-in` on dropdown | `cubic-bezier(0.23, 1, 0.32, 1)` | `ease-in` feels sluggish; strong ease-out gives instant feedback |
-| No `:active` state on button | `transform: scale(0.97)` on `:active` | Buttons must feel responsive to press |
-| `transform-origin: center` on popover | `transform-origin: var(--radix-popover-content-transform-origin)` | Popovers scale from trigger (modals stay centered) |
-| `animate={{ x: 100 }}` in Framer Motion | `animate={{ transform: &quot;translateX(100px)&quot; }}` | Framer Motion `x`/`y` NOT hardware-accelerated |
-
-## The Animation Decision Framework
-
-Before writing any animation code, answer these questions in order:
-
-### 1. Should this animate at all?
-
-| Frequency | Decision |
-|-----------|----------|
-| 100+ times/day (keybo
-...[truncated - view full skill on GitHub]</pre>
+|--------|
+...[truncated]</pre>
           </div>
         </article>
-        <article class="skill-card" data-name="impeccable" data-domain="Frontend">
+        <article class="skill-card" data-name="impeccable">
           <button class="skill-trigger" aria-expanded="false">
             <span class="skill-arrow" aria-hidden="true">+</span>
             <div class="skill-info">
@@ -2192,30 +1677,11 @@ Match-and-refuse. If you&#x27;re about to write any of these, rewrite with diffe
 |-----|-----|
 | **Side-stripe borders** (`border-left` &gt; 1px as accent) | The #1 AI-dashboard tell |
 | **Gradient text** (`background-clip: text` + gradient) | Decorative, never meaningful |
-| **Glassmorphism as default** | Rare and purposeful, or nothing |
-| **Hero-metric template** | Big number + small label + gradient. SaaS cliché. |
-| **Identical card grids** | Icon + heading + text, repeated. Lazy. |
-| **Modal as first thought** | Exhaust inline/progressive alternatives first. |
-
-## The AI Slop Test
-
-If someone could look at this interface and say &quot;AI made that&quot; without doubt, it&#x27;s failed.
-
-**First-order check:** Can someone guess the theme from the category alone? &quot;Observability → dark blue&quot;, &quot;Healthcare → white + teal&quot;, &quot;Crypto → neon on black&quot; — these are training-data reflexes. Rework.
-
-**Second-order check:** Can someone guess the aesthetic from category-plus-anti-references? &quot;AI workflow that&#x27;s not SaaS-cream → editorial-typographic&quot;. Still a reflex. Rework again.
-
-## Design Tokens (OKLCH)
-
-```css
---color-ink: oklch(10% 0 0);          /* Body copy, even for small text */
---color-charcoal: oklch(25% 0 0);      /* Headings, larger body */
---color-ash: oklch(55% 0 0);           /* Labels, captions, metadata */
---c
-...[truncated - view full skill on GitHub]</pre>
+| **Glassmorphism as default** | Rare and purposef
+...[truncated]</pre>
           </div>
         </article>
-        <article class="skill-card" data-name="taste" data-domain="Frontend">
+        <article class="skill-card" data-name="taste">
           <button class="skill-trigger" aria-expanded="false">
             <span class="skill-arrow" aria-hidden="true">+</span>
             <div class="skill-info">
@@ -2282,26 +1748,11 @@ These are the standard baselines. ALWAYS listen to the user: adapt these values 
 ## 3. DESIGN ENGINEERING DIRECTIVES (Bias Correction)
 
 ### Rule 1: Deterministic Typography
-- **Display/Headlines:** `text-4xl md:text-6xl tracking-tighter leading-none`. Use `Geist`, `Outfit`, `Cabinet Grotesk`, or `Satoshi`. NEVER Inter for premium.
-- **TECHNICAL UI:** Serif fonts strictly BANNED for Dashboards. Use high-end Sans-Serif: `Geist` + `Geist Mono`.
-- **Body:** `text-base text-gray-600 leading-relaxed max-w-[65ch]`.
-
-### Rule 2: Color Calibration
-- Max 1 Accent Color. Saturation &lt; 80%.
-- **THE AI PURPLE BAN:** No purple button glows, no neon gradients. Use neutral bases (Zinc/Slate) with singular accents (Emerald, Electric Blue, Deep Rose).
-- **OKLCH preferred (shokunin improvement):** `oklch(50% 0.2 170)` over hex `#10b981`.
-- One palette for entire project. No warm/cool gray mix.
-
-### Rule 3: Layout Diversification
-- **ANTI-CENTER BIAS:** When `DESIGN_VARIANCE &gt; 4`, centered Hero sections are BANNED. Use Split Screen (50/50), Left Aligned content + Right Aligned asset, or Asymmetric White-space.
-
-### Rule 4: Materiality and Shadows
-- **DASHBOARD HARDENING:** For `VISUAL_DENSITY &gt; 7`, cards are BANNED. Use `border-t`, `divide-y`, or negative space. Data breathes without boxes.
-- Cards only when elevation communica
-...[truncated - view full skill on GitHub]</pre>
+- **Display/Headlines:** `text-4xl md:text-6xl tracking-tighter leading-none`. Use `Geist`, `Outfit`, `Cabinet Grotesk`, or `Satoshi`. NEVER Inter for prem
+...[truncated]</pre>
           </div>
         </article>
-        <article class="skill-card" data-name="taste-soft" data-domain="Frontend">
+        <article class="skill-card" data-name="taste-soft">
           <button class="skill-trigger" aria-expanded="false">
             <span class="skill-arrow" aria-hidden="true">+</span>
             <div class="skill-info">
@@ -2351,25 +1802,11 @@ Select ONE combination per project to ensure unique output:
 2. **Z-Axis Cascade:** Elements stacked like physical cards, overlapping with subtle `-2deg` or `3deg` rotation. **Mobile:** Remove all rotations and negative margins. Stack vertically.
 3. **Editorial Split:** Massive typography on left half (`w-1/2`), interactive horizontal scrollable cards on right. **Mobile:** Full-width vertical stack.
 
-**Universal Mobile Override:** Any asymmetric layout ≥ md breakpoint MUST collapse to `w-full px-4 py-8` below `768px`. NEVER `h-screen` — always `min-h-[100dvh]`.
-
-## 3. HAPTIC MICRO-AESTHETICS
-
-### &quot;Double-Bezel&quot; Nested Architecture
-- **Outer Shell:** Wrapper with subtle background (`bg-black/5`), hairline border (`ring-1 ring-black/5`), padding `p-1.5`, large radius `rounded-[2rem]`.
-- **Inner Core:** Content container with distinct background, its own inner highlight (`shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)]`), mathematically calculated smaller radius `rounded-[calc(2rem-0.375rem)]`.
-
-### CTA &quot;Button-in-Button&quot; Architecture
-- Primary buttons: fully rounded pills (`rounded-full`, `px-6 py-3`).
-- Trailing icon: NEVER naked. Wrapped in its own circular container (`w-8 h-8 rounded-full bg-black/5`), placed flush with button&#x27;s right inner padding.
-
-### Spatial Rhythm
-- Macro-whitespace: `py-24` to `py-40` for sections. Breathe heavily.
-- Eyebrow Tags: Microscopic, pill-shaped badge (`rounded-full px-3 py-1 text-[10px] uppercase tracki
-...[truncated - view full skill on GitHub]</pre>
+**Universal Mobile Override:** Any asymmetric layout ≥ md
+...[truncated]</pre>
           </div>
         </article>
-        <article class="skill-card" data-name="taste-minimalist" data-domain="Frontend">
+        <article class="skill-card" data-name="taste-minimalist">
           <button class="skill-trigger" aria-expanded="false">
             <span class="skill-arrow" aria-hidden="true">+</span>
             <div class="skill-info">
@@ -2445,30 +1882,8 @@ Based on: Apple Notes, Linear, Notion, Basecamp, iA Writer, and premium editoria
 - Labels placed OUTSIDE and BELOW cards.
 
 ### Primary CTAs
-- Background `#111111`, text `#FFFFFF`. Radius `4px` to `6px`. No box-shadow.
-- Hover: `background: #333333` or `transform: scale(0.98)`. Transition: `200ms ease-out`.
-- Active: `transform: scale(0.97)`. `160ms`.
-
-### Tags &amp; Status Badges
-- Pill-shaped (`border-radius: 9999px`), `text-xs` uppercase, `tracking: 0.05em`.
-- Background: muted pastels from palette above.
-
-### Accordions (FAQ)
-- NO container boxes. Separated by `border-bottom: 1px solid #EAEAEA`.
-- Clean `+` / `−` toggle icon.
-
-### Keystroke Micro-UIs
-- `&lt;kbd&gt;` with `border: 1px solid #EAEAEA`, `border-radius: 4px`, `background: #F7F6F3`. Monospace.
-
-### Faux-OS Window Chrome
-- Minimalist container with white top bar + three small light gray macOS circles.
-
-## 5. Iconography &amp; Imagery
-
-- **Icons:** Phosphor Icons (Bold or Fill). Consistent stroke width.
-- **Illustrations:** Monochromatic, rough continuous-line ink sketches on white background. Single offset geometric shape in muted pastel.
-- **Photography:** Desaturated, warm tone. Subtle grain overlay (`opacity: 0.04`). Never overs
-...[truncated - view full skill on GitHub]</pre>
+- Background `#111111`, text `#FFFFFF`. Radius `4px` to `6p
+...[truncated]</pre>
           </div>
         </article>
       </div>
@@ -2479,7 +1894,7 @@ Based on: Apple Notes, Linear, Notion, Basecamp, iA Writer, and premium editoria
         <span class="domain-count">2 skills</span>
       </div>
       <div class="skills-grid">
-        <article class="skill-card" data-name="flutter" data-domain="Mobile">
+        <article class="skill-card" data-name="flutter">
           <button class="skill-trigger" aria-expanded="false">
             <span class="skill-arrow" aria-hidden="true">+</span>
             <div class="skill-info">
@@ -2577,51 +1992,11 @@ final loginProvider = StateNotifierProvider&lt;LoginNotifier, AsyncValue&lt;void
 class LoginScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final status = ref.watch(loginProvider);
-    return status.when(
-      loading: () =&gt; const CircularProgressIndicator(),
-      error: (e, _) =&gt; ErrorWidget(message: e.toString()),
-      data: (_) =&gt; const LoginForm(),
-    );
-  }
-}
-```
-
-### GoRouter with Auth Guard
-
-```dart
-final router = GoRouter(
-  redirect: (context, state) {
-    final isAuth = ref.read(authStateProvider).value != null;
-    final isLogin = state.matchedLocation.startsWith(&#x27;/login&#x27;);
-    if (!isAuth &amp;&amp; !isLogin) return &#x27;/login&#x27;;
-    if (isAuth &amp;&amp; isLogin) return &#x27;/&#x27;;
-    return null;
-  },
-  routes: [
-    GoRoute(path: &#x27;/&#x27;, builder: (_, __) =&gt; const HomeScreen()),
-    GoRoute(path: &#x27;/login&#x27;, builder: (_, __) =&gt; const LoginScreen()),
-  ],
-);
-```
-
-### Impeller
-
-Since Flutter 3.24+, Impeller is default on iOS. On Android, opt in:
-```gradle
-// android/app/build.gradle
-renderingEngine = &quot;impeller&quot;
-```
-
-Eliminates first-frame jank. Faster frame rendering. Better memory on low-end devices.
-
-### Platform Channels via Pigeon
-
-```d
-...[truncated - view full skill on GitHub]</pre>
+    fin
+...[truncated]</pre>
           </div>
         </article>
-        <article class="skill-card" data-name="react-native" data-domain="Mobile">
+        <article class="skill-card" data-name="react-native">
           <button class="skill-trigger" aria-expanded="false">
             <span class="skill-arrow" aria-hidden="true">+</span>
             <div class="skill-info">
@@ -2718,53 +2093,8 @@ app/
 │   ├ feed.tsx      # /feed
 │   └ profile.tsx   # /profile
 ├ product/
-│   ├ [id].tsx      # /product/:id
-│   └ review.tsx    # /product/:id/review
-└ auth/
-    ├ login.tsx     # /auth/login
-    └ signup.tsx    # /auth/signup
-```
-
-Deep links work automatically. Universal links with `app.json` scheme config.
-
-### Typed Routes (Expo Router v4+)
-
-```typescript
-// app/product/[id].tsx
-import { useLocalSearchParams } from &#x27;expo-router&#x27;
-
-export default function ProductScreen() {
-  const { id } = useLocalSearchParams&lt;{ id: string }&gt;()
-  // id is typed as string
-}
-```
-
-## React Navigation v7
-
-```typescript
-type RootStackParamList = {
-  Home: undefined
-  ProductDetail: { id: string }
-  Cart: undefined
-}
-
-const Stack = createNativeStackNavigator&lt;RootStackParamList&gt;()
-
-export function RootNavigator() {
-  return (
-    &lt;NavigationContainer
-      linking={{
-        prefixes: [&#x27;myapp://&#x27;, &#x27;https://myapp.com&#x27;],
-        config: {
-          screens: {
-            Home: &#x27;&#x27;,
-            ProductDetail: &#x27;product/:id&#x27;,
-            Cart: &#x27;cart&#x27;,
-          },
-        },
-      }}&gt;
-      &lt;Stack.Navigator
-...[truncated - view full skill on GitHub]</pre>
+│   ├ [id].tsx      # 
+...[truncated]</pre>
           </div>
         </article>
       </div>
@@ -2775,7 +2105,7 @@ export function RootNavigator() {
         <span class="domain-count">7 skills</span>
       </div>
       <div class="skills-grid">
-        <article class="skill-card" data-name="test-commander" data-domain="Quality">
+        <article class="skill-card" data-name="test-commander">
           <button class="skill-trigger" aria-expanded="false">
             <span class="skill-arrow" aria-hidden="true">+</span>
             <div class="skill-info">
@@ -2861,46 +2191,11 @@ describe(&#x27;UserProfile&#x27;, () =&gt; {
   it(&#x27;renders user data on success&#x27;, async () =&gt; {
     render(&lt;UserProfile userId=&quot;123&quot; /&gt;)
     await screen.findByText(&#x27;Alice&#x27;)
-    expect(screen.getByText(&#x27;alice@example.com&#x27;)).toBeInTheDocument()
-  })
-
-  it(&#x27;handles race condition: fast re-fetch&#x27;, async () =&gt; {
-    const { rerender } = render(&lt;UserProfile userId=&quot;123&quot; /&gt;)
-    await screen.findByText(&#x27;Alice&#x27;)
-    rerender(&lt;UserProfile userId=&quot;456&quot; /&gt;)
-    await screen.findByText(&#x27;Bob&#x27;)
-    expect(screen.queryByText(&#x27;Alice&#x27;)).not.toBeInTheDocument()
-  })
-})
-```
-
-### Step 3: MSW setup (exact pattern)
-
-```typescript
-import { http, HttpResponse } from &#x27;msw&#x27;
-import { setupServer } from &#x27;msw/node&#x27;
-
-const server = setupServer(
-  http.get(&#x27;/api/users&#x27;, () =&gt; {
-    return HttpResponse.json([
-      { id: &#x27;1&#x27;, name: &#x27;Alice&#x27;, email: &#x27;alice@example.com&#x27; },
-      { id: &#x27;2&#x27;, name: &#x27;Bob&#x27;, email: &#x27;bob@example.com&#x27; },
-    ])
-  }),
-
-  http.post(&#x27;/api/users&#x27;, async ({ request }) =&gt; {
-    const body = await request.json()
-    return HttpResponse.json({ id: &#x27;3&#x27;, ...body }, { status: 201 })
-  })
-)
-
-beforeAll(() =&gt; server.listen({ onUnhandledRequest: &#x27;warn&#x27; }))
-afterEach(() =&gt; server.resetHandlers())
-afterAl
-...[truncated - view full skill on GitHub]</pre>
+    expect(screen.getByTe
+...[truncated]</pre>
           </div>
         </article>
-        <article class="skill-card" data-name="performance-profiler" data-domain="Quality">
+        <article class="skill-card" data-name="performance-profiler">
           <button class="skill-trigger" aria-expanded="false">
             <span class="skill-arrow" aria-hidden="true">+</span>
             <div class="skill-info">
@@ -2988,44 +2283,11 @@ Target scores:
 ```
 
 **LCP sub-parts breakdown:**
-1. TTFB (Time to First Byte): &lt; 800ms. Optimize server response. CDN. Caching.
-2. Resource load delay: Preload + fetchpriority + no render-blocking.
-3. Resource load time: Compress, CDN, modern format (WebP/AVIF).
-4. Element render delay: Inline critical CSS. No layout-shifting JS above fold.
-
-#### INP optimization (long task breakup)
-
-```typescript
-// Break up long tasks with scheduler.yield()
-async function processLargeDataset(items: Item[]) {
-  const CHUNK_SIZE = 50
-
-  for (let i = 0; i &lt; items.length; i += CHUNK_SIZE) {
-    const chunk = items.slice(i, i + CHUNK_SIZE)
-    processChunk(chunk)
-
-    if (i + CHUNK_SIZE &lt; items.length) {
-      // Yield to main thread every 50ms
-      await new Promise(resolve =&gt; setTimeout(resolve, 0))
-    }
-  }
-}
-
-// Or use scheduler.yield() (Chrome 115+)
-for (let i = 0; i &lt; items.length; i += CHUNK_SIZE) {
-  processChunk(items.slice(i, i + CHUNK_SIZE))
-  await scheduler.yield()
-}
-```
-
-**Common INP causes:**
-- Expensive event handlers (click, keydown, input)
-- Synchronous layout reads/writes (layout thrashing)
-- La
-...[truncated - view full skill on GitHub]</pre>
+1. TTFB (Time to First Byte): &lt; 800ms. Optimize server response.
+...[truncated]</pre>
           </div>
         </article>
-        <article class="skill-card" data-name="code-review" data-domain="Quality">
+        <article class="skill-card" data-name="code-review">
           <button class="skill-trigger" aria-expanded="false">
             <span class="skill-arrow" aria-hidden="true">+</span>
             <div class="skill-info">
@@ -3103,44 +2365,11 @@ Review against two tiers using the checklist below.
 - Exposed secrets, tokens, or credentials
 - Unsafe deserialization
 - Missing input validation at system boundaries
-- Improper access control or authorization checks
-
-**Performance:**
-- Inefficient algorithms (quadratic where linear is possible)
-- N+1 queries or unbounded database calls
-- Memory leaks or unbounded growth
-- Missing pagination on large datasets
-- Blocking operations in async contexts
-
-**Data Integrity:**
-- Race conditions in concurrent code
-- Missing transactions for multi-step writes
-- Data loss on error paths
-- Inconsistent state after partial failures
-
-#### Code Quality (P2–P3)
-
-**Clarity:**
-- Unnecessary complexity or deep nesting
-- Poor naming (vague, misleading, or inconsistent)
-- Confusing logic flow or convoluted conditionals
-- Nested ternary operators (prefer switch/if-else)
-- Magic numbers or unexplained constants
-
-**Consistency:**
-- Violations of project conventions
-- Inconsistent naming conventions
-- Mixed patterns for the same concern
-- Import style inconsistencies
-
-**Maintainability:**
-- Missing abstractions for duplicated logic
-- Tight coupling between unrelated modules
-- Over-engineering 
-...[truncated - view full skill on GitHub]</pre>
+- Improper access co
+...[truncated]</pre>
           </div>
         </article>
-        <article class="skill-card" data-name="comprehensive-review" data-domain="Quality">
+        <article class="skill-card" data-name="comprehensive-review">
           <button class="skill-trigger" aria-expanded="false">
             <span class="skill-arrow" aria-hidden="true">+</span>
             <div class="skill-info">
@@ -3215,29 +2444,10 @@ Each review criterion has a corresponding instruction file inside this skill&#x2
 | architecture | `criteria/architecture.md` |
 | security | `criteria/security.md` |
 | performance | `criteria/performance.md` |
-| code-quality | `criteria/code-quality.md` |
-| requirements-compliance | `criteria/requirements-compliance.md` |
-| bugs | `criteria/bugs.md` |
-
-#### Strategy A: Simple complexity
-
-For **simple** PRs, perform the review yourself (the root agent) without calling subagents.
-
-1. Read **all 6** criteria instruction files from `&lt;SKILL_DIRECTORY&gt;/criteria/`.
-2. Read the diff file.
-3. Apply all criteria to review the change yourself, producing findings as a flat list without priorities (same format as subagents would). You will assign priorities in Step 4.
-
-#### Strategy B: Medium complexity
-
-For **medium** PRs, launch **6 parallel subagent calls** — one per review criterion.
-
-**CRITICAL**: You MUST spawn subagents for this step. Do NOT read the criteria instruction files yourself. Do NOT perform the reviews yourself. Each subagent must read its own instruction file.
-
-Use a subagent tool to spawn each subagent. Select the single most powerful model from each available provider. Alternate the
-...[truncated - view full skill on GitHub]</pre>
+...[truncated]</pre>
           </div>
         </article>
-        <article class="skill-card" data-name="cross-review" data-domain="Quality">
+        <article class="skill-card" data-name="cross-review">
           <button class="skill-trigger" aria-expanded="false">
             <span class="skill-arrow" aria-hidden="true">+</span>
             <div class="skill-info">
@@ -3331,20 +2541,11 @@ When user says &quot;review with [model name]&quot;, map to a valid model ID:
 | gpt-4, gpt4 | gpt-4 |
 | gpt-4o | gpt-4o |
 | gemini | gemini-2.0-flash |
-| deepseek | deepseek-chat |
-
-If the model name is unrecognized, ask for the exact model ID.
-
-## Error Handling
-
-- **Subagent fails or times out**: Inform user. Suggest retry or different model.
-- **No changes in conversation**: Inform user and stop.
-- **Incomplete review**: Relay what was returned. Note it may be incomplete.
-- **Model not available**: Offer alternative from the mapping table.
-</pre>
+| deepseek
+...[truncated]</pre>
           </div>
         </article>
-        <article class="skill-card" data-name="zen-review" data-domain="Quality">
+        <article class="skill-card" data-name="zen-review">
           <button class="skill-trigger" aria-expanded="false">
             <span class="skill-arrow" aria-hidden="true">+</span>
             <div class="skill-info">
@@ -3411,31 +2612,11 @@ Do NOT read existing PR comments or reviews — form your own independent opinio
 
 ### 3. Verify type correctness
 - For each function call, read the target function&#x27;s signature.
-- Do argument types match parameter types? Will it compile/run?
-- If a function returns a new type or shape, do all consumers handle it?
-
-### 4. Trace callers (only if needed)
-- If a function&#x27;s signature, return type, or behavior changed, search for its callers.
-- Read 3-5 callers to check they still work with the new contract.
-
-### 5. Check for MULTIPLE issues per function
-- After finding one issue in a function, keep looking. Most functions with one bug have more.
-- Specifically re-examine: error handling paths, nil/null guards, edge cases.
-- For each function you found a bug in, ask: &quot;what ELSE could go wrong here?&quot;
-- Check what happens when inputs are nil/null/empty/zero.
-- Check what happens on error paths — does error state leak? Is state left inconsistent?
-
-Do NOT create todo lists or plan your work. Just read and analyze.
-
-Before returning your findings, verify you have read and analyzed EVERY changed file in the diff. Do not skip any files.
-
-## Checklist
-
-- **Type errors**: wrong argument types, missing arguments, i
-...[truncated - view full skill on GitHub]</pre>
+- Do argument types match parameter type
+...[truncated]</pre>
           </div>
         </article>
-        <article class="skill-card" data-name="zen-comprehensive-review" data-domain="Quality">
+        <article class="skill-card" data-name="zen-comprehensive-review">
           <button class="skill-trigger" aria-expanded="false">
             <span class="skill-arrow" aria-hidden="true">+</span>
             <div class="skill-info">
@@ -3505,26 +2686,8 @@ If any of these models are unavailable, substitute with the most powerful availa
 For each subagent, set the prompt to:
 
 **PR mode:**
-&quot;IMPORTANT: Follow the skill instructions STRICTLY and IN ORDER. The diff is saved at /tmp/review-diff.patch. Your FIRST action MUST be to read that file — do NOT run git diff, do NOT read any other files before you have the diff. Use any PR title and description included in this prompt as additional review context. Review this PR.&quot;
-
-**Local mode:**
-&quot;IMPORTANT: Follow the skill instructions STRICTLY and IN ORDER. The diff is saved at /tmp/review-diff.patch. Your FIRST action MUST be to read that file — do NOT run git diff, do NOT read any other files before you have the diff. Review the changes on this branch.&quot;
-
-Each subagent has the repo checked out and can read files for context after reading the diff.
-The skill provides review instructions. Each subagent will return a JSON array of findings.
-
-Spawn all 3 in parallel, then await all results.
-
-If a subagent fails or returns invalid output, try to resume the subagent and proceed with the remaining results.
-
-## Step 2: Merge and Deduplicate
-
-After ALL subagents complete, list all findings in a structured format before merging.
-For each finding, note which subagent/model reported it. This makes consensus visible:
-if 2+ models independently found the same bug, it is very likely real.
-
-Then
-...[truncated - view full skill on GitHub]</pre>
+&quot;IMPORTANT: Follow the skill instructions STRICTLY and IN ORDER. The diff is saved at /tmp/review-diff.patch. Your FIRST action MUST be to read that file — do NOT run git diff, do NOT read any other files before you have the diff. Use any PR title and desc
+...[truncated]</pre>
           </div>
         </article>
       </div>
@@ -3535,7 +2698,7 @@ Then
         <span class="domain-count">6 skills</span>
       </div>
       <div class="skills-grid">
-        <article class="skill-card" data-name="communication" data-domain="Content & Business">
+        <article class="skill-card" data-name="communication">
           <button class="skill-trigger" aria-expanded="false">
             <span class="skill-arrow" aria-hidden="true">+</span>
             <div class="skill-info">
@@ -3622,34 +2785,11 @@ Professional writing that gets results. Based on Harvard Business Review, Radica
 **Step 3 — Select channel**
 | Scenario | Channel |
 |----------|---------|
-| Simple question, needs quick answer | DM (Slack/Teams) |
-| Team-wide decision or update | Public channel |
-| Sensitive feedback | In-person or video call |
-| Complex explanation | Loom or shared doc |
-| Formal request or escalation | Email |
-| Needs paper trail | Email |
-| External client | Email |
-
-**Step 4 — Draft using structure**
-
-Email structure:
-1. **Subject**: `[Verb] + [Topic]`. Max 50 chars. Prefix: `[Request/Update/Follow-up/Escalation]`
-2. **Context**: reference previous communication in one sentence
-3. **Purpose**: the ask or update in the FIRST paragraph
-4. **Detail**: supporting info, bulleted if &gt; 3 items
-5. **Next step**: who does what by when
-6. **Closing**: matched to relationship
-
-**Step 5 — Review checklist**
-- [ ] Subject ≤ 50 chars, prefixed with `[Request/Update/Follow-up/Escalation]`
-- [ ] One explicit ask per message, with deadline
-- [ ] Length ≤ 150 words internal, ≤ 200 client
-- [ ] Tone matches recipient in matrix
-- [ ] Zero filler: no &quot;hope this finds you well&quot;, &quot;just c
-...[truncated - view full skill on GitHub]</pre>
+| Simple questi
+...[truncated]</pre>
           </div>
         </article>
-        <article class="skill-card" data-name="content-marketing" data-domain="Content & Business">
+        <article class="skill-card" data-name="content-marketing">
           <button class="skill-trigger" aria-expanded="false">
             <span class="skill-arrow" aria-hidden="true">+</span>
             <div class="skill-info">
@@ -3735,42 +2875,11 @@ Lead types:
 ### Traditional SEO
 - Primary keyword in H1, first 100 words, one H2
 - Meta description under 155 chars with value prop
-- URL: kebab-case, no stop words
-- Internal links: 2-3 related posts
-
-### GEO (Generative Engine Optimization)
-- Direct answer in first 2 paragraphs (AI scrapes opening)
-- Structured data: FAQ, HowTo, Article schema
-- Entity clarity: define who you are, what you do, for whom
-- Cite primary sources (studies, data, .edu/.gov)
-- Contrarian takes (AI models reference multiple viewpoints)
-- Conversational tone (AI penalizes keyword-stuffed text)
-
-## Twitter Threads (5-7 tweets)
-
-```
-Tweet 1: Hook — stop the scroll (240 chars max)
-Tweet 2: Context — why this matters
-Tweets 3-5: Value — core teaching, step by step
-Tweet 6: Proof — evidence, results, data
-Tweet 7: CTA — one clear action
-```
-
-Hook patterns: surprising stat, contrarian take, direct promise, story opening, bold claim.
-
-## Newsletter Benchmarks
-
-| Metric | Good | Needs work |
-|--------|:----:|:----------:|
-| Open rate | 25-40% | Below 20% |
-| Click rate | 2-5% | Below 1% |
-| Unsubscribe | Under 0.5% | Over 1% |
-
-Subject line: 30-50 chars. Start with 
-...[truncated - view full skill on GitHub]</pre>
+- URL: kebab-case, n
+...[truncated]</pre>
           </div>
         </article>
-        <article class="skill-card" data-name="business-proposals" data-domain="Content & Business">
+        <article class="skill-card" data-name="business-proposals">
           <button class="skill-trigger" aria-expanded="false">
             <span class="skill-arrow" aria-hidden="true">+</span>
             <div class="skill-info">
@@ -3855,42 +2964,11 @@ When the user asks for any sales document, follow this process:
 
 If you cannot do level 2, do not send the email.
 
-### Sequence Logic
-```
-Email 1 (Day 1):  Value prop + low-friction ask
-Email 2 (Day 4):  Follow-up with additional value
-Email 3 (Day 8):  Different angle or case study
-Email 4 (Day 12): Breakup — leave door open
-```
-
-4 emails max. No response in 12 days → move to nurture.
-
-## Proposals
-
-### Required Discovery
-| Question | Why |
-|----------|-----|
-| What problem needs solving? | Problem statement anchors the proposal |
-| What is the solution? | Scope definition |
-| What are the deliverables? | Tangible output client expects |
-| What is excluded? | Prevents scope creep |
-| What is the budget range? | Pricing tier selection |
-
-### Executive Summary
-```
-[Client] needs to [solve specific problem].
-We propose to [solution overview] over [timeline] for [price].
-This achieves [outcome 1], [outcome 2], [outcome 3].
-```
-One paragraph. This is the only section most decision-makers read.
-
-### Scope of Work
-**Included**: features, revision rounds, deliverables (docs, source, deployment)
-**Excluded** (critical):
-...[truncated - view full skill on GitHub]</pre>
+### Sequence L
+...[truncated]</pre>
           </div>
         </article>
-        <article class="skill-card" data-name="seo-geo" data-domain="Content & Business">
+        <article class="skill-card" data-name="seo-geo">
           <button class="skill-trigger" aria-expanded="false">
             <span class="skill-arrow" aria-hidden="true">+</span>
             <div class="skill-info">
@@ -3984,33 +3062,11 @@ Also: Article, FAQPage, HowTo, Product, BreadcrumbList, LocalBusiness (if applic
 - https://example.com/blog/post: Title
 ```
 
-Place at `/.well-known/llms.txt`. This is how AI crawlers (GPTBot, Claude, Gemini) discover your site.
-
-### Step 6: GEO optimization
-
-| Factor | Implementation |
-|--------|---------------|
-| Citability | Publish original research, unique data. AI cites sources. |
-| Entity clarity | Clear about pages. Define who/what/for whom. |
-| Answer format | Direct answer in first 2 paragraphs before expanding. |
-| Conversational tone | Write naturally. AI penalizes keyword stuffing. |
-| Source authority | Link to .edu, .gov, peer-reviewed. Build topical authority. |
-| Brand mentions | Get mentioned on authoritative sites. |
-
-## Production Checklist
-
-- [ ] Technical SEO &gt; 90%
-- [ ] GEO audit passes (llms.txt, schema, entity clarity)
-- [ ] Core Web Vitals pass (LCP &lt; 2.5s, INP &lt; 200ms, CLS &lt; 0.1)
-- [ ] Structured data: Organization + page-specific types
-- [ ] Sitemap.xml submitted to GSC
-- [ ] robots.txt correct (not blocking anything important)
-- [ ] hreflang configured (if multilingual)
-- [ ] Canonical U
-...[truncated - view full skill on GitHub]</pre>
+Place a
+...[truncated]</pre>
           </div>
         </article>
-        <article class="skill-card" data-name="translate-craft" data-domain="Content & Business">
+        <article class="skill-card" data-name="translate-craft">
           <button class="skill-trigger" aria-expanded="false">
             <span class="skill-arrow" aria-hidden="true">+</span>
             <div class="skill-info">
@@ -4093,33 +3149,11 @@ Translate **meaning**, not words. If the reader can tell it&#x27;s a translation
 ### EN → ZH (Mandarin)
 - **Measure words**: 个, 张, 条, 块 — correct classifier per noun
 - **Tone**: 您 (formal) vs 你 (casual)
-- **Shortened**: ~15-20% shorter. More room in UI.
-- **Script**: Simplified for CN. Traditional for TW/HK.
-
-### EN → KO (Korean)
-- **Honorifics**: 합쇼체 (formal), 해요체 (polite casual), 해체 (casual). Default: 해요체
-- **SOV word order**: Subject-Object-Verb, opposite of English
-
-### EN → AR (Arabic)
-- **RTL**: Everything mirrors. Use CSS logical properties.
-- **Root system**: Words derive from 3-letter roots
-- **Length**: ~25% shorter. Text shrinks in UI.
-
-## Procedural Workflow
-
-1. **Identify scope**: source, target, audience, medium, tone tier
-2. **Analyze source**: flag idioms, cultural references, ambiguity
-3. **Translate**: first pass applying language-specific rules
-4. **Adapt tone**: adjust register per audience
-5. **Localize**: dates, times, currencies, units, phone, addresses
-6. **Restructure**: natural target-language word order
-7. **Reverse review**: read only target. If you can reconstruct source, too literal.
-8. **UI verify**: paste into layout. Check truncation, overflow, RTL, line breaks.
-9. **Final pass**: product
-...[truncated - view full skill on GitHub]</pre>
+- **Shortened**: ~15-20% shorter. Mor
+...[truncated]</pre>
           </div>
         </article>
-        <article class="skill-card" data-name="documentation" data-domain="Content & Business">
+        <article class="skill-card" data-name="documentation">
           <button class="skill-trigger" aria-expanded="false">
             <span class="skill-arrow" aria-hidden="true">+</span>
             <div class="skill-info">
@@ -4239,34 +3273,8 @@ Rules: Keep a Changelog format. Every entry links to PR. Migration notes for bre
 
 ### Article Format
 ```
-Title: as a question user would search for
-Context: 1-2 sentences — who, what product/feature
-Steps: numbered, one action per step, action verb first
-Expected result: after last step
-Escalation: if it still doesn&#x27;t work
-```
-
-Rules: One action per step. Bold UI labels exactly as they appear. Max 15 words per step. No jargon.
-
-## Production Checklist
-
-- [ ] All examples tested from clean environment
-- [ ] No &quot;TODO&quot;, &quot;coming soon&quot;, &quot;TBD&quot;, placeholder text
-- [ ] Consistent tone across all sections
-- [ ] Every link resolves
-- [ ] License badge matches LICENSE file
-- [ ] API docs: curl + SDK example per endpoint
-- [ ] Changelog: unreleased section present, versions correct
-- [ ] KB: tested by someone unfamiliar with the product
-
-## Anti-Patterns
-
-| Anti-Pattern | Correct |
-|--------------|---------|
-| Default README (template unfilled) | Remove all template comments. Fill every section. |
-| &quot;Coming soon&quot; features | Ship or hide. Never show unfinished. |
-| Untested install instructions | Test from scratch in clean environm
-...[truncated - view full skill on GitHub]</pre>
+Title: as a question user would
+...[truncated]</pre>
           </div>
         </article>
       </div>
@@ -4277,7 +3285,7 @@ Rules: One action per step. Bold UI labels exactly as they appear. Max 15 words 
         <span class="domain-count">8 skills</span>
       </div>
       <div class="skills-grid">
-        <article class="skill-card" data-name="git-workflow" data-domain="Productivity">
+        <article class="skill-card" data-name="git-workflow">
           <button class="skill-trigger" aria-expanded="false">
             <span class="skill-arrow" aria-hidden="true">+</span>
             <div class="skill-info">
@@ -4389,40 +3397,11 @@ gh pr create --title &quot;feat(auth): add user authentication&quot; --body-file
 |--------|------|
 | Size | Max 400 lines changed |
 | Title | Same as conventional commit |
-| Description | What + Why + How to test |
-| Reviewers | 1-2 relevant team members |
-| Labels | Type (feat/fix/docs) + priority |
-| Draft | Use for Work-in-Progress |
-
-### Step 5: Clean up after merge
-
-```powershell
-scripts/cleanup-branches.ps1
-```
-
-This lists merged branches (excluding protected ones), asks for confirmation, deletes locally and remotely, and prunes remote tracking refs.
-
-## Workflow by strategy
-
-See [references/git-workflows.md](references/git-workflows.md) for full reference.
-
-| Strategy | Best for | Branch model |
-|----------|----------|--------------|
-| Trunk-based | CI/CD, deploys multiple times/day | Short-lived feature branches → main |
-| GitHub Flow | Standard SaaS | feature → main (PR + merge) |
-| GitFlow | Release management, multiple versions | feature → develop → release → main |
-
-**Default recommendation**: GitHub Flow for simplicity. Trunk-based if CI/CD is mature.
-
-## Error Handling
-
-| Scenario | Cause | Fix |
-|----------|-------|-----|
-| Rebase conflicts | Multiple pe
-...[truncated - view full skill on GitHub]</pre>
+| Description |
+...[truncated]</pre>
           </div>
         </article>
-        <article class="skill-card" data-name="windows-powershell" data-domain="Productivity">
+        <article class="skill-card" data-name="windows-powershell">
           <button class="skill-trigger" aria-expanded="false">
             <span class="skill-arrow" aria-hidden="true">+</span>
             <div class="skill-info">
@@ -4526,32 +3505,11 @@ The profile includes:
 
 ```powershell
 # Weekly cleanup every Sunday at 9 PM
-schtasks /Create /SC WEEKLY /D SUN /TN &quot;SystemCleanup&quot; /TR &quot;powershell.exe -File &#x27;$env:USERPROFILE\.config\opencode\skills\windows-powershell\scripts\cleanup-system.ps1&#x27;&quot; /ST 21:00 /RL HIGHEST
-```
-
-## Windows Utilities Reference
-
-See [references/powershell-mastery.md](references/powershell-mastery.md) for complete reference.
-
-| Task | Command |
-|------|---------|
-| Find large files | `Get-ChildItem -Recurse | Sort-Object Length -Descending | Select-Object -First 20` |
-| Kill process by port | `Get-Process -Id (Get-NetTCPConnection -LocalPort 3000).OwningProcess | Stop-Process` |
-| Check disk health | `Get-PhysicalDisk | Get-HealthStatus` |
-| Export installed programs | `Get-WmiObject Win32_Product | Export-Csv installed.csv` |
-| Check battery health | `powercfg /batteryreport` |
-| Network speed test | `Invoke-WebRequest -Uri &quot;http://speedtest.url&quot;` |
-| Windows activation status | `slmgr /xpr` |
-
-## Error Handling
-
-| Scenario | Cause | Fix |
-|----------|-------|-----|
-| `winget` not found | Outdated Windows or missing App Installer | Install from Microsoft 
-...[truncated - view full skill on GitHub]</pre>
+schtasks /Create /SC WEEKLY /D SUN /TN &quot;SystemCleanup&quot; /TR &quot;powershell.e
+...[truncated]</pre>
           </div>
         </article>
-        <article class="skill-card" data-name="runbook-gen" data-domain="Productivity">
+        <article class="skill-card" data-name="runbook-gen">
           <button class="skill-trigger" aria-expanded="false">
             <span class="skill-arrow" aria-hidden="true">+</span>
             <div class="skill-info">
@@ -4636,45 +3594,11 @@ How this incident is typically discovered:
 ### Initial Response (first 5 min)
 1. Acknowledge alert (PagerDuty/Opsgenie). Time: &lt; 2 min
 2. Determine severity. Time: &lt; 1 min
-3. Assign owner. Create incident channel (#inc-sev1). Time: &lt; 2 min
-4. Post initial status:
-   &quot;Investigating [issue] affecting [scope]. Will update in 15 min.&quot;
-5. Start diagnosis timer. Time: &lt; 1 min
-
-### Diagnosis (decision tree)
-1. Check [primary dashboard]: expected [X], current [Y]
-2. Check logs: `kubectl logs -n [ns] -l app=[service] --tail 200`
-3. Check database health: `SELECT count(*) FROM pg_stat_activity`
-4. Check cache/queue latency: `redis-cli --latency`
-5. IF [error in logs] → Runbook A
-6. IF [latency &gt; threshold] → Runbook B
-7. IF unknown → Escalate
-
-### Resolution Procedures
-Each time-boxed with exact commands and verification:
-
-#### Runbook A: [Name] (10 min)
-```bash
-# Step 1 (2 min)
-kubectl rollout restart deployment/[service]
-
-# Verify (1 min)
-kubectl rollout status deployment/[service]
-```
-
-#### Runbook B: [Alternative]
-
-### Verification Checklist
-- [ ] Service health endpoint returns 200
-- [ ] Alert resolved (dashboard green)
-- [ ] Error rate back to baseline (&lt; 0.1%)
-- [ ] Latency p99 &lt; [threshold]
-
-### Escalati
-...[truncated - view full skill on GitHub]</pre>
+3. Assign owner. Create incident channel (#inc-se
+...[truncated]</pre>
           </div>
         </article>
-        <article class="skill-card" data-name="strategy" data-domain="Productivity">
+        <article class="skill-card" data-name="strategy">
           <button class="skill-trigger" aria-expanded="false">
             <span class="skill-arrow" aria-hidden="true">+</span>
             <div class="skill-info">
@@ -4778,47 +3702,11 @@ Higher = prioritize first
 
 ```
            High Impact          Low Impact
-Low Effort  → Do First         → Quick Wins
-High Effort → Strategic        → Don&#x27;t Do
-```
-
-### First Principles Thinking
-
-1. Identify the current belief/assumption
-2. Break it down into fundamental truths
-3. Rebuild from those truths
-
-```
-Current: &quot;Our testing takes too long to run&quot;
-Deconstruction: What IS testing? Verifying code behavior.
-Fundamental: We need confidence code works. Speed matters but accuracy matters more.
-Rebuild: What&#x27;s the fastest way to get accuracy confidence? Change test scope to integration-focused.
-```
-
-### Pre-Mortem Analysis
-
-Before starting a project, imagine it failed 6 months from now:
-1. What went wrong? (list 5-10 failure modes)
-2. For each, what&#x27;s the probability? (low/medium/high)
-3. For each, what&#x27;s the impact? (minor/major/critical)
-4. Mitigation: What can we do NOW to prevent it?
-
-### Opportunity Cost
-
-```
-Choosing Option A means NOT choosing Options B-Z.
-Before committing, list: What else could these resources do?
-```
-
-## Prompt Engineering
-
-### The 7 Dimensions
-
-1. **Clarity
-...[truncated - view full skill on GitHub]</pre>
+Low Effort  → Do First      
+...[truncated]</pre>
           </div>
         </article>
-        <article class="skill-card" data-name="design" data-domain="Productivity">
+        <article class="skill-card" data-name="design">
           <button class="skill-trigger" aria-expanded="false">
             <span class="skill-arrow" aria-hidden="true">+</span>
             <div class="skill-info">
@@ -4898,44 +3786,11 @@ Follow this numbered process. Do not skip steps.
 
 ## Brand Guidelines
 
-A complete brand system has 9 sections: brand story, logo, color, typography, spacing, imagery, voice, application, anti-patterns.
-
-### Color Palette
-
-**Primary** (2-4 colors, 60%+ of touchpoints):
-| Role | Hex | Usage |
-|------|-----|-------|
-| Primary | #1B365D | Headlines, primary buttons |
-| Accent | #F5BD47 | CTAs, highlights |
-
-**Neutral** (grays for UI):
-| Name | Hex | Usage |
-|------|-----|-------|
-| Dark | #080808 | Headings |
-| Mid | #666666 | Body text |
-| Light | #E0E0E0 | Borders |
-| Surface | #F5F5F5 | Backgrounds |
-
-**Semantic**: Success #2ECC71, Warning #F39C12, Error #E74C3C, Info #3498DB
-
-### Design Tokens (W3C Format)
-
-```json
-{
-  &quot;color&quot;: {
-    &quot;primary&quot;: { &quot;$value&quot;: &quot;#1B365D&quot;, &quot;$type&quot;: &quot;color&quot; },
-    &quot;accent&quot;: { &quot;$value&quot;: &quot;#F5BD47&quot;, &quot;$type&quot;: &quot;color&quot; },
-    &quot;surface&quot;: { &quot;$value&quot;: &quot;#F5F5F5&quot;, &quot;$type&quot;: &quot;color&quot; }
-  },
-  &quot;spacing&quot;: {
-    &quot;xs&quot;: { &quot;$value&quot;: &quot;4px&quot;, &quot;$type&quot;: &quot;dimension&quot; },
-    &quot;sm&quot;: { &quot;$value&quot;: &quot;8px&quot;, &quot;$type&quot;: &quot;dimension&quot; },
-    &quot;md&quot;: { &quot;$value&quot;: &quot;16px&quot;, &quot;$type&quot;: &quot;dimension&quot; },
-    &quot;lg&quot;: { &quot;$valu
-...[truncated - view full skill on GitHub]</pre>
+A complete brand system has 9 sections:
+...[truncated]</pre>
           </div>
         </article>
-        <article class="skill-card" data-name="finance" data-domain="Productivity">
+        <article class="skill-card" data-name="finance">
           <button class="skill-trigger" aria-expanded="false">
             <span class="skill-arrow" aria-hidden="true">+</span>
             <div class="skill-info">
@@ -5054,41 +3909,11 @@ Follow in order. Skip pillars already covered.
 
 ## Pillar 2: Net Worth
 
-- Track monthly via spreadsheet or app
-- Direction &gt; absolute number
-- Milestones: $0 → 3 months expenses → 1x income → 10x income
-
-## Pillar 3: Debt Payoff
-
-| Strategy | Approach | Best for |
-|----------|----------|----------|
-| Avalanche | Extra to highest interest rate | Mathematically optimal |
-| Snowball | Extra to smallest balance | Psychological wins |
-
-&gt; **Debt is emergency if**: total &gt; 6 months income OR interest rate &gt; 10%
-
-## Pillar 4: Emergency Fund
-
-| Phase | Amount | When |
-|-------|--------|------|
-| Starter | $1,000 or 1 month | While paying off debt |
-| Full | 3-6 months essential expenses | After debt free |
-| Conservative | 6-12 months | Irregular income, self-employed |
-
-**Where**: High-yield savings account (HYSA). Never invested.
-
-## Pillar 5: Investing &amp; Retirement
-
-### Account Contribution Hierarchy
-
-1. 401(k) up to employer match → free money, do this first
-2. HSA (if eligible) → triple tax-advantaged
-3. IRA (Roth or Traditional) → $7,000/yr ($8,000 if 50+)
-4. 401(k) up to max → $23
-...[truncated - view full skill on GitHub]</pre>
+- Track monthly via spr
+...[truncated]</pre>
           </div>
         </article>
-        <article class="skill-card" data-name="legal-counsel" data-domain="Productivity">
+        <article class="skill-card" data-name="legal-counsel">
           <button class="skill-trigger" aria-expanded="false">
             <span class="skill-arrow" aria-hidden="true">+</span>
             <div class="skill-info">
@@ -5159,31 +3984,11 @@ When asked a legal compliance question, follow these steps:
 | Jurisdiction unclear | Ask which country/state the business operates in | Assume US or EU by default |
 | Threshold question (revenue, user count) | Clarify exact figures before answering | Give partial guidance |
 | Law recently updated | Check effective date; note &quot;proposed/not yet in force&quot; if applicable | Cite outdated text as current |
-| User asks about pending legislation | Flag &quot;not yet law — monitor progress&quot; | Present as binding requirement |
-| Cross-border data transfer (EU→US) | Reference DPF / SCCs / BCRs | Oversimplify transfer mechanism |
-
-## 3. EU Law
-
-### 3.1 GDPR (Regulation EU 2016/679)
-
-**Applies to**: Any organization processing personal data of EU residents.
-**Lawful basis** (6): Consent, contract, legal obligation, vital interest, public task, legitimate interest.
-**Consent**: Specific, informed, unambiguous, freely given, revocable. No pre-ticked boxes.
-**DSAR**: 30 days. Mostly free. Can extend 60 days for complex.
-**Breach notification**: 72 hours to authority. Notify subjects if high risk.
-**DPIA**: Required for high-risk processing (profiling, large-scale sensitive data).
-**Fines**: Up to 4% of annual global turnover or EUR 20M.
-
-### 3.2 DSA (Digital Services Act)
-
-**Applies to**: Platforms, marketplaces, social media reaching EU users.
-**Key requirements**:
-- Notice-and-action for illegal content
-- Transparency repo
-...[truncated - view full skill on GitHub]</pre>
+| User asks about pend
+...[truncated]</pre>
           </div>
         </article>
-        <article class="skill-card" data-name="whendone-plus" data-domain="Productivity">
+        <article class="skill-card" data-name="whendone-plus">
           <button class="skill-trigger" aria-expanded="false">
             <span class="skill-arrow" aria-hidden="true">+</span>
             <div class="skill-info">
@@ -5264,7 +4069,7 @@ Include:
         <span class="domain-count">3 skills</span>
       </div>
       <div class="skills-grid">
-        <article class="skill-card" data-name="kami" data-domain="Documents">
+        <article class="skill-card" data-name="kami">
           <button class="skill-trigger" aria-expanded="false">
             <span class="skill-arrow" aria-hidden="true">+</span>
             <div class="skill-info">
@@ -5316,24 +4121,11 @@ Always use `CHEATSHEET.md` and `references/*.md` for design, writing, production
 
 ## Step 1.5 · Intent extraction (silent checklist)
 
-Before choosing a template, verify these four dimensions are clear. Do not ask unless 2+ are missing and cannot be inferred from context.
-
-| Dimension | What to extract | Example |
-|---|---|---|
-| **Purpose** | Why this document exists | Persuade investor vs. align internal team vs. close a candidate |
-| **Audience** | Who reads it, what they already know | Technical CTO (skip basics) vs. non-technical board (explain terms) |
-| **Constraint** | Hard limits on length, format, tone, or delivery | &quot;One page max&quot;, &quot;formal English&quot;, &quot;print-ready A4&quot; |
-| **Success** | What outcome counts as success | They schedule a meeting / they approve the budget / they understand the architecture |
-
-Rules:
-- If the conversation already answered a dimension, skip it silently.
-- If a dimension can be inferred from the document type (e.g. resume purpose is always &quot;get an interview&quot;), skip it.
-- If 2+ dimensions are genuinely unclear, ask in a single compact question (max 2 sub-questions).
-- Never ask all four as a checklist. T
-...[truncated - view full skill on GitHub]</pre>
+Before choosing a te
+...[truncated]</pre>
           </div>
         </article>
-        <article class="skill-card" data-name="kagen" data-domain="Documents">
+        <article class="skill-card" data-name="kagen">
           <button class="skill-trigger" aria-expanded="false">
             <span class="skill-arrow" aria-hidden="true">+</span>
             <div class="skill-info">
@@ -5441,35 +4233,11 @@ h1, h2, h3, h4 { break-after: avoid; }
 
 /* Keep these blocks intact — never split across pages */
 table, pre, figure, .callout, .card,
-blockquote, .finding-header, .takeaway {
-  break-inside: avoid;
-}
-
-/* Avoid code blocks getting orphaned from their preceding paragraph */
-pre {
-  margin-top: 6pt;
-  page-break-before: avoid;
-}
-
-/* Tables should not break rows across pages */
-table tr {
-  break-inside: avoid;
-}
-```
-
-### Visual patterns by document type
-
-Cada tipo de documento necesita su propio conjunto de patrones visuales. Aplicar segun corresponda:
-
-| Tipo | Patrones obligatorios | Patrones opcionales |
-|------|----------------------|---------------------|
-| **Pentest / Security report** | Severity badges (rojo/naranja/verde), risk bar, bloques de codigo con borde izquierdo, cajas impacto/remediacion | Finding-header con metadatos, tabla de hallazgos con badges |
-| **One-pager / Executive summary** | Glance grid (4 metricas), lead paragraph, takeaway box, cover con titulo grande + linea decorativa | Callout para dato clave, footer con contacto |
-| **White paper / Long doc** | Chapter breaks en secciones densas, tabla de contenidos, callouts, keep-togethe
-...[truncated - view full skill on GitHub]</pre>
+blockquote, .finding-header, .takeaway 
+...[truncated]</pre>
           </div>
         </article>
-        <article class="skill-card" data-name="portfolio-auto" data-domain="Documents">
+        <article class="skill-card" data-name="portfolio-auto">
           <button class="skill-trigger" aria-expanded="false">
             <span class="skill-arrow" aria-hidden="true">+</span>
             <div class="skill-info">
@@ -5591,10 +4359,8 @@ Sync complete:
 
 ## Notes
 
-- Screenshots require Playwright + valid URL. Skip if no homepage.
-- Never change `featured: true` on existing projects — only user can promote.
-- Schedule via cron/GitHub Actions for weekly sync.
-</pre>
+- Screenshots require Playwright + valid URL. Skip if no homepag
+...[truncated]</pre>
           </div>
         </article>
       </div>
@@ -5605,7 +4371,7 @@ Sync complete:
         <span class="domain-count">3 skills</span>
       </div>
       <div class="skills-grid">
-        <article class="skill-card" data-name="agent-browser" data-domain="AI Agents">
+        <article class="skill-card" data-name="agent-browser">
           <button class="skill-trigger" aria-expanded="false">
             <span class="skill-arrow" aria-hidden="true">+</span>
             <div class="skill-info">
@@ -5683,25 +4449,11 @@ agent-browser auth login &lt;url&gt;            # automated login flow
 ## Load specialized workflows from CLI
 
 ```bash
-agent-browser skills get electron          # Electron desktop apps (VS Code, Slack, Discord, Figma)
-agent-browser skills get slack             # Slack workspace automation
-agent-browser skills get dogfood           # Exploratory testing / QA / bug hunts
-agent-browser skills get vercel-sandbox    # Inside Vercel Sandbox microVMs
-agent-browser skills get agentcore         # AWS Bedrock AgentCore cloud browsers
-agent-browser skills list                  # all available
-```
-
-## Why agent-browser
-
-- Fast native Rust CLI, not a Node.js wrapper
-- Works with any AI agent (Cursor, Claude Code, Codex, Continue, Windsurf, etc.)
-- Chrome/Chromium via CDP with no Playwright or Puppeteer dependency
-- Accessibility-tree snapshots with element refs for reliable interaction
-- Sessions, authentication vault, state persistence, video recording
-</pre>
+agent-browser skills get electron     
+...[truncated]</pre>
           </div>
         </article>
-        <article class="skill-card" data-name="agent-tools" data-domain="AI Agents">
+        <article class="skill-card" data-name="agent-tools">
           <button class="skill-trigger" aria-expanded="false">
             <span class="skill-arrow" aria-hidden="true">+</span>
             <div class="skill-info">
@@ -5778,36 +4530,11 @@ infsh app run falai/topaz-image-upscaler --input &#x27;{&quot;image&quot;: &quot
 infsh app run falai/wan-2-5-i2v --input &#x27;{&quot;image&quot;: &quot;./my-image.png&quot;, &quot;prompt&quot;: &quot;make it move&quot;}&#x27;
 
 # Avatar with local audio and image
-infsh app run bytedance/omnihuman-1-5 --input &#x27;{&quot;audio&quot;: &quot;/path/to/speech.mp3&quot;, &quot;image&quot;: &quot;/path/to/face.jpg&quot;}&#x27;
-
-# Post tweet with local media
-infsh app run x/post-create --input &#x27;{&quot;text&quot;: &quot;Check this out!&quot;, &quot;media&quot;: &quot;./screenshot.png&quot;}&#x27;
-```
-
-## Commands
-
-| Task | Command |
-|------|---------|
-| List all apps | `infsh app list` |
-| Search apps | `infsh app list --search &quot;flux&quot;` |
-| Filter by category | `infsh app list --category image` |
-| Get app details | `infsh app get google/veo-3-1-fast` |
-| Generate sample input | `infsh app sample google/veo-3-1-fast --save input.json` |
-| Run app | `infsh app run google/veo-3-1-fast --input input.json` |
-| Run without waiting | `infsh app run &lt;app&gt; --input input.json --no-wait` |
-| Check task status | `infsh task get &lt;task-id&gt;` |
-
-## What&#x27;s Available
-
-| Category | Examples |
-|----------|----------|
-| **Image** | FLUX, Gemini 3 Pro, Grok Imagine, Seedream 4.5, Reve, Topaz Upscaler |
-| **Video** | Veo 3.1, Seedance 1.5, Wan 2.5, OmniHuman, Fabric, HunyuanVideo Foley |
-| **LLMs** | Claude Opus/Sonnet/Haiku, Gemini 3 Pro, Ki
-...[truncated - view full skill on GitHub]</pre>
+infsh app run bytedance/omnihuman-1-5 --input &#x27;{&quot;audio&quot;: &quot;/path/to/speech.mp
+...[truncated]</pre>
           </div>
         </article>
-        <article class="skill-card" data-name="skill-creator" data-domain="AI Agents">
+        <article class="skill-card" data-name="skill-creator">
           <button class="skill-trigger" aria-expanded="false">
             <span class="skill-arrow" aria-hidden="true">+</span>
             <div class="skill-info">
@@ -5852,25 +4579,8 @@ Cool? Cool.
 
 ## Communicating with the user
 
-The skill creator is liable to be used by people across a wide range of familiarity with coding jargon. If you haven&#x27;t heard (and how could you, it&#x27;s only very recently that it started), there&#x27;s a trend now where the power of Claude is inspiring plumbers to open up their terminals, parents and grandparents to google &quot;how to install npm&quot;. On the other hand, the bulk of users are probably fairly computer-literate.
-
-So please pay attention to context cues to understand how to phrase your communication! In the default case, just to give you some idea:
-
-- &quot;evaluation&quot; and &quot;benchmark&quot; are borderline, but OK
-- for &quot;JSON&quot; and &quot;assertion&quot; you want to see serious cues from the user that they know what those things are before using them without explaining them
-
-It&#x27;s OK to briefly explain terms if you&#x27;re in doubt, and feel free to clarify terms with a short definition if you&#x27;re unsure if the user will get it.
-
----
-
-## Creating a skill
-
-### Capture Intent
-
-Start by understanding the user&#x27;s intent. The current conversation might already contain a workflow the user wants to capture (e.g., they say &quot;turn this into a skill&quot;). If so, extract answers from the conversation history first — the tools used, the sequence of steps, corrections the user made, input/output formats observed. The user may need to fill the gaps, and should confirm before proceeding to the next step.
-
-1. What shou
-...[truncated - view full skill on GitHub]</pre>
+The skill creator is liable to be used by people across a wide range of familiarity with coding jargon. If you haven&#x27;t heard (and how could you, it&#x27;s only very recently that it started), there&#x27;s a trend now where the power of Claude is inspiring plumbers to open up their terminals, parents and grandparents to google &quot;how to install npm&quot;. On the other hand, the bulk of users are probably
+...[truncated]</pre>
           </div>
         </article>
       </div>
@@ -5881,7 +4591,7 @@ Start by understanding the user&#x27;s intent. The current conversation might al
         <span class="domain-count">6 skills</span>
       </div>
       <div class="skills-grid">
-        <article class="skill-card" data-name="playwright" data-domain="Extras">
+        <article class="skill-card" data-name="playwright">
           <button class="skill-trigger" aria-expanded="false">
             <span class="skill-arrow" aria-hidden="true">+</span>
             <div class="skill-info">
@@ -5950,47 +4660,11 @@ references/        → Deep-dive guides (loaded on demand)
   visual-testing   → Screenshot diff, percy-like patterns
   performance      → Lighthouse, performance budgets  
   ci-cd            → Docker, GitHub Actions, sharding
-  debugging        → Trace viewer, HAR, video
-templates/         → Reusable code templates
-lib/
-  helpers.js       → Utility functions
-  analyzer.js      → Page analysis engine
-  validators.js    → Validation helpers
-run.js             → Universal executor
-```
-
-## Workflow
-
-### Step 1: Resolve skill directory
-
-Determine `$SKILL_DIR` based on where this SKILL.md was loaded. All paths below are relative to `$SKILL_DIR`.
-
-### Step 2: Verify setup
-
-```bash
-cd &quot;$SKILL_DIR&quot;
-node -e &quot;require(&#x27;./lib/helpers&#x27;).ensureSetup()&quot;
-```
-
-This auto-installs Playwright + Chromium if missing. One-time cost.
-
-### Step 3: Auto-detect environment
-
-```bash
-cd &quot;$SKILL_DIR&quot;
-node -e &quot;require(&#x27;./lib/helpers&#x27;).probeEnvironment().then(r =&gt; console.log(JSON.stringify(r)))&quot;
-```
-
-This probes:
-- Active dev servers (ports 3000, 3001, 5173, 8080, 8000, 4200, 5000, 9000)
-- Installed browsers (chromium, firefox, webkit)
-- Available frameworks (React, Vue, Svelte indicators)
-
-Returns JSON that determines routing decisions bel
-...[truncated - view full skill on GitHub]</pre>
+  
+...[truncated]</pre>
           </div>
         </article>
-        <article class="skill-card" data-name="web-security" data-domain="Extras">
+        <article class="skill-card" data-name="web-security">
           <button class="skill-trigger" aria-expanded="false">
             <span class="skill-arrow" aria-hidden="true">+</span>
             <div class="skill-info">
@@ -6072,44 +4746,11 @@ if (order.userId !== req.user.id) return 403
 # - .env files committed to git
 ```
 
-### A03 — Injection (SQL, XSS, Command, NoSQL)
-
-**SQL injection — always parameterize:**
-```
-// Wrong — never do this
-db.query(`SELECT * FROM users WHERE id = ${userId}`)
-
-// Right — parameterized queries
-db.query(&#x27;SELECT * FROM users WHERE id = ?&#x27;, [userId])
-// or ORM equivalents: User.findById(userId)
-```
-
-**XSS — context-aware output encoding:**
-- Never inject user data into HTML without escaping
-- Use framework&#x27;s built-in escaping (React JSX auto-escapes, Angular templates, etc.)
-- `innerHTML` with user content → always sanitize with DOMPurify or equivalent
-- `eval()`, `new Function()`, `setTimeout(string)` — ban entirely
-
-**Command injection:**
-```
-// Wrong
-exec(`ffmpeg -i ${userFilename} output.mp4`)
-
-// Right — never concatenate user input into shell commands
-// Use argument arrays, not string interpolation
-execFile(&#x27;ffmpeg&#x27;, [&#x27;-i&#x27;, userFilename, &#x27;output.mp4&#x27;])
-```
-
-### A04 — Insecure Design
-
-Security flaws at the design level that code changes can&#x27;t fix.
-
-**Threat model every feature:**
-Before building:
-...[truncated - view full skill on GitHub]</pre>
+### A03 — Injection (SQL, 
+...[truncated]</pre>
           </div>
         </article>
-        <article class="skill-card" data-name="plan" data-domain="Extras">
+        <article class="skill-card" data-name="plan">
           <button class="skill-trigger" aria-expanded="false">
             <span class="skill-arrow" aria-hidden="true">+</span>
             <div class="skill-info">
@@ -6210,43 +4851,11 @@ Goal: Write the final plan. Include:
 
 ### Implementation Steps
 1. [Step 1]: [what to do, why, any gotchas]
-2. [Step 2]: [what to do, why, any gotchas]
-3. [Step 3]: [what to do, why, any gotchas]
-
-### Architecture Decisions
-| Decision | Choice | Rationale |
-|----------|--------|-----------|
-| [Decision] | [Choice] | [Why this over alternatives] |
-
-### Risks &amp; Mitigations
-| Risk | Probability | Mitigation |
-|------|-------------|------------|
-| [Risk] | Low/Med/High | [Mitigation] |
-
-### Verification
-- [ ] [Test command / manual check]
-- [ ] [Edge case to verify]
-```
-
-## Common Planning Patterns
-
-| Pattern | When to use |
-|---------|-------------|
-| **Surgical** | Small, isolated change. Read 1-2 files, write plan in 1 message. |
-| **Scout** | Adding to existing pattern. Find 3+ similar implementations first. |
-| **Architect** | New feature or refactor. Full phases 1-4 with multiple agents. |
-| **Emergency** | Production bug. Skip to fix, plan doc optional.
-
-## Anti-Patterns
-
-| Mistake | Fix |
-|---------|-----|
-| Over-planning trivial changes | Small typo? Just fix it. Plan adds no value. |
-| Un
-...[truncated - view full skill on GitHub]</pre>
+2. 
+...[truncated]</pre>
           </div>
         </article>
-        <article class="skill-card" data-name="find-skills" data-domain="Extras">
+        <article class="skill-card" data-name="find-skills">
           <button class="skill-trigger" aria-expanded="false">
             <span class="skill-arrow" aria-hidden="true">+</span>
             <div class="skill-info">
@@ -6342,36 +4951,11 @@ npx skills add &lt;owner/repo@skill&gt; -g -y
 | Testing | testing, jest, playwright, e2e |
 | DevOps | deploy, docker, kubernetes, ci-cd |
 | Documentation | docs, readme, changelog, api-docs |
-| Code Quality | review, lint, refactor, best-practices |
-| Design | ui, ux, design-system, accessibility |
-| Productivity | workflow, automation, git |
-
-## Skill Quality Assessment
-
-When presenting a skill, assess these dimensions:
-
-| Dimension | What to check | Red flags |
-|-----------|--------------|-----------|
-| Maintenance | Last update &lt; 6 months? | No updates in 1+ year |
-| Depth | Has examples, not just description? | Single paragraph, no code |
-| Compatibility | Supports your agent? | Only tested on one platform |
-| Specificity | Solves your exact problem? | Generic content without actionable patterns |
-
-## Fallback: When No Skills Found
-
-Acknowledge, offer direct help, suggest creating a custom skill:
-
-```
-I searched for skills related to &quot;xyz&quot; but didn&#x27;t find matches.
-I can still help with this task directly.
-
-If this is something you do often, create your own skill:
-npx skills init my-xyz-skill
-```
-</pre>
+| C
+...[truncated]</pre>
           </div>
         </article>
-        <article class="skill-card" data-name="efficient-coding" data-domain="Extras">
+        <article class="skill-card" data-name="efficient-coding">
           <button class="skill-trigger" aria-expanded="false">
             <span class="skill-arrow" aria-hidden="true">+</span>
             <div class="skill-info">
@@ -6453,33 +5037,11 @@ tokens than any other cause. Attack it first.
 - If the user asked for code, write the code. Don&#x27;t explain it unless asked.
 - If the user asked for a fix, apply the fix. Don&#x27;t describe what was wrong unless asked.
 
-**No unsolicited comments in code:**
-- Don&#x27;t add inline comments or docstrings unless explicitly requested.
-- The user&#x27;s codebase defines the comment convention — match it, don&#x27;t add to it.
-
-**No redundant display of file contents:**
-- Don&#x27;t show the user the file you just read unless they asked to see it.
-- Don&#x27;t echo back the code you just wrote with a &quot;Here&#x27;s the updated file:&quot; header.
-
----
-
-## 4. Scope — Do Exactly What Was Asked
-
-**Strict scope discipline:**
-- Fix the bug that was reported. Don&#x27;t also refactor the function it&#x27;s in.
-- Add the feature that was requested. Don&#x27;t also clean up nearby code.
-- If you notice something broken but unrelated, mention it briefly — don&#x27;t fix it unasked.
-
-**No unsolicited file creation:**
-- Never create README, docs, specs, changelogs, or migration files unless explicitly requested.
-- Never create test files unless the task is specifically about tests.
-- Always prefer editing an existing file over creating a new one.
-
-**No unsolicited dependency changes:**
-...[truncated - view full skill on GitHub]</pre>
+**No unsolic
+...[truncated]</pre>
           </div>
         </article>
-        <article class="skill-card" data-name="senior-engineer" data-domain="Extras">
+        <article class="skill-card" data-name="senior-engineer">
           <button class="skill-trigger" aria-expanded="false">
             <span class="skill-arrow" aria-hidden="true">+</span>
             <div class="skill-info">
@@ -6576,42 +5138,8 @@ Every hardcoded value with business meaning is a future bug.
 // Wrong
 price * 1.21
 if (status === 3)
-setTimeout(fn, 86400000)
-
-// Right
-const VAT_RATE = 0.21
-const STATUS_SHIPPED = 3
-const ONE_DAY_MS = 24 * 60 * 60 * 1000
-```
-
-If a value can change, or has meaning beyond its face value, it must be a named constant.
-
----
-
-## 4. Error Handling — Fail Fast, Fail Clearly
-
-**Validate inputs at the boundary:**
-- Check early, fail fast, with an actionable message
-- Never let bad data travel deep into the system before exploding
-
-**Make failures explicit:**
-```
-// Wrong — vague, no context
-throw new Error(&quot;Something went wrong&quot;)
-catch (e) { console.log(e) }
-
-// Right — who failed, what failed, what identifier
-throw new Error(`Payment failed for orderId=${order.id}: ${e.message}`)
-logger.error({ orderId: order.id, userId: user.id, error: e.message })
-```
-
-**Design for failure, not success:**
-- APIs fail. Network is unreliable. Data can be malformed. Assume all of it.
-- Every external call needs: timeout, error handling, and at minimum a logged failure
-
-**Don&#x27;t swallow exceptions:**
-- Empty `cat
-...[truncated - view full skill on GitHub]</pre>
+s
+...[truncated]</pre>
           </div>
         </article>
       </div>
@@ -6622,7 +5150,7 @@ logger.error({ orderId: order.id, userId: user.id, error: e.message })
         <span class="domain-count">3 skills</span>
       </div>
       <div class="skills-grid">
-        <article class="skill-card" data-name="shokunin-update" data-domain="Ecosystem">
+        <article class="skill-card" data-name="shokunin-update">
           <button class="skill-trigger" aria-expanded="false">
             <span class="skill-arrow" aria-hidden="true">+</span>
             <div class="skill-info">
@@ -6698,19 +5226,19 @@ This automatically:
 </pre>
           </div>
         </article>
-        <article class="skill-card" data-name="chromadb" data-domain="Ecosystem">
+        <article class="skill-card" data-name="chromadb">
           <button class="skill-trigger" aria-expanded="false">
             <span class="skill-arrow" aria-hidden="true">+</span>
             <div class="skill-info">
               <h3 class="skill-name">chromadb</h3>
               <span class="skill-lines">60 lines</span>
             </div>
-            <p class="skill-desc">Gestiona la base de memoria ChromaDB: ver almacenamiento, buscar entradas, borrar, hacer backup, y resetear. Use when user asks to manage memory, check what&#x27;s stored in ChromaDB, delete memory entries...</p>
+            <p class="skill-desc">Manages ChromaDB memory base: view storage, search entries, delete, backup, and reset. Use when user asks to manage memory, check what&#x27;s stored in ChromaDB, delete memory entries, backup the vector da...</p>
           </button>
           <div class="skill-body" hidden>
             <pre class="skill-content">---
 name: chromadb
-description: Gestiona la base de memoria ChromaDB: ver almacenamiento, buscar entradas, borrar, hacer backup, y resetear. Use when user asks to manage memory, check what&#x27;s stored in ChromaDB, delete memory entries, backup the vector database, or reset the memory. Do NOT use for general question answering about past sessions (use memory skill for that).
+description: Manages ChromaDB memory base: view storage, search entries, delete, backup, and reset. Use when user asks to manage memory, check what&#x27;s stored in ChromaDB, delete memory entries, backup the vector database, or reset the memory. Do NOT use for general question answering about past sessions (use memory skill for that).
 license: MIT
 compatibility: opencode
 metadata:
@@ -6722,31 +5250,31 @@ metadata:
 
 # ChromaDB Manager
 
-Gestiona la base de vectores que almacena la memoria persistente del ecosistema.
+Manages the vector database that stores the ecosystem&#x27;s persistent memory.
 
-## Comandos
+## Commands
 
-| Comando | Descripción |
+| Command | Description |
 |---------|-------------|
-| /memory-status | Muestra cuántas entradas hay, tamaño en disco, colecciones |
-| /memory-search [query] | Busca entradas específicas en la memoria |
-| /memory-delete [id] | Borra una entrada específica |
-| /memory-backup | Crea backup de ChromaDB |
-| /memory-reset | Borra TODA la memoria (confirmación requerida) |
+| /memory-status | Shows number of entries, disk size, collections |
+| /memory-search [query] | Searches for specific entries in memory |
+| /memory-delete [id] | Deletes a specific entry |
+| /memory-backup | Creates a ChromaDB backup |
+| /memory-reset | Deletes ALL memory (confirmation required) |
 
 ## Workflow
 
-### Ver estado de la memoria
-El agente usa `search_context` con `query: &quot;__stats__&quot;` para contar entradas.
-O ejecuta:
+### Check memory status
+The agent uses `search_context` with `query: &quot;__stats__&quot;` to count entries.
+Or run:
 ```powershell
 $stats = @&quot;
 {&quot;jsonrpc&quot;:&quot;2.0&quot;,&quot;id&quot;:1,&quot;method&quot;:&quot;tools/call&quot;,&quot;params&quot;:{&quot;name&quot;:&quot;search_context&quot;,&quot;arguments&quot;:{&quot;query&quot;:&quot;stats&quot;}}}
 &quot;@ | python ~/.shokunin/memory/mcp-server.py 2&gt;&amp;1
 ```
 
-### Backup de la memoria
-Los datos están en `~/.shokunin/memory/chroma_db/`. Backup:
+### Memory backup
+Data is stored in `~/.shokunin/memory/chroma_db/`. Backup:
 ```powershell
 $backupDir = &quot;$env:USERPROFILE\.shokunin\backups&quot;
 New-Item -ItemType Directory -Path $backupDir -Force | Out-Null
@@ -6755,23 +5283,23 @@ Compress-Archive -Path &quot;$env:USERPROFILE\.shokunin\memory&quot; -Destinatio
 Write-Host &quot;Backup: $backupDir\memory-$date.zip&quot;
 ```
 
-### Reset completo (si quieres empezar de cero)
+### Full reset (if you want to start from scratch)
 ```powershell
 Remove-Item -Recurse -Force &quot;$env:USERPROFILE\.shokunin\memory\chroma_db&quot;
-Write-Host &quot;Memoria borrada. Se recreará sola al próximo uso.&quot;
+Write-Host &quot;Memory deleted. It will recreate itself on next use.&quot;
 ```
 
-## Automatización
-Backup automático cada domingo con el cleanup semanal (ya configurado en Task Scheduler).
+## Automation
+Automatic backup every Sunday with the weekly cleanup (already configured in Task Scheduler).
 
-## Dónde están los datos
-- Base de datos: `~/.shokunin/memory/chroma_db/`
+## Where the data is
+- Database: `~/.shokunin/memory/chroma_db/`
 - Backups: `~/.shokunin/backups/`
-- Tamaño típico: ~400 KB (crece ~1 KB por entrada)
+- Typical size: ~400 KB (grows ~1 KB per entry)
 </pre>
           </div>
         </article>
-        <article class="skill-card" data-name="memory" data-domain="Ecosystem">
+        <article class="skill-card" data-name="memory">
           <button class="skill-trigger" aria-expanded="false">
             <span class="skill-arrow" aria-hidden="true">+</span>
             <div class="skill-info">
@@ -6882,7 +5410,7 @@ The agent should automatically:
         <span class="domain-count">3 skills</span>
       </div>
       <div class="skills-grid">
-        <article class="skill-card" data-name="humanize" data-domain="Language">
+        <article class="skill-card" data-name="humanize">
           <button class="skill-trigger" aria-expanded="false">
             <span class="skill-arrow" aria-hidden="true">+</span>
             <div class="skill-info">
@@ -6917,79 +5445,54 @@ Sources: GPTZero, QuillBot, MIT Technology Review, Google Brain research (Ippoli
 
 ---
 
-## The 16 AI tells (con qué se nota)
+## The 16 AI tells (how to spot them)
 
-### 1. Palabras comodín sobreutilizadas (Grammarly 2026, Reddit)
+### 1. Overused buzzwords (Grammarly 2026, Reddit)
 
-| Palabra AI | Alternativa humana |
+| AI word | Human alternative |
 |------------|-------------------|
-| delve into | analizar, profundizar, explorar |
-| pivotal | clave, determinante, crítico |
-| underscore | destacar, señalar, remarcar |
-| multifaceted | complejo, con varios aspectos |
-| landscape | ecosistema, panorama, situación |
-| paradigm | modelo, enfoque, esquema |
-| robust | sólido, fiable, resistente |
-| leverage | aprovechar, usar, sacar partido |
-| seamless | fluido, sin fricción, natural |
-| transformative | disruptivo, profundo, radical |
+| delve into | analyze, explore, dig into |
+| pivotal | key, decisive, critical |
+| underscore | highlight, point out, stress |
+| multifaceted | complex, with several aspects |
+| landscape | ecosystem, context, situation |
+| paradigm | model, approach, framework |
+| robust | solid, reliable, resilient |
+| leverage | use, harness, take advantage of |
+| seamless | smooth, frictionless, natural |
+| transformative | disruptive, profound, radical |
 
-### 2. Conectores mecánicos (GPTZero research)
+### 2. Mechanical connectors (GPTZero research)
 
-- &quot;Moreover&quot;, &quot;Furthermore&quot;, &quot;Nevertheless&quot;, &quot;Consequently&quot; → usar &quot;Además&quot;, &quot;También&quot;, &quot;Pero&quot;, &quot;Por eso&quot; o nada
-- &quot;Sin embargo&quot; cada 3 párrafos → tachar la mitad, dejar que fluya
-- &quot;No obstante&quot;, &quot;Por lo tanto&quot;, &quot;En consecuencia&quot; → reemplazar por &quot;Así que&quot;, &quot;Entonces&quot;, &quot;Eso significa que&quot;
+- &quot;Moreover&quot;, &quot;Furthermore&quot;, &quot;Nevertheless&quot;, &quot;Consequently&quot; → use &quot;Also&quot;, &quot;But&quot;, &quot;So&quot; or nothing
+- &quot;However&quot; every 3 paragraphs → cut half, let it flow
+- &quot;Nevertheless&quot;, &quot;Therefore&quot;, &quot;Consequently&quot; → replace with &quot;So&quot;, &quot;Then&quot;, &quot;That means&quot;
 
-### 3. Estructura perfecta y simétrica (MIT Tech Review)
+### 3. Perfect symmetrical structure (MIT Tech Review)
 
-Los LLMs generan párrafos del mismo largo, misma estructura: intro → punto → ejemplo → conclusión.
+LLMs generate paragraphs of the same length, same structure: intro → point → example → conclusion.
 
-**Fix:** Romper el patrón. Párrafo de una línea. Luego uno largo. Lista. Luego otro corto.
+**Fix:** Break the pattern. One-line paragraph. Then a long one. List. Then another short one.
 
-### 4. Burstiness baja (QuillBot, pdf4.dev)
+### 4. Low burstiness (QuillBot, pdf4.dev)
 
-AI produce frases de largo parejo. Los humanos alternan:
-- Frase corta. Impacto.
-- Luego una más larga que desarrolla la idea con más detalle y matices, añadiendo contexto.
-- Otra corta.
+AI produces sentences of similar length. Humans alternate:
+- Short sentence. Impact.
+- Then a longer one that develops the idea with more detail and nuance, adding context.
+- Another short one.
 
-### 5. Neutralidad absoluta (r/auscorp, Reddit)
+### 5. Absolute neutrality (r/auscorp, Reddit)
 
-La IA nunca toma posición. Suena a wiki.
-**Fix:** Meter opinión, juicio, sesgo reconocido. &quot;Esto no nos gusta&quot;, &quot;Esto está bien hecho&quot;, &quot;Es debatible&quot;.
+AI never takes a position. Sounds like a wiki.
+**Fix:** Add opinion, judgment, acknowledged bias. &quot;We don&#x27;t like this&quot;, &quot;This is well done&quot;, &quot;This is debatable&quot;.
 
-### 6. Transiciones forzadas (HN, cybersecurity forums)
+### 6. Forced transitions (HN, cybersecurity forums)
 
-&quot;Es importante destacar que...&quot;, &quot;Cabe mencionar que...&quot;, &quot;Vale la pena señalar que...&quot; → borrar todas. Si la frase no funciona sin la muleta, reescríbela.
-
-### 7. Números y estadísticas sin fuente
-
-AI inventa datos que &quot;suenan bien&quot;. Ej: &quot;Estudios demuestran que el 80% de los usuarios...&quot;
-**Fix:** Si no hay fuente real, no pongas número. Usa &quot;muchos&quot;, &quot;la mayoría&quot;, &quot;es frecuente&quot;.
-
-### 8. Voz pasiva excesiva
-
-&quot;Fue realizado&quot;, &quot;Se ha determinado&quot;, &quot;Puede ser observado&quot;
-**Fix:** Activa. &quot;Realizamos&quot;, &quot;Determinamos&quot;, &quot;Se observa&quot;
-
-### 9. Hipérbole vacía (r/cybersecurity)
-
-&quot;Crítico&quot;, &quot;Masivo&quot;, &quot;Transformador&quot;, &quot;Revolucionario&quot; sin respaldo.
-**Fix:** Datos concretos o lenguaje mesurado.
-
-### 10. Cierre con pregunta retórica
-
-&quot;¿Estás listo para el futuro?&quot;, &quot;¿Te imaginas un mundo donde...?&quot;
-**Fix:** Cerrar con afirmación o call to action directo.
-
-### 11. Longitud uniforme de párrafos
-
-AI: todos los párrafos 3-5 líneas.
-Humano: mez
-...[truncated - view full skill on GitHub]</pre>
+&quot;I
+...[truncated]</pre>
           </div>
         </article>
-        <article class="skill-card" data-name="research" data-domain="Language">
+        <article class="skill-card" data-name="research">
           <button class="skill-trigger" aria-expanded="false">
             <span class="skill-arrow" aria-hidden="true">+</span>
             <div class="skill-info">
@@ -7021,74 +5524,44 @@ Based on: CIA Structured Analytic Techniques (Heuer &amp; Pherson), US Governmen
 
 ## Evidence hierarchy (adapted from NHMRC + intelligence community)
 
-Usar esta jerarquía para determinar el peso de cada fuente:
+Use this hierarchy to determine the weight of each source:
 
-| Nivel | Tipo | Ejemplo |
+| Level | Type | Example |
 |-------|------|---------|
-| **1 — Primaria directa** | Documento oficial, captura directa, dato observado | Response HTTP real, código fuente, DB dump, screenshot |
-| **2 — Primaria oficial** | Comunicado oficial, documentación pública, filing | SEC filing, CVE entry, changelog oficial, press release |
-| **3 — Secundaria reputada** | Medio establecido, paper revisado, base de datos curada | NVD, Wordfence, OWASP, Reuters, arXiv |
-| **4 — Múltiples fuentes independientes** | 3+ fuentes no relacionadas reportan lo mismo | Cross-reference entre blogs técnicos + foros + docs |
-| **5 — Fuente única con evidencia** | Un source verificable pero sin corroboración | Blog de investigador con evidencia reproducible |
-| **6 — Sin verificar** | Afirmación sin respaldo, rumor, especulación | NO usar como hecho en un documento |
+| **1 — Direct primary** | Official document, direct capture, observed data | Real HTTP response, source code, DB dump, screenshot |
+| **2 — Official primary** | Official statement, public documentation, filing | SEC filing, CVE entry, official changelog, press release |
+| **3 — Reputable secondary** | Established outlet, peer-reviewed paper, curated database | NVD, Wordfence, OWASP, Reuters, arXiv |
+| **4 — Multiple independent sources** | 3+ unrelated sources report the same | Cross-reference across tech blogs + forums + docs |
+| **5 — Single source with evidence** | One verifiable source but no corroboration | Researcher blog with reproducible evidence |
+| **6 — Unverified** | Unsupported claim, rumor, speculation | Do NOT use as fact in a document |
 
-**Regla:** un documento profesional solo usa niveles 1–4 para afirmaciones factuales. Nivel 5 para contexto o citas directas, marcado como tal. Nivel 6 no se publica.
+**Rule:** a professional document only uses levels 1–4 for factual claims. Level 5 for context or direct quotes, marked as such. Level 6 is not published.
 
 ---
 
 ## Source verification protocol (NPR + Princeton triangulation)
 
-### Step 1: The direct knowledge test (antes de citar)
+### Step 1: The direct knowledge test (before citing)
 
-Preguntar sobre cada fuente:
+Ask about each source:
 
-- **First-hand:** ¿La fuente presenció el evento, participó directamente, o tiene documentación? → Fuerte, pero requiere corroboración
-- **Second-hand:** ¿La fuente escuchó de alguien más? → Útil para leads, insuficiente para publicar
-- **Third-hand+:** ¿Rumor, hearsay, especulación? → No publicable como hecho
+- **First-hand:** Did the source witness the event, participate directly, or have documentation? → Strong, but requires corroboration
+- **Second-hand:** Did the source hear it from someone else? → Useful for leads, insufficient to publish
+- **Third-hand+:** Rumor, hearsay, speculation? → Not publishable as fact
 
 ### Step 2: Triangulation (Princeton method)
 
-Cruce cada afirmación contra múltiples fuentes independientes:
+Cross-check each claim against multiple independent sources:
 
 ```
-Afirmación: &quot;WordPress 6.7 tiene una vulnerabilidad X&quot;
-  → Fuente A: advisory oficial de WordPress
-  → Fuente B: entrada en NVD/CVE
-  → Fuente C: análisis de Wordfence o similar
-  → ¿Coinciden? → VERIFICADO
-  → ¿Solo una fuente? → NO VERIFICADO
-```
-
-### Step 3: Bias and agenda assessment (NPR)
-
-Por cada fuente, identificar:
-
-- **Financial interest:** ¿La fuente se beneficia económicamente de una narrativa particular?
-- **Professional interest:** ¿Su reputación/carrera depende de cierto resultado?
-- **Personal relationships:** ¿Amigos, familia, enemigos del sujeto?
-- **Funding:** ¿Quién financia a la fuente? ¿Qué intereses tiene ese financiador?
-
-### Step 4: The five-minute background check (NPR)
-
-Cuando hay poco tiempo:
-
-1. Leer bio y &quot;About&quot; de la fuente
-2. Identificar quién financia o respalda
-3. Buscar patrones de comportamiento o reclamos previos
-4. Verificar si hay conflictos de interés visibles
-
----
-
-## Verification tiers (adaptado de OSINT + War Intel Hub)
-
-Cada afirmación en el documento debe tener un tier asignado:
-
-| Tier | Label | Requisito | Color en documento |
-|---
-...[truncated - view full skill on GitHub]</pre>
+Claim: &quot;WordPress 6.7 has vulnerability X&quot;
+  → Source A: official WordPress advisory
+  → Source B: entry in NVD/CVE
+  → Source C: Wordfence or similar a
+...[truncated]</pre>
           </div>
         </article>
-        <article class="skill-card" data-name="init" data-domain="Language">
+        <article class="skill-card" data-name="init">
           <button class="skill-trigger" aria-expanded="false">
             <span class="skill-arrow" aria-hidden="true">+</span>
             <div class="skill-info">
@@ -7178,38 +5651,13 @@ Test framework, how to run tests, coverage requirements if any.
 **## Commit &amp; Pull Request Guidelines**
 Commit conventions derived from actual git history. Note any PR templates.
 
-Add other sections only if facts strongly support them (e.g., Architecture Overview, Agent Instructions).
-
-### What to never include
-
-Do not include generic development practices such as:
-- &quot;Write unit tests for all new utilities&quot;
-- &quot;Use meaningful variable names&quot;
-
-Do not invent sections like &quot;Common Development Tasks&quot; or &quot;Tips for Development&quot; unless the repo&#x27;s own documentation expressly contains them. Do not list every file — only document what is non-obvious.
-
-### New vs existing
-
-- **Existing AGENTS.md:** Fix inaccuracies, fill gaps, remove generic advice, ensure commands are current. Preserve correct, specific content. Present the diff and ask to confirm before overwriting.
-- **New AGENTS.md:** Write directly to the repository root. No confirmation needed.
-
----
-
-## Validate
-
-Before finalizing, verify:
-
-- Every command mentioned actually exists in the build system
-- Every file path mentioned exists in the repo
-- No generic advice slipped in
-- No repeated information across sections
--
-...[truncated - view full skill on GitHub]</pre>
+Add
+...[truncated]</pre>
           </div>
         </article>
       </div>
     </section>
-</main>
+  </main>
 
 <footer class="footer">
   <div><a href="./">Home</a> <span>·</span> <a href="https://github.com/EliasOulkadi/shokunin">GitHub</a> <span>·</span> MIT License <span>·</span> v4.2.2</div>
