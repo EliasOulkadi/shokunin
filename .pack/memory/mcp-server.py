@@ -463,7 +463,7 @@ def _dispatch(request: dict[str, Any]) -> dict[str, Any] | None:
                     "id": req_id,
                     "result": {"content": [{"type": "text", "text": json.dumps(tool_result)}]},
                 }
-            except Exception as e:
+            except Exception:
                 _LOGGER.exception(f"Error handling tool {tool_name}")
                 return {"jsonrpc": "2.0", "id": req_id, "error": {"code": -32000, "message": "Internal server error"}}
         else:

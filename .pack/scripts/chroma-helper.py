@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import logging as _logging
 import math
 import os
 import re
@@ -14,7 +15,6 @@ from typing import Any
 import chromadb
 from chromadb.config import Settings
 
-import logging as _logging
 _LOGGER = _logging.getLogger("shokunin.chroma")
 _LOGGER.setLevel(_logging.WARNING)
 
@@ -151,7 +151,7 @@ def recall(query: str, project: str | None = None, n_results: int = 10, from_dat
             if fname.endswith(".md") and not fname.endswith("-parsed.md"):
                 fpath = os.path.join(sessions_dir, fname)
                 try:
-                    with open(fpath, "r", encoding="utf-8", errors="replace") as f:
+                    with open(fpath, encoding="utf-8", errors="replace") as f:
                         content = f.read()
                     if content.strip():
                         md_entries.append({"text": content, "session": fname.replace(".md", "")})
@@ -384,7 +384,7 @@ def session_continue(session_id: str, summary_only: bool = False) -> dict[str, A
     jsonl_messages = []
     if os.path.isfile(jsonl_path):
         try:
-            with open(jsonl_path, "r", encoding="utf-8") as f:
+            with open(jsonl_path, encoding="utf-8") as f:
                 for line in f:
                     line = line.strip()
                     if line:

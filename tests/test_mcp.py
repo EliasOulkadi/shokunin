@@ -1,12 +1,10 @@
 from __future__ import annotations
 
-import os
 import json
+import os
 import subprocess
 import sys
 from typing import Any
-
-import pytest
 
 MCP_SERVER = os.path.join(os.path.expanduser("~"), ".shokunin", "memory", "mcp-server.py")
 PYTHON = sys.executable

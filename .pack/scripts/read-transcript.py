@@ -70,7 +70,7 @@ if __name__ == "__main__":
     if len(sys.argv) < 2:
         print("Usage: read-transcript.py <raw_text_file> [session_id]", file=sys.stderr)
         sys.exit(1)
-    with open(sys.argv[1], "r", encoding="utf-8", errors="replace") as f:
+    with open(sys.argv[1], encoding="utf-8", errors="replace") as f:
         raw = f.read()
     sid = sys.argv[2] if len(sys.argv) > 2 else f"manual-{datetime.now().strftime('%Y%m%d-%H%M%S')}"
     print(parse_transcript(raw, sid))
