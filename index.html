@@ -46,6 +46,10 @@
     --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
     --serif: Charter, Georgia, Palatino, "Times New Roman", serif;
     --mono: "JetBrains Mono", "SF Mono", "Fira Code", Consolas, Monaco, monospace;
+    --bench-vec: #8a8880;
+    --bench-mul: #1B365D;
+    --bench-vec-bg: #d8d6d0;
+    --bench-mul-bg: #d0d8e4;
   }
 
   @keyframes heroIn { from { opacity: 0; transform: translateY(30px) rotateX(8deg) scale(0.96); } to { opacity: 1; transform: translateY(0) rotateX(0) scale(1); } }
@@ -68,7 +72,7 @@
 
   .skip-link { position: absolute; top: -100%; left: 16px; background: var(--ink-blue); color: #fff; padding: 8px 16px; border-radius: 4px; z-index: 100000; font-size: 14px; }
   .skip-link:focus { top: 8px; }
-.theme-toggle { position: fixed; top: 20px; right: 24px; z-index: 10001; background: none; border: none; color: var(--stone); cursor: pointer; padding: 6px; transition: color 0.3s ease, transform 0.3s cubic-bezier(0.23, 1, 0.32, 1); opacity: 0.5; }
+  .theme-toggle { position: fixed; top: 20px; right: 24px; z-index: 10001; background: none; border: none; color: var(--stone); cursor: pointer; padding: 6px; transition: color 0.3s ease, transform 0.3s cubic-bezier(0.23, 1, 0.32, 1); opacity: 0.5; }
   .theme-toggle:hover { opacity: 1; color: var(--ink-blue); transform: scale(1.1); }
   .theme-toggle:active { transform: scale(0.92); }
   .theme-toggle:focus-visible { outline: 2px solid var(--ink-blue); outline-offset: 2px; border-radius: 2px; opacity: 1; }
@@ -199,8 +203,8 @@
     table td { padding: 8px 10px; }
     table td:first-child { white-space: normal; }
 
-    .faq-q { font-size: 15px; }
-    .faq-a { font-size: 14px; }
+    details.faq-item summary { font-size: 15px; padding: 16px 0; }
+    details.faq-item .faq-a { font-size: 14px; }
 
     h1 { font-size: clamp(28px, 7vw, 42px); }
     h2 { font-size: clamp(22px, 5vw, 30px); }
@@ -270,14 +274,14 @@
   .bench-label { font-size: 13px; color: var(--dark-warm); font-weight: 500; text-align: right; }
   .bench-track { height: 24px; background: var(--border-soft); border-radius: 4px; overflow: hidden; }
   .bench-bar { height: 100%; border-radius: 4px; transform: scaleX(0); transform-origin: left; transition: transform 1s var(--ease-out); }
-  .bench-bar.vec { background: var(--stone); }
-  .bench-bar.mul { background: linear-gradient(135deg, var(--ink-blue), var(--ink-light)); }
+  .bench-bar.vec { background: var(--bench-vec); }
+  .bench-bar.mul { background: var(--bench-mul); }
   .bench-val { font-size: 12px; font-weight: 500; color: var(--near-black); font-variant-numeric: tabular-nums; white-space: nowrap; }
   .bench-legend { display: flex; gap: 20px; justify-content: center; margin-top: 18px; font-size: 12px; color: var(--stone); }
   .bench-legend span { display: inline-flex; align-items: center; gap: 6px; }
   .bench-legend .ldot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
-  .bench-legend .ldot.vec { background: var(--stone); }
-  .bench-legend .ldot.mul { background: linear-gradient(135deg, var(--ink-blue), var(--ink-light)); }
+  .bench-legend .ldot.vec { background: var(--bench-vec); }
+  .bench-legend .ldot.mul { background: var(--bench-mul); }
 
   .bench-footnote { margin-top: 24px; padding: 16px 20px; background: var(--ink-tag); border-radius: 8px; font-size: 13px; color: var(--ink-blue); line-height: 1.55; }
   .bench-footnote a { color: var(--ink-blue); text-decoration: underline; }
@@ -323,59 +327,63 @@
     }
   }
 
-  @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) {
-      --parchment: #0c0c0c;
-      --ivory: #161616;
-      --ink-blue: #7ca3d8;
-      --ink-light: #5a8bc4;
-      --ink-tag: #1a2a42;
-      --near-black: #e8e6e0;
-      --dark-warm: #b0ada5;
-      --olive: #8a877f;
-      --stone: #8a8880;
-      --border: #2a2a28;
-      --border-soft: #252523;
-    }
-    :root:not([data-theme="light"]) body::after { opacity: 0.06; }
-    :root:not([data-theme="light"]) .hero-bg { color: var(--ink-blue); }
-    :root:not([data-theme="light"]) .splash { background: var(--parchment); }
-    :root:not([data-theme="light"]) .splash-text { color: #3a3a38; }
-    :root:not([data-theme="light"]) .btn-primary { background: var(--ink-blue); color: #0d0d0d; }
-    :root:not([data-theme="light"]) .btn-secondary-text { color: var(--ink-light); }
-    :root:not([data-theme="light"]) .feature-card, :root:not([data-theme="light"]) .bench-highlight-item, :root:not([data-theme="light"]) .bench-callout, :root:not([data-theme="light"]) .bench-chart, :root:not([data-theme="light"]) .bench-footnote { background: var(--ivory); border-color: var(--border); }
-    :root:not([data-theme="light"]) .hero-install pre { background: var(--ivory); border-color: var(--border); color: var(--near-black); }
-    :root:not([data-theme="light"]) .arch-diagram { background: var(--ivory); border-color: var(--border); color: var(--dark-warm); }
-    :root:not([data-theme="light"]) .section-mesh { background-image: radial-gradient(ellipse 60% 40% at 30% 50%, rgba(124,163,216,0.06) 0%, transparent 60%); }
-    :root:not([data-theme="light"]) .faq-q { color: var(--ink-light); }
-    :root:not([data-theme="light"]) details.faq-item summary { color: var(--ink-light); }
-  }
-
+  /* ===== DARK MODE ===== */
   [data-theme="dark"] {
-    --parchment: #0c0c0c;
-    --ivory: #161616;
-    --ink-blue: #7ca3d8;
-    --ink-light: #5a8bc4;
-    --ink-tag: #1a2a42;
-    --near-black: #e8e6e0;
+    --parchment: #080808;
+    --ivory: #0f0f0f;
+    --ink-blue: oklch(65% 0.15 260);
+    --ink-light: oklch(58% 0.12 260);
+    --ink-tag: #141c2e;
+    --near-black: #f0ede8;
     --dark-warm: #b0ada5;
     --olive: #8a877f;
-    --stone: #8a8880;
-    --border: #2a2a28;
-    --border-soft: #252523;
+    --stone: oklch(55% 0.02 260);
+    --border: oklch(22% 0.01 260);
+    --border-soft: oklch(18% 0.01 260);
+    --bench-vec: oklch(55% 0.02 260);
+    --bench-mul: oklch(65% 0.15 260);
+    --bench-vec-bg: oklch(25% 0.01 260);
+    --bench-mul-bg: oklch(28% 0.06 260);
   }
   [data-theme="dark"] body::after { opacity: 0.06; }
-  [data-theme="dark"] .hero-bg { color: var(--ink-blue); }
+  [data-theme="dark"] .hero-bg { color: var(--ink-blue); opacity: 0.08; }
   [data-theme="dark"] .splash { background: var(--parchment); }
-  [data-theme="dark"] .splash-text { color: #3a3a38; }
-  [data-theme="dark"] .btn-primary { background: var(--ink-blue); color: #0d0d0d; }
+  [data-theme="dark"] .splash-text { color: #2a2a28; }
+  [data-theme="dark"] .btn-primary { background: var(--ink-blue); color: #080808; }
   [data-theme="dark"] .btn-secondary-text { color: var(--ink-light); }
-  [data-theme="dark"] .feature-card, [data-theme="dark"] .bench-highlight-item, [data-theme="dark"] .bench-callout, [data-theme="dark"] .bench-chart, [data-theme="dark"] .bench-footnote { background: var(--ivory); border-color: var(--border); }
+  [data-theme="dark"] .feature-card, [data-theme="dark"] .bench-highlight-item, [data-theme="dark"] .bench-callout, [data-theme="dark"] .bench-chart { background: var(--ivory); border-color: var(--border); }
+  [data-theme="dark"] .bench-footnote { background: var(--ink-tag); border-color: var(--border); color: var(--ink-light); }
+  [data-theme="dark"] .bench-footnote a { color: var(--ink-blue); }
   [data-theme="dark"] .hero-install pre { background: var(--ivory); border-color: var(--border); color: var(--near-black); }
-  [data-theme="dark"] .arch-diagram { background: var(--ivory); border-color: var(--border); color: var(--dark-warm); }
-  [data-theme="dark"] .section-mesh { background-image: radial-gradient(ellipse 60% 40% at 30% 50%, rgba(124,163,216,0.06) 0%, transparent 60%); }
-  [data-theme="dark"] .faq-q { color: var(--ink-light); }
-  [data-theme="dark"] details.faq-item summary { color: var(--ink-light); }
+  [data-theme="dark"] .arch-diagram { background: var(--ivory); border-color: var(--border); color: var(--stone); }
+  [data-theme="dark"] .section-mesh { background-image: radial-gradient(ellipse 60% 40% at 30% 50%, oklch(65% 0.15 260 / 0.05) 0%, transparent 60%); }
+  [data-theme="dark"] .faq-q { color: var(--ink-blue); }
+  [data-theme="dark"] details.faq-item summary { color: var(--ink-blue); }
+  [data-theme="dark"] .bench-bar.vec { background: var(--bench-vec); }
+  [data-theme="dark"] .bench-bar.mul { background: var(--bench-mul); }
+  [data-theme="dark"] .bench-track { background: var(--border-soft); }
+  [data-theme="dark"] .bench-val { color: var(--near-black); }
+  [data-theme="dark"] .bench-legend { color: var(--stone); }
+  [data-theme="dark"] .bench-legend .ldot.vec { background: var(--bench-vec); }
+  [data-theme="dark"] .bench-legend .ldot.mul { background: var(--bench-mul); }
+  [data-theme="dark"] .bench-highlight-item .big-num.neutral { color: var(--dark-warm); }
+  [data-theme="dark"] .bench-callout .lead { color: var(--ink-blue); }
+  [data-theme="dark"] .bench-callout .detail { color: var(--dark-warm); }
+  [data-theme="dark"] .stats-line { color: var(--dark-warm); }
+  [data-theme="dark"] .stats-line strong { color: var(--ink-blue); }
+  [data-theme="dark"] .sep { color: var(--border); }
+  [data-theme="dark"] .section-divider { background: linear-gradient(90deg, transparent, var(--border), transparent); }
+  [data-theme="dark"] .section-divider--foot { background: linear-gradient(90deg, transparent, var(--border), transparent); }
+  [data-theme="dark"] table th { color: var(--dark-warm); border-bottom-color: var(--border); }
+  [data-theme="dark"] table td { border-bottom-color: var(--border-soft); }
+  [data-theme="dark"] .hero-install .copy-btn { background: var(--ink-tag); color: var(--ink-blue); }
+  [data-theme="dark"] .hero-install .copy-btn:hover { background: var(--ink-blue); color: #080808; }
+  [data-theme="dark"] .hero-install .copy-btn:focus-visible { background: var(--ink-blue); color: #080808; }
+  [data-theme="dark"] a { color: var(--ink-blue); }
+  [data-theme="dark"] .bench-highlight-item--emphasis { border-color: var(--ink-blue); box-shadow: inset 0 0 0 1px var(--ink-blue), 0 0 24px oklch(65% 0.15 260 / 0.1); }
+  [data-theme="dark"] .feature-card:hover { box-shadow: 0 6px 20px oklch(65% 0.15 260 / 0.12); }
+  [data-theme="dark"] .bench-highlight-item:hover { box-shadow: 0 4px 16px oklch(65% 0.15 260 / 0.1); }
+  [data-theme="dark"] .btn:hover { box-shadow: 0 4px 12px oklch(65% 0.15 260 / 0.2); }
 </style>
 </head>
 <body>
@@ -648,12 +656,11 @@ get_session_summary — summarize all entries in a given session
 
 <script defer>
 (function() {
-  // Theme toggle: persist in localStorage, respect OS preference
+  // Theme toggle: default light, persist choice
   const toggle = document.getElementById('theme-toggle');
   const root = document.documentElement;
   const saved = localStorage.getItem('theme');
-  if (saved) { root.setAttribute('data-theme', saved); }
-  else if (window.matchMedia('(prefers-color-scheme: dark)').matches) { root.setAttribute('data-theme', 'dark'); }
+  if (saved === 'dark') { root.setAttribute('data-theme', 'dark'); }
   if (toggle) {
     toggle.addEventListener('click', () => {
       const current = root.getAttribute('data-theme');
