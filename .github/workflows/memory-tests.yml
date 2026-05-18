@@ -12,6 +12,7 @@ on:
       - 'install.sh'
       - 'tests/**'
       - 'pyproject.toml'
+      - '.github/workflows/memory-tests.yml'
   pull_request:
     paths:
       - '.pack/memory/**'
