@@ -31,7 +31,7 @@ def test_list_tools() -> None:
     assert "store_context" in tool_names
     assert "search_context" in tool_names
     assert "get_session_summary" in tool_names
-    assert len(tools) == 8
+    assert len(tools) == 9
 
 
 def test_invalid_method() -> None:

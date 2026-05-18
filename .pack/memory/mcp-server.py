@@ -324,17 +324,17 @@ def handle_search_context(args: dict[str, Any]) -> list[dict[str, Any]]:
 
     if freshness_boost > 0:
         now = datetime.now(timezone.utc)
-        for e in entries:
-            ts_str = e.get("timestamp", "")
+        for entry in entries:
+            ts_str = entry.get("timestamp", "")
             if ts_str:
                 try:
                     ts = datetime.fromisoformat(ts_str.replace("Z", "+00:00"))
                     days = (now - ts).total_seconds() / 86400.0
                     recency = math.exp(-days / 30.0)
-                    e["similarity"] = round((1.0 - freshness_boost) * e["similarity"] + freshness_boost * recency, 4)
+                    entry["similarity"] = round((1.0 - freshness_boost) * entry["similarity"] + freshness_boost * recency, 4)
                 except (ValueError, TypeError):
                     pass
-        entries.sort(key=lambda e: e["similarity"], reverse=True)
+        entries.sort(key=lambda entry: entry["similarity"], reverse=True)
 
     return entries[:n_results]
 
@@ -464,7 +464,7 @@ def handle_verify_file_path(args: dict[str, Any]) -> dict[str, Any]:
         try:
             mtime = datetime.fromtimestamp(os.path.getmtime(expanded), tz=timezone.utc).isoformat()
         except OSError:
-            pass
+            mtime = None
     kind = None
     if os.path.isfile(expanded):
         kind = "file"
