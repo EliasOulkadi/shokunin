@@ -6,7 +6,7 @@ compatibility: opencode
 metadata:
   workflow: operations
   audience: sre
-  version: "3.0"
+  version: "3.0.0"
 triggers:
   - "create a runbook"
   - "incident response plan"
@@ -24,6 +24,7 @@ negatives:
   - "Use **ci-cd** for deployment pipeline runbooks"
   - "Use **db-sculptor** for database-specific recovery procedures"
 ---
+
 
 # Runbook Generator
 

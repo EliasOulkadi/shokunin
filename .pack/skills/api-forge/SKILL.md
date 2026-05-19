@@ -25,9 +25,10 @@ compatibility: opencode
 metadata:
   workflow: backend
   audience: developers
-  version: "4.0"
+  version: "4.0.0"
   author: shokunin
 ---
+
 
 # API Forge
 

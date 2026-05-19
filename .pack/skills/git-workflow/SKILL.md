@@ -1,15 +1,37 @@
 ---
 name: git-workflow
 description: Automate the complete Git development workflow — create feature branches with conventional naming, atomic commits with conventional commit messages, interactive rebase, squash merges, PR body generation from commit history, branch cleanup, and git worktree patterns. Use when user asks to create a branch, commit changes, make a PR, rebase, squash, clean up branches, or follow a Git workflow. Do NOT use for CI/CD pipeline configuration (use ci-cd), code review (use code-review), or GitHub Actions workflows.
+triggers:
+  - "git branch"
+  - "create branch"
+  - "commit"
+  - "git commit"
+  - "git push"
+  - "git rebase"
+  - "squash commits"
+  - "git workflow"
+  - "make a PR"
+  - "pull request"
+  - "git merge"
+  - "git cleanup"
+  - "branch management"
+  - "conventional commit"
+negatives:
+  - "CI/CD pipeline"
+  - "GitHub Actions"
+  - "code review"
+  - "GitHub workflow"
+  - "GitLab CI"
 license: MIT
 compatibility: opencode
 metadata:
   workflow: development
   audience: developers
-  version: "3.0"
+  version: "3.0.0"
   author: shokunin
 allowed-tools: Read Bash Write Grep
 ---
+
 
 # Git Workflow
 

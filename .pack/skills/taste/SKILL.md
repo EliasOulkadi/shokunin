@@ -1,13 +1,34 @@
 ---
 name: taste
 description: "Senior UI/UX Engineer. Architect digital interfaces overriding default LLM biases. Enforces metric-based rules, strict component architecture, hardware-accelerated CSS, and balanced design engineering. By Leon Lin & blueemi. Multi-runtime improved by shokunin."
+triggers:
+  - "taste"
+  - "design taste"
+  - "UI taste"
+  - "design variance"
+  - "anti-slop"
+  - "creative arsenal"
+  - "Leon Lin"
+  - "design engineering"
+negatives:
+  - "animations"
+  - "motion"
+  - "components library"
+  - "brand identity"
+  - "premium agency design" -> use taste-soft
+  - "minimalist editorial" -> use taste-minimalist
+  - "design audit" -> use impeccable
+  - "micro-interactions" -> use emil-design-eng
 license: MIT (based on Leonxlnx/taste-skill)
 compatibility: opencode
 metadata:
-  version: "2.0-improved"
+  version: "2.0.0"
   author: Leon Lin, blueemi, improved by shokunin
   source: https://github.com/Leonxlnx/taste-skill
----
+
+  workflow: frontend
+  audience: designers---
+
 
 # High-Agency Frontend Skill
 

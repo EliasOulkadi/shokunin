@@ -8,31 +8,36 @@ description: >
   visual hierarchy, typography, color systems, layout, spacing, motion, dark mode,
   responsive design, and conversion patterns. Activate even when the user doesn't
   say "design" — if they're building a web frontend, these standards apply.
----
-
-# Aesthetic Web Design
-
-A specific, opinionated design language based on real references. This skill encodes a visual DNA — not generic "make it look good" — but exact fonts, exact palettes, exact CSS values.
-
-## Creative North Star
-
-The default direction is **editorial + atmospheric**.
-
-Core DNA:
-- Typography as primary visual element — massive, oversized, bleeding off-screen
-- Backgrounds with depth: gradient meshes, grain texture, illustrated scenes
-- 3D scroll effects and parallax on hero
-- Dark (#080808) OR cream (#f5f2ec) palettes — never generic white
-- Serif display for editorial, bold condensed display for tech
-- Product screenshots floating at angles, not centered boxes
-
-Anti-identity (absolute bans):
-- Flat #fff background with Inter font — wireframe, not finished design
-- Purple/indigo gradient on white — the #1 AI cliché
-- Generic 3-column centered layout with icon + heading + text cards
-- Emoji as icons
-- Animations on everything with no purpose
-
+triggers:
+  - "make it look better"
+  - "make it beautiful"
+  - "design system"
+  - "UI design"
+  - "web design"
+  - "visual design"
+  - "premium design"
+  - "styling"
+  - "interface design"
+  - "brand design"
+  - "typography"
+  - "color palette"
+negatives:
+  - "animation"
+  - "motion design"
+  - "component library"
+  - "React component"
+  - "Vue component"
+  - "conversion optimization"  # use landing-craft
+  - "responsive layout"  # use responsive-engine
+  - "animation"  # use motion-craft
+  - "micro-interactions"  # use emil-design-eng
+  - "component implementation"  # use component-forge
+license: MIT
+compatibility: opencode
+metadata:
+  workflow: frontend
+  audience: designers
+  version: "1.0.0"
 ---
 
 ## Register Distinction

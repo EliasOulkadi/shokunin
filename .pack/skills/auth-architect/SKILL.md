@@ -1,14 +1,37 @@
 ---
 name: auth-architect
 description: Implement authentication and authorization with OWASP Top 10 standards, OAuth 2.0 + OIDC, WebAuthn/Passkeys, session management, and RBAC/ABAC. Use when user asks to implement login, signup, authentication, authorization, JWT, OAuth, SSO, passkeys, MFA, or role-based access. Do NOT use for API key management (use api-forge), encryption at rest, or network-level security (firewalls, WAF).
+triggers:
+  - "authentication"
+  - "authorization"
+  - "login"
+  - "signup"
+  - "OAuth"
+  - "JWT"
+  - "SSO"
+  - "passkeys"
+  - "WebAuthn"
+  - "MFA"
+  - "role-based access"
+  - "RBAC"
+  - "session management"
+  - "passwordless"
+negatives:
+  - "API key management"
+  - "encryption at rest"
+  - "firewall"
+  - "WAF"
+  - "network security"
+  - "API design"
 license: MIT
 compatibility: opencode
 metadata:
   workflow: backend
   audience: developers
-  version: "4.0"
+  version: "4.0.0"
   author: shokunin
 ---
+
 
 # Auth Architect
 

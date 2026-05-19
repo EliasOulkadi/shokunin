@@ -1,15 +1,37 @@
 ---
 name: docker
 description: Optimize Docker images with multi-stage builds, distroless bases, BuildKit cache mounts, multi-arch builds, compose watch, security hardening (non-root, seccomp, capabilities drop), and vulnerability scanning via docker scout/trivy. Use when user asks to write a Dockerfile, optimize image size, set up docker-compose, debug containers, harden container security, or scan for CVEs. Do NOT use for Kubernetes deployments (use kubernetes), CI/CD pipeline design (use ci-cd), or Terraform (use terraform).
+triggers:
+  - "write a Dockerfile"
+  - "dockerize"
+  - "containerize"
+  - "optimize image"
+  - "multi-stage build"
+  - "docker-compose"
+  - "docker build"
+  - "Dockerfile"
+  - "docker image"
+  - "docker container"
+  - "docker compose"
+  - "docker scout"
+  - "docker security"
+  - "container security"
+negatives:
+  - "Kubernetes"
+  - "CI/CD pipeline"
+  - "Terraform"
+  - "K8s"
+  - "deploy to cluster"
 license: MIT
 compatibility: opencode
 metadata:
   workflow: infrastructure
   audience: devops
-  version: "3.0"
+  version: "3.0.0"
   author: shokunin
 allowed-tools: Read Bash Write
 ---
+
 
 # Docker Architect
 

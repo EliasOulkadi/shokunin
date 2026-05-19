@@ -26,7 +26,8 @@ function Log { if (-not $Quiet) { Write-Host "$args" -ForegroundColor $args[1] }
 function Get-Hash($path) {
   if (-not (Test-Path $path)) { return $null }
   try {
-    $bytes = [System.IO.File]::ReadAllBytes((Resolve-Path $path))
+    $resolvedPath = Microsoft.PowerShell.Management\Resolve-Path -LiteralPath $path -ErrorAction Stop
+    $bytes = [System.IO.File]::ReadAllBytes($resolvedPath.Path)
     $hasher = [System.Security.Cryptography.SHA256]::Create()
     $hash = $hasher.ComputeHash($bytes)
     return ($hash | ForEach-Object { $_.ToString("x2") }) -join ""
@@ -41,7 +42,7 @@ function Resolve-Vars($text, $vars) {
   return $result
 }
 
-function Resolve-Path($relative) {
+function Resolve-ShokuninPath($relative) {
   $r = $relative
   if ($r.StartsWith("~/") -or $r -eq "~") {
     $r = $env:USERPROFILE + $r.Substring(1)
@@ -70,20 +71,20 @@ function Flatten-Components($manifest) {
 
   foreach ($group in $manifest.components.PSObject.Properties) {
     $g = $group.Value
-    $groupPath = if ($g.path) { Resolve-Vars $g.path $vars } else { $null }
-    $groupBackup = if ($g.backup) { $true } else { $false }
-    $groupRule = if ($g.rule) { $g.rule } else { "MODIFY" }
-    $entries = $g.entries.PSObject.Properties
+    $groupPath = if ($g.PSObject.Properties['path']) { Resolve-Vars $g.path $vars } else { $null }
+    $groupBackup = if ($g.PSObject.Properties['backup']) { $true } else { $false }
+    $groupRule = if ($g.PSObject.Properties['rule']) { $g.rule } else { "MODIFY" }
+    $entries = if ($g.PSObject.Properties['entries']) { $g.entries.PSObject.Properties } else { @() }
     foreach ($entry in $entries) {
       $e = $entry.Value
-      $relPath = if ($e.path) { $e.path } elseif ($groupPath) { "$groupPath/$($entry.Name)" } else { $entry.Name }
-      $fullPath = Resolve-Path (Resolve-Vars $relPath $vars)
+      $relPath = if ($e.PSObject.Properties['path']) { $e.path } elseif ($groupPath) { "$groupPath/$($entry.Name)" } else { $entry.Name }
+      $fullPath = Resolve-ShokuninPath (Resolve-Vars $relPath $vars)
       $flat += [PSCustomObject]@{
         Key = $entry.Name
         FullPath = $fullPath
-        Type = if ($e.type) { $e.type } else { "static" }
-        Runtime = if ($e.runtime) { $e.runtime } else { "none" }
-        Template = if ($e.template) { $e.template } else { $null }
+        Type = if ($e.PSObject.Properties['type']) { $e.type } else { "static" }
+        Runtime = if ($e.PSObject.Properties['runtime']) { $e.runtime } else { "none" }
+        Template = if ($e.PSObject.Properties['template']) { $e.template } else { $null }
         Rule = $groupRule
         Backup = $groupBackup
       }
@@ -119,14 +120,15 @@ function Get-Status($flat) {
 }
 
 function Write-StatusReport($results) {
-  $ok = ($results | Where-Object { $_.Status -eq "OK" }).Count
-  $missing = ($results | Where-Object { $_.Status -eq "MISSING" }).Count
-  $protected = ($results | Where-Object { $_.Status -eq "PROTECTED" }).Count
+  $allResults = @($results)
+  $ok = (@($allResults | Where-Object { $_.Status -eq "OK" })).Count
+  $missing = (@($allResults | Where-Object { $_.Status -eq "MISSING" })).Count
+  $protected = (@($allResults | Where-Object { $_.Status -eq "PROTECTED" })).Count
 
   Write-Host "`nShokunin Ecosystem Status" -ForegroundColor Cyan
   Write-Host "==========================================" -ForegroundColor Cyan
   Write-Host ""
-  Write-Host "Components: $($results.Count) total" -ForegroundColor White
+  Write-Host "Components: $($allResults.Count) total" -ForegroundColor White
   Write-Host "  $ok OK" -ForegroundColor Green
   if ($missing -gt 0) { Write-Host "  $missing MISSING" -ForegroundColor Red }
   Write-Host "  $protected PROTECTED (data - never modified)" -ForegroundColor DarkGray
@@ -134,7 +136,7 @@ function Write-StatusReport($results) {
 
   if ($missing -gt 0) {
     Write-Host "Missing components:" -ForegroundColor Yellow
-    $results | Where-Object { $_.Status -eq "MISSING" } | ForEach-Object {
+    $allResults | Where-Object { $_.Status -eq "MISSING" } | ForEach-Object {
       Write-Host "  - $($_.Key): $($_.Path)" -ForegroundColor Red
     }
     Write-Host ""
@@ -320,7 +322,3 @@ switch ($Command) {
   }
 }
 
-if ($Command -eq "status") {
-  $results = Get-Status $flat
-  Write-StatusReport $results
-}

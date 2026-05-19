@@ -1,15 +1,36 @@
 ---
 name: memory
 description: Persistent memory across AI sessions using ChromaDB vector database. Stores and retrieves context from past conversations, decisions, and code. Use when user asks to remember something, search past conversations, recall what was done before, save context for later, or find information from previous sessions. Do NOT use for git history or file-based notes.
+triggers:
+  - "remember"
+  - "search past"
+  - "recall"
+  - "what was done"
+  - "previous session"
+  - "save context"
+  - "remember that"
+  - "memory"
+  - "ChromaDB"
+  - "vector memory"
+  - "persistent memory"
+negatives:
+  - "git history"
+  - "file system"
+  - "file notes"
+  - "backup"
+  - "database"
+  - "memory admin" -> use chromadb
+  - "backup memory" -> use chromadb
 license: MIT
 compatibility: opencode
 metadata:
   workflow: productivity
   audience: developers
-  version: "1.0"
+  version: "1.0.0"
   author: shokunin
 allowed-tools: Read Bash Write
 ---
+
 
 # Memory
 
@@ -158,6 +179,20 @@ size = sum(os.path.getsize(os.path.join(root, f)) for root, _, files in os.walk(
 print(f"Database size: {size / 1024 / 1024:.1f} MB")
 print(f"Collection count: {collection.count()}")
 ```
+
+## Related Scripts
+
+- `~/.shokunin/scripts/seed-memory.ps1` — Imports session markdown files into ChromaDB for first-time population
+- `~/.shokunin/scripts/memory-healthcheck.ps1` — Verifies ChromaDB collection integrity and reports health status
+- `~/.shokunin/scripts/read-transcript.py` — Parses MCP session transcripts and extracts structured decisions and sections
+
+## Checklist
+
+- [ ] Session ID is unique before storing (check with `session list`)
+- [ ] Entry text is descriptive: what, why, and result (not just what)
+- [ ] Type matches VALID_TYPES in MCP server config
+- [ ] Tags align with previous entries for consistent search
+- [ ] Session_end saved at end of every session
 
 ## Sources
 

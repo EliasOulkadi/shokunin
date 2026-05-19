@@ -36,7 +36,7 @@ compatibility: opencode
 metadata:
   workflow: mobile
   audience: developers
-  version: "3.0"
+  version: "3.0.0"
 allowed-tools:
   - bash
   - edit
@@ -47,6 +47,7 @@ allowed-tools:
   - websearch
   - webfetch
 ---
+
 
 # React Native Architect
 

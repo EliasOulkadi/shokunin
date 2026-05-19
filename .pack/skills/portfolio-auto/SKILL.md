@@ -1,13 +1,27 @@
 ---
 name: portfolio-auto
 description: Auto-sync GitHub repos to portfolio website. Scans GitHub repos, captures screenshots with Playwright, generates project entries, and updates projects-data.js or Supabase DB. Use when user asks to "update portfolio", "sync projects", "add my repos to portfolio", or "refresh portfolio projects". Do NOT use for one-time project additions — batch sync only.
+triggers:
+  - "update portfolio"
+  - "sync projects"
+  - "add my repos"
+  - "refresh portfolio"
+  - "portfolio automation"
+  - "GitHub sync"
+  - "project screenshots"
+negatives:
+  - "one-time project"
+  - "manual addition"
+  - "design portfolio"
+  - "PDF portfolio"
 license: MIT
 compatibility: opencode
 metadata:
   workflow: automation
   audience: developers
-  version: "2.0"
+  version: "2.0.0"
 ---
+
 
 > **Note:** `last-sync.json` state file is auto-created on first successful sync. Ignore "missing file" warnings on first run.
 
@@ -188,6 +202,14 @@ for repo in repos:
 
 json.dump(cache, open(cache_file, 'w'))
 ```
+
+## Checklist
+
+- [ ] GitHub token has correct scopes (repo, read:user) before fetching repos
+- [ ] Screenshot runs only for repos with valid homepage URLs (HEAD check first)
+- [ ] Playwright browser closed in finally block to prevent orphan processes
+- [ ] Existing portfolio customizations preserved before upserting new entries
+- [ ] Dry-run mode available to preview changes without executing
 
 ## Sources
 

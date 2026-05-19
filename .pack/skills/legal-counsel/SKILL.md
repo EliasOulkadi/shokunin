@@ -24,8 +24,9 @@ compatibility: opencode
 metadata:
   workflow: legal
   audience: developers
-  version: "3.0"
+  version: "3.0.0"
 ---
+
 
 **IMPORTANT DISCLAIMER**: Reference information for educational and preliminary analysis. NOT legal advice. No attorney-client relationship. Laws vary by jurisdiction and change frequently. Always consult a qualified attorney.
 

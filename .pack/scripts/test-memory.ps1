@@ -121,8 +121,8 @@ Test-Step -Name "AGENTS.md has memory section" -ScriptBlock {
     if (-not ($content -match "MEMORY SYSTEM")) { throw "AGENTS.md missing MEMORY SYSTEM section" }
 }
 
-# 8. New memory features
-Write-Host "[8/8] BM25 recall and consolidate" -ForegroundColor Yellow
+# 7. New memory features
+Write-Host "[7/8] BM25 recall and consolidate" -ForegroundColor Yellow
 $recallTestId = "recall-test-$(Get-Date -Format 'yyyyMMdd-HHmmss')"
 Test-Step -Name "Recall finds keyword via BM25" -ScriptBlock {
     $r = python $helperPy save "BM25_RECALL_TEST_unicorn_xkcd42" $recallTestId "test" "recall,test" "test-recall" 2>&1
@@ -136,7 +136,7 @@ Test-Step -Name "Consolidate runs without error" -ScriptBlock {
     if ($result -match "consolidated") { $true } else { throw "Consolidate failed: $result" }
 }
 
-# Benchmark: recall@5
+# 8. Benchmark: recall@5
 Write-Host "[8/8] Benchmark recall@5" -ForegroundColor Yellow
 Test-Step -Name "Recall@5 finds exact match in top results" -ScriptBlock {
     $bm25Id = "benchmark-$(Get-Date -Format 'yyyyMMdd-HHmmss')"

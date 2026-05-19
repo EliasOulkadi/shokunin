@@ -1,15 +1,36 @@
 ---
 name: seo-geo
 description: SEO + Generative Engine Optimization (GEO) for 2026 — technical SEO, on-page optimization, structured data (JSON-LD, schema.org), Core Web Vitals, citability scoring (llms.txt, entity clarity), AI search engine optimization (ChatGPT, Gemini, Perplexity, Claude, Google AI Overviews), and brand authority building. Use when user asks to optimize a site for search engines, improve SEO, write SEO content, implement structured data, optimize for AI search/GEO, audit a page, or improve Google rankings. Do NOT use for content writing strategy (use content-marketing), performance optimization beyond Core Web Vitals (use performance-profiler), or paid ad strategy.
+triggers:
+  - "SEO"
+  - "search engine optimization"
+  - "GEO"
+  - "generative engine optimization"
+  - "AI search"
+  - "structured data"
+  - "schema.org"
+  - "JSON-LD"
+  - "llms.txt"
+  - "Google ranking"
+  - "Core Web Vitals"
+  - "on-page SEO"
+  - "technical SEO"
+negatives:
+  - "content writing"
+  - "ad strategy"
+  - "social media"
+  - "paid ads"
+  - "PPC"
 license: MIT
 compatibility: opencode
 metadata:
   workflow: marketing
   audience: developers
-  version: "4.0"
+  version: "4.0.0"
   author: shokunin
 allowed-tools: Read Bash Write Grep WebFetch
 ---
+
 
 # SEO & GEO Architect
 

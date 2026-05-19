@@ -1,10 +1,29 @@
 ---
 name: plan
 description: "Planning agent for task breakdown and implementation planning. Use via spawn_subagent with skill='plan' when you need to explore a codebase and design an implementation approach before writing code."
+triggers:
+  - "plan"
+  - "implementation plan"
+  - "task breakdown"
+  - "break down task"
+  - "plan implementation"
+  - "how to implement"
+  - "technical plan"
+  - "execution plan"
+negatives:
+license: MIT
+compatibility: opencode
+  - "write code"
+  - "implement now"
+  - "just do it"
+  - "simple task"
 metadata:
   version: 1.0.0
+  workflow: system
+  audience: developers
 disable-model-invocation: false
 ---
+
 
 Entered plan mode. Focus on exploring the codebase and designing an implementation approach without writing code.
 
@@ -136,6 +155,14 @@ Goal: Write the final plan. Include:
 | Phase 1 exploration reveals the task is trivial (single-file, single-line) | Full 4-phase planning is wasteful for a typo fix. Abort plan mode. Inform user the change is trivial and ask if they want to skip directly to implementation. |
 | Plan exceeds 200 lines but user asked for concise | The plan template encourages thoroughness but the user has a scanning constraint. Collapse "Files to Modify" to a 3-column table. Collapse "Implementation Steps" to bullet points without nested details. |
 | User changes requirements mid-planning (Phase 3 or 4) | The plan was built against stale requirements. Do not patch the existing plan. Return to Phase 1 with the new requirements. Archive the old plan with a deprecation comment. |
+
+## Checklist
+
+- [ ] Codebase explored before writing the plan — dependencies, conventions, patterns identified
+- [ ] All edge cases and failure modes documented, not just happy path
+- [ ] Estimations include testing, documentation, and verification time
+- [ ] Dependencies and risks explicitly called out
+- [ ] Plan is reviewable independently — enough context for another developer to evaluate
 
 ## Sources
 

@@ -86,7 +86,7 @@ def _log_jsonl(session_id: str, entry_type: str, content: str, role: str | None 
     except Exception as e:
         _LOGGER.warning(f"Failed to log jsonl for {session_id}: {e}")
 
-VALID_TYPES = {"decision", "file", "command", "preference", "checkpoint", "session_end", "general", "claim_file", "claim_function", "claim_flag", "claim_api"}
+VALID_TYPES = {"decision", "file", "command", "preference", "checkpoint", "session_end", "general", "claim_file", "claim_function", "claim_flag", "claim_api", "consolidated"}
 
 _TOOLS = {
     "tools": [
@@ -243,6 +243,8 @@ def _save_to_markdown(text: str, session_id: str, entry_type: str, tags: list[st
 
 
 def handle_store_context(args: dict[str, Any]) -> dict[str, Any]:
+    if not args:
+        return {"error": "args required", "stored": False}
     text = args.get("text", "")
     entry_type = args.get("type", "general")
     if entry_type not in VALID_TYPES:
@@ -262,11 +264,14 @@ def handle_store_context(args: dict[str, Any]) -> dict[str, Any]:
         "timestamp": timestamp,
     }
 
-    _get_db().add(
-        documents=[text],
-        metadatas=[metadata],
-        ids=[entry_id],
-    )
+    try:
+        _get_db().add(
+            documents=[text],
+            metadatas=[metadata],
+            ids=[entry_id],
+        )
+    except Exception as e:
+        _LOGGER.error(f"Failed to store in ChromaDB: {e}")
 
     _save_to_markdown(text, session_id, entry_type, tags, project)
 
@@ -275,6 +280,8 @@ def handle_store_context(args: dict[str, Any]) -> dict[str, Any]:
 
 
 def handle_search_context(args: dict[str, Any]) -> list[dict[str, Any]]:
+    if not args:
+        return []
     query = args.get("query", "")
     project = args.get("project")
     session_id = args.get("session_id", "")
@@ -346,8 +353,10 @@ def handle_search_context(args: dict[str, Any]) -> list[dict[str, Any]]:
     return entries[:n_results]
 
 
-def handle_get_session_summary(args: dict[str, Any]) -> dict[str, Any]:
-    session_id = args["session_id"]
+def handle_get_session_summary(args: dict[str, Any] | None) -> dict[str, Any]:
+    if not args:
+        return {"error": "args required", "session_id": "", "entry_count": 0, "entries": [], "summary": "No args provided."}
+    session_id = args.get("session_id", "")
 
     all_results = _get_db().get(
         where={"session_id": session_id},
@@ -404,6 +413,8 @@ def handle_get_session_summary(args: dict[str, Any]) -> dict[str, Any]:
 
 
 def handle_multi_search_context(args: dict[str, Any]) -> dict[str, Any]:
+    if not args:
+        return {"error": "args required", "entries": [], "count": 0}
     query = args.get("query", "")
     project = args.get("project")
     session_id = args.get("session_id", "")
@@ -422,6 +433,8 @@ def handle_multi_search_context(args: dict[str, Any]) -> dict[str, Any]:
         return {"error": str(e), "entries": []}
 
 def handle_consolidate_memories(args: dict[str, Any]) -> dict[str, Any]:
+    if not args:
+        args = {}
     project = args.get("project")
     try:
         ch = _get_ch()
@@ -432,6 +445,8 @@ def handle_consolidate_memories(args: dict[str, Any]) -> dict[str, Any]:
         return {"error": str(e), "consolidated": 0}
 
 def handle_list_sessions(args: dict[str, Any]) -> dict[str, Any]:
+    if not args:
+        args = {}
     limit = min(args.get("limit", 5), 20)
     project = args.get("project")
     try:
@@ -442,6 +457,8 @@ def handle_list_sessions(args: dict[str, Any]) -> dict[str, Any]:
         return {"error": str(e), "sessions": []}
 
 def handle_continue_session(args: dict[str, Any]) -> dict[str, Any]:
+    if not args:
+        return {"error": "args required", "entries": []}
     session_id = args.get("session_id", "")
     try:
         ch = _get_ch()
@@ -451,6 +468,8 @@ def handle_continue_session(args: dict[str, Any]) -> dict[str, Any]:
         return {"error": str(e), "entries": []}
 
 def handle_save_message(args: dict[str, Any]) -> dict[str, Any]:
+    if not args:
+        return {"error": "args required", "stored": False}
     text = args.get("text", "")
     session_id = args.get("session_id", "")
     role = args.get("role", "user")
@@ -464,6 +483,8 @@ def handle_save_message(args: dict[str, Any]) -> dict[str, Any]:
 
 def handle_verify_file_path(args: dict[str, Any]) -> dict[str, Any]:
     """Verify whether a file or directory path exists on the local filesystem."""
+    if not args:
+        return {"exists": False, "error": "args required"}
     path = args.get("path", "")
     if not path:
         return {"exists": False, "error": "path required"}

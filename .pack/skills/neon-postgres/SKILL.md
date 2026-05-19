@@ -1,7 +1,29 @@
 ---
 name: neon-postgres
 description: Guides and best practices for working with Neon Serverless Postgres. Covers getting started, local development with Neon, choosing a connection method, Neon features, authentication (@neondatabase/auth), PostgREST-style data API (@neondatabase/neon-js), Neon CLI, and Neon's Platform API/SDKs. Use for any Neon-related questions.
----
+triggers:
+  - "Neon"
+  - "Neon Postgres"
+  - "serverless Postgres"
+  - "connection pooling"
+  - "neonctl"
+  - "@neondatabase"
+  - "Neon MCP"
+  - "Postgres branching"
+negatives:
+license: MIT
+compatibility: opencode
+  - "self-hosted Postgres"
+  - "RDS"
+  - "Aurora"
+  - "Supabase"
+  - "PlanetScale"
+metadata:
+  version: "1.0.0"
+
+  workflow: backend
+  audience: developers---
+
 
 # Neon Serverless Postgres
 
@@ -222,6 +244,14 @@ Link: https://neon.com/docs/guides/logical-replication-guide.md
 | Ignoring IP allow lists in production | Database exposed to the internet if not configured | Set up IP allow lists to restrict access to known IPs/CIDRs only. |
 | Using the same branch for development and production | Schema changes in dev affect production data | Create a dev branch from main. Merge changes only after testing. |
 | Disabling scale-to-zero on hobby projects unnecessarily | Pays for idle compute time | Keep default scale-to-zero unless continuous availability is required. |
+
+## Checklist
+
+- [ ] Connection method chosen correctly (pooled HTTP vs direct TCP for use case)
+- [ ] Connection string loaded from env var, not hardcoded
+- [ ] Pool configured with appropriate min/max connections
+- [ ] Prepared statements used for all user-facing queries
+- [ ] Branching strategy defined (dev branch per PR, main for production)
 
 ## Sources
 

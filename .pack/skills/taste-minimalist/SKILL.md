@@ -1,12 +1,34 @@
 ---
 name: taste-minimalist
 description: "Clean editorial-style interfaces. Warm monochrome palette, typographic contrast, flat bento grids, muted pastels. No gradients, no heavy shadows. Based on taste-skill by Leon Lin & blueemi, improved by shokunin."
+triggers:
+  - "minimalist design"
+  - "clean interface"
+  - "editorial design"
+  - "warm monochrome"
+  - "bento grid"
+  - "muted palette"
+  - "flat design"
+  - "document-style"
+  - "typographic layout"
+  - "ultra-minimalist"
+negatives:
+  - "luxury design"
+  - "glassmorphism"
+  - "agency design"
+  - "heavy shadows"
+  - "gradients"
+  - "3D design"
+  - "base design framework" -> use taste
 license: MIT
 compatibility: opencode
 metadata:
-  version: "2.0-improved"
+  version: "2.0.0"
   author: Leon Lin, blueemi, improved by shokunin
----
+
+  workflow: frontend
+  audience: designers---
+
 
 # Premium Utilitarian Minimalism & Editorial UI
 

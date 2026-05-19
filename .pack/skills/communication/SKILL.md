@@ -5,23 +5,42 @@ description: >
   notes, and escalation templates. Covers tone matrix, cross-cultural
   communication, Slack/Teams async patterns, and structured notes from raw
   transcripts.
-  Trigger phrases: "write an email", "draft feedback", "difficult conversation",
-  "meeting notes", "escalate", "compose a message", "corporate email", "feedback
-  for [person]", "créame un correo", "tone check", "reply to this email", "say
-  no to a client", "status update to exec", "project delay email", "cold email
-  to [person]", "async message", "Slack message", "teams message", "follow-up
-  email", "meeting agenda", "meeting summary".
-  Negative triggers:
-    "sales outreach", "cold email sequence", "proposal", "SOW", "pitch deck",
-    "investor deck" → delegate to business-proposals skill.
-    "translate", "translation", "localize", "traducir" → delegate to
-    translate-craft skill.
-    "blog post", "newsletter", "Twitter thread", "case study", "marketing copy"
-    → delegate to content-marketing skill.
+triggers:
+  - "write an email"
+  - "draft feedback"
+  - "difficult conversation"
+  - "meeting notes"
+  - "escalate"
+  - "compose a message"
+  - "corporate email"
+  - "tone check"
+  - "reply to this email"
+  - "status update"
+  - "project delay"
+  - "async message"
+  - "Slack message"
+  - "Teams message"
+  - "follow-up email"
+  - "meeting agenda"
+  - "meeting summary"
+  - "say no to a client"
+negatives:
+  - "sales outreach"  -> use business-proposals
+  - "cold email sequence" -> use business-proposals
+  - "proposal" -> use business-proposals
+  - "SOW" -> use business-proposals
+  - "pitch deck" -> use business-proposals
+  - "investor deck" -> use business-proposals
+  - "translate" -> use translate-craft
+  - "translation" -> use translate-craft
+  - "localize" -> use translate-craft
+  - "blog post" -> use content-marketing
+  - "newsletter" -> use content-marketing
+  - "marketing copy" -> use content-marketing
 license: MIT
 compatibility: opencode 1.0+
 metadata:
-  version: "4.0"
+  version: "4.0.0"
   workflow: communication
   audience: developers
 allowed-tools:
@@ -35,6 +54,7 @@ allowed-tools:
   - websearch
   - skills
 ---
+
 
 # Communication
 
@@ -236,6 +256,14 @@ Rules:
 - No passive-aggressive language
 - No assigning blame to a person
 - Signature: Name, Title, Company, Phone. No quotes. No ASCII art.
+
+## Checklist
+
+- [ ] Audience identified (executive, peer, client, direct report)
+- [ ] Purpose clear: inform, persuade, align, or escalate
+- [ ] Tone matched to relationship and context
+- [ ] Key action item or ask stated explicitly near the top
+- [ ] Proofread for ambiguity and unnecessary jargon
 
 ## Sources
 

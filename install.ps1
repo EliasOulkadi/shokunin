@@ -176,7 +176,13 @@ function Install-NewScripts {
         "save-memory.ps1",
         "search-memory.ps1",
         "read-transcript.ps1",
-        "test-memory.ps1"
+        "read-transcript.py",
+        "test-memory.ps1",
+        "memory-healthcheck.ps1",
+        "shokunin-update.ps1",
+        "validate-skills.ps1",
+        "seed-memory.ps1",
+        "scan-cleanup.ps1"
     )
 
     $count = 0
@@ -378,9 +384,9 @@ function Setup-Extras {
 function Show-Summary {
     Write-Host @"
 
-â•”â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•—
-â•‘        Shokunin AI Ecosystem â€” Installed         â•‘
-â•šâ•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+========================================
+  Shokunin AI Ecosystem - Installed
+========================================
 
   Skills:       $((Get-ChildItem $script:skillsDir -Directory).Count) installed
   Memory:       ChromaDB v4.2 (3 capture layers)
@@ -406,7 +412,7 @@ function Show-Summary {
      [Environment]::SetEnvironmentVariable('NVIDIA_API_KEY','tu-key','User')
      and edit ~\.config\opencode\opencode.json with your key
 
-  2. Restart your terminal or reload your profile: . $PROFILE
+  2. Restart your terminal or reload your profile: . `$PROFILE
 
   3. Open a NEW terminal to load the profile
 
@@ -421,18 +427,19 @@ function Show-Summary {
 # ============================================================
 Clear-Host
 Write-Host @"
-â•”â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•—
-â•‘         Shokunin AI Ecosystem v$script:version       â•‘
-â•‘         One-command installer                    â•‘
-â•‘         github.com/EliasOulkadi/shokunin         â•‘
-â•šâ•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+
+========================================
+  Shokunin AI Ecosystem v$script:version
+  One-command installer
+  github.com/EliasOulkadi/shokunin
+========================================
 
   This installer sets up your PC as an AI workstation
   AI Engineer with 62 skills, persistent memory,
-  and automations — all free and open source.
+  and automations - all free and open source.
 
-  Requiere: Windows 10/11, Node.js 18+, Python 3.11+
-  Tiempo estimado: 2-5 minutos
+  Requires: Windows 10/11, Node.js 18+, Python 3.11+
+  Estimated time: 2-5 minutes
 
 "@ -ForegroundColor Cyan
 

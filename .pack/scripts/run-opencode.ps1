@@ -35,8 +35,8 @@ $sessionInfo | Out-File -FilePath $SESSION_FILE -Encoding UTF8 -Force
 $mcpHealthy = $false
 try {
     $mcpRequest = '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}'
-    $mcpResponse = $mcpRequest | python $SHOKUNIN_DIR\memory\mcp-server.py 2>&1
-    $mcpHealthy = $mcpResponse -match "store_context"
+    $mcpResponse = $mcpRequest | python "$SHOKUNIN_DIR\memory\mcp-server.py" 2>$null
+    $mcpHealthy = $mcpResponse -match '"name"\s*:\s*"store_context"'
 } catch {}
 $env:SHOKUNIN_MCP_HEALTHY = if ($mcpHealthy) { "1" } else { "0" }
 
@@ -76,7 +76,7 @@ try {
     & $REAL_OPENCODE
 } catch {
     Write-Host "  opencode exited with error: $_" -ForegroundColor Yellow
-    try { & opencode.exe } catch { Write-Host "  Fallback also failed" -ForegroundColor Red }
+    try { & opencode } catch { Write-Host "  Fallback also failed" -ForegroundColor Red }
 }
 
 $endTime = Get-Date
@@ -93,36 +93,36 @@ Write-Host "    reading console buffer..." -NoNewline
 $bufferText = ""
 $bufferOk = $false
 
-if (-not $bufferOk) {
-    try {
-        $cursor = $host.UI.RawUI.CursorPosition
-        $bufW = $host.UI.RawUI.BufferSize.Width
-        $bufH = $cursor.Y
-        if ($bufH -gt 0 -and $bufW -gt 0) {
-            $linesToRead = [Math]::Min($bufH, $BUFFER_READ_LINES)
-            $startLine = [Math]::Max(0, $bufH - $linesToRead)
-            $rect = New-Object System.Management.Automation.Host.Rectangle(0, $startLine, $bufW - 1, $bufH)
-            $cells = $host.UI.RawUI.GetBufferContents($rect)
-            if ($cells) {
-                $rows = $cells.GetLength(0)
-                $cols = $cells.GetLength(1)
-                $lines = @()
-                for ($y = 0; $y -lt $rows; $y++) {
-                    $line = ""
-                    for ($x = 0; $x -lt $cols; $x++) {
-                        $line += $cells.GetValue($y, $x).Character
-                    }
-                    $lines += $line
+try {
+    $cursor = $host.UI.RawUI.CursorPosition
+    $bufW = $host.UI.RawUI.BufferSize.Width
+    $bufH = $cursor.Y
+    if ($bufH -gt 0 -and $bufW -gt 0) {
+        $linesToRead = [Math]::Min($bufH, $BUFFER_READ_LINES)
+        $startLine = [Math]::Max(0, $bufH - $linesToRead)
+        $rect = New-Object System.Management.Automation.Host.Rectangle(0, $startLine, $bufW - 1, $bufH)
+        $cells = $host.UI.RawUI.GetBufferContents($rect)
+        if ($cells) {
+            $rows = $cells.GetLength(0)
+            $cols = $cells.GetLength(1)
+            $lines = @()
+            for ($y = 0; $y -lt $rows; $y++) {
+                $line = ""
+                for ($x = 0; $x -lt $cols; $x++) {
+                    $line += $cells.GetValue($y, $x).Character
                 }
-                $bufferText = $lines -join "`n"
-                if ($bufferText.Length -gt 50) { $bufferOk = $true }
+                $lines += $line
             }
+            $bufferText = $lines -join "`n"
+            if ($bufferText.Length -gt 50) { $bufferOk = $true }
         }
-    } catch {}
+    }
+} catch {
+    Write-Host "(not supported) " -NoNewline -ForegroundColor DarkGray
 }
 
 if (-not $bufferOk) {
-    Write-Host "trying fallback..." -NoNewline
+    Write-Host "trying history fallback..." -NoNewline
     try {
         $history = Get-History -Count 500 -ErrorAction SilentlyContinue
         if ($history) {
@@ -198,5 +198,3 @@ Write-Host "  ChromaDB: $(if ($chromaOk) { 'saved' } else { 'failed' })" -Foregr
 Write-Host "------------------------------------------" -ForegroundColor Cyan
 
 $env:SHOKUNIN_LAST_SESSION = $sessionId
-
-

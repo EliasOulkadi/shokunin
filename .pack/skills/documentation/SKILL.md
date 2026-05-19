@@ -4,18 +4,31 @@ description: >
   Generate READMEs, API docs, changelogs, and knowledge base articles. Covers
   README structure with personality, OpenAPI-based API documentation, changelogs
   from conventional commits, typedoc patterns, and support KB articles.
-  Triggers: "write a README", "API docs", "API documentation", "changelog",
-  "release notes", "knowledge base", "KB article", "documentation", "project docs",
-  "setup guide". Negatives: do NOT use for API design (use api-forge) or code
-  comments.
+triggers:
+  - "write documentation"
+  - "write README"
+  - "API documentation"
+  - "API docs"
+  - "changelog"
+  - "release notes"
+  - "knowledge base"
+  - "setup guide"
+  - "getting started"
+  - "project docs"
+negatives:
+  - "API design"
+  - "code comments"
+  - "blog post"
+  - "technical writing prose"
 license: MIT
 compatibility: opencode
 metadata:
-  version: "4.0"
+  version: "4.0.0"
   workflow: documentation
   audience: developers
 allowed-tools: [read, write, edit, glob, grep, bash, webfetch]
 ---
+
 
 # Documentation
 

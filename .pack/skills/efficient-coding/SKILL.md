@@ -6,7 +6,29 @@ description: >
   and quality-preserving practices throughout. Activate even when the user doesn't
   explicitly ask for efficiency — this skill is always relevant for software development
   work. Do not skip this skill for "simple" tasks; the rules apply at every scale.
----
+triggers:
+  - "efficient coding"
+  - "token saving"
+  - "coding efficiency"
+  - "reduce tokens"
+  - "quality preserving"
+  - "efficient implementation"
+  - "code quality"
+  - "clean code"
+  - "readable code"
+negatives:
+license: MIT
+compatibility: opencode
+  - "design"
+  - "architecture"
+  - "testing"
+  - "performance optimization"
+metadata:
+  version: "1.0.0"
+
+  workflow: general
+  audience: developers---
+
 
 # Efficient Coding
 
@@ -202,6 +224,14 @@ These are the most common ways agents waste tokens — treat each as a hard rule
 | Creating new files for small changes | Fragments the codebase unnecessarily | Edit existing files with surgical precision |
 | Explaining code after writing it unprompted | Unsolicited output wastes tokens | Only explain if user explicitly asks |
 | Running speculative commands with no hypothesis | Wastes tool calls and tokens | Form hypothesis, then act decisively |
+
+## Checklist
+
+- [ ] Token budget estimated before starting the task
+- [ ] File read once, not re-read — context reused from previous reads
+- [ ] Batch independent tool calls into single message
+- [ ] Only relevant sections read (head/tail/offset), not entire files
+- [ ] Verify output is minimal — no preamble, summary, or commentary
 
 ## Sources
 

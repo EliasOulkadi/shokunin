@@ -1,6 +1,24 @@
 ---
 name: chromadb
 description: Manage the ChromaDB vector database that stores the ecosystem's persistent memory. Use when user asks to check memory storage, backup memory, search stored entries, delete entries, or reset the vector database. Do NOT use for general question answering about past sessions (use the memory skill for that).
+triggers:
+  - "manage memory"
+  - "memory status"
+  - "memory backup"
+  - "memory delete"
+  - "memory reset"
+  - "ChromaDB status"
+  - "check storage"
+  - "delete entry"
+  - "backup database"
+  - "reset database"
+negatives:
+  - "search memory"
+  - "query context"
+  - "save context"
+  - "verify file"
+  - "context recall" -> use memory
+  - "remember past" -> use memory
 license: MIT
 compatibility: opencode
 metadata:
@@ -188,6 +206,14 @@ python ~/.shokunin/scripts/chroma-helper.py verify
 ```
 
 Checks: SQLite integrity, embedding count vs document count, orphan metadata, collection schema version.
+
+## Checklist
+
+- [ ] ChromaDB client initialized lazily (not at import time)
+- [ ] Collection name sanitized (alphanumeric + hyphens only)
+- [ ] Embedding dimension matches between writes and queries
+- [ ] Backups configured before destructive operations (delete/reset)
+- [ ] Search results validated — empty results handled gracefully
 
 ## Sources
 

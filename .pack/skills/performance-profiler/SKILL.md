@@ -1,15 +1,35 @@
 ---
 name: performance-profiler
 description: Performance profiling and optimization for web apps — Core Web Vitals (LCP, INP, CLS), Lighthouse audits, bundle analysis, backend profiling (CPU, memory, DB queries), N+1 detection, caching strategies (Redis, CDN, HTTP), and performance budgets. Use when user asks to improve performance, run Lighthouse audit, profile a Node.js app, optimize Core Web Vitals, reduce bundle size, or investigate slow response times. Do NOT use for database schema optimization (use db-sculptor), Docker image optimization (use docker), or CDN configuration.
+triggers:
+  - "performance"
+  - "optimize"
+  - "slow"
+  - "Lighthouse"
+  - "Core Web Vitals"
+  - "LCP"
+  - "INP"
+  - "CLS"
+  - "bundle size"
+  - "profiling"
+  - "N+1 query"
+  - "caching"
+  - "response time"
+negatives:
+  - "schema optimization"
+  - "Docker image optimization"
+  - "CDN configuration"
+  - "database indexes"
 license: MIT
 compatibility: opencode
 metadata:
   workflow: quality
   audience: developers
-  version: "4.0"
+  version: "4.0.0"
   author: shokunin
 allowed-tools: Read Bash Write WebFetch
 ---
+
 
 # Performance Profiler
 

@@ -1,7 +1,6 @@
 ---
 name: translate-craft
 description: Professional translation and localization for 8 languages (ES, JA, FR, DE, PT, ZH, KO, AR). Covers tone matrix, formality levels, i18n patterns (react-intl, i18next, ICU), RTL layout, cultural adaptation, and locale formatting. Use when user asks to translate text, localize an app, adapt tone, review translations, add i18n, or set up RTL.
-version: "4.0"
 license: MIT
 compatibility: opencode
 triggers:
@@ -18,9 +17,11 @@ negatives:
   - raw machine translation without human review
   - translating code comments or variable names
 metadata:
+  version: "4.0.0"
   workflow: communication
   audience: developers, translators
 ---
+
 
 # Translate Craft
 

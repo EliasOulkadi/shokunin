@@ -1,7 +1,6 @@
 ---
 name: business-proposals
 description: Generate sales outreach sequences, proposals, SOWs, investor pitch decks, and RFP responses. Covers cold email sequences, proposal structure, pricing tiers (Good-Better-Best), scope of work with exclusions, and 10-slide pitch deck.
-version: "3.0"
 triggers:
   - "write a proposal"
   - "cold email / outreach sequence"
@@ -14,16 +13,19 @@ triggers:
 negatives:
   - general corporate communication (use communication skill)
   - content marketing / blog posts (use content-marketing skill)
-  - brand design / creative direction (use design skill)
+  - brand design / creative direction (use brand-design skill)
   - financial models / spreadsheets (use finance skill)
   - legal contracts / terms of service (use legal-counsel skill)
 license: MIT
 compatibility: opencode
 metadata:
+  version: "3.0.0"
+metadata:
   workflow: sales
   audience: consultants, founders, freelancers
-  version: "3.0"
+  version: "3.0.0"
 ---
+
 
 # Business Proposals v3.0
 

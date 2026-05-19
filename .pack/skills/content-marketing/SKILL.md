@@ -5,18 +5,33 @@ description: >
   that convert. Covers copywriting frameworks (AIDA, PAS, BAB, FAB), headline
   formulas, SEO/GEO for 2026 (AI Overviews, SGE), newsletter deliverability,
   Twitter thread hooks, Cialdini psychology, and cognitive biases.
-  Triggers: write a blog post, newsletter, Twitter thread, case study,
-  marketing copy, landing page copy, ad copy, sales page.
-  Negative triggers: sales outreach (use business-proposals), landing page
-  design (use landing-craft), translation (use translate-craft).
+triggers:
+  - "write a blog post"
+  - "write a newsletter"
+  - "write a Twitter thread"
+  - "case study"
+  - "marketing copy"
+  - "copywriting"
+  - "landing page copy"
+  - "ad copy"
+  - "sales copy"
+  - "content strategy"
+negatives:
+  - "sales outreach"
+  - "proposal"
+  - "SOW"
+  - "pitch deck"
+  - "translation"
+  - "localization"
 license: MIT
 compatibility: opencode
 metadata:
-  version: "4.0"
+  version: "4.0.0"
   workflow: content-marketing
   audience: developers
 allowed-tools: [websearch, webfetch, read, write, edit, glob, grep, bash, skill]
 ---
+
 
 # Content Marketing
 

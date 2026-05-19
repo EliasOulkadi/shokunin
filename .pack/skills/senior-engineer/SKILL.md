@@ -6,7 +6,29 @@ description: >
   fix a bug, design a module, or improve existing code — even if they don't mention
   quality explicitly. The goal is production-grade code: readable, correct, maintainable,
   secure, and failure-aware. Always active for any coding task, at any scale.
----
+triggers:
+  - "senior engineer"
+  - "production code"
+  - "production-grade"
+  - "write quality code"
+  - "robust code"
+  - "maintainable code"
+  - "secure code"
+  - "production quality"
+negatives:
+license: MIT
+compatibility: opencode
+  - "design"
+  - "architecture"
+  - "testing"
+  - "performance optimization"
+  - "animation"
+metadata:
+  version: "1.0.0"
+
+  workflow: general
+  audience: developers---
+
 
 # Senior Engineer Coding
 
@@ -395,6 +417,14 @@ Before marking any code task done, run through:
 | Inheritance chains over 2 levels deep | Implicit behavior, hard to trace | Prefer composition. Inject dependencies explicitly. |
 | Processing user input without validation | Injection, corruption, crashes | Validate and sanitize at the system boundary before any processing. |
 | Throwing generic Error with no context | Debugging requires grep, not error messages | Include what failed, what identifier, and actionable context in every error. |
+
+## Checklist
+
+- [ ] Function does one thing — if it needs a comment to explain sub-steps, extract them
+- [ ] Error handling covers all failure modes (null, network, auth, rate limit)
+- [ ] Names are precise and reveal intent (no abbreviations, no generic terms)
+- [ ] Tests exist for the critical path (not 100% coverage, but core logic is covered)
+- [ ] Security review done for any auth, input, or data exposure surface
 
 ## Sources
 

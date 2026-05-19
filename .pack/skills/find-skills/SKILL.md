@@ -1,11 +1,28 @@
 ---
 name: find-skills
 description: Search the agent skills ecosystem to discover and install skills that extend AI coding agent capabilities. Use when user asks "how do I do X" (X being a common task), "find a skill for X", "is there a skill that can...", or expresses interest in extending agent capabilities. Triggers on "find a skill", "install a skill", "skill for [task]", "can you do X", "I need help with [domain]", "how do I [task]". Do NOT use when user has explicitly asked to proceed without a skill, or when the task is better handled by agent's built-in capabilities (file operations, git, basic coding).
+triggers:
+  - "find a skill"
+  - "install a skill"
+  - "skill for"
+  - "is there a skill"
+  - "how do I"
+  - "search skills"
+  - "discover skills"
+  - "skill ecosystem"
+  - "available skills"
+  - "list skills"
+negatives:
+  - "create a skill"
+  - "write a skill"
+  - "edit a skill"
+  - "skill development"
 license: MIT
 compatibility: opencode
 metadata:
   workflow: tooling
   audience: developers
+  version: "1.0.0"
 ---
 
 Help users discover and install skills from the open agent skills ecosystem.
@@ -157,6 +174,14 @@ Minimum threshold for production: 4 of 5 criteria met.
 | `skill already installed` | Version conflict or duplicate | `npx skills remove <name>` then reinstall |
 | `trigger not matching` | Description too generic or too narrow | Edit frontmatter `description:` field and re-test |
 | `npm ERR!` during install | npm registry issue or network | Retry. If persistent, clone manually from GitHub |
+
+## Checklist
+
+- [ ] Description matching first (the skill's `description` field against the task)
+- [ ] At least 2-3 synonym/alternative queries tried before concluding "no skill"
+- [ ] SKILL.md content read before recommending (descriptions can be misleading)
+- [ ] Compatibility confirmed for the user's platform/tools
+- [ ] User consent obtained before installing any skill
 
 ## Sources
 

@@ -1,15 +1,37 @@
 ---
 name: component-forge
 description: Build production-grade components for React, Vue 3, and Svelte 5 with all states (loading, empty, error, success, idle), TypeScript strict, WCAG 2.2 accessibility, server components (RSC), and compound component patterns. Includes scaffold script, reference patterns, and template files for React and Vue. Use when user asks to create a UI component, frontend module, or design system component. Do NOT use for page layouts (use landing-craft), routing, or state management architecture (global stores).
+triggers:
+  - "create component"
+  - "build component"
+  - "React component"
+  - "Vue component"
+  - "Svelte component"
+  - "UI component"
+  - "button component"
+  - "modal component"
+  - "form component"
+  - "accessible component"
+  - "compound component"
+  - "component library"
+negatives:
+  - "page layout"
+  - "routing"
+  - "state management"
+  - "global store"
+  - "full page"
+  - "landing page"
+  - "design system colors"
 license: MIT
 compatibility: opencode
 metadata:
   workflow: frontend
   audience: developers
-  version: "4.0"
+  version: "4.0.0"
   author: shokunin
 allowed-tools: Read Bash Write Grep Glob
 ---
+
 
 # Component Forge
 

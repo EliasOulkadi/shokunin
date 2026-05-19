@@ -37,7 +37,9 @@ if (-not [string]::IsNullOrEmpty($Query)) {
                 }
             }
         }
-    } catch {}
+    } catch {
+        Write-Warning "ChromaDB search failed: $_"
+    }
 }
 
 # 2. Fallback to recent entries if nothing found
@@ -63,10 +65,12 @@ if ($RESULTS.Count -eq 0) {
                 }
             }
         }
-    } catch {}
+    } catch {
+        Write-Warning "Recent entries failed: $_"
+    }
 }
 
-$RESULTS = $RESULTS | Sort-Object { if ($_.Source -eq "Recent") { 0 } else { $_.Score } } -Descending | Select-Object -First $Limit
+$RESULTS = $RESULTS | Sort-Object Score -Descending | Select-Object -First $Limit
 
 if ($RESULTS.Count -eq 0) {
     Write-Host "No memory data yet." -ForegroundColor Yellow

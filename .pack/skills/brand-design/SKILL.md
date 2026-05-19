@@ -1,9 +1,6 @@
 ---
-name: design
+name: brand-design
 description: Generate brand guidelines, design systems with design tokens (W3C format), creative direction (SCAMPER, Design Thinking, TRIZ), and design briefs with scope and success criteria.
-version: "3.0"
-license: MIT
-compatibility: opencode
 triggers:
   - "brand guidelines"
   - "style guide"
@@ -16,18 +13,20 @@ triggers:
   - "creative direction"
   - "brand strategy"
 negatives:
-  - "UI component design patterns" -> use ui-ux-pro-max
-  - "landing page layout" -> use landing-craft
-  - "responsive design" -> use responsive-engine
-  - "icon set creation" -> use component-forge
-  - "color palette generation" -> use ui-ux-pro-max
+  - "UI component design patterns"  # use ui-ux-pro-max
+  - "landing page layout"  # use landing-craft
+  - "responsive design"  # use responsive-engine
+  - "icon set creation"  # use component-forge
+  - "color palette generation"  # use ui-ux-pro-max
+license: MIT
+compatibility: opencode
 metadata:
-  workflow: design
-  audience: designers
-  previous_version: "2.0"
----
+  workflow: productivity
+  audience: developers
+  version: "3.0.0"
 
-# Design Skill v3.0
+---
+# Brand Design Skill v3.0
 
 Brand identity, design systems, creative direction, and project briefs.
 
