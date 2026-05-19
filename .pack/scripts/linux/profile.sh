@@ -25,8 +25,6 @@ alias ll="ls -la"
 
 # Utils
 mkcd() { mkdir -p "$1" && cd "$1"; }
-touch() { :>"$1"; }
-which() { command -v "$1"; }
 
 # Shokunin opencode wrapper
 opencode() {

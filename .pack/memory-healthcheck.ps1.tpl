@@ -36,7 +36,6 @@ function Warn {
 Write-Host "`nShokunin Memory Healthcheck" -ForegroundColor Cyan
 Write-Host "==========================================`n" -ForegroundColor Cyan
 
-# 1. Environment
 Write-Host "[Environment]" -ForegroundColor Yellow
 Check -Name "Python available" -ScriptBlock { python --version 2>&1 | Out-Null }
 
@@ -45,49 +44,46 @@ Check -Name "chromadb importable" -ScriptBlock {
 }
 
 Check -Name "Data directory exists" -ScriptBlock {
-    if (-not (Test-Path "$env:USERPROFILE\.shokunin\memory")) { throw "memory dir not found" }
+    if (-not (Test-Path "{{SHOKUNIN_DIR}}\memory")) { throw "memory dir not found" }
 }
 
-# 2. chroma-helper
 Write-Host "[chroma-helper]" -ForegroundColor Yellow
 $testId = "healthcheck-$(Get-Date -Format 'yyyyMMdd-HHmmss')"
 Check -Name "save entry" -ScriptBlock {
-    $r = python "$env:USERPROFILE\.shokunin\scripts\chroma-helper.py" save "Healthcheck test" $testId "test" "healthcheck" "healthcheck" 2>&1
+    $r = python "{{CHROMA_HELPER_PATH}}" save "Healthcheck test" $testId "test" "healthcheck" "healthcheck" 2>&1
     if ($r -notmatch "stored") { throw "save failed: $r" }
 }
 Check -Name "search entry" -ScriptBlock {
-    $r = python "$env:USERPROFILE\.shokunin\scripts\chroma-helper.py" search "Healthcheck test" "healthcheck" 100 2>&1
-    if ($r -notmatch [regex]::Escape($testId)) { throw "search didn't find test entry" }
+    $r = python "{{CHROMA_HELPER_PATH}}" search "Healthcheck test" "healthcheck" 100 2>&1
+    if ($r -match $testId) { $true } else { throw "search didn't find test entry" }
 }
 Check -Name "count entries" -ScriptBlock {
-    $r = python "$env:USERPROFILE\.shokunin\scripts\chroma-helper.py" count 2>&1
+    $r = python "{{CHROMA_HELPER_PATH}}" count 2>&1
     if ($r -notmatch "count") { throw "count failed" }
 }
 
-# 3. MCP Server
 Write-Host "[MCP Server]" -ForegroundColor Yellow
 Check -Name "tools/list responds" -ScriptBlock {
     $req = '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}'
-    $resp = $req | python "$env:USERPROFILE\.shokunin\memory\mcp-server.py" 2>&1
+    $resp = $req | python "{{SHOKUNIN_DIR}}\memory\mcp-server.py" 2>&1
     if ($resp -notmatch "store_context") { throw "MCP did not list tools" }
 }
 
 Check -Name "store via MCP" -ScriptBlock {
     $sid = "mcp-test-$(Get-Date -Format 'yyyyMMdd-HHmmss')"
     $req = '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"store_context","arguments":{"text":"MCP healthcheck","session_id":"' + $sid + '","type":"test","tags":["healthcheck"]}}}'
-    $resp = $req | python "$env:USERPROFILE\.shokunin\memory\mcp-server.py" 2>&1
+    $resp = $req | python "{{SHOKUNIN_DIR}}\memory\mcp-server.py" 2>&1
     if ($resp -notmatch "stored") { throw "MCP store failed" }
 }
 
 Check -Name "search via MCP" -ScriptBlock {
     $req = '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"search_context","arguments":{"query":"MCP healthcheck"}}}'
-    $resp = $req | python "$env:USERPROFILE\.shokunin\memory\mcp-server.py" 2>&1
-    if ($resp -notmatch "MCP healthcheck" -or $resp.Length -lt 50) { throw "MCP search returned empty" }
+    $resp = $req | python "{{SHOKUNIN_DIR}}\memory\mcp-server.py" 2>&1
+    if ($resp -notmatch "mcp-test" -or $resp.Length -lt 50) { throw "MCP search returned empty" }
 }
 
-# 4. Script syntax
 Write-Host "[Script Syntax]" -ForegroundColor Yellow
-Get-ChildItem "$env:USERPROFILE\.shokunin\scripts" -Filter *.ps1 | ForEach-Object {
+Get-ChildItem "{{SHOKUNIN_DIR}}\scripts" -Filter *.ps1 | ForEach-Object {
     Check -Name "$($_.Name) parses" -ScriptBlock {
         $e = $null
         $null = [System.Management.Automation.PSParser]::Tokenize((Get-Content $_.FullName -Raw), [ref]$e)
@@ -95,7 +91,6 @@ Get-ChildItem "$env:USERPROFILE\.shokunin\scripts" -Filter *.ps1 | ForEach-Objec
     }
 }
 
-# 5. Config validation
 Write-Host "[Configuration]" -ForegroundColor Yellow
 Check -Name "opencode.json valid JSON" -ScriptBlock {
     $j = Get-Content "$env:USERPROFILE\.config\opencode\opencode.json" -Raw | ConvertFrom-Json
@@ -113,34 +108,31 @@ Check -Name "AGENTS.md has memory section" -ScriptBlock {
     if ($am -notmatch "MEMORY SYSTEM") { throw "missing MEMORY SYSTEM section" }
 }
 
-# 6. Session storage
 Write-Host "[Storage]" -ForegroundColor Yellow
 Check -Name "sessions dir writable" -ScriptBlock {
-    $d = "$env:USERPROFILE\.shokunin\memory\sessions"
+    $d = "{{SHOKUNIN_DIR}}\memory\sessions"
     New-Item -ItemType Directory -Path $d -Force | Out-Null
     "test" | Out-File -FilePath "$d\.write-test" -Force
     Remove-Item "$d\.write-test" -Force
 }
 
 Check -Name "current-session.json exists" -ScriptBlock {
-    if (-not (Test-Path "$env:USERPROFILE\.shokunin\current-session.json")) { throw "not found" }
+    if (-not (Test-Path "{{SHOKUNIN_DIR}}\current-session.json")) { throw "not found" }
 }
 
-# 7. Cleanup test data
 Write-Host "[Cleanup]" -ForegroundColor Yellow
 Check -Name "Remove test entries" -ScriptBlock {
-    $h = "$env:USERPROFILE\.shokunin\scripts\chroma-helper.py"
+    $h = "{{CHROMA_HELPER_PATH}}"
     $r = python $h search "Healthcheck test" "healthcheck" 100 2>&1
     if ($r -match '"session_id":') {
         python $h delete "healthcheck" 2>&1 | Out-Null
     }
-    $s = "$env:USERPROFILE\.shokunin\memory\sessions"
+    $s = "{{SHOKUNIN_DIR}}\memory\sessions"
     Get-ChildItem "$s\healthcheck-*" -ErrorAction SilentlyContinue | Remove-Item -Force
     Get-ChildItem "$s\mcp-test-*" -ErrorAction SilentlyContinue | Remove-Item -Force
     $true
 }
 
-# Summary
 Write-Host ""
 Write-Host "==========================================" -ForegroundColor Cyan
 if ($FAIL -eq 0) {

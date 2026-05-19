@@ -11,11 +11,13 @@ $extensions = @("*.md", "*.ps1", "*.sh", "*.py", "*.json", "*.yaml", "*.yml", "*
 $changed = 0
 $total = 0
 
-Get-ChildItem -Path $Path -Recurse -Include $extensions -Exclude "*node_modules*", "*.git*" | ForEach-Object {
+Get-ChildItem -Path $Path -Recurse -File | Where-Object {
+    $_.Extension -match '\.(md|ps1|sh|py|json|yaml|yml|ts|tsx|js|jsx|css|html)$' -and
+    $_.FullName -notmatch 'node_modules|\.git'
+} | ForEach-Object {
     $total++
     $content = [System.IO.File]::ReadAllText($_.FullName)
-    if ($content -match "
-") {
+    if ($content.Contains("`r`n")) {
         if (-not $Check) {
             $content = $content -replace "`r`n", "`n"
             [System.IO.File]::WriteAllText($_.FullName, $content, [System.Text.UTF8Encoding]::new($false))

@@ -38,6 +38,7 @@ if (Test-Path $memDir) {
 }
 
 # 3. Check memory size
+$size = 0
 if (Test-Path "$memDir\chroma_db") {
     $size = (Get-ChildItem -Recurse "$memDir\chroma_db" | Measure-Object -Property Length -Sum).Sum
     Write-Host "  ChromaDB size: $([math]::Round($size/1KB, 1)) KB" -ForegroundColor Green

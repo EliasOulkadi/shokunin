@@ -12,7 +12,9 @@
                  "CHROMA_HELPER_PATH":  "{{SHOKUNIN_DIR}}\\scripts\\chroma-helper.py",
                  "FILESYSTEM_ROOT":  "~",
                  "MODEL":  "opencode-go/deepseek-v4-flash",
-                 "LINUX_SESSION_DIR":  "{{SHOKUNIN_DIR}}/memory/sessions"
+                 "LINUX_SESSION_DIR":  "{{SHOKUNIN_DIR}}/memory/sessions",
+                 "PYTHON_BIN":  "python",
+                 "MCP_ROOT_PATH":  "~"
              },
     "components":  {
                        "scripts":  {

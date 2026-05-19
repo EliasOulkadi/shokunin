@@ -46,11 +46,12 @@ $decisions = @()
 $commands = @()
 foreach ($s in $sections) {
     if ($s.Length -le 20) { continue }
-    if ($s -like "*decid*" -or $s -like "*usar*" -or $s -like "*cre*" -or $s -like "*implement*") {
+    $lower = $s.ToLower()
+    if (($lower -like "*decid*" -or $lower -like "*implement*") -and ($lower -notlike "*create*" -or $lower -like "*decided*")) {
         $trunc = $s.Substring(0, [Math]::Min($MAX_PREVIEW_LENGTH, $s.Length))
         $decisions += $trunc
     }
-    $matchResult = [regex]::Match($s, "(npm|pip|git|docker|python|node) ")
+    $matchResult = [regex]::Match($s, "(npm|npx|pip|git|docker|python|python3|node|yarn|cargo|go) ")
     if ($matchResult.Success) {
         $trunc = $s.Substring(0, [Math]::Min($MAX_COMMAND_LENGTH, $s.Length))
         $commands += $trunc

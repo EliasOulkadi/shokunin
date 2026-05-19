@@ -2,7 +2,7 @@
 .SYNOPSIS
     Manage Shokunin ecosystem: status, plan, apply, rollback, init.
 #>
-[CmdletBinding()] param(
+param(
   [ValidateSet("status","plan","apply","rollback","init")]
   [string]$Command = "status",
   [string]$Timestamp = "",
@@ -10,18 +10,15 @@
   [switch]$Quiet
 )
 
-Set-StrictMode -Version Latest
-$ErrorActionPreference = "Stop"
-
-$SHOKUNIN_DIR = "$env:USERPROFILE\.shokunin"
+$SHOKUNIN_DIR = "{{SHOKUNIN_DIR}}"
 $MANIFEST = "$SHOKUNIN_DIR\shokunin.json"
 $BACKUP_DIR = "$SHOKUNIN_DIR\backups"
 $TEMPLATES_DIR = "$SHOKUNIN_DIR\templates"
-$CHROMA_HELPER = "$SHOKUNIN_DIR\scripts\chroma-helper.py"
+$CHROMA_HELPER = "{{CHROMA_HELPER_PATH}}"
 
 $PASS = 0; $FAIL = 0; $WARN = 0; $PROTECTED = 0
 
-function Log { if (-not $Quiet) { Write-Host $args[0] -ForegroundColor $args[1] } }
+function Log { if (-not $Quiet) { Write-Host "$args" -ForegroundColor $args[1] } }
 
 function Get-Hash($path) {
   if (-not (Test-Path $path)) { return $null }
@@ -36,13 +33,8 @@ function Get-Hash($path) {
 
 function Resolve-Vars($text, $vars) {
   $result = $text
-  $maxIterations = 10
-  $iteration = 0
-  while ($result -match '\{\{[^}]+\}\}' -and $iteration -lt $maxIterations) {
-    foreach ($v in $vars.GetEnumerator()) {
-      $result = $result.Replace("{{" + $v.Key + "}}", $v.Value)
-    }
-    $iteration++
+  foreach ($v in $vars.GetEnumerator()) {
+    $result = $result.Replace("{{" + $v.Key + "}}", $v.Value)
   }
   return $result
 }
@@ -105,7 +97,7 @@ function Get-Status($flat) {
     $hash = if ($isDir) { "DIRECTORY" } else { Get-Hash $c.FullPath }
     $exists = $hash -ne $null
     $status = if ($c.Rule -eq "NEVER_MODIFY") {
-      $PROTECTED++
+      $script:PROTECTED++
       if ($exists) { "PROTECTED" } else { "PROTECTED_EMPTY" }
     } elseif (-not $exists) {
       "MISSING"
@@ -180,21 +172,9 @@ function Backup-File($path) {
   $backupDir = "$BACKUP_DIR\$ts"
   New-Item -ItemType Directory -Path $backupDir -Force | Out-Null
   $leaf = Split-Path $path -Leaf
-  $safeLeaf = "$([System.IO.Path]::GetFileNameWithoutExtension($path))_$([System.IO.Path]::GetExtension($path).TrimStart('.'))"
-  $destPath = "$backupDir\$safeLeaf.bak"
-  $counter = 1
-  while (Test-Path $destPath) {
-    $destPath = "$backupDir\$safeLeaf`_$counter.bak"
-    $counter++
-  }
-  Copy-Item -Path $path -Destination $destPath -Force
-  $manifestPath = "$backupDir\manifest.json"
-  $manifest = @{}
-  if (Test-Path $manifestPath) {
-    $manifest = Get-Content $manifestPath -Raw | ConvertFrom-Json | ForEach-Object { $_ }
-  }
-  $manifest[$safeLeaf] = $path
-  ($manifest | ConvertTo-Json) | Out-File $manifestPath -Encoding UTF8 -Force
+  Copy-Item -Path $path -Destination "$backupDir\$leaf.bak" -Force
+  $manifest = @{ $leaf = $path } | ConvertTo-Json
+  $manifest | Out-File "$backupDir\manifest.json" -Encoding UTF8 -Force
   return $backupDir
 }
 
@@ -338,4 +318,3 @@ switch ($Command) {
     Write-Host "For now, edit shokunin.json manually to add components."
   }
 }
-

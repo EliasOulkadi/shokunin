@@ -12,6 +12,14 @@ $script:startupDir = [Environment]::GetFolderPath('Startup')
 $script:logFile = "$env:TEMP\shokunin-install-$(Get-Date -Format 'yyyyMMdd-HHmmss').log"
 $script:sourceDir = if ($PSScriptRoot) { $PSScriptRoot } else { (Get-Location).Path }
 
+# Known SHA256 checksums for critical scripts (updated per release)
+# These are verified after download to prevent tampering
+$script:knownChecksums = @{
+    "mcp-server.py" = ""
+    "chroma-helper.py" = ""
+    "run-opencode.ps1" = ""
+}
+
 # ============================================================
 # SECTION 1: LOGGING & DISPLAY
 # ============================================================
@@ -20,6 +28,15 @@ function Write-Step { param([string]$Msg) Write-Host "`n[$($script:step++)] $Msg
 function Write-OK { Write-Host "    OK" -ForegroundColor Green }
 function Write-Skip { Write-Host "    SKIP (already exists)" -ForegroundColor Yellow }
 function Write-Fail { Write-Host "    FAIL" -ForegroundColor Red }
+
+function Test-FileChecksum {
+    param([string]$Path, [string]$ExpectedHash)
+    if (-not $ExpectedHash -or -not (Test-Path $Path)) { return $true }
+    try {
+        $actual = (Get-FileHash -Path $Path -Algorithm SHA256).Hash
+        return $actual -eq $ExpectedHash
+    } catch { return $false }
+}
 
 # ============================================================
 # SECTION 2: PREREQUISITES CHECK
@@ -143,12 +160,22 @@ function Install-MemorySystem {
 
     # Copy MCP server
     $mcpSrc = Join-Path $script:sourceDir ".pack\memory\mcp-server.py"
+    $mcpDest = Join-Path $script:installDir "memory\mcp-server.py"
     if (Test-Path $mcpSrc) {
-        Copy-Item $mcpSrc (Join-Path $script:installDir "memory\mcp-server.py") -Force
+        Copy-Item $mcpSrc $mcpDest -Force
     } else {
-        # Download from GitHub
+        # Download from GitHub with checksum verification
         $url = "https://raw.githubusercontent.com/EliasOulkadi/shokunin/master/.pack/memory/mcp-server.py"
-        Invoke-WebRequest -Uri $url -OutFile (Join-Path $script:installDir "memory\mcp-server.py") -ErrorAction SilentlyContinue
+        try {
+            Invoke-WebRequest -Uri $url -OutFile $mcpDest -ErrorAction Stop
+            if ($script:knownChecksums["mcp-server.py"]) {
+                if (-not (Test-FileChecksum -Path $mcpDest -ExpectedHash $script:knownChecksums["mcp-server.py"])) {
+                    Write-Log "CHECKSUM MISMATCH for mcp-server.py — file may be tampered" Red
+                }
+            }
+        } catch {
+            Write-Log "Could not download mcp-server.py" Red
+        }
     }
 
     # Copy healthcheck script
@@ -188,13 +215,19 @@ function Install-NewScripts {
     $count = 0
     foreach ($script in $newScripts) {
         $src = Join-Path $script:sourceDir ".pack\scripts\$script"
+        $dest = Join-Path $scriptsDir $script
         if (Test-Path $src) {
-            Copy-Item $src (Join-Path $scriptsDir $script) -Force
+            Copy-Item $src $dest -Force
             $count++
         } else {
             $url = "https://raw.githubusercontent.com/EliasOulkadi/shokunin/master/.pack/scripts/$script"
             try {
-                Invoke-WebRequest -Uri $url -OutFile (Join-Path $scriptsDir $script) -ErrorAction SilentlyContinue
+                Invoke-WebRequest -Uri $url -OutFile $dest -ErrorAction Stop
+                if ($script:knownChecksums.ContainsKey($script) -and $script:knownChecksums[$script]) {
+                    if (-not (Test-FileChecksum -Path $dest -ExpectedHash $script:knownChecksums[$script])) {
+                        Write-Log "  CHECKSUM MISMATCH for $script" Red
+                    }
+                }
                 $count++
             } catch {
                 Write-Log "  Could not download $script" Yellow

@@ -55,8 +55,11 @@ echo "  Saving session context..."
 BUFFER_TEXT=""
 if [ -f "$LOG_DIR/$SESSION_ID-raw.log" ]; then
     BUFFER_TEXT=$(python3 -c "
-import sys, re
-with open('$LOG_DIR/$SESSION_ID-raw.log', errors='replace') as f:
+import sys, re, os
+log_path = os.environ.get('LOG_FILE_PATH', '')
+if not log_path:
+    log_path = sys.argv[1] if len(sys.argv) > 1 else ''
+with open(log_path, errors='replace') as f:
     raw = f.read()
 cleaned = re.sub(r'\x1b\[[0-9;]*[a-zA-Z]', '', raw)
 cleaned = re.sub(r'\x1b\][0-9;]*[a-zA-Z]', '', cleaned)
@@ -64,7 +67,7 @@ start = cleaned.find('==========================================')
 if start >= 0:
     cleaned = cleaned[start:]
 print(cleaned[:20000])
-" 2>/dev/null || echo "")
+" "$LOG_DIR/$SESSION_ID-raw.log" 2>/dev/null || echo "")
 fi
 
 SUMMARY="Session: $SESSION_ID

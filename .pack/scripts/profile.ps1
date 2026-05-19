@@ -55,7 +55,12 @@ function global:opencode {
     if (Test-Path $wrapper) {
         & $wrapper @args
     } else {
-        & opencode.exe @args
+        $realOpencode = Get-Command opencode.exe -ErrorAction SilentlyContinue
+        if ($realOpencode) {
+            & $realOpencode.Source @args
+        } else {
+            Write-Host "opencode not found. Install with: npm install -g opencode" -ForegroundColor Red
+        }
     }
 }
 

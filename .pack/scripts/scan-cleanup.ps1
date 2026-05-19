@@ -122,24 +122,46 @@ function Do-Cleanup {
     Add-Content -Path $logFile -Value $header
 
     Add-Type -AssemblyName Microsoft.VisualBasic
+    $allowedDirs = @(
+        [Environment]::GetFolderPath('Desktop'),
+        (Join-Path $env:USERPROFILE "Downloads"),
+        $env:TEMP,
+        (Join-Path $env:USERPROFILE ".shokunin\docs")
+    ) | Where-Object { $_ }
+
     foreach ($id in $Ids) {
         $parts = $id -split "\|"
         $path = $parts[0]
         $reason = if ($parts.Count -gt 1) { $parts[1] } else { "User request" }
-        if (Test-Path $path) {
-            try {
-                $item = Get-Item -LiteralPath $path
-                [Microsoft.VisualBasic.FileIO.FileSystem]::DeleteFile($path, "OnlyErrorDialogs", "SendToRecycleBin")
-                $entry = "$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') | MOVED | $path | $($item.Length) | $reason"
-                Add-Content -Path $logFile -Value $entry
-                $moved = $moved + 1
-                $totalBytes = $totalBytes + $item.Length
-                Write-Host "  Moved $($item.Name)" -ForegroundColor Green
-            } catch {
-                $entry = "$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') | FAILED | $path | $_"
-                Add-Content -Path $logFile -Value $entry
-                Write-Host "  Failed $path - $_" -ForegroundColor Red
+
+        if (-not (Test-Path $path)) { continue }
+
+        $resolved = (Get-Item -LiteralPath $path).FullName
+        $isAllowed = $false
+        foreach ($allowed in $allowedDirs) {
+            $resolvedAllowed = (Get-Item -LiteralPath $allowed -ErrorAction SilentlyContinue).FullName
+            if ($resolvedAllowed -and $resolved.StartsWith($resolvedAllowed, [System.StringComparison]::OrdinalIgnoreCase)) {
+                $isAllowed = $true
+                break
             }
+        }
+        if (-not $isAllowed) {
+            Write-Host "  SKIPPED $($path) - outside allowed directories" -ForegroundColor Yellow
+            continue
+        }
+
+        try {
+            $item = Get-Item -LiteralPath $path
+            [Microsoft.VisualBasic.FileIO.FileSystem]::DeleteFile($path, "OnlyErrorDialogs", "SendToRecycleBin")
+            $entry = "$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') | MOVED | $path | $($item.Length) | $reason"
+            Add-Content -Path $logFile -Value $entry
+            $moved = $moved + 1
+            $totalBytes = $totalBytes + $item.Length
+            Write-Host "  Moved $($item.Name)" -ForegroundColor Green
+        } catch {
+            $entry = "$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') | FAILED | $path | $_"
+            Add-Content -Path $logFile -Value $entry
+            Write-Host "  Failed $path - $_" -ForegroundColor Red
         }
     }
     $totalMB = [math]::Round($totalBytes / 1MB, 1)

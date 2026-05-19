@@ -30,7 +30,13 @@ clean_pdfs() {
     if [ -d "$dir" ]; then
         while IFS= read -r -d '' file; do
             size=$(stat -c%s "$file" 2>/dev/null || echo 0)
-            mv "$file" "$HOME/.local/share/Trash/files/" 2>/dev/null || rm -f "$file" 2>/dev/null || true
+            if command -v gio &>/dev/null; then
+                gio trash "$file" 2>/dev/null || rm -f "$file" 2>/dev/null || true
+            elif command -v trash-put &>/dev/null; then
+                trash-put "$file" 2>/dev/null || rm -f "$file" 2>/dev/null || true
+            else
+                rm -f "$file" 2>/dev/null || true
+            fi
             count=$((count + 1))
             bytes=$((bytes + size))
         done < <(find "$dir" -maxdepth 1 -name "Shokunin-*.pdf" -mtime +1 -print0 2>/dev/null)
