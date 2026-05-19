@@ -1,9 +1,26 @@
 ---
 name: zen-comprehensive-review
 description: "Orchestrate a multi-model code review: spawn 3 review subagents, merge findings. In PR mode, posts GitHub PR comments with reactions. In local mode, outputs findings directly. CRITICAL: this skill is costly, don't use it unless user explicitly requested to use it."
+triggers:
+  - "zen comprehensive"
+  - "multi-model review"
+  - "3 model review"
+  - "costly review"
+  - "thorough code review"
+negatives:
+license: MIT
+compatibility: opencode
+  - "single model review"
+  - "quick review"
+  - "simple review"
+  - "cross review"
+  - "code review"
 metadata:
   version: 1.2.1
----
+
+  workflow: quality
+  audience: developers---
+
 
 > **Note:** `scripts/post_review_strict.js` is distributed with the full Shokunin tooling. Manual posting to PRs is available without it.
 
@@ -289,6 +306,14 @@ Post the review, then stop.
 | Silently dropping findings that don't map to a clear file:line | Violates the requirement to not silently drop | Document dropped findings with reason. If they describe real issues, find the nearest code location. |
 | Running git diff inside subagents | Wastes subagent context. Diff may differ between agents. | Pre-save diff to `/tmp/review-diff.patch`. Subagents read that file only. |
 | Reviewing pre-existing code not in the diff | Scope creep. Reviews irrelevant code. | Only review code in the diff. Pre-existing issues are out of scope. |
+
+## Checklist
+
+- [ ] All subagents dispatched and returned results before merging
+- [ ] Findings deduplicated across model outputs
+- [ ] False positives filtered out (models may flag non-issues)
+- [ ] Priority levels assigned (P0 critical, P1 major, P2 minor, P3 suggestion)
+- [ ] PR description or context reviewed — changes make sense in the broader feature context
 
 ## Sources
 

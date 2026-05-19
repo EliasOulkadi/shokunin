@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
     Weekly health check — disk space, memory backup, ChromaDB size, skills count, OpenCode config.
 #>
@@ -19,7 +19,7 @@ foreach ($d in $disks) {
     $freeGB = [math]::Round($d.Free / 1GB, 1)
     $totalGB = [math]::Round(($d.Used + $d.Free) / 1GB, 1)
     Write-Host "  $($d.Name) $freeGB GB free / $totalGB GB total"
-    if ($freeGB -lt 10) { Write-Host "    âš ï¸ Low disk space!" -ForegroundColor Red }
+    if ($freeGB -lt 10) { Write-Host "    LOW DISK SPACE!" -ForegroundColor Red }
 }
 
 # 2. Memory backup
@@ -60,8 +60,10 @@ if (Test-Path "$startupFolder\ShokuninBot.lnk") {
 
 Write-Host "`n=== Health check complete: $date ===" -ForegroundColor Cyan
 
-# Log to file
+# Log to file — capture meaningful results
 $logDir = "$env:USERPROFILE\.shokunin\logs"
 New-Item -ItemType Directory -Path $logDir -Force | Out-Null
-$log = Get-Date -Format "yyyy-MM-dd HH:mm:ss" | Out-File -FilePath "$logDir\healthcheck.log" -Append
+$freeGB = [math]::Round(($disks | Select-Object -First 1).Free / 1GB, 1)
+$logLine = "$date | Disk free: ${freeGB}GB | ChromaDB: $([math]::Round($size/1KB,1))KB | Skills: $skillsCount"
+Add-Content -Path "$logDir\healthcheck.log" -Value $logLine
 

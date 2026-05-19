@@ -6,7 +6,7 @@ compatibility: opencode
 metadata:
   workflow: infrastructure
   audience: devops
-  version: "3.0"
+  version: "3.0.0"
   author: shokunin
 allowed-tools: Read Bash Write Grep Glob
 triggers:
@@ -27,7 +27,14 @@ triggers:
   - network policy
   - statefulset
   - daemonset
+negatives:
+  - "Dockerfile"
+  - "Docker"
+  - "docker-compose"
+  - "CI/CD pipeline"
+  - "Terraform"
 ---
+
 
 # Kubernetes Architect
 

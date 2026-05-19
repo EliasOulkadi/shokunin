@@ -2,8 +2,8 @@
 .SYNOPSIS
     PowerShell profile for the Shokunin AI Ecosystem - aliases, PSReadLine, Telegram bot, Oh My Posh.
 #>
-Set-StrictMode -Version Latest
-$ErrorActionPreference = "Stop"
+# Profile should not use StrictMode or Stop — it must degrade gracefully
+$ErrorActionPreference = "Continue"
 
 # Shokunin AI Ecosystem - PowerShell Profile
 # Documentation: https://github.com/EliasOulkadi/shokunin
@@ -55,8 +55,7 @@ function global:opencode {
     if (Test-Path $wrapper) {
         & $wrapper @args
     } else {
-        # Windows-only fallback path
-        & "$env:USERPROFILE\AppData\Roaming\npm\opencode.ps1" @args
+        & opencode.exe @args
     }
 }
 

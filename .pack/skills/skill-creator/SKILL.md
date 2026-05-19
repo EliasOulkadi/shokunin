@@ -1,6 +1,30 @@
 ---
 name: skill-creator
 description: Create new skills, modify and improve existing skills, and measure skill performance. Use when users want to create a skill from scratch, update or optimize an existing skill, run evals to test a skill, benchmark skill performance with variance analysis, or optimize a skill's description for better triggering accuracy.
+triggers:
+  - "create a skill"
+  - "new skill"
+  - "edit skill"
+  - "improve skill"
+  - "write a skill"
+  - "skill evaluation"
+  - "skill benchmark"
+  - "description optimization"
+  - "evals"
+  - "test a skill"
+negatives:
+  - "general coding"
+  - "code review"
+  - "find a skill"
+  - "install a skill"
+  - "ecosystem update"
+license: MIT
+compatibility: opencode
+metadata:
+  version: "1.0.0"
+  workflow: tooling
+  audience: developers
+  author: shokunin
 ---
 
 # Skill Creator
@@ -420,6 +444,14 @@ Skill creation best practices drawn from:
 - Iterative prompt engineering principles: draft → test → review → improve loop
 - Progressive disclosure architecture for managing context window budgets
 - Description optimization techniques for reliable triggering in multi-skill environments
+
+## Checklist
+
+- [ ] Skill solves a specific, recurring problem (not a one-shot instruction)
+- [ ] Frontmatter complete: name, description, triggers, negatives, license, compatibility, version
+- [ ] Description optimized for triggering — test with 3+ variations of a user request
+- [ ] Workflow instructions are actionable and tool-agnostic where possible
+- [ ] At least one test prompt included for evaluation
 
 ---
 

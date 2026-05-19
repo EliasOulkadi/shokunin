@@ -1,13 +1,34 @@
 ---
 name: terraform
 description: Design and manage infrastructure as code with Terraform — modules, remote state (S3 + DynamoDB), Stacks (deployments), test framework, preconditions/postconditions, moved/removed blocks, and CI/CD plan/apply separation. Use when user asks to write Terraform config, set up remote state, design modules, manage state, or automate infrastructure. Do NOT use for Kubernetes (use kubernetes), Docker (use docker), or CI/CD pipeline design (use ci-cd).
+triggers:
+  - "Terraform"
+  - "infrastructure as code"
+  - "IaC"
+  - "terraform plan"
+  - "terraform apply"
+  - "terraform state"
+  - "remote backend"
+  - "provision infrastructure"
+  - "cloud resources"
+  - "AWS infrastructure"
+  - "HashiCorp"
+  - "terraform module"
+negatives:
+  - "Kubernetes"
+  - "Docker"
+  - "CI/CD"
+  - "Ansible"
+  - "Pulumi"
+  - "CloudFormation"
 license: MIT
 compatibility: opencode
 metadata:
   workflow: infrastructure
   audience: devops
-  version: "2.0"
+  version: "2.0.0"
 ---
+
 
 # Terraform Architect
 

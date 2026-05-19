@@ -9,7 +9,7 @@ compatibility: opencode
 metadata:
   workflow: finance
   audience: personal
-  version: "3.0"
+  version: "3.0.0"
 triggers:
   - create a budget
   - track spending
@@ -29,6 +29,7 @@ negatives:
   - options trading
   - individual stock picks
 ---
+
 
 **Disclaimer**: Educational financial planning information. Not professional financial advice.
 

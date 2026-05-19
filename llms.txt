@@ -1,0 +1,36 @@
+# Shokunin AI Ecosystem
+
+> 62 skills for AI coding agents. Infrastructure, backend, frontend, mobile, content, quality, productivity, documents, and AI agents. Each skill provides structured workflows, checklists, and domain-specific knowledge for production-grade software engineering.
+
+## Core Resources
+
+- [Skills Directory](https://eliasoulkadi.github.io/shokunin/skills.html): Complete listing of all 62 skills with descriptions
+- [Project Home](https://eliasoulkadi.github.io/shokunin/): Landing page with overview
+- [Architecture](docs/ARCHITECTURE.md): System design and component relationships
+- [MCP API](docs/MCP-API.md): Memory server API documentation
+- [Changelog](CHANGELOG.md): Version history
+
+## Skill Categories
+
+- **Infrastructure**: docker, kubernetes, terraform, ci-cd, db-admin
+- **Backend**: api-forge, auth-architect, db-sculptor, error-handler
+- **Frontend**: component-forge, responsive-engine, motion-craft, landing-craft, aesthetic-web, ui-ux-pro-max
+- **Mobile**: flutter, react-native
+- **Quality**: test-commander, performance-profiler, code-review
+- **Content**: content-marketing, translate-craft, communication, documentation
+- **Productivity**: git-workflow, windows-powershell, strategy, finance
+- **Documents**: kami, kagen, portfolio-auto
+- **AI Agents**: agent-browser, agent-tools, skill-creator, memory, chromadb
+- **System**: shokunin-update, init, find-skills, plan
+
+## Key Documents
+
+- [Install Guide](install.ps1): Windows PowerShell installation
+- [Install Guide (Unix)](install.sh): Unix shell installation
+- [Contributing](CONTRIBUTING.md): How to contribute
+- [Security](SECURITY.md): Security policy
+- [Code of Conduct](CODE_OF_CONDUCT.md): Community standards
+
+## GitHub
+
+- https://github.com/eliasoulkadi/shokunin

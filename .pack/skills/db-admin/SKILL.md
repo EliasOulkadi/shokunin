@@ -1,15 +1,35 @@
 ---
 name: db-admin
 description: PostgreSQL database administration — backup/restore (pg_dump, PITR, WAL archiving), health monitoring (connections, bloat, cache hit ratio, dead tuples), connection pooling (PgBouncer), replication (streaming, logical), vacuum/autovacuum tuning, and scheduled backups with retention. Use when user asks to backup a database, restore from backup, monitor database health, set up replication, or perform DBA tasks. Do NOT use for schema design (use db-sculptor), query optimization (use db-sculptor), or migration planning (use db-sculptor).
+triggers:
+  - "PostgreSQL backup"
+  - "restore database"
+  - "database backup"
+  - "database administration"
+  - "DBA"
+  - "monitor database"
+  - "pg_dump"
+  - "PgBouncer"
+  - "database replication"
+  - "WAL archiving"
+  - "vacuum database"
+  - "postgres health"
+negatives:
+  - "schema design"
+  - "query optimization"
+  - "Prisma"
+  - "Drizzle"
+  - "migration"
 license: MIT
 compatibility: opencode
 metadata:
   workflow: operations
   audience: devops
-  version: "3.0"
+  version: "3.0.0"
   author: shokunin
 allowed-tools: Read Bash Write
 ---
+
 
 # Database Administrator
 

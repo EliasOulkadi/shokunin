@@ -1,13 +1,33 @@
 ---
 name: whendone-plus
 description: Automatically notify the user when long-running terminal commands finish (npm test, docker build, git push, etc.). The agent monitors command execution and sends a desktop notification on completion if the command ran longer than threshold (default 10s). Use when user asks to "notify me when done", "desktop notification when command finishes", "alert when done", or "tell me when this completes". Do NOT use for interactive commands (vim, nano, less, htop), commands that always complete in <5s, or streaming commands (tail -f).
+triggers:
+  - "notify me when done"
+  - "desktop notification"
+  - "alert when done"
+  - "tell me when this completes"
+  - "notify when finished"
+  - "ping me when"
+  - "remind me when"
+  - "notification on completion"
+  - "when done"
+negatives:
+  - "interactive commands"
+  - "vim"
+  - "nano"
+  - "less"
+  - "htop"
+  - "streaming commands"
+  - "tail -f"
+  - "short commands"
 license: MIT
 compatibility: opencode
 metadata:
   workflow: automation
   audience: developers
-  version: "3.0"
+  version: "3.0.0"
 ---
+
 
 # WhenDone Plus
 
@@ -139,6 +159,14 @@ notify-send "Command Complete" "npm test finished in 142s"
 | Include exit code | Yes | Show pass/fail in notification |
 | Show elapsed time | Yes | Include duration in notification text |
 | Fallback on failure | Bell | What to do if toast notification fails |
+
+## Checklist
+
+- [ ] Notification method matches platform (BurntToast on Windows, terminal-notifier on macOS, notify-send on Linux)
+- [ ] Threshold duration set appropriately (default 10s — not too short, not too long)
+- [ ] Not used for interactive commands (vim, nano, htop, less)
+- [ ] Custom message includes the command name and result (success/fail)
+- [ ] Fallback: terminal bell or Write-Host if notification fails
 
 ## Sources
 

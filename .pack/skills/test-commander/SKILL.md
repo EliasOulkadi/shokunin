@@ -1,15 +1,36 @@
 ---
 name: test-commander
 description: Generate unit, integration, E2E, and visual regression tests following the Testing Trophy methodology (80% integration). Covers Vitest/Jest, Testing Library, Playwright, MSW for API mocking, snapshot strategy, visual regression (Chromatic/Percy/Playwright), test factories with Faker, and CI sharding. Use when user asks to write tests, set up testing framework, mock API/dependencies, improve coverage, or add visual regression. Do NOT use for performance/load testing, production monitoring, or type testing (covered by TypeScript).
+triggers:
+  - "write tests"
+  - "unit test"
+  - "integration test"
+  - "E2E test"
+  - "test coverage"
+  - "Vitest"
+  - "Jest"
+  - "Playwright test"
+  - "Testing Library"
+  - "MSW"
+  - "mock API"
+  - "visual regression"
+  - "test setup"
+negatives:
+  - "performance testing"
+  - "load testing"
+  - "production monitoring"
+  - "type testing"
+  - "TypeScript"
 license: MIT
 compatibility: opencode
 metadata:
   workflow: quality
   audience: developers
-  version: "4.0"
+  version: "4.0.0"
   author: shokunin
 allowed-tools: Read Bash Write Grep Glob
 ---
+
 
 # Test Commander
 

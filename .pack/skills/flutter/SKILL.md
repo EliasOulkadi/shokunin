@@ -8,9 +8,10 @@ compatibility: opencode
 metadata:
   workflow: mobile
   audience: developers
-  version: "4.0"
+  version: "4.0.0"
   author: shokunin
 ---
+
 
 # Flutter Architect
 

@@ -1,8 +1,40 @@
 ---
 name: agent-tools
 description: "Run 150+ AI apps via inference.sh CLI - image generation, video creation, LLMs, search, 3D, Twitter automation. Models: FLUX, Veo, Gemini, Grok, Claude, Seedance, OmniHuman, Tavily, Exa, OpenRouter, and many more. Use when running AI apps, generating images/videos, calling LLMs, web search, or automating Twitter. Triggers: inference.sh, infsh, ai model, run ai, serverless ai, ai api, flux, veo, claude api, image generation, video generation, openrouter, tavily, exa search, twitter api, grok"
+triggers:
+  - "inference.sh"
+  - "infsh"
+  - "FLUX"
+  - "Veo"
+  - "Gemini"
+  - "Grok"
+  - "Claude API"
+  - "image generation"
+  - "video generation"
+  - "OpenRouter"
+  - "Tavily"
+  - "Exa"
+  - "search API"
+  - "AI model"
+  - "run AI"
+  - "serverless AI"
+  - "Twitter API"
+  - "social media automation"
+negatives:
+license: MIT
+compatibility: opencode
+  - "local model"
+  - "Ollama"
+  - "vector search"
+  - "memory"
+  - "ChromaDB"
 allowed-tools: Bash(infsh *)
----
+metadata:
+  version: "1.0.0"
+
+  workflow: ai-agents
+  audience: developers---
+
 
 # [inference.sh](https://inference.sh)
 
@@ -169,6 +201,14 @@ For multi-step pipelines, chain apps: run the first app, extract its output URL,
 | Output URL returns 404 | Generated asset expired (files are ephemeral) | Re-run the job; for permanent storage, download immediately with `infsh task download <task-id>` |
 | JSON parse error on `--input` | Input file is not valid JSON or schema mismatch | Use `infsh app sample <app-id> --save input.json` to regenerate a valid template |
 | Image/video generation produces blank or corrupted output | Model inference failed silently | Re-run the job; check app-specific known issues in `infsh app get <app-id>`; try a different model for the same task |
+
+## Checklist
+
+- [ ] App is authenticated before running (`infsh login check`)
+- [ ] Model supports the requested input format (image/video/text sizes)
+- [ ] Task ID saved for async operations to retrieve results later
+- [ ] Credit cost checked before bulk operations
+- [ ] Output format confirmed (URL, file, or stdout) before passing to next step
 
 ## Sources
 

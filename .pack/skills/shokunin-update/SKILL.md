@@ -1,7 +1,30 @@
 ---
 name: shokunin-update
 description: Detect drift, plan updates, and apply changes to the Shokunin AI Ecosystem. Use this when user asks to update, fix, sync, or verify the ecosystem.
----
+triggers:
+  - "update ecosystem"
+  - "sync ecosystem"
+  - "fix ecosystem"
+  - "verify ecosystem"
+  - "shokunin update"
+  - "ecosystem status"
+  - "check drift"
+  - "update skills"
+  - "repair ecosystem"
+  - "ecosystem health"
+negatives:
+license: MIT
+compatibility: opencode
+  - "update skill content"
+  - "create skill"
+  - "memory operations"
+  - "session management"
+metadata:
+  version: "1.0.0"
+
+  workflow: system
+  audience: developers---
+
 
 > **Note:** The `shokunin-update.ps1` script lives in `.pack/scripts/` and is deployed to `~/.shokunin/scripts/` by the installer.
 
@@ -73,6 +96,11 @@ This automatically:
 | Rollback target timestamp not found | Backup was purged by retention policy or never created. Cannot recover that point in time. Run `status` to assess current state and manually fix drift. |
 | Powershell execution policy blocks the script | System execution policy set to Restricted | Run `Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser` or invoke with `powershell -ExecutionPolicy Bypass -File script.ps1`. |
 | ChromaDB save during apply step fails | MCP server is down or ChromaDB collection is locked | Apply still succeeded on the filesystem. Save the update event manually: `python ~/.shokunin/scripts/chroma-helper.py save "update applied" ...`. |
+
+## Related Scripts
+
+- `~/.shokunin/scripts/validate-skills.ps1` — Validates all installed skills for required sections, size, and referenced script existence
+- `~/.shokunin/scripts/shokunin-update.ps1` — Drift detection, manifest-driven update apply, rollback, and status reporting
 
 ## Sources
 

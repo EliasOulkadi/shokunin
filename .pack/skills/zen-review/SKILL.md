@@ -1,9 +1,24 @@
 ---
 name: zen-review
 description: "Expert code reviewer. Analyze PR changes for correctness, security, performance, and quality. Returns findings as JSON. CRITICAL: this skill is costly, don't use it unless user explicitly requested to use it."
+triggers:
+  - "zen review"
+  - "expert code review"
+  - "JSON review"
+  - "structured review"
+negatives:
+license: MIT
+compatibility: opencode
+  - "comprehensive review"
+  - "cross review"
+  - "PR review"
+  - "UI review"
 metadata:
   version: 1.1.0
----
+
+  workflow: quality
+  audience: developers---
+
 
 # Code Review
 

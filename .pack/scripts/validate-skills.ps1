@@ -52,11 +52,10 @@ foreach ($d in $skillDirs) {
 Write-Host "`n[Scripts referenced]" -ForegroundColor Yellow
 foreach ($d in $skillDirs) {
     $content = Get-Content "$($d.FullName)\SKILL.md" -Raw
-    $refs = [regex]::Matches($content, 'scripts/[\w.-]+') | ForEach-Object { $_.Value }
+    $refs = [regex]::Matches($content, 'scripts/[\w.-]+') | ForEach-Object { $_.Value -replace '/', '\' }
     foreach ($ref in $refs) {
         $scriptPath = Join-Path $d.FullName $ref
-        $packPath = Join-Path $env:USERPROFILE ".shokunin\scripts\$ref"
-        if (-not (Test-Path $scriptPath) -and -not (Test-Path $packPath)) {
+        if (-not (Test-Path $scriptPath)) {
             Warn "$($d.Name)" "referenced script not found: $ref"
         }
     }

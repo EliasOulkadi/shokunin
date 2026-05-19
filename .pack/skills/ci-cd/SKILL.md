@@ -1,15 +1,34 @@
 ---
 name: ci-cd
 description: Design CI/CD pipelines for GitHub Actions, GitLab CI, and CircleCI with matrix builds, test sharding, caching, Docker layer caching, OIDC auth, deployment strategies (rolling, blue-green, canary), auto-rollback, self-hosted runners, and environment protection with manual approvals. Use when user asks to set up CI/CD, write a pipeline, configure GitHub Actions/GitLab CI/CircleCI, automate deployments, or set up build/test/deploy workflows. Do NOT use for Dockerfile authoring (use docker), K8s manifests (use kubernetes), or Terraform config (use terraform).
+triggers:
+  - "CI/CD pipeline"
+  - "GitHub Actions"
+  - "GitLab CI"
+  - "CircleCI"
+  - "continuous integration"
+  - "continuous deployment"
+  - "build pipeline"
+  - "deploy pipeline"
+  - "automate build"
+  - "automate deploy"
+  - "test pipeline"
+  - "CI workflow"
+negatives:
+  - "Dockerfile"
+  - "Terraform"
+  - "Kubernetes manifest"
+  - "infrastructure provisioning"
 license: MIT
 compatibility: opencode
 metadata:
   workflow: infrastructure
   audience: devops
-  version: "3.0"
+  version: "3.0.0"
   author: shokunin
 allowed-tools: Read Bash Write Grep
 ---
+
 
 # CI/CD Architect
 

@@ -176,7 +176,13 @@ function Install-NewScripts {
         "save-memory.ps1",
         "search-memory.ps1",
         "read-transcript.ps1",
-        "test-memory.ps1"
+        "read-transcript.py",
+        "test-memory.ps1",
+        "memory-healthcheck.ps1",
+        "shokunin-update.ps1",
+        "validate-skills.ps1",
+        "seed-memory.ps1",
+        "scan-cleanup.ps1"
     )
 
     $count = 0

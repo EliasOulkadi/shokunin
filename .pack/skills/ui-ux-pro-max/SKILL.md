@@ -1,7 +1,32 @@
 ---
 name: ui-ux-pro-max
 description: "UI/UX design intelligence. 67 styles, 96 palettes, 57 font pairings, 25 charts, 13 stacks (React, Next.js, Vue, Svelte, SwiftUI, React Native, Flutter, Tailwind, shadcn/ui). Actions: plan, build, create, design, implement, review, fix, improve, optimize, enhance, refactor, check UI/UX code. Projects: website, landing page, dashboard, admin panel, e-commerce, SaaS, portfolio, blog, mobile app, .html, .tsx, .vue, .svelte. Elements: button, modal, navbar, sidebar, card, table, form, chart. Styles: glassmorphism, claymorphism, minimalism, brutalism, neumorphism, bento grid, dark mode, responsive, skeuomorphism, flat design. Topics: color palette, accessibility, animation, layout, typography, font pairing, spacing, hover, shadow, gradient. Integrations: shadcn/ui MCP for component search and examples."
----
+triggers:
+  - "UI pattern"
+  - "color palette"
+  - "font pairing"
+  - "design system"
+  - "UX guidelines"
+  - "wireframe"
+  - "mockup"
+  - "design reference"
+  - "UI library"
+  - "design inspiration"
+  - "UI component examples"
+  - "style guide"
+negatives:
+license: MIT
+compatibility: opencode
+  - "animations"
+  - "motion"
+  - "coding"
+  - "backend"
+metadata:
+  version: "1.0.0"
+
+  workflow: frontend
+  audience: designers---
+
 # UI/UX Pro Max - Design Intelligence
 
 Comprehensive design guide for web and mobile applications. Contains 67 styles, 96 color palettes, 57 font pairings, 99 UX guidelines, and 25 chart types across 13 technology stacks. Searchable database with priority-based recommendations.

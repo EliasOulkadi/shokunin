@@ -1,14 +1,34 @@
 ---
 name: impeccable
 description: "Use when the user wants to design, redesign, shape, critique, audit, polish, clarify, distill, harden, optimize, adapt, animate, colorize, extract, or otherwise improve a frontend interface. Covers design systems, anti-pattern detection, brand vs product registers, typography, color (OKLCH), spacing, motion, copy, and accessibility. By Paul Bakaus (ex-Google, ex-Disney, ex-Unity). Full version includes 23 sub-commands, CLI detection, Chrome extension, and E2E test suite: npx skills add pbakaus/impeccable"
+triggers:
+  - "impeccable"
+  - "design audit"
+  - "UI critique"
+  - "redesign"
+  - "polish UI"
+  - "design review"
+  - "anti-patterns"
+  - "design quality"
+  - "improve design"
+negatives:
+  - "animations"
+  - "components"
+  - "landing page"
+  - "conversion"
+  - "design philosophy" -> use taste
+  - "premium design standards" -> use aesthetic-web
 license: Apache 2.0 (based on pbakaus/impeccable)
 compatibility: opencode
 metadata:
-  version: "1.0-lite"
+  version: "1.0.0"
   author: Paul Bakaus, lite integration by shokunin
   source: https://github.com/pbakaus/impeccable
   full_install: npx skills add pbakaus/impeccable
----
+
+  workflow: frontend
+  audience: designers---
+
 
 # Impeccable (Lite)
 

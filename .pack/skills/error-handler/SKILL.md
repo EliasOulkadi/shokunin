@@ -1,15 +1,36 @@
 ---
 name: error-handler
 description: Design error handling, structured logging, and observability with OpenTelemetry (traces, metrics, logs), error classification, recovery patterns (retry with jitter, circuit breaker, bulkhead, timeout), error budgets/SLOs with burn rate alerts, and production incident triage. Use when user asks to implement error handling, logging, monitoring, observability, OpenTelemetry, error boundaries, circuit breakers, retry logic, or SLO tracking. Do NOT use for incident runbooks (use runbook-gen), vendor-specific APM setup (Datadog, Sentry agent config), or K8s debugging.
+triggers:
+  - "error handling"
+  - "logging"
+  - "observability"
+  - "OpenTelemetry"
+  - "error boundary"
+  - "circuit breaker"
+  - "retry logic"
+  - "SLO"
+  - "error budget"
+  - "structured logging"
+  - "monitoring"
+  - "tracing"
+negatives:
+  - "incident runbook"
+  - "on-call"
+  - "Datadog setup"
+  - "Sentry config"
+  - "K8s debugging"
+  - "APM vendor setup"
 license: MIT
 compatibility: opencode
 metadata:
   workflow: backend
   audience: developers
-  version: "4.0"
+  version: "4.0.0"
   author: shokunin
 allowed-tools: Read Bash Write Grep
 ---
+
 
 # Error Handler
 

@@ -126,6 +126,20 @@ Check -Name "current-session.json exists" -ScriptBlock {
     if (-not (Test-Path "$env:USERPROFILE\.shokunin\current-session.json")) { throw "not found" }
 }
 
+# 7. Cleanup test data
+Write-Host "[Cleanup]" -ForegroundColor Yellow
+Check -Name "Remove test entries" -ScriptBlock {
+    $h = "$env:USERPROFILE\.shokunin\scripts\chroma-helper.py"
+    $r = python $h search "Healthcheck test" "healthcheck" 100 2>&1
+    if ($r -match '"session_id":') {
+        python $h delete "healthcheck" 2>&1 | Out-Null
+    }
+    $s = "$env:USERPROFILE\.shokunin\memory\sessions"
+    Get-ChildItem "$s\healthcheck-*" -ErrorAction SilentlyContinue | Remove-Item -Force
+    Get-ChildItem "$s\mcp-test-*" -ErrorAction SilentlyContinue | Remove-Item -Force
+    $true
+}
+
 # Summary
 Write-Host ""
 Write-Host "==========================================" -ForegroundColor Cyan

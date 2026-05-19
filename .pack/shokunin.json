@@ -1,0 +1,187 @@
+﻿{
+    "version":  "4.2.3",
+    "updated":  "2026-05-19T00:00:00Z",
+    "shokunin_dir":  "{{SHOKUNIN_DIR}}",
+    "config_dir":  "{{CONFIG_DIR}}",
+    "agents_dir":  "{{AGENTS_DIR}}",
+    "vars":  {
+                 "SHOKUNIN_DIR":  "~/.shokunin",
+                 "CONFIG_DIR":  "~/.config/opencode",
+                 "AGENTS_DIR":  "~/.agents",
+                 "MCP_MEMORY_PATH":  "{{SHOKUNIN_DIR}}\\memory\\mcp-server.py",
+                 "CHROMA_HELPER_PATH":  "{{SHOKUNIN_DIR}}\\scripts\\chroma-helper.py",
+                 "FILESYSTEM_ROOT":  "~",
+                 "MODEL":  "opencode-go/deepseek-v4-flash",
+                 "LINUX_SESSION_DIR":  "{{SHOKUNIN_DIR}}/memory/sessions"
+             },
+    "components":  {
+                       "scripts":  {
+                                       "type":  "group",
+                                       "path":  "{{SHOKUNIN_DIR}}/scripts",
+                                       "backup":  true,
+                                       "entries":  {
+                        "chroma-helper.py":  {
+                                                                                 "type":  "template",
+                                                                                 "runtime":  "python",
+                                                                                 "template":  "chroma-helper.py.tpl"
+                                                                             },
+                                                       "run-opencode.ps1":  {
+                                                                                "type":  "template",
+                                                                                "runtime":  "powershell",
+                                                                                "template":  "run-opencode.ps1.tpl"
+                                                                            },
+                                                       "save-memory.ps1":  {
+                                                                               "type":  "template",
+                                                                               "runtime":  "powershell",
+                                                                               "template":  "save-memory.ps1.tpl"
+                                                                           },
+                                                       "search-memory.ps1":  {
+                                                                                 "type":  "template",
+                                                                                 "runtime":  "powershell",
+                                                                                 "template":  "search-memory.ps1.tpl"
+                                                                             },
+                                                       "memory-healthcheck.ps1":  {
+                                                                                      "type":  "template",
+                                                                                      "runtime":  "powershell",
+                                                                                      "template":  "memory-healthcheck.ps1.tpl"
+                                                                                  },
+                                                       "test-memory.ps1":  {
+                                                                               "type":  "template",
+                                                                               "runtime":  "powershell",
+                                                                               "template":  "test-memory.ps1.tpl"
+                                                                           },
+                        "chroma_helper_stub.py":  {
+                                                                                        "type":  "static",
+                                                                                        "runtime":  "python"
+                                                                                    },
+                                                        "read-transcript.ps1":  {
+                                                                                    "type":  "static",
+                                                                                    "runtime":  "powershell"
+                                                                                },
+                                                        "read-transcript.py":  {
+                                                                                   "type":  "static",
+                                                                                   "runtime":  "python"
+                                                                               },
+                                                        "seed-memory.ps1":  {
+                                                                               "type":  "static",
+                                                                               "runtime":  "powershell"
+                                                                           },
+                                                       "scan-cleanup.ps1":  {
+                                                                                "type":  "static",
+                                                                                "runtime":  "powershell"
+                                                                            },
+                                                       "validate-skills.ps1":  {
+                                                                                   "type":  "static",
+                                                                                   "runtime":  "powershell"
+                                                                               },
+                                                       "weekly-healthcheck.ps1":  {
+                                                                                      "type":  "static",
+                                                                                      "runtime":  "powershell"
+                                                                                  },
+                         "shokunin-update.ps1":  {
+                                                                                     "type":  "template",
+                                                                                     "runtime":  "powershell",
+                                                                                     "template":  "shokunin-update.ps1.tpl"
+                                                                                 },
+                         "normalize-eol.ps1":  {
+                                                                                   "type":  "static",
+                                                                                   "runtime":  "powershell"
+                                                                               },
+                         "profile.ps1":  {
+                                                                             "type":  "static",
+                                                                             "runtime":  "powershell"
+                                                                         }
+                                                    }
+                                   },
+                        "linux_scripts":  {
+                                              "type":  "group",
+                                              "path":  "{{SHOKUNIN_DIR}}/scripts/linux",
+                                              "backup":  true,
+                                              "entries":  {
+                                                              "run-opencode.sh":  {
+                                                                                      "type":  "static",
+                                                                                      "runtime":  "bash"
+                                                                                  },
+                                                              "memory-healthcheck.sh":  {
+                                                                                            "type":  "static",
+                                                                                            "runtime":  "bash"
+                                                                                        },
+                                                              "profile.sh":  {
+                                                                                 "type":  "static",
+                                                                                 "runtime":  "bash"
+                                                                             },
+                                                              "weekly-maintenance.sh":  {
+                                                                                            "type":  "static",
+                                                                                            "runtime":  "bash"
+                                                                                        },
+                                                              "scan-cleanup.sh":  {
+                                                                                      "type":  "static",
+                                                                                      "runtime":  "bash"
+                                                                                  },
+                                                              "test-memory.sh":  {
+                                                                                     "type":  "static",
+                                                                                     "runtime":  "bash"
+                                                                                 }
+                                                          }
+                                          },
+                       "memory":  {
+                                      "type":  "group",
+                                      "path":  "{{SHOKUNIN_DIR}}/memory",
+                                      "entries":  {
+                                                      "mcp-server.py":  {
+                                                                            "type":  "template",
+                                                                            "runtime":  "python",
+                                                                            "template":  "mcp-server.py.tpl"
+                                                                        }
+                                                  }
+                                  },
+                       "configs":  {
+                                       "type":  "group",
+                                       "backup":  true,
+                                       "entries":  {
+                                                       "opencode.json":  {
+                                                                             "type":  "template",
+                                                                             "path":  "{{CONFIG_DIR}}/opencode.json",
+                                                                             "template":  "opencode.json.tpl"
+                                                                         },
+                                                       "AGENTS.md":  {
+                                                                         "type":  "template",
+                                                                         "path":  "{{AGENTS_DIR}}/../AGENTS.md",
+                                                                         "template":  "AGENTS.md.tpl"
+                                                                     },
+                                                       "CLAUDE.md":  {
+                                                                         "type":  "template",
+                                                                         "path":  "~/.claude/CLAUDE.md",
+                                                                         "template":  "CLAUDE.md.tpl"
+                                                                     }
+                                                   }
+                                   },
+                       "protected":  {
+                                         "type":  "group",
+                                         "rule":  "NEVER_MODIFY",
+                                         "entries":  {
+                                                         "chroma_db":  {
+                                                                           "type":  "data",
+                                                                           "path":  "{{SHOKUNIN_DIR}}/memory/chroma_db"
+                                                                       },
+                                                         "sessions":  {
+                                                                          "type":  "data",
+                                                                          "path":  "{{SHOKUNIN_DIR}}/memory/sessions"
+                                                                      },
+                                                         "logs":  {
+                                                                      "type":  "data",
+                                                                      "path":  "{{SHOKUNIN_DIR}}/logs"
+                                                                  },
+                                                         "backups":  {
+                                                                         "type":  "data",
+                                                                         "path":  "{{SHOKUNIN_DIR}}/backups"
+                                                                     }
+                                                     }
+                                     }
+                   },
+    "hooks":  {
+                  "pre-apply":  "python {{CHROMA_HELPER_PATH}} save \u0027Update started\u0027 auto session_end update {{SHOKUNIN_DIR}}",
+                  "post-apply":  "python {{CHROMA_HELPER_PATH}} save \u0027Update complete\u0027 auto session_end update {{SHOKUNIN_DIR}}",
+                  "verify":  "powershell {{SHOKUNIN_DIR}}/scripts/memory-healthcheck.ps1"
+              }
+}

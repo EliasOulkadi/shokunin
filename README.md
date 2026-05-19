@@ -65,7 +65,7 @@ The Docker skill is 1,422 words with a multi-stage Node.js template, BuildKit ca
 | **Quality** | test-commander, performance-profiler, code-review, comprehensive-review, cross-review, zen-review, zen-comprehensive-review | v4.0 |
 | **Content & Business** | communication, content-marketing, business-proposals, seo-geo, translate-craft, documentation | v4.0 |
 | **Documents** | kami (PDF generator), portfolio-auto, kagen (AI images) | v4.0 |
-| **Productivity** | git-workflow, windows-powershell, strategy, design, runbook-gen, finance, legal-counsel, whendone-plus | v4.0 |
+| **Productivity** | git-workflow, windows-powershell, strategy, brand-design, runbook-gen, finance, legal-counsel, whendone-plus | v4.0 |
 | **AI Agents** | agent-browser, agent-tools, find-skills, skill-creator, research, humanize | v4.0 |
 | **System** | memory, chromadb, shokunin-update, init, efficient-coding, senior-engineer, plan, playwright, neon-postgres, web-security | v4.2 |
 

@@ -9,7 +9,34 @@ description: >
   coding, threat modeling, and defensive architecture. Activate even when
   security is not explicitly mentioned — treat every web feature as a security
   surface.
----
+triggers:
+  - "security"
+  - "OWASP"
+  - "secure"
+  - "XSS"
+  - "SQL injection"
+  - "CSRF"
+  - "authentication security"
+  - "authorization security"
+  - "security audit"
+  - "threat modeling"
+  - "secure coding"
+  - "security review"
+negatives:
+license: MIT
+compatibility: opencode
+  - "network security"
+  - "firewall"
+  - "WAF"
+  - "infrastructure security"
+  - "cloud security"
+  - "IAM"
+metadata:
+  version: "1.0.0"
+
+  workflow: general
+  audience: developers---
+
 
 # Web Security — Professional Standards
 

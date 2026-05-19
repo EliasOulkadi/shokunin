@@ -1,12 +1,33 @@
 ---
 name: taste-soft
 description: "High-end visual design like a premium agency. Defines exact fonts, spacing, shadows, card structures, and animations that make a website feel expensive. Blocks common defaults that make AI designs look cheap or generic. Based on taste-skill by Leon Lin & blueemi, improved by shokunin."
+triggers:
+  - "luxury design"
+  - "premium UI"
+  - "agency design"
+  - "expensive look"
+  - "high-end design"
+  - "Apple-esque"
+  - "Linear-tier"
+  - "double-bezel"
+  - "magnetic button"
+  - "fluid nav"
+negatives:
+  - "minimalist design"
+  - "editorial design"
+  - "brutalist"
+  - "flat design"
+  - "components"
+  - "base design framework" -> use taste
 license: MIT
 compatibility: opencode
 metadata:
-  version: "2.0-improved"
+  version: "2.0.0"
   author: Leon Lin, blueemi, improved by shokunin
----
+
+  workflow: frontend
+  audience: designers---
+
 
 # Principal UI/UX Architect & Motion Choreographer (Awwwards-Tier)
 

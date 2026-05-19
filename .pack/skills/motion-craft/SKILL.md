@@ -1,14 +1,36 @@
 ---
 name: motion-craft
 description: Design GPU-accelerated animations with Web Animations API (WAAPI), Scroll-Driven Animations (ScrollTimeline/ViewTimeline), FLIP technique, easing systems, and accessibility (prefers-reduced-motion). Use when user asks to create animations, transitions, scroll effects, page transitions, or interactive motion for web UIs. Do NOT use for canvas-based animations (Three.js, PixiJS), video editing, or non-web (native mobile) motion design.
+triggers:
+  - "animation"
+  - "transition"
+  - "motion"
+  - "scroll animation"
+  - "page transition"
+  - "WAAPI"
+  - "Web Animations API"
+  - "scroll-driven animation"
+  - "FLIP animation"
+  - "easing"
+  - "animate"
+  - "spring animation"
+  - "stagger animation"
+negatives:
+  - "Three.js"
+  - "canvas animation"
+  - "video editing"
+  - "native mobile animation"
+  - "game animation"
+  - "CSS only"
 license: MIT
 compatibility: opencode
 metadata:
   workflow: frontend
   audience: developers
-  version: "4.0"
+  version: "4.0.0"
   author: shokunin
 ---
+
 
 # Motion Craft
 
@@ -652,6 +674,14 @@ Before delivering animated UI code:
 | Scroll parallax jank from `scroll` event listener | `window.addEventListener('scroll')` fires on main thread, competing with rendering | Use `ScrollTimeline` (Chrome) or throttled `IntersectionObserver` with `requestAnimationFrame` debounce. |
 | Touch device fires hover state on tap, then hover state persists | Mobile browsers synthesize hover on first tap and keep it until another tap elsewhere | Gate hover animations behind `@media (hover: hover) and (pointer: fine)`. |
 | Auto-playing carousel without pause button | WCAG 2.2.2 violation: moving content must be pausable | Add pause/play button. Respect `prefers-reduced-motion`. Allow keyboard control. |
+
+## Checklist
+
+- [ ] Animation uses compositor-only properties (transform, opacity) where possible
+- [ ] `prefers-reduced-motion` respected — fallback to static or reduced variant
+- [ ] Easing curve appropriate for the motion type (spring for UI, ease for enter/exit)
+- [ ] Before/After states compared — animation solves a real UX problem
+- [ ] Tested on mobile and with throttled CPU to verify 60fps
 
 ## Sources
 

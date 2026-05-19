@@ -1,9 +1,26 @@
 ---
 name: comprehensive-review
 description: "Comprehensive code review using parallel specialized subagents. If a PR URL is provided, fetches PR details and can post comments. If no PR is provided, reviews the diff between the current branch and its base branch plus any uncommitted changes. CRITICAL: this skill is costly, don't use it unless user explicitly requested to use it."
+triggers:
+  - "comprehensive review"
+  - "full code review"
+  - "deep code review"
+  - "thorough review"
+  - "complete review"
+  - "review everything"
+negatives:
+license: MIT
+compatibility: opencode
+  - "quick review"
+  - "simple review"
+  - "design review"
+  - "UI review"
 metadata:
   version: 2.1.0
----
+
+  workflow: quality
+  audience: developers---
+
 
 # Comprehensive Code Review
 
@@ -287,6 +304,14 @@ Validate comment line numbers against the diff before posting. Adjust line numbe
 | Blocking merge on P3 nits and stylistic preferences | Slows velocity without quality gain. Contributor spends time on changes that don't reduce bugs or improve performance | P3 = approve with optional suggestions. "Request changes" only for P0 and P1. Trust the contributor to decide on style preferences |
 | Posting dozens of PR comments without prioritization | Overwhelms the author. They can't distinguish critical from cosmetic | Group and prioritize before posting. Top comment should summarize: X critical, Y major, Z minor. Critical issues get individual comments; minor issues can be batched in summary |
 | Using review as a gatekeeping or knowledge-hoarding mechanism | Deliberately slow reviews to maintain information asymmetry. Toxic to team culture | Set SLA: review within 4 business hours. If blocked waiting for domain expert, note it and unblock with partial review |
+
+## Checklist
+
+- [ ] Diff fetched from correct base branch
+- [ ] All related changes included (no partial diffs)
+- [ ] Each subagent model confirmed available before dispatch
+- [ ] Critical (P0) and High (P1) findings clearly separated from suggestions
+- [ ] False positives reviewed before presenting final report
 
 ## Sources
 

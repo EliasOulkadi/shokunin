@@ -1,6 +1,17 @@
 ---
 name: cross-review
 description: Delegate code review to a subagent running a specific model. Use ONLY when user explicitly names a model to review changes ("review with opus", "use sonnet to review", "review with gemini"). The root agent reconstructs changes from conversation history and spawns a subagent with the code-review skill using the specified model. Do NOT use for general code review (use code-review skill instead), for reviewing PRs from git history, or when no model is specified by the user.
+triggers:
+  - "review with"
+  - "review using"
+  - "review via"
+  - "cross review"
+  - "different model review"
+negatives:
+  - "comprehensive review"
+  - "zen review"
+  - "simple review"
+  - "code review"
 license: MIT
 compatibility: opencode
 metadata:
@@ -154,6 +165,14 @@ When models disagree:
 - The dissenting model may have caught something the others missed
 - Present both views: "Claude suggests X, Gemini suggests Y"
 - Let the human reviewer decide
+
+## Checklist
+
+- [ ] Valid model name passed (not an alias or unsupported ID)
+- [ ] Diff or context reconstructed accurately from conversation history
+- [ ] Subagent has the code-review skill loaded
+- [ ] Review result captured from subagent output (not assumed)
+- [ ] Fallback model specified if primary model is unavailable
 
 ## Sources
 

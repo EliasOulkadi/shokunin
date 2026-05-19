@@ -1,14 +1,34 @@
 ---
 name: landing-craft
 description: Build conversion-optimized landing pages with CRO frameworks (Conversion Research, LIFT Model), scroll effects, A/B testing, personalization, form optimization, and Core Web Vitals (INP, LCP, CLS). Use when user asks to create a landing page, sales page, lead generation page, or improve conversion rates. Do NOT use for full product design (use component-forge), animation-specific (use motion-craft), or brand identity (use design).
+triggers:
+  - "landing page"
+  - "sales page"
+  - "conversion"
+  - "CRO"
+  - "A/B test"
+  - "conversion rate"
+  - "lead generation"
+  - "signup page"
+  - "marketing page"
+  - "pricing page"
+  - "LIFT model"
+negatives:
+  - "full product design"
+  - "component library"
+  - "animations only"
+  - "brand identity"
+  - "dashboard"
+  - "app UI"
 license: MIT
 compatibility: opencode
 metadata:
   workflow: marketing
   audience: developers
-  version: "4.0"
+  version: "4.0.0"
   author: shokunin
 ---
+
 
 # Landing Craft
 

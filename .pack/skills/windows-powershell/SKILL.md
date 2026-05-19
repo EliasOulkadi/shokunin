@@ -1,15 +1,38 @@
 ---
 name: windows-powershell
 description: Windows 11 system administration with PowerShell — system info reporting, hardware monitoring, package management (winget/scoop), disk cleanup, performance optimization, environment configuration, PowerShell profile setup with aliases and autocomplete, and Task Scheduler automation. Use when user asks to check system info, install tools on Windows, clean up disk space, set up PowerShell profile, or automate Windows tasks. Do NOT use for Linux administration, cross-platform scripting, or network infrastructure management.
+triggers:
+  - "PowerShell"
+  - "Windows"
+  - "system info"
+  - "winget"
+  - "scoop"
+  - "Chocolatey"
+  - "disk cleanup"
+  - "Windows optimization"
+  - "environment variables"
+  - "Windows profile"
+  - "PowerShell profile"
+  - "Task Scheduler"
+  - "Windows 11"
+  - "install tool Windows"
+negatives:
+  - "Linux"
+  - "macOS"
+  - "bash"
+  - "cross-platform"
+  - "WSL"
+  - "Linux administration"
 license: MIT
 compatibility: opencode
 metadata:
   workflow: operations
   audience: developers
-  version: "3.0"
+  version: "3.0.0"
   author: shokunin
 allowed-tools: Read Bash Write
 ---
+
 
 # Windows PowerShell
 
@@ -241,6 +264,10 @@ if (-not $?) {
     Write-Warning "Path not found, using default"
 }
 ```
+
+## Related Scripts
+
+- `~/.shokunin/scripts/scan-cleanup.ps1` — Scans Downloads, Desktop, and Temp for files to classify (keep/review/trash) and optionally clean
 
 ## Sources
 

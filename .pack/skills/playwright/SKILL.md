@@ -1,6 +1,25 @@
 ---
 name: playwright
 description: "Browser automation, web scraping, E2E testing, and visual regression with Playwright. Covers 30+ patterns: login flows, form testing, responsive design checks, broken link validation, API mocking, data extraction, PDF generation, accessibility audits (axe-core), performance budgets (Lighthouse), visual diffing, multi-browser testing (Chromium/Firefox/WebKit), mobile emulation, infinite scroll, shadow DOM, iframes, file downloads, auth state reuse, cookie consent handling, WebSocket monitoring, console error detection, HAR export, trace viewer, Docker CI, GitHub Actions, and parallel sharding. Use when user asks to test a website, take screenshots, check responsive design, automate a browser task, scrape data, validate forms, check broken links, test login, audit accessibility, or measure page performance. Do NOT use for unit testing, API-only testing, or static analysis. Requires Node.js 18+."
+triggers:
+  - "Playwright"
+  - "browser test"
+  - "E2E test"
+  - "visual test"
+  - "screenshot"
+  - "PDF generation"
+  - "web scraping"
+  - "browser automation"
+  - "test form"
+  - "test login"
+  - "accessibility audit"
+  - "visual regression"
+negatives:
+  - "unit testing"
+  - "API testing"
+  - "static analysis"
+  - "load testing"
+  - "quick scraping" -> use agent-browser
 license: MIT
 compatibility: opencode
 metadata:
@@ -334,9 +353,16 @@ const { injectAxe, checkA11y } = require('@axe-core/playwright');
 | `page.waitForSelector: Target closed` | Navigation destroyed the page | Wrap navigation + post-navigation actions in a single `await` chain |
 | `require('playwright'): Cannot find module` | Install incomplete | `npm install playwright` then verify `node_modules/playwright` exists |
 
+## Checklist
+
+- [ ] Locator uses `getByRole`, `getByText`, or `getByTestId` — never XPath or CSS selectors with fragile class names
+- [ ] Auto-waiting relied on (no manual `waitForTimeout` or `sleep`)
+- [ ] Test isolates state (clean DB or API mock per test)
+- [ ] Cross-browser tested (Chromium + Firefox + WebKit) for critical flows
+- [ ] Trace viewer enabled on failure for debugging CI flakes
+
 ## Sources
 
-Playwright patterns and best practices drawn from:
 - Playwright official documentation (playwright.dev) — locator strategies, auto-waiting, fixtures
 - Testing Trophy methodology — 80% integration / 20% unit testing ratio
 - @axe-core/playwright for accessibility audits

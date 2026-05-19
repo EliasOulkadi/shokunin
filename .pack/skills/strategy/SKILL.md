@@ -12,7 +12,7 @@ triggers:
   - prompt engineering
   - structured thinking
 negatives:
-  - creative direction (use design skill)
+  - creative direction (use brand-design skill)
   - content strategy (use content-marketing)
   - personal coaching
   - simple yes/no decisions without tradeoffs
@@ -22,8 +22,9 @@ compatibility: opencode
 metadata:
   workflow: strategy
   audience: developers
-  version: "3.0"
+  version: "3.0.0"
 ---
+
 
 # Strategy
 

@@ -1,10 +1,30 @@
 ---
 name: init
 description: "Use when the user asks to initialize a repo, create AGENTS.md, generate contributor guidelines, or set up agent-oriented documentation for a codebase."
+triggers:
+  - "initialize repo"
+  - "init repo"
+  - "create AGENTS.md"
+  - "contributor guidelines"
+  - "set up project"
+  - "repository setup"
+  - "project initialization"
+  - "new project setup"
+negatives:
+license: MIT
+compatibility: opencode
+  - "build tool"
+  - "template"
+  - "boilerplate"
+  - "scaffold component"
+  - "scaffold project"
 disable-model-invocation: true
 metadata:
   version: 1.3.0
----
+
+  workflow: system
+  audience: developers---
+
 
 # AGENTS.md Generator
 
@@ -152,6 +172,14 @@ Before finalizing, verify:
 | Missing sections where evidence exists | Incomplete onboarding guide | Include all sections that have supporting evidence |
 | Overwriting correct, specific existing content | Loses institutional knowledge | Preserve correct content. Fix only inaccuracies and gaps. |
 | Exceeding 400 words with filler prose | Too long to scan; loses utility | Cut every sentence that doesn't convey a specific convention |
+
+## Checklist
+
+- [ ] Project type identified (lib, app, monorepo, etc.)
+- [ ] AGENTS.md created with profile, behavior, and tools sections
+- [ ] .gitignore includes platform-relevant entries (node_modules, .env, etc.)
+- [ ] License file created matching project requirements
+- [ ] CI/CD scaffolding included if project will be deployed
 
 ## Sources
 

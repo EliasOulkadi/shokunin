@@ -18,6 +18,20 @@ node_modules/
 # Ruff
 .ruff_cache/
 
+# ChromaDB (local data — never versioned)
+chroma_db/
+
+# Session data
+sessions/
+
+# Logs
+logs/
+*.log
+
+# Python cache
+__pycache__/
+*.pyc
+
 # Benchmarks
 benchmarks/results/
 
