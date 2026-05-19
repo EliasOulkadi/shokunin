@@ -1,4 +1,4 @@
----
+﻿---
 name: shokunin-update
 description: Detect drift, plan updates, and apply changes to the Shokunin AI Ecosystem. Use this when user asks to update, fix, sync, or verify the ecosystem.
 triggers:
@@ -121,3 +121,16 @@ This automatically:
 | Ignoring drift warnings for long periods | Drift accumulates, making later applies riskier and harder to roll back | Run `status` weekly. Schedule via Task Scheduler: `shokunin-update.ps1 status > ~/.shokunin/logs/drift.log`. |
 | Restoring from backup without verifying backup integrity | A corrupted backup restores corrupted files | Before rollback, verify backup checksums against the original manifest hashes. Abort if mismatch. |
 | Running apply while another apply is in progress | Race condition on backup/restore directories causing incomplete state | Use a lock file: `~/.shokunin/.apply-lock`. If lock exists and process is alive, wait or abort. Stale lock (>30 min) can be removed. |
+
+## Checklist
+
+- [ ] Verify shokunin.json is valid JSON and all component paths resolve
+- [ ] Run shokunin-update.ps1 status — 0 MISSING, no crashes
+- [ ] Run shokunin-update.ps1 apply — all components sync without errors
+- [ ] Verify MCP server starts: python ~/.shokunin/memory/mcp-server.py responds to tools/list
+- [ ] Verify chroma-helper.py CLI works: python ~/.shokunin/scripts/chroma-helper.py count
+- [ ] Verify all 62 skills present in .config/opencode/skills/
+- [ ] Verify templates match installed files (no drift)
+- [ ] Verify AGENTS.md version matches shokunin.json version
+- [ ] Run memory-healthcheck.ps1 — all tests pass
+- [ ] Run alidate-skills.ps1 — 0 failures

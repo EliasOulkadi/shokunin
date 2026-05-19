@@ -1,4 +1,4 @@
----
+﻿---
 name: impeccable
 description: "Use when the user wants to design, redesign, shape, critique, audit, polish, clarify, distill, harden, optimize, adapt, animate, colorize, extract, or otherwise improve a frontend interface. Covers design systems, anti-pattern detection, brand vs product registers, typography, color (OKLCH), spacing, motion, copy, and accessibility. By Paul Bakaus (ex-Google, ex-Disney, ex-Unity). Full version includes 23 sub-commands, CLI detection, Chrome extension, and E2E test suite: npx skills add pbakaus/impeccable"
 triggers:
@@ -215,3 +215,13 @@ Check every element against the 6 absolute bans: side-stripe borders, gradient t
 | Swiss modern | Neue Haas Grotesk | Inter | Dashboards, admin, data-heavy |
 | Classic warm | Playfair Display / Cormorant Garamond | Charter / Georgia | Editorial, publishing, luxury |
 | Punchy condensed | Bebas Neue / Anton | Geist / DM Sans | Hero headlines, campaign pages |
+
+## Checklist
+
+- [ ] Skill loads without errors in the AI agent
+- [ ] YAML frontmatter is valid (description, compatibility, audience)
+- [ ] Workflow section provides clear step-by-step instructions
+- [ ] Error handling section covers common failure modes
+- [ ] All referenced files (references/, scripts/, assets/) exist
+- [ ] Skill triggers correctly for intended use cases
+- [ ] No broken links or missing resources

@@ -1,4 +1,4 @@
----
+﻿---
 name: finance
 description: >-
   Personal finance planning — 5-pillar framework (cash flow, net worth, debt,
@@ -297,3 +297,13 @@ Itemize only if deductions exceed standard.
 - SECURE 2.0 Act provisions
 - Kitces.com — Backdoor Roth, Mega Backdoor, tax strategies
 - Morningstar — SWR research
+
+## Checklist
+
+- [ ] Skill loads without errors in the AI agent
+- [ ] YAML frontmatter is valid (description, compatibility, audience)
+- [ ] Workflow section provides clear step-by-step instructions
+- [ ] Error handling section covers common failure modes
+- [ ] All referenced files (references/, scripts/, assets/) exist
+- [ ] Skill triggers correctly for intended use cases
+- [ ] No broken links or missing resources

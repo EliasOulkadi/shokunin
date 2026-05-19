@@ -1,4 +1,4 @@
----
+﻿---
 name: kagen
 description: Convert Kami HTML templates to production-grade PDF via Chromium/Playwright. Complements Kami (design) with PDF rendering. Use when user asks to generate PDF files, render HTML to PDF, or export documents.
 triggers:
@@ -461,3 +461,13 @@ Complete ALL four checklist categories before final output: Structural (blocking
 | Launching a new browser instance per PDF document | Cold start ~630ms vs warm ~13ms. 48x slower per document. Wastes CI minutes on multi-document projects | Use warm mode (PDFRenderer class pattern): launch browser once, render all documents, close browser once. Keep-alive between renders |
 | Font files referenced with absolute Windows paths (`C:\Users\swagger\fonts\...`) | PDF generated on a different machine or in CI won't find fonts. Paths break across environments. Not portable | Always use relative paths in `@font-face`: `src: url("fonts/CustomFont.woff2")`. Place font files in same directory or subdirectory as the HTML template |
 | Skipping the self-review protocol because "it looks fine in the browser" | Browser rendering != PDF output. Chrome applies different print stylesheet rules. Many issues only visible in the final PDF | Always open the actual PDF output and run through all 4 checklist categories. Visual inspection is mandatory, not optional |
+
+## Checklist
+
+- [ ] Skill loads without errors in the AI agent
+- [ ] YAML frontmatter is valid (description, compatibility, audience)
+- [ ] Workflow section provides clear step-by-step instructions
+- [ ] Error handling section covers common failure modes
+- [ ] All referenced files (references/, scripts/, assets/) exist
+- [ ] Skill triggers correctly for intended use cases
+- [ ] No broken links or missing resources

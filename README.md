@@ -15,7 +15,7 @@
 
 **62 engineering skills + persistent AI memory. One command. Zero servers.**
 
-**v4.2.2** adds freshness decay (time-weighted memory), claim verification (verify_file_path MCP tool), 9 MCP tools (was 8), and 30+ bug fixes.
+**v4.2.3** adds freshness decay (time-weighted memory), claim verification (verify_file_path MCP tool), 9 MCP tools (was 8), and 30+ bug fixes.
 
 > *職人 (shokunin) means artisan in Japanese. These skills aim for that standard: every detail crafted, every edge case handled, every workflow automated.*
 
@@ -144,7 +144,7 @@ source ~/.bashrc
 opencode
 ```
 
-## Memory System v4.2.2
+## Memory System v4.2.3
 
 Multi-strategy recall (vector + BM25 + temporal + reciprocal rank fusion). Session management with explicit continue (no guessing which session to resume).
 
@@ -173,7 +173,7 @@ All data stored at `~/.shokunin/memory/`. No cloud, no telemetry, no subscriptio
 .\memory-healthcheck.ps1
 ```
 
-- [Technical Overview v4.2.2](docs/Shokunin-Technical-Overview-v4.2.2.pdf) - Full ecosystem overview, multi-strategy recall, Hindsight comparison
+- [Technical Overview v4.2.3](docs/Shokunin-Technical-Overview-v4.2.3.pdf) - Full ecosystem overview, multi-strategy recall, Hindsight comparison
 
 ## Troubleshooting
 
@@ -241,7 +241,7 @@ The ecosystem works across multiple AI coding runtimes. The core (skills, memory
 
 - **GitHub** github.com/EliasOulkadi/shokunin
 - **Website** eliasoulkadi.github.io/shokunin
-- [Shokunin Technical Overview](/docs/Shokunin-Technical-Overview-v4.2.2.pdf)
+- [Shokunin Technical Overview](/docs/Shokunin-Technical-Overview-v4.2.3.pdf)
 
 ## License
 

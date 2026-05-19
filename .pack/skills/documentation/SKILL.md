@@ -1,4 +1,4 @@
----
+﻿---
 name: documentation
 description: >
   Generate READMEs, API docs, changelogs, and knowledge base articles. Covers
@@ -206,3 +206,13 @@ npx changelogen --from v1.0.0 --to HEAD
 - Conventional Commits (conventionalcommits.org)
 - OpenAPI Specification (openapis.org)
 - Zendesk / Intercom — KB standards
+
+## Checklist
+
+- [ ] Skill loads without errors in the AI agent
+- [ ] YAML frontmatter is valid (description, compatibility, audience)
+- [ ] Workflow section provides clear step-by-step instructions
+- [ ] Error handling section covers common failure modes
+- [ ] All referenced files (references/, scripts/, assets/) exist
+- [ ] Skill triggers correctly for intended use cases
+- [ ] No broken links or missing resources

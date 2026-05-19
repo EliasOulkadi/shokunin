@@ -1,4 +1,4 @@
----
+﻿---
 name: flutter
 description: Build production Flutter apps with Clean Architecture, Riverpod (preferred over Bloc/Provider), GoRouter navigation, Impeller rendering engine, Dart 3.7+ patterns, platform channels via Pigeon, and App Store/Play Store deployment.
 triggers: ["create a Flutter app", "set up state management", "design widgets", "implement navigation", "deploy to stores", "flutter clean architecture", "riverpod", "go_router", "build flutter", "mobile app flutter", "pubspec.yaml", "flutter test", "flutter build", "platform channel", "pigeon", "impeller"]
@@ -266,3 +266,13 @@ Before submitting Flutter code:
 - [ ] Tested on real Android device (not just iOS simulator or vice versa)
 - [ ] App works correctly when process is killed and restarted (state restoration)
 - [ ] Safe areas respected: `MediaQuery.of(context).padding` or `SafeArea` widget
+
+## Checklist
+
+- [ ] Skill loads without errors in the AI agent
+- [ ] YAML frontmatter is valid (description, compatibility, audience)
+- [ ] Workflow section provides clear step-by-step instructions
+- [ ] Error handling section covers common failure modes
+- [ ] All referenced files (references/, scripts/, assets/) exist
+- [ ] Skill triggers correctly for intended use cases
+- [ ] No broken links or missing resources

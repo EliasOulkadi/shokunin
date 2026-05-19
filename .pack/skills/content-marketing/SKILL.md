@@ -1,4 +1,4 @@
----
+﻿---
 name: content-marketing
 description: >
   Write blogs, newsletters, Twitter threads, case studies, and marketing copy
@@ -238,3 +238,13 @@ CNAME  selector2._domainkey  selector2.provider.com
 - Cialdini "Influence"
 - Google Search Central — SEO documentation
 - Mailchimp / Campaign Monitor — Email benchmarks
+
+## Checklist
+
+- [ ] Skill loads without errors in the AI agent
+- [ ] YAML frontmatter is valid (description, compatibility, audience)
+- [ ] Workflow section provides clear step-by-step instructions
+- [ ] Error handling section covers common failure modes
+- [ ] All referenced files (references/, scripts/, assets/) exist
+- [ ] Skill triggers correctly for intended use cases
+- [ ] No broken links or missing resources

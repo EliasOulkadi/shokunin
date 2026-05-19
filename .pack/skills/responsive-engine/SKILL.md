@@ -1,4 +1,4 @@
----
+﻿---
 name: responsive-engine
 description: Design multi-device layouts with Container Queries, clamp() fluid typography, :has() selector, subgrid, and modern CSS units (dvh/svh/lvh). Use when user asks to make a layout responsive, handle mobile/tablet/desktop breakpoints, create fluid typography, or use Container Queries. Do NOT use for full-page layouts (use landing-craft), component design (use component-forge), or animation-specific responsive (use motion-craft).
 triggers:
@@ -403,3 +403,13 @@ Before writing any CSS, identify what's broken:
 4. Container Queries used for component responsiveness
 5. Asymmetric layouts collapse to single column below 768px
 6. All `:has()` selectors guarded with `@supports` fallback
+
+## Checklist
+
+- [ ] Skill loads without errors in the AI agent
+- [ ] YAML frontmatter is valid (description, compatibility, audience)
+- [ ] Workflow section provides clear step-by-step instructions
+- [ ] Error handling section covers common failure modes
+- [ ] All referenced files (references/, scripts/, assets/) exist
+- [ ] Skill triggers correctly for intended use cases
+- [ ] No broken links or missing resources

@@ -1,4 +1,4 @@
----
+﻿---
 name: emil-design-eng
 description: Encode Emil Kowalski's philosophy on UI polish, component design, animation decisions, and the invisible details that make software feel great. From the creator of Sonner (13M+ weekly npm downloads), Vaul, animations.dev, and Linear's web team. Use when user wants to polish UI, audit animations, review component interactions, add micro-feedback, or elevate motion quality.
 triggers:
@@ -379,3 +379,13 @@ For each interaction, answer in strict order:
 | Animating `width`, `height`, `top`, `left` | Triggers layout recalculation on every frame. Runs on CPU, not GPU. Janky at any frame rate | `transform: scale()` instead of `width`/`height`. `transform: translate()` instead of `top`/`left`. Compositor-only properties always |
 | Same duration and easing for enter and exit | Exit must feel faster. Users want elements to appear smoothly but disappear instantly so they can continue their task | Exit duration = 50-70% of enter duration. Use `ease-in` (starts fast, slows) on exit. Use `ease-out` (starts fast, slows) on enter |
 | Hero text reveal with `animation-delay` > 500ms | User has scrolled past before animation plays. Animation served zero purpose and just annoyed | Hero animations trigger on mount, not on scroll. If scroll-triggered, start when element top is 20% visible from viewport bottom |
+
+## Checklist
+
+- [ ] Skill loads without errors in the AI agent
+- [ ] YAML frontmatter is valid (description, compatibility, audience)
+- [ ] Workflow section provides clear step-by-step instructions
+- [ ] Error handling section covers common failure modes
+- [ ] All referenced files (references/, scripts/, assets/) exist
+- [ ] Skill triggers correctly for intended use cases
+- [ ] No broken links or missing resources

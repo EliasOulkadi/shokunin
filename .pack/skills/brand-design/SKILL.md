@@ -1,4 +1,4 @@
----
+﻿---
 name: brand-design
 description: Generate brand guidelines, design systems with design tokens (W3C format), creative direction (SCAMPER, Design Thinking, TRIZ), and design briefs with scope and success criteria.
 triggers:
@@ -293,3 +293,13 @@ Export as W3C Design Token format for Figma Tokens plugin, Style Dictionary, or 
 - Design Council UK "Double Diamond"
 - NN Group "How to Write a Design Brief"
 - Figma Design Tokens plugin
+
+## Checklist
+
+- [ ] Skill loads without errors in the AI agent
+- [ ] YAML frontmatter is valid (description, compatibility, audience)
+- [ ] Workflow section provides clear step-by-step instructions
+- [ ] Error handling section covers common failure modes
+- [ ] All referenced files (references/, scripts/, assets/) exist
+- [ ] Skill triggers correctly for intended use cases
+- [ ] No broken links or missing resources

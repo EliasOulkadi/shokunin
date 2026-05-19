@@ -1,4 +1,4 @@
----
+﻿---
 name: taste-minimalist
 description: "Clean editorial-style interfaces. Warm monochrome palette, typographic contrast, flat bento grids, muted pastels. No gradients, no heavy shadows. Based on taste-skill by Leon Lin & blueemi, improved by shokunin."
 triggers:
@@ -189,3 +189,13 @@ Based on: Apple Notes, Linear, Notion, Basecamp, iA Writer, and premium editoria
 - Erik Spiekermann — "Stop Stealing Sheep & Find Out How Type Works" (Adobe Press)
 - Robert Bringhurst — "The Elements of Typographic Style" (Hartley & Marks)
 - Josef Müller-Brockmann — "Grid Systems in Graphic Design" (Niggli Verlag)
+
+## Checklist
+
+- [ ] Skill loads without errors in the AI agent
+- [ ] YAML frontmatter is valid (description, compatibility, audience)
+- [ ] Workflow section provides clear step-by-step instructions
+- [ ] Error handling section covers common failure modes
+- [ ] All referenced files (references/, scripts/, assets/) exist
+- [ ] Skill triggers correctly for intended use cases
+- [ ] No broken links or missing resources

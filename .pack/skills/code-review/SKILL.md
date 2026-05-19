@@ -1,4 +1,4 @@
----
+﻿---
 name: code-review
 description: "Review code changes for correctness, security, performance, and code quality. Use when the user asks to review a diff, review code changes, review commits, or perform a code review. Input can be: (1) a text diff pasted directly, (2) one or more git commit hashes to extract the diff from, or (3) a git range like abc123..def456. The user may also provide task description or requirements that motivated the change."
 triggers:
@@ -282,3 +282,13 @@ Always assume positive intent. Phrase findings as observations: "This path retur
 - Conventional Comments — conventionalcomments.org
 - Philipp Hauer — "Code Review Guidelines for Humans" (philipphauer.de)
 - Trisha Gee — "Code Review Best Practices" (trishagee.com)
+
+## Checklist
+
+- [ ] Skill loads without errors in the AI agent
+- [ ] YAML frontmatter is valid (description, compatibility, audience)
+- [ ] Workflow section provides clear step-by-step instructions
+- [ ] Error handling section covers common failure modes
+- [ ] All referenced files (references/, scripts/, assets/) exist
+- [ ] Skill triggers correctly for intended use cases
+- [ ] No broken links or missing resources

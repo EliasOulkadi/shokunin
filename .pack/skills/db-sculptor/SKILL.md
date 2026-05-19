@@ -1,4 +1,4 @@
----
+﻿---
 name: db-sculptor
 description: Design database schemas with Prisma/Drizzle, PostgreSQL index strategy (B-tree, GIN, GiST, BRIN, Hash), query optimization (EXPLAIN ANALYZE), migration safety (expand/contract, zero-downtime), and sharding/partitioning. Use when user asks to design schema, create migrations, optimize slow queries, add indexes, choose between SQL/NoSQL, or set up Prisma/Drizzle. Do NOT use for data warehouse dimensional modeling, ETL pipeline design, or non-relational (MongoDB, DynamoDB) schema design.
 triggers:
@@ -295,3 +295,13 @@ max_db_connections = 25
 - PlanetScale schema migration patterns
 - Stormatics — composite and partial indexes
 - Neon serverless PostgreSQL patterns
+
+## Checklist
+
+- [ ] Skill loads without errors in the AI agent
+- [ ] YAML frontmatter is valid (description, compatibility, audience)
+- [ ] Workflow section provides clear step-by-step instructions
+- [ ] Error handling section covers common failure modes
+- [ ] All referenced files (references/, scripts/, assets/) exist
+- [ ] Skill triggers correctly for intended use cases
+- [ ] No broken links or missing resources

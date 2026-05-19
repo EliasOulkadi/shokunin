@@ -1,4 +1,4 @@
----
+﻿---
 name: Web Security
 description: >
   Apply professional-grade security standards to any web application task.
@@ -325,3 +325,13 @@ Run this mentally on every feature, and explicitly when asked to audit:
 - Troy Hunt — "Have I Been Pwned" API (haveibeenpwned.com/API)
 - The Tangled Web — Michal Zalewski (No Starch Press)
 - Web Application Hacker's Handbook — Stuttard & Pinto (Wiley, 2nd Edition)
+
+## Checklist
+
+- [ ] Skill loads without errors in the AI agent
+- [ ] YAML frontmatter is valid (description, compatibility, audience)
+- [ ] Workflow section provides clear step-by-step instructions
+- [ ] Error handling section covers common failure modes
+- [ ] All referenced files (references/, scripts/, assets/) exist
+- [ ] Skill triggers correctly for intended use cases
+- [ ] No broken links or missing resources

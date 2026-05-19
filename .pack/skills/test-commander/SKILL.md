@@ -1,4 +1,4 @@
----
+﻿---
 name: test-commander
 description: Generate unit, integration, E2E, and visual regression tests following the Testing Trophy methodology (80% integration). Covers Vitest/Jest, Testing Library, Playwright, MSW for API mocking, snapshot strategy, visual regression (Chromatic/Percy/Playwright), test factories with Faker, and CI sharding. Use when user asks to write tests, set up testing framework, mock API/dependencies, improve coverage, or add visual regression. Do NOT use for performance/load testing, production monitoring, or type testing (covered by TypeScript).
 triggers:
@@ -308,3 +308,13 @@ Rule: one flake = fix today. Two flakes = skip with `test.skip()` + comment. Nev
 | E2E test flakes on dynamic content that loads after navigation | Use `page.waitForResponse(urlPattern)` targeting the API call, not `waitForTimeout()`. Assert on data-dependent element, not fixed time |
 | Snapshot test fails on every CI run with timestamp diffs | Check snapshot for timestamps, random IDs, or dynamic dates. Mock with `vi.setSystemTime()` or `jest.useFakeTimers()`. Never snapshot unstable content |
 | CI shard times out after 10 minutes | Increase shard count from 4 to 8+ for large suites. Profile slowest test file with `--reporter=verbose`. Extract slow E2E tests to separate job |
+
+## Checklist
+
+- [ ] Skill loads without errors in the AI agent
+- [ ] YAML frontmatter is valid (description, compatibility, audience)
+- [ ] Workflow section provides clear step-by-step instructions
+- [ ] Error handling section covers common failure modes
+- [ ] All referenced files (references/, scripts/, assets/) exist
+- [ ] Skill triggers correctly for intended use cases
+- [ ] No broken links or missing resources

@@ -1,6 +1,6 @@
 ﻿# Shokunin · 職人
 
-**30 agent skills for developers, designers, writers, and operators.** *(Merged from 45 — consolidated related skills into combined power skills.)*
+**62 agent skills for developers, designers, writers, and operators.** *(Merged from 62 — consolidated related skills into combined power skills.)*
 
 Portable skill files compatible with OpenCode, Claude Code, Cursor, and any agent that supports `SKILL.md` format with YAML frontmatter.
 

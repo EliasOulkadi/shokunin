@@ -1,4 +1,4 @@
----
+﻿---
 name: strategy
 description: Run structured brainstorming sessions (divergent/convergent), improve prompts with 7-dimension framework, and apply decision frameworks (RICE, weighted scoring, first principles, pre-mortem).
 triggers:
@@ -259,3 +259,13 @@ Classify features: Basic (expected, absence = dissatisfaction), Performance (mor
 - Annie Duke "Thinking in Bets"
 - First Principles (Elon Musk / Richard Feynman approach)
 - Fermi Estimation techniques
+
+## Checklist
+
+- [ ] Skill loads without errors in the AI agent
+- [ ] YAML frontmatter is valid (description, compatibility, audience)
+- [ ] Workflow section provides clear step-by-step instructions
+- [ ] Error handling section covers common failure modes
+- [ ] All referenced files (references/, scripts/, assets/) exist
+- [ ] Skill triggers correctly for intended use cases
+- [ ] No broken links or missing resources

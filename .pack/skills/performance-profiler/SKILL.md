@@ -1,4 +1,4 @@
----
+﻿---
 name: performance-profiler
 description: Performance profiling and optimization for web apps — Core Web Vitals (LCP, INP, CLS), Lighthouse audits, bundle analysis, backend profiling (CPU, memory, DB queries), N+1 detection, caching strategies (Redis, CDN, HTTP), and performance budgets. Use when user asks to improve performance, run Lighthouse audit, profile a Node.js app, optimize Core Web Vitals, reduce bundle size, or investigate slow response times. Do NOT use for database schema optimization (use db-sculptor), Docker image optimization (use docker), or CDN configuration.
 triggers:
@@ -292,3 +292,13 @@ npx lighthouse https://staging.example.com --output=json | \
 | Chrome DevTools Performance tab freezes on large trace (>30s) | Record shorter traces (5-10s max). Use `--user-data-dir` with clean profile. Export HAR for sharing instead of full trace |
 | `clinic doctor` fails with "Cannot find module" | Works only with Node.js < 22. For Node 22+, use `node --cpu-prof` and analyze with Chrome DevTools. clinic is community-maintained, lagging Node releases |
 | WebPageTest results vary significantly by test location | Test from 2+ geographic regions. Use `medianRun` and `repeatView` in WPT API. Document which locations were tested in audit report |
+
+## Checklist
+
+- [ ] Skill loads without errors in the AI agent
+- [ ] YAML frontmatter is valid (description, compatibility, audience)
+- [ ] Workflow section provides clear step-by-step instructions
+- [ ] Error handling section covers common failure modes
+- [ ] All referenced files (references/, scripts/, assets/) exist
+- [ ] Skill triggers correctly for intended use cases
+- [ ] No broken links or missing resources

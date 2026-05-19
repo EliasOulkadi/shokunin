@@ -1,4 +1,4 @@
----
+﻿---
 name: auth-architect
 description: Implement authentication and authorization with OWASP Top 10 standards, OAuth 2.0 + OIDC, WebAuthn/Passkeys, session management, and RBAC/ABAC. Use when user asks to implement login, signup, authentication, authorization, JWT, OAuth, SSO, passkeys, MFA, or role-based access. Do NOT use for API key management (use api-forge), encryption at rest, or network-level security (firewalls, WAF).
 triggers:
@@ -325,3 +325,13 @@ Every auth failure must return a generic message. Never reveal which part of aut
 - Auth0 Security Architecture
 - FIDO2 Specification
 - HaveIBeenPwned API (k-anonymity model)
+
+## Checklist
+
+- [ ] Skill loads without errors in the AI agent
+- [ ] YAML frontmatter is valid (description, compatibility, audience)
+- [ ] Workflow section provides clear step-by-step instructions
+- [ ] Error handling section covers common failure modes
+- [ ] All referenced files (references/, scripts/, assets/) exist
+- [ ] Skill triggers correctly for intended use cases
+- [ ] No broken links or missing resources

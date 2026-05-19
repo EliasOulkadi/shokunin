@@ -1,4 +1,4 @@
----
+﻿---
 name: business-proposals
 description: Generate sales outreach sequences, proposals, SOWs, investor pitch decks, and RFP responses. Covers cold email sequences, proposal structure, pricing tiers (Good-Better-Best), scope of work with exclusions, and 10-slide pitch deck.
 triggers:
@@ -247,3 +247,13 @@ Bundle complementary services at 20-30% discount vs individual. Never discount i
 - Close.com outbound sales research
 - AIGA agency proposal best practices
 - B2B pricing psychology research
+
+## Checklist
+
+- [ ] Skill loads without errors in the AI agent
+- [ ] YAML frontmatter is valid (description, compatibility, audience)
+- [ ] Workflow section provides clear step-by-step instructions
+- [ ] Error handling section covers common failure modes
+- [ ] All referenced files (references/, scripts/, assets/) exist
+- [ ] Skill triggers correctly for intended use cases
+- [ ] No broken links or missing resources

@@ -1,4 +1,4 @@
----
+﻿---
 name: windows-powershell
 description: Windows 11 system administration with PowerShell — system info reporting, hardware monitoring, package management (winget/scoop), disk cleanup, performance optimization, environment configuration, PowerShell profile setup with aliases and autocomplete, and Task Scheduler automation. Use when user asks to check system info, install tools on Windows, clean up disk space, set up PowerShell profile, or automate Windows tasks. Do NOT use for Linux administration, cross-platform scripting, or network infrastructure management.
 triggers:
@@ -277,3 +277,13 @@ if (-not $?) {
 - Windows Package Manager (winget) docs
 - Scoop package manager (scoop.sh)
 - SS64 PowerShell commands reference
+
+## Checklist
+
+- [ ] Skill loads without errors in the AI agent
+- [ ] YAML frontmatter is valid (description, compatibility, audience)
+- [ ] Workflow section provides clear step-by-step instructions
+- [ ] Error handling section covers common failure modes
+- [ ] All referenced files (references/, scripts/, assets/) exist
+- [ ] Skill triggers correctly for intended use cases
+- [ ] No broken links or missing resources

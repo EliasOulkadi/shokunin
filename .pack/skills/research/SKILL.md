@@ -1,4 +1,4 @@
----
+﻿---
 name: research
 description: Deep research with web search, source verification, and fact-checking. Runs before humanize + kami in the document pipeline. Use when user asks to research a topic, verify facts, gather sources, or do deep web investigation. Covers source validation, citation, and evidence hierarchy.
 triggers:
@@ -226,3 +226,13 @@ Rule: if the document goes to an external client or has legal/security implicati
 | Including level 5 (single source) claims without marking them | Reader assumes verified when it's actually unconfirmed. | Explicitly mark any level 5 claim: "[Source: single report, not independently confirmed]". |
 | Treating all sources as equally credible | A Reddit comment ≠ a peer-reviewed paper ≠ an NVD entry. | Apply evidence hierarchy. Weight sources by type, not by what supports the desired narrative. |
 | Skipping verification because the claim "sounds right" | Confirmation bias. LLMs are confident and wrong simultaneously. | Verify every factual claim. "Sounds right" is how hallucinations reach production documents. |
+
+## Checklist
+
+- [ ] Skill loads without errors in the AI agent
+- [ ] YAML frontmatter is valid (description, compatibility, audience)
+- [ ] Workflow section provides clear step-by-step instructions
+- [ ] Error handling section covers common failure modes
+- [ ] All referenced files (references/, scripts/, assets/) exist
+- [ ] Skill triggers correctly for intended use cases
+- [ ] No broken links or missing resources

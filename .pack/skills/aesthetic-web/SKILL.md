@@ -1,4 +1,4 @@
----
+﻿---
 name: Aesthetic Web Design
 description: >
   Apply professional, premium UI/UX design standards when building or styling
@@ -455,3 +455,13 @@ Choose one of the 4 directions: Dark+accent, Deep navy+spotlight, Cream editoria
 | Gradient text via `background-clip: text` | Decorative, never semantic. Fails WCAG contrast at gradient mid-point | Use solid colors with weight and scale contrast for hierarchy |
 | Glassmorphism as default card surface | Trendy 2022. Low contrast, poor readability. Adds visual noise | Use only when atmospehre IS the product (Brand register). Never in Product dashboards |
 | Nesting cards inside cards | Creates visual clutter. User cannot establish information hierarchy | One level of card per section. Use dividers or spacing for sub-groups |
+
+## Checklist
+
+- [ ] Skill loads without errors in the AI agent
+- [ ] YAML frontmatter is valid (description, compatibility, audience)
+- [ ] Workflow section provides clear step-by-step instructions
+- [ ] Error handling section covers common failure modes
+- [ ] All referenced files (references/, scripts/, assets/) exist
+- [ ] Skill triggers correctly for intended use cases
+- [ ] No broken links or missing resources

@@ -1,4 +1,4 @@
----
+﻿---
 name: ci-cd
 description: Design CI/CD pipelines for GitHub Actions, GitLab CI, and CircleCI with matrix builds, test sharding, caching, Docker layer caching, OIDC auth, deployment strategies (rolling, blue-green, canary), auto-rollback, self-hosted runners, and environment protection with manual approvals. Use when user asks to set up CI/CD, write a pipeline, configure GitHub Actions/GitLab CI/CircleCI, automate deployments, or set up build/test/deploy workflows. Do NOT use for Dockerfile authoring (use docker), K8s manifests (use kubernetes), or Terraform config (use terraform).
 triggers:
@@ -309,3 +309,13 @@ Before merging to production:
 - [ ] Healthcheck endpoint verified post-deploy
 - [ ] Monitoring alerts configured for the new version
 - [ ] Database migrations tested with a copy of production data
+
+## Checklist
+
+- [ ] Skill loads without errors in the AI agent
+- [ ] YAML frontmatter is valid (description, compatibility, audience)
+- [ ] Workflow section provides clear step-by-step instructions
+- [ ] Error handling section covers common failure modes
+- [ ] All referenced files (references/, scripts/, assets/) exist
+- [ ] Skill triggers correctly for intended use cases
+- [ ] No broken links or missing resources

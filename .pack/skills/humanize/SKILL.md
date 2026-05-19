@@ -1,4 +1,4 @@
----
+﻿---
 name: humanize
 description: Rewrite AI-generated text to sound natural, remove AI tells, and adjust tone. Use when user asks to make text less robotic, more natural, or humanize AI output. Covers tone matrix, filler words, sentence rhythm, and anti-AI-slop patterns.
 triggers:
@@ -256,3 +256,13 @@ Use this checklist before delivering any humanized text:
 - Ippolito et al., Google Brain (2020): "Automatic Detection of Generated Text"
 - JustDone / AHelp: Spanish AI detection guides
 - print-css.rocks, BrowserStack, pdf4.dev (document formatting research)
+
+## Checklist
+
+- [ ] Skill loads without errors in the AI agent
+- [ ] YAML frontmatter is valid (description, compatibility, audience)
+- [ ] Workflow section provides clear step-by-step instructions
+- [ ] Error handling section covers common failure modes
+- [ ] All referenced files (references/, scripts/, assets/) exist
+- [ ] Skill triggers correctly for intended use cases
+- [ ] No broken links or missing resources

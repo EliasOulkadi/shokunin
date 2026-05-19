@@ -1,4 +1,4 @@
----
+﻿---
 name: translate-craft
 description: Professional translation and localization for 8 languages (ES, JA, FR, DE, PT, ZH, KO, AR). Covers tone matrix, formality levels, i18n patterns (react-intl, i18next, ICU), RTL layout, cultural adaptation, and locale formatting. Use when user asks to translate text, localize an app, adapt tone, review translations, add i18n, or set up RTL.
 license: MIT
@@ -236,3 +236,13 @@ new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(49
 - W3C Internationalization articles
 - FormatJS / ICU Message Syntax
 - Google Material Design — RTL guidelines
+
+## Checklist
+
+- [ ] Skill loads without errors in the AI agent
+- [ ] YAML frontmatter is valid (description, compatibility, audience)
+- [ ] Workflow section provides clear step-by-step instructions
+- [ ] Error handling section covers common failure modes
+- [ ] All referenced files (references/, scripts/, assets/) exist
+- [ ] Skill triggers correctly for intended use cases
+- [ ] No broken links or missing resources

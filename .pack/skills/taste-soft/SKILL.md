@@ -1,4 +1,4 @@
----
+﻿---
 name: taste-soft
 description: "High-end visual design like a premium agency. Defines exact fonts, spacing, shadows, card structures, and animations that make a website feel expensive. Blocks common defaults that make AI designs look cheap or generic. Based on taste-skill by Leon Lin & blueemi, improved by shokunin."
 triggers:
@@ -194,3 +194,13 @@ Run through the 12-item checklist (Section 6) before delivering. Every unchecked
 | Omitting mobile overrides | Asymmetric bento and Z-axis cascade layouts break catastrophically below 768px. | Every `col-span-*` and rotation resets at `md:` breakpoint. Test at 375px width before delivery. |
 | Linear or ease-in-out on any transition | These are explicitly banned in Section 1. Default easing reads as unpolished AI output. | Custom cubic-bezier with asymmetric curve on every transition. Interactive: `duration-200`. Scroll: `duration-700`. |
 | Adding a fourth or fifth font to "make it unique" | Premium design uses 2 fonts max (heading + body). More fonts create visual noise and degrade performance. | Stick to 1-2 typefaces. Use weight, size, and letter-spacing for hierarchy instead of additional families. |
+
+## Checklist
+
+- [ ] Skill loads without errors in the AI agent
+- [ ] YAML frontmatter is valid (description, compatibility, audience)
+- [ ] Workflow section provides clear step-by-step instructions
+- [ ] Error handling section covers common failure modes
+- [ ] All referenced files (references/, scripts/, assets/) exist
+- [ ] Skill triggers correctly for intended use cases
+- [ ] No broken links or missing resources

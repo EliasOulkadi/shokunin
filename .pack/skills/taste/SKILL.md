@@ -1,4 +1,4 @@
----
+﻿---
 name: taste
 description: "Senior UI/UX Engineer. Architect digital interfaces overriding default LLM biases. Enforces metric-based rules, strict component architecture, hardware-accelerated CSS, and balanced design engineering. By Leon Lin & blueemi. Multi-runtime improved by shokunin."
 triggers:
@@ -231,3 +231,13 @@ Reference library of advanced UI concepts. Never default to generic. Use Framer 
 - Apple Human Interface Guidelines
 - Material Design 3
 - OKLCH color space (W3C)
+
+## Checklist
+
+- [ ] Skill loads without errors in the AI agent
+- [ ] YAML frontmatter is valid (description, compatibility, audience)
+- [ ] Workflow section provides clear step-by-step instructions
+- [ ] Error handling section covers common failure modes
+- [ ] All referenced files (references/, scripts/, assets/) exist
+- [ ] Skill triggers correctly for intended use cases
+- [ ] No broken links or missing resources

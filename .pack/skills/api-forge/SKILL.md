@@ -1,4 +1,4 @@
----
+﻿---
 name: api-forge
 description: Design REST/GraphQL APIs with OpenAPI 3.1, error handling, pagination, rate limiting, webhooks, and idempotency. Use when user asks to design an API, create endpoints, define REST/GraphQL schema, or generate OpenAPI spec. Do NOT use for database schema design, frontend API integration, or non-HTTP protocols (gRPC, WebSocket, MQTT).
 triggers:
@@ -346,3 +346,13 @@ Every endpoint needs:
 - IETF RFC 7231 — HTTP semantics
 - IETF RFC 6585 — Additional HTTP status codes
 - Slack API — rate limiting headers
+
+## Checklist
+
+- [ ] Skill loads without errors in the AI agent
+- [ ] YAML frontmatter is valid (description, compatibility, audience)
+- [ ] Workflow section provides clear step-by-step instructions
+- [ ] Error handling section covers common failure modes
+- [ ] All referenced files (references/, scripts/, assets/) exist
+- [ ] Skill triggers correctly for intended use cases
+- [ ] No broken links or missing resources

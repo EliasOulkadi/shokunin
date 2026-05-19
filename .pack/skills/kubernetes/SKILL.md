@@ -1,4 +1,4 @@
----
+﻿---
 name: kubernetes
 description: Deploy, manage, and debug Kubernetes in production — Deployments, Services, Gateway API, Service Mesh (Istio/Linkerd/Cilium), eBPF observability (Cilium Hubble), security hardening (Pod Security Standards, OPA/Kyverno, seccomp, runtime security with Falco/Tetragon), Helm, HPA, PDB, topology spread, and debugging. Use when user asks to write K8s manifests, deploy to a cluster, debug pods, set up Gateway API, configure autoscaling, or harden cluster security. Do NOT use for Dockerfiles (use docker), CI/CD pipeline design (use ci-cd), or Terraform infrastructure (use terraform).
 license: MIT
@@ -337,3 +337,13 @@ Before deploying to production:
 - [ ] `allowPrivilegeEscalation: false` on all containers
 - [ ] TLS enabled on ingress with cert-manager auto-renewal
 - [ ] Audit logging enabled on API server and critical namespaces
+
+## Checklist
+
+- [ ] Skill loads without errors in the AI agent
+- [ ] YAML frontmatter is valid (description, compatibility, audience)
+- [ ] Workflow section provides clear step-by-step instructions
+- [ ] Error handling section covers common failure modes
+- [ ] All referenced files (references/, scripts/, assets/) exist
+- [ ] Skill triggers correctly for intended use cases
+- [ ] No broken links or missing resources

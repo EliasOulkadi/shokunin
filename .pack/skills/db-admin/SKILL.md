@@ -1,4 +1,4 @@
----
+﻿---
 name: db-admin
 description: PostgreSQL database administration — backup/restore (pg_dump, PITR, WAL archiving), health monitoring (connections, bloat, cache hit ratio, dead tuples), connection pooling (PgBouncer), replication (streaming, logical), vacuum/autovacuum tuning, and scheduled backups with retention. Use when user asks to backup a database, restore from backup, monitor database health, set up replication, or perform DBA tasks. Do NOT use for schema design (use db-sculptor), query optimization (use db-sculptor), or migration planning (use db-sculptor).
 triggers:
@@ -239,3 +239,13 @@ FROM pg_stat_user_tables WHERE n_dead_tup > 10000 ORDER BY n_dead_tup DESC;
 - WAL archiving and PITR guide
 - Replication documentation
 - pganalyze — Monitoring and tuning
+
+## Checklist
+
+- [ ] Skill loads without errors in the AI agent
+- [ ] YAML frontmatter is valid (description, compatibility, audience)
+- [ ] Workflow section provides clear step-by-step instructions
+- [ ] Error handling section covers common failure modes
+- [ ] All referenced files (references/, scripts/, assets/) exist
+- [ ] Skill triggers correctly for intended use cases
+- [ ] No broken links or missing resources

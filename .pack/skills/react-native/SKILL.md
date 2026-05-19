@@ -1,4 +1,4 @@
----
+﻿---
 name: react-native
 description: Build production React Native apps with Expo SDK 53+, Expo Router (file-based navigation), New Architecture (Fabric + TurboModules), FlashList, Reanimated 4, Zustand for state, Hermes, EAS Build, and App Store/Play Store deployment.
 triggers:
@@ -354,3 +354,13 @@ eas submit --platform android
 - EAS Build Documentation
 - Zustand Documentation (github.com/pmndrs/zustand)
 - TanStack Query Documentation (tanstack.com/query/latest)
+
+## Checklist
+
+- [ ] Skill loads without errors in the AI agent
+- [ ] YAML frontmatter is valid (description, compatibility, audience)
+- [ ] Workflow section provides clear step-by-step instructions
+- [ ] Error handling section covers common failure modes
+- [ ] All referenced files (references/, scripts/, assets/) exist
+- [ ] Skill triggers correctly for intended use cases
+- [ ] No broken links or missing resources

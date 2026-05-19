@@ -5,7 +5,6 @@ so the MCP server can start even if chromadb import fails.
 """
 import importlib.util
 import os
-import sys
 
 _ch_mod = None
 

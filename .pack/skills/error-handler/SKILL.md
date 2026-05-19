@@ -1,4 +1,4 @@
----
+﻿---
 name: error-handler
 description: Design error handling, structured logging, and observability with OpenTelemetry (traces, metrics, logs), error classification, recovery patterns (retry with jitter, circuit breaker, bulkhead, timeout), error budgets/SLOs with burn rate alerts, and production incident triage. Use when user asks to implement error handling, logging, monitoring, observability, OpenTelemetry, error boundaries, circuit breakers, retry logic, or SLO tracking. Do NOT use for incident runbooks (use runbook-gen), vendor-specific APM setup (Datadog, Sentry agent config), or K8s debugging.
 triggers:
@@ -365,3 +365,13 @@ Every log line must be JSON with these fields:
 - AWS Well-Architected Framework - Reliability Pillar
 - Microsoft Polly - Circuit breaker patterns
 - Hystrix - Netflix circuit breaker patterns
+
+## Checklist
+
+- [ ] Skill loads without errors in the AI agent
+- [ ] YAML frontmatter is valid (description, compatibility, audience)
+- [ ] Workflow section provides clear step-by-step instructions
+- [ ] Error handling section covers common failure modes
+- [ ] All referenced files (references/, scripts/, assets/) exist
+- [ ] Skill triggers correctly for intended use cases
+- [ ] No broken links or missing resources

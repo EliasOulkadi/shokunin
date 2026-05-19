@@ -1,4 +1,4 @@
----
+﻿---
 name: landing-craft
 description: Build conversion-optimized landing pages with CRO frameworks (Conversion Research, LIFT Model), scroll effects, A/B testing, personalization, form optimization, and Core Web Vitals (INP, LCP, CLS). Use when user asks to create a landing page, sales page, lead generation page, or improve conversion rates. Do NOT use for full product design (use component-forge), animation-specific (use motion-craft), or brand identity (use design).
 triggers:
@@ -471,3 +471,13 @@ Before launching, verify:
 - Refactoring UI - Adam Wathan, Steve Schoger
 - Google Web Vitals (web.dev)
 - Copyhackers - Conversion copywriting
+
+## Checklist
+
+- [ ] Skill loads without errors in the AI agent
+- [ ] YAML frontmatter is valid (description, compatibility, audience)
+- [ ] Workflow section provides clear step-by-step instructions
+- [ ] Error handling section covers common failure modes
+- [ ] All referenced files (references/, scripts/, assets/) exist
+- [ ] Skill triggers correctly for intended use cases
+- [ ] No broken links or missing resources

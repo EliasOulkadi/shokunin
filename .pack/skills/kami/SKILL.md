@@ -1,4 +1,4 @@
----
+﻿---
 name: kami
 description: 'Generate PDFs, resumes, CVs, letters, slide decks, portfolios, one-pagers, white papers, and professional documents. Use when user asks to create a PDF, make a resume, write a letter, design slides, format a document, typeset a report, build a portfolio, make a presentation, or create a one-pager. Warm parchment, ink-blue accent, serif-led hierarchy. CN uses TsangerJinKai02, EN uses Charter, JA uses YuMincho (best-effort). Triggers on Chinese: "做 PDF / 排版 / 一页纸 / 白皮书 / 作品集 / 简历 / PPT / slides". Do NOT use for code formatting, data charts, or wireframes.'
 triggers:
@@ -481,3 +481,13 @@ Never say "I'll adjust the spacing" without naming the exact property and its ne
 | Building without `--verify` | Hidden issues: missing fonts, page overflow, leftover placeholders | Always run `python3 scripts/build.py --verify` before shipping |
 | Using CJK parentheses `（...）` in slides | Breaks visual rhythm; looks translated from English | Replace with `·` or `,` in slide decks |
 | Defaulting to PPTX path | PPTX output has layout drift and cannot embed custom fonts | WeasyPrint HTML → PDF is the default; PPTX only when user explicitly requires editable file |
+
+## Checklist
+
+- [ ] Skill loads without errors in the AI agent
+- [ ] YAML frontmatter is valid (description, compatibility, audience)
+- [ ] Workflow section provides clear step-by-step instructions
+- [ ] Error handling section covers common failure modes
+- [ ] All referenced files (references/, scripts/, assets/) exist
+- [ ] Skill triggers correctly for intended use cases
+- [ ] No broken links or missing resources

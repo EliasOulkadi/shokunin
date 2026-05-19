@@ -1,4 +1,4 @@
----
+﻿---
 name: legal-counsel
 description: >-
   Structured legal reference for GDPR, EU AI Act, DSA/DMA, CCPA/CPRA, HIPAA (2026 updates),
@@ -206,3 +206,13 @@ When asked a legal compliance question, follow these steps:
 - EDPB guidelines
 - Sourcepoint "US State Privacy Law Comparison"
 - DOJ Title II WCAG rule (2024)
+
+## Checklist
+
+- [ ] Skill loads without errors in the AI agent
+- [ ] YAML frontmatter is valid (description, compatibility, audience)
+- [ ] Workflow section provides clear step-by-step instructions
+- [ ] Error handling section covers common failure modes
+- [ ] All referenced files (references/, scripts/, assets/) exist
+- [ ] Skill triggers correctly for intended use cases
+- [ ] No broken links or missing resources

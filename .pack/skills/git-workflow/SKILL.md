@@ -1,4 +1,4 @@
----
+﻿---
 name: git-workflow
 description: Automate the complete Git development workflow — create feature branches with conventional naming, atomic commits with conventional commit messages, interactive rebase, squash merges, PR body generation from commit history, branch cleanup, and git worktree patterns. Use when user asks to create a branch, commit changes, make a PR, rebase, squash, clean up branches, or follow a Git workflow. Do NOT use for CI/CD pipeline configuration (use ci-cd), code review (use code-review), or GitHub Actions workflows.
 triggers:
@@ -251,3 +251,13 @@ git worktree remove ../project-feat-auth
 - Git SCM docs (git-scm.com)
 - Keep a Changelog (keepachangelog.com)
 - Semantic Versioning (semver.org)
+
+## Checklist
+
+- [ ] Skill loads without errors in the AI agent
+- [ ] YAML frontmatter is valid (description, compatibility, audience)
+- [ ] Workflow section provides clear step-by-step instructions
+- [ ] Error handling section covers common failure modes
+- [ ] All referenced files (references/, scripts/, assets/) exist
+- [ ] Skill triggers correctly for intended use cases
+- [ ] No broken links or missing resources

@@ -1,4 +1,4 @@
----
+﻿---
 name: component-forge
 description: Build production-grade components for React, Vue 3, and Svelte 5 with all states (loading, empty, error, success, idle), TypeScript strict, WCAG 2.2 accessibility, server components (RSC), and compound component patterns. Includes scaffold script, reference patterns, and template files for React and Vue. Use when user asks to create a UI component, frontend module, or design system component. Do NOT use for page layouts (use landing-craft), routing, or state management architecture (global stores).
 triggers:
@@ -444,3 +444,13 @@ When reviewing component code, use a Before/After table:
 - WCAG 2.2 - Accessibility guidelines
 - Radix UI - Focus trap, popover, tooltip patterns
 - Base UI - Transform origin variables
+
+## Checklist
+
+- [ ] Skill loads without errors in the AI agent
+- [ ] YAML frontmatter is valid (description, compatibility, audience)
+- [ ] Workflow section provides clear step-by-step instructions
+- [ ] Error handling section covers common failure modes
+- [ ] All referenced files (references/, scripts/, assets/) exist
+- [ ] Skill triggers correctly for intended use cases
+- [ ] No broken links or missing resources

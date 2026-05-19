@@ -1,4 +1,4 @@
----
+﻿---
 name: terraform
 description: Design and manage infrastructure as code with Terraform — modules, remote state (S3 + DynamoDB), Stacks (deployments), test framework, preconditions/postconditions, moved/removed blocks, and CI/CD plan/apply separation. Use when user asks to write Terraform config, set up remote state, design modules, manage state, or automate infrastructure. Do NOT use for Kubernetes (use kubernetes), Docker (use docker), or CI/CD pipeline design (use ci-cd).
 triggers:
@@ -392,3 +392,13 @@ Before `terraform apply`:
 - [ ] Sensitive outputs marked with `sensitive = true`
 - [ ] Plan file reviewed by a second person for production changes
 - [ ] `terraform apply` runs from CI/CD, not a developer laptop
+
+## Checklist
+
+- [ ] Skill loads without errors in the AI agent
+- [ ] YAML frontmatter is valid (description, compatibility, audience)
+- [ ] Workflow section provides clear step-by-step instructions
+- [ ] Error handling section covers common failure modes
+- [ ] All referenced files (references/, scripts/, assets/) exist
+- [ ] Skill triggers correctly for intended use cases
+- [ ] No broken links or missing resources

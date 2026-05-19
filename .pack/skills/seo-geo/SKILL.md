@@ -1,4 +1,4 @@
----
+﻿---
 name: seo-geo
 description: SEO + Generative Engine Optimization (GEO) for 2026 — technical SEO, on-page optimization, structured data (JSON-LD, schema.org), Core Web Vitals, citability scoring (llms.txt, entity clarity), AI search engine optimization (ChatGPT, Gemini, Perplexity, Claude, Google AI Overviews), and brand authority building. Use when user asks to optimize a site for search engines, improve SEO, write SEO content, implement structured data, optimize for AI search/GEO, audit a page, or improve Google rankings. Do NOT use for content writing strategy (use content-marketing), performance optimization beyond Core Web Vitals (use performance-profiler), or paid ad strategy.
 triggers:
@@ -233,3 +233,13 @@ For AI search engines (ChatGPT, Gemini, Perplexity, Google AI Overviews):
 | Canonical URL points to wrong domain after migration | Stale canonicals cause duplicate content penalties. Audit all pages with a crawler (Screaming Frog, Sitebulb). Update in bulk with server-side redirects. Verify each canonical returns 200, not a redirect chain. |
 | Hreflang tags return 404 or self-referencing loops | Each language variant must return a valid page. Use `x-default` for the language selector page. Validate with the hreflang tag tester in GSC International Targeting report. Remove broken variant links rather than leaving dead hreflang. |
 | Site dropped in rankings after major redesign | URLs may have changed without 301 redirects. Audit before/after URL maps. Implement redirects for all high-traffic pages first (prioritize by organic traffic in GSC). Submit old sitemap + new sitemap to GSC simultaneously for faster re-indexing. |
+
+## Checklist
+
+- [ ] Skill loads without errors in the AI agent
+- [ ] YAML frontmatter is valid (description, compatibility, audience)
+- [ ] Workflow section provides clear step-by-step instructions
+- [ ] Error handling section covers common failure modes
+- [ ] All referenced files (references/, scripts/, assets/) exist
+- [ ] Skill triggers correctly for intended use cases
+- [ ] No broken links or missing resources

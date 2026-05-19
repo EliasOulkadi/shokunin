@@ -1,4 +1,4 @@
----
+﻿---
 name: docker
 description: Optimize Docker images with multi-stage builds, distroless bases, BuildKit cache mounts, multi-arch builds, compose watch, security hardening (non-root, seccomp, capabilities drop), and vulnerability scanning via docker scout/trivy. Use when user asks to write a Dockerfile, optimize image size, set up docker-compose, debug containers, harden container security, or scan for CVEs. Do NOT use for Kubernetes deployments (use kubernetes), CI/CD pipeline design (use ci-cd), or Terraform (use terraform).
 triggers:
@@ -335,3 +335,13 @@ If CVEs found: switch base image to newer distroless tag, rebuild, re-scan. Trac
 - Trivy vulnerability scanner
 - Docker Scout documentation
 - SLSA framework (slsa.dev)
+
+## Checklist
+
+- [ ] Skill loads without errors in the AI agent
+- [ ] YAML frontmatter is valid (description, compatibility, audience)
+- [ ] Workflow section provides clear step-by-step instructions
+- [ ] Error handling section covers common failure modes
+- [ ] All referenced files (references/, scripts/, assets/) exist
+- [ ] Skill triggers correctly for intended use cases
+- [ ] No broken links or missing resources
