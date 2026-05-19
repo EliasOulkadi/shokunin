@@ -1,8 +1,8 @@
 # Changelog
 
-v4.2.2 adds freshness decay (time-weighted memory search), claim verification (verify_file_path MCP tool), 9 MCP tools (was 8), and all 62 skills standardized with Workflow, Error Handling, Sources, and Anti-Patterns sections (average 257 lines each).
+v4.2.3 adds null-safety to all MCP handlers, proper lazy loading for chroma_helper_stub, delete command for chroma-helper.py, fixed buffer capture in run-opencode.ps1, corrected search-memory.ps1 sorting, resolved Resolve-Path shadowing in shokunin-update.ps1, and improved install.ps1 encoding.
 
-## [4.2.2] - 2026-05-16
+## [4.2.3] - 2026-05-19
 ### Fixed
 - Path traversal in `_sanitize_id`/`_safe_id` (regex instead of single replace)
 - `install.ps1` `$PSScriptRoot` crash when running via iex

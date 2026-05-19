@@ -502,6 +502,27 @@ if __name__ == "__main__":
             print(json.dumps({"error": str(e)}))
     elif cmd == "count":
         print(json.dumps({"count": _get_db().count()}))
+    elif cmd == "delete" and len(sys.argv) >= 3:
+        tag_filter = sys.argv[2]
+        try:
+            all_data = _get_db().get(limit=1000)
+            deleted = 0
+            if all_data.get("ids"):
+                ids_to_delete = []
+                for i in range(len(all_data["ids"])):
+                    meta = all_data["metadatas"][i]
+                    try:
+                        entry_tags = json.loads(meta.get("tags", "[]"))
+                    except (json.JSONDecodeError, TypeError):
+                        entry_tags = []
+                    if tag_filter in entry_tags or meta.get("project") == tag_filter:
+                        ids_to_delete.append(all_data["ids"][i])
+                if ids_to_delete:
+                    _get_db().delete(ids=ids_to_delete)
+                    deleted = len(ids_to_delete)
+            print(json.dumps({"deleted": deleted, "tag_filter": tag_filter}))
+        except Exception as e:
+            print(json.dumps({"error": str(e), "deleted": 0}))
     elif cmd == "session" and len(sys.argv) >= 3:
         sub = sys.argv[2]
         if sub == "list":

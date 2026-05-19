@@ -9,12 +9,11 @@ param(
     [int]$Limit = 5
 )
 Set-StrictMode -Version Latest
-$ErrorActionPreference = "Stop"
+$ErrorActionPreference = "Continue"
 
-$HELPER = "$env:USERPROFILE\.shokunin\scripts\chroma-helper.py"
+$HELPER = "{{CHROMA_HELPER_PATH}}"
 $RESULTS = @()
 
-# 1. Try ChromaDB semantic search
 if (-not [string]::IsNullOrEmpty($Query)) {
     try {
         $json = python $HELPER search "$Query" $Project 2>$null
@@ -42,7 +41,6 @@ if (-not [string]::IsNullOrEmpty($Query)) {
     }
 }
 
-# 2. Fallback to recent entries if nothing found
 if ($RESULTS.Count -eq 0) {
     try {
         $json = python $HELPER recent $Limit 2>$null
@@ -58,7 +56,7 @@ if ($RESULTS.Count -eq 0) {
                         Session = $e.session_id
                         Project = $e.project
                         Tags = $e.tags -join ", "
-                        Score = 0
+                        Score = 0.001
                         Timestamp = $e.timestamp
                     }
                     $RESULTS += $obj
@@ -66,7 +64,7 @@ if ($RESULTS.Count -eq 0) {
             }
         }
     } catch {
-        Write-Warning "Recent entries failed: $_"
+        Write-Warning "Recent entries fallback failed: $_"
     }
 }
 
