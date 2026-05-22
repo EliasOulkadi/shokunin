@@ -11,18 +11,19 @@ triggers:
   - "Neon MCP"
   - "Postgres branching"
 negatives:
-license: MIT
-compatibility: opencode
   - "self-hosted Postgres"
   - "RDS"
   - "Aurora"
   - "Supabase"
   - "PlanetScale"
+license: MIT
+compatibility: opencode
 metadata:
   version: "1.0.0"
 
   workflow: backend
-  audience: developers---
+  audience: developers
+---
 
 
 # Neon Serverless Postgres

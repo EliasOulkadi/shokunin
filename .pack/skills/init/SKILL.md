@@ -11,19 +11,20 @@ triggers:
   - "project initialization"
   - "new project setup"
 negatives:
-license: MIT
-compatibility: opencode
   - "build tool"
   - "template"
   - "boilerplate"
   - "scaffold component"
   - "scaffold project"
+license: MIT
+compatibility: opencode
 disable-model-invocation: true
 metadata:
   version: 1.3.0
 
   workflow: system
-  audience: developers---
+  audience: developers
+---
 
 
 # AGENTS.md Generator

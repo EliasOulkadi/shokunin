@@ -1,4 +1,4 @@
-﻿---
+---
 name: kami
 description: 'Generate PDFs, resumes, CVs, letters, slide decks, portfolios, one-pagers, white papers, and professional documents. Use when user asks to create a PDF, make a resume, write a letter, design slides, format a document, typeset a report, build a portfolio, make a presentation, or create a one-pager. Warm parchment, ink-blue accent, serif-led hierarchy. CN uses TsangerJinKai02, EN uses Charter, JA uses YuMincho (best-effort). Triggers on Chinese: "做 PDF / 排版 / 一页纸 / 白皮书 / 作品集 / 简历 / PPT / slides". Do NOT use for code formatting, data charts, or wireframes.'
 triggers:
@@ -16,18 +16,19 @@ triggers:
   - "white paper"
   - "one-pager"
 negatives:
-license: MIT
-compatibility: opencode
   - "code formatting"
   - "data charts"
   - "wireframes"
   - "HTML rendering"
   - "PDF rendering" -> use kagen
+license: MIT
+compatibility: opencode
 metadata:
   version: "1.0.0"
 
   workflow: documents
-  audience: developers---
+  audience: developers
+---
 
 
 > **Note:** Full Kami distribution includes ~30+ auxiliary files (CHEATSHEET.md, scripts/, references/, assets/diagrams/*.html). The core SKILL.md works standalone; scripts/build.py is required for PDF generation. Check the Shokunin ecosystem root for these.

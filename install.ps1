@@ -12,6 +12,15 @@ $script:startupDir = [Environment]::GetFolderPath('Startup')
 $script:logFile = "$env:TEMP\shokunin-install-$(Get-Date -Format 'yyyyMMdd-HHmmss').log"
 $script:sourceDir = if ($PSScriptRoot) { $PSScriptRoot } else { (Get-Location).Path }
 
+# Validate sourceDir has the required .pack folder.
+# When run via iex from the web, $PSScriptRoot is empty and
+# the current directory won't have repo files. Fall back to git clone.
+$script:needsClone = $false
+if (-not (Test-Path (Join-Path $script:sourceDir ".pack\skills"))) {
+    $script:needsClone = $true
+    Write-Log "Repo not found locally, will clone from GitHub" Yellow
+}
+
 # Known SHA256 checksums for critical scripts (updated per release)
 # These are verified after download to prevent tampering
 $script:knownChecksums = @{
@@ -111,37 +120,43 @@ function Install-Dependencies {
 # ============================================================
 function Install-Skills {
     Write-Step "Installing 62 skills..."
-    $repoSkills = Join-Path $script:sourceDir ".pack\skills"
 
     if (-not (Test-Path $script:skillsDir)) {
         New-Item -ItemType Directory -Path $script:skillsDir -Force | Out-Null
     }
 
-    $count = 0
-    Get-ChildItem $repoSkills -Directory | Where-Object { Test-Path (Join-Path $_.FullName "SKILL.md") } | ForEach-Object {
-        $target = Join-Path $script:skillsDir $_.Name
-        if (-not (Test-Path $target)) {
-            New-Item -ItemType Directory -Path $target -Force | Out-Null
-        }
-        Copy-Item -Recurse -Force "$($_.FullName)\*" "$target\" -ErrorAction SilentlyContinue
-        $count++
+    # Determine skills source: local clone or GitHub download
+    if ($script:needsClone) {
+        $skillsSource = "$env:TEMP\shokunin-skills"
+        if (Test-Path $skillsSource) { Remove-Item -Recurse -Force $skillsSource -ErrorAction SilentlyContinue }
+        Write-Log "Cloning from GitHub..." Yellow
+        git clone --depth 1 https://github.com/EliasOulkadi/shokunin.git "$env:TEMP\shokunin-tmp" 2>&1 | Out-Null
+        $skillsSource = "$env:TEMP\shokunin-tmp\.pack\skills"
+    } else {
+        $skillsSource = Join-Path $script:sourceDir ".pack\skills"
     }
 
-    if ($count -gt 0) { Write-Log "$count skills installed in $script:skillsDir" Green }
-    else {
-        Write-Log "No skills found in repository. Cloning..." Yellow
-        git clone --depth 1 https://github.com/EliasOulkadi/shokunin.git "$env:TEMP\shokunin-tmp" 2>&1 | Out-Null
-        $skillsPath = "$env:TEMP\shokunin-tmp\.pack\skills"
-        if (Test-Path $skillsPath) {
-            Get-ChildItem $skillsPath -Directory | Where-Object { Test-Path (Join-Path $_.FullName "SKILL.md") } | ForEach-Object {
-                $target = Join-Path $script:skillsDir $_.Name
-                if (-not (Test-Path $target)) { New-Item -ItemType Directory -Path $target -Force | Out-Null }
-                Copy-Item -Recurse -Force "$($_.FullName)\*" "$target\" -ErrorAction SilentlyContinue
-                $count++
+    $count = 0
+    if (Test-Path $skillsSource) {
+        Get-ChildItem $skillsSource -Directory -ErrorAction SilentlyContinue | Where-Object { Test-Path (Join-Path $_.FullName "SKILL.md") } | ForEach-Object {
+            $target = Join-Path $script:skillsDir $_.Name
+            if (-not (Test-Path $target)) {
+                New-Item -ItemType Directory -Path $target -Force | Out-Null
             }
+            Copy-Item -Recurse -Force "$($_.FullName)\*" "$target\" -ErrorAction SilentlyContinue
+            $count++
         }
+    }
+
+    # Cleanup temp clone
+    if ($script:needsClone) {
         Remove-Item -Recurse -Force "$env:TEMP\shokunin-tmp" -ErrorAction SilentlyContinue
-        Write-Log "$count skills installed" Green
+    }
+
+    if ($count -gt 0) {
+        Write-Log "$count skills installed in $script:skillsDir" Green
+    } else {
+        Write-Log "No skills found to install. Check network connectivity." Red
     }
 }
 

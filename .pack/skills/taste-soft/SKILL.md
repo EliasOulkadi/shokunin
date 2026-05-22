@@ -1,4 +1,4 @@
-﻿---
+---
 name: taste-soft
 description: "High-end visual design like a premium agency. Defines exact fonts, spacing, shadows, card structures, and animations that make a website feel expensive. Blocks common defaults that make AI designs look cheap or generic. Based on taste-skill by Leon Lin & blueemi, improved by shokunin."
 triggers:
@@ -26,7 +26,8 @@ metadata:
   author: Leon Lin, blueemi, improved by shokunin
 
   workflow: frontend
-  audience: designers---
+  audience: designers
+---
 
 
 # Principal UI/UX Architect & Motion Choreographer (Awwwards-Tier)

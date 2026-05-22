@@ -17,8 +17,8 @@ negatives:
   - "query context"
   - "save context"
   - "verify file"
-  - "context recall" -> use memory
-  - "remember past" -> use memory
+  - "context recall"
+  - "remember past"
 license: MIT
 compatibility: opencode
 metadata:

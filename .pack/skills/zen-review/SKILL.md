@@ -7,17 +7,18 @@ triggers:
   - "JSON review"
   - "structured review"
 negatives:
-license: MIT
-compatibility: opencode
   - "comprehensive review"
   - "cross review"
   - "PR review"
   - "UI review"
+license: MIT
+compatibility: opencode
 metadata:
   version: 1.1.0
 
   workflow: quality
-  audience: developers---
+  audience: developers
+---
 
 
 # Code Review

@@ -16,18 +16,19 @@ triggers:
   - "secure code"
   - "production quality"
 negatives:
-license: MIT
-compatibility: opencode
   - "design"
   - "architecture"
   - "testing"
   - "performance optimization"
   - "animation"
+license: MIT
+compatibility: opencode
 metadata:
   version: "1.0.0"
 
   workflow: general
-  audience: developers---
+  audience: developers
+---
 
 
 # Senior Engineer Coding

@@ -1,4 +1,4 @@
-﻿---
+---
 name: Web Security
 description: >
   Apply professional-grade security standards to any web application task.
@@ -23,19 +23,20 @@ triggers:
   - "secure coding"
   - "security review"
 negatives:
-license: MIT
-compatibility: opencode
   - "network security"
   - "firewall"
   - "WAF"
   - "infrastructure security"
   - "cloud security"
   - "IAM"
+license: MIT
+compatibility: opencode
 metadata:
   version: "1.0.0"
 
   workflow: general
-  audience: developers---
+  audience: developers
+---
 
 
 # Web Security — Professional Standards

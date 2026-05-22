@@ -1,4 +1,4 @@
-﻿---
+---
 name: research
 description: Deep research with web search, source verification, and fact-checking. Runs before humanize + kami in the document pipeline. Use when user asks to research a topic, verify facts, gather sources, or do deep web investigation. Covers source validation, citation, and evidence hierarchy.
 triggers:
@@ -14,18 +14,19 @@ triggers:
   - "look up"
   - "investigate"
 negatives:
-license: MIT
-compatibility: opencode
   - "memory search"
   - "ChromaDB"
   - "vector search"
   - "code search"
   - "git history"
+license: MIT
+compatibility: opencode
 metadata:
   version: "1.0.0"
 
   workflow: ai-agents
-  audience: general---
+  audience: general
+---
 
 # research · 調査
 

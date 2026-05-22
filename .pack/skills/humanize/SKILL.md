@@ -1,4 +1,4 @@
-﻿---
+---
 name: humanize
 description: Rewrite AI-generated text to sound natural, remove AI tells, and adjust tone. Use when user asks to make text less robotic, more natural, or humanize AI output. Covers tone matrix, filler words, sentence rhythm, and anti-AI-slop patterns.
 triggers:
@@ -13,18 +13,19 @@ triggers:
   - "anti AI slop"
   - "make it conversational"
 negatives:
-license: MIT
-compatibility: opencode
   - "translation"
   - "formal writing"
   - "academic writing"
   - "technical documentation"
   - "code comments"
+license: MIT
+compatibility: opencode
 metadata:
   version: "1.0.0"
 
   workflow: ai-agents
-  audience: general---
+  audience: general
+---
 
 # humanize · 人間
 

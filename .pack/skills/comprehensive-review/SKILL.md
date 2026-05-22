@@ -9,17 +9,18 @@ triggers:
   - "complete review"
   - "review everything"
 negatives:
-license: MIT
-compatibility: opencode
   - "quick review"
   - "simple review"
   - "design review"
   - "UI review"
+license: MIT
+compatibility: opencode
 metadata:
   version: 2.1.0
 
   workflow: quality
-  audience: developers---
+  audience: developers
+---
 
 
 # Comprehensive Code Review

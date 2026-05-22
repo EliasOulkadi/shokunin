@@ -1,4 +1,4 @@
-﻿---
+---
 name: taste
 description: "Senior UI/UX Engineer. Architect digital interfaces overriding default LLM biases. Enforces metric-based rules, strict component architecture, hardware-accelerated CSS, and balanced design engineering. By Leon Lin & blueemi. Multi-runtime improved by shokunin."
 triggers:
@@ -27,7 +27,8 @@ metadata:
   source: https://github.com/Leonxlnx/taste-skill
 
   workflow: frontend
-  audience: designers---
+  audience: designers
+---
 
 
 # High-Agency Frontend Skill

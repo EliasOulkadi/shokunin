@@ -181,9 +181,6 @@ log "Linux scripts installed"
 # === OPENCODE CONFIG ===
 step_msg "Configuring OpenCode..."
 CONFIG_SRC="$REPO_DIR/.pack/opencode.json"
-if [ -f "$CONFIG_DIR/opencode.json" ]; then
-    cp "$CONFIG_DIR/opencode.json" "$CONFIG_DIR/opencode.json.shokunin-backup-$(date +%Y%m%d-%H%M%S)"
-fi
 
 NVIDIA_KEY="${NVIDIA_API_KEY:-}"
 if [ -z "$NVIDIA_KEY" ] && [ "$NONINTERACTIVE" = false ] && [ -t 0 ]; then
@@ -199,13 +196,58 @@ if [ -f "$CONFIG_SRC" ]; then
     PYTHON_BIN="python3"
     command -v python3 &>/dev/null || PYTHON_BIN="python"
 
-    sed "s#{{MCP_ROOT_PATH}}#$HOME#g; \
+    # Process template: substitute placeholders
+    TEMPLATE_CONTENT=$(sed "s#{{MCP_ROOT_PATH}}#$HOME#g; \
          s#{{PYTHON_BIN}}#$PYTHON_BIN#g; \
          s#{{MCP_MEMORY_PATH}}#$CORES_DIR/memory/mcp-server.py#g" \
-      "$CONFIG_SRC" > "$CONFIG_DIR/opencode.json" 2>/dev/null || cp "$CONFIG_SRC" "$CONFIG_DIR/opencode.json"
+      "$CONFIG_SRC" 2>/dev/null)
 
-    if grep -q "{{MCP_\|{{PYTHON_BIN}}" "$CONFIG_DIR/opencode.json" 2>/dev/null; then
-        log "WARNING: Placeholders remain in opencode.json. Check the file."
+    if grep -q "{{MCP_\|{{PYTHON_BIN}}" <<< "$TEMPLATE_CONTENT" 2>/dev/null; then
+        log "WARNING: Placeholders remain in template. Check the file."
+    fi
+
+    # Merge with existing config if present (preserves user's providers/commands)
+    if [ -f "$CONFIG_DIR/opencode.json" ]; then
+        cp "$CONFIG_DIR/opencode.json" "$CONFIG_DIR/opencode.json.shokunin-backup-$(date +%Y%m%d-%H%M%S)"
+        log "Backup saved: opencode.json.shokunin-backup-$(date +%Y%m%d-%H%M%S)"
+
+        # Use Python for deep merge: template wins for mcp/agent, user wins for provider/command
+        $PYTHON_BIN -c "
+import json
+with open('$CONFIG_DIR/opencode.json') as f:
+    existing = json.load(f)
+with open('/dev/stdin') as f:
+    tmpl = json.load(f)
+
+merged = dict(tmpl)
+
+# Preserve user's provider configs (they may have custom API keys)
+if 'provider' in existing:
+    merged['provider'] = existing['provider']
+
+# Preserve user's commands
+if 'command' in existing:
+    merged['command'] = {**existing['command'], **merged.get('command', {})}
+
+# Preserve user's model preference
+if 'model' in existing and existing['model'] != merged.get('model'):
+    merged['model'] = existing['model']
+
+# Preserve any user-added MCP servers
+existing_mcp = existing.get('mcp', {})
+if existing_mcp:
+    for k, v in existing_mcp.items():
+        if k not in merged.get('mcp', {}):
+            merged.setdefault('mcp', {})[k] = v
+
+print(json.dumps(merged, indent=2))
+" <<< "$TEMPLATE_CONTENT" > "$CONFIG_DIR/opencode.json" 2>/dev/null || {
+        log "Merge failed, using template. Backup at opencode.json.shokunin-backup-*" Yellow
+        echo "$TEMPLATE_CONTENT" > "$CONFIG_DIR/opencode.json"
+    }
+    else
+        echo "$TEMPLATE_CONTENT" > "$CONFIG_DIR/opencode.json"
+        log "Config generated (new)"
     fi
 fi
 

@@ -21,19 +21,20 @@ triggers:
   - "Twitter API"
   - "social media automation"
 negatives:
-license: MIT
-compatibility: opencode
   - "local model"
   - "Ollama"
   - "vector search"
   - "memory"
   - "ChromaDB"
+license: MIT
+compatibility: opencode
 allowed-tools: Bash(infsh *)
 metadata:
   version: "1.0.0"
 
   workflow: ai-agents
-  audience: developers---
+  audience: developers
+---
 
 
 # [inference.sh](https://inference.sh)
@@ -232,4 +233,3 @@ For multi-step pipelines, chain apps: run the first app, extract its output URL,
 | Using the cheapest model for everything | OpenRouter free models may have lower quality or stricter rate limits | Match model quality to task importance; paid tiers are more reliable |
 | Not saving task IDs | Async tasks complete after the terminal session; without the ID you can't retrieve results | Log all task IDs: `infsh task get <id> > task-<id>-result.json` |
 | Running image generation without checking supported resolutions/aspect ratios | Models silently crop or stretch to supported dimensions | Check `infsh app get` for `supported_sizes` or `aspect_ratios` field |
-

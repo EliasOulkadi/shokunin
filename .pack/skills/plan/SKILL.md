@@ -11,12 +11,12 @@ triggers:
   - "technical plan"
   - "execution plan"
 negatives:
-license: MIT
-compatibility: opencode
   - "write code"
   - "implement now"
   - "just do it"
   - "simple task"
+license: MIT
+compatibility: opencode
 metadata:
   version: 1.0.0
   workflow: system

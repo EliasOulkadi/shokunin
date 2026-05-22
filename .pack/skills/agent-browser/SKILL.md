@@ -20,20 +20,21 @@ triggers:
   - "VS Code automation"
   - "Electron"
 negatives:
-license: MIT
-compatibility: opencode
   - "API testing"
   - "unit testing"
   - "static analysis"
   - "backend testing"
   - "E2E testing" -> use playwright
+license: MIT
+compatibility: opencode
 allowed-tools: Bash(agent-browser:*), Bash(npx agent-browser:*)
 hidden: true
 metadata:
   version: "1.0.0"
 
   workflow: ai-agents
-  audience: developers---
+  audience: developers
+---
 
 
 # agent-browser

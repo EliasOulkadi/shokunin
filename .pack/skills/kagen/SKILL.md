@@ -1,4 +1,4 @@
-﻿---
+---
 name: kagen
 description: Convert Kami HTML templates to production-grade PDF via Chromium/Playwright. Complements Kami (design) with PDF rendering. Use when user asks to generate PDF files, render HTML to PDF, or export documents.
 triggers:
@@ -12,8 +12,6 @@ triggers:
   - "PDF generation"
   - "Chromium PDF"
 negatives:
-license: MIT
-compatibility: opencode
   - "design PDF"
   - "create template"
   - "HTML design"
@@ -21,11 +19,14 @@ compatibility: opencode
   - "branding"
   - "document design"
   - "PDF design template" -> use kami
+license: MIT
+compatibility: opencode
 metadata:
   version: "1.0.0"
 
   workflow: documents
-  audience: developers---
+  audience: developers
+---
 
 # kagen · 紙源
 

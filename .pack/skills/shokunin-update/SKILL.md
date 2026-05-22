@@ -1,4 +1,4 @@
-﻿---
+---
 name: shokunin-update
 description: Detect drift, plan updates, and apply changes to the Shokunin AI Ecosystem. Use this when user asks to update, fix, sync, or verify the ecosystem.
 triggers:
@@ -13,17 +13,18 @@ triggers:
   - "repair ecosystem"
   - "ecosystem health"
 negatives:
-license: MIT
-compatibility: opencode
   - "update skill content"
   - "create skill"
   - "memory operations"
   - "session management"
+license: MIT
+compatibility: opencode
 metadata:
   version: "1.0.0"
 
   workflow: system
-  audience: developers---
+  audience: developers
+---
 
 
 > **Note:** The `shokunin-update.ps1` script lives in `.pack/scripts/` and is deployed to `~/.shokunin/scripts/` by the installer.

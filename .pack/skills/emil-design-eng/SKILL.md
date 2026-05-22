@@ -1,4 +1,4 @@
-﻿---
+---
 name: emil-design-eng
 description: Encode Emil Kowalski's philosophy on UI polish, component design, animation decisions, and the invisible details that make software feel great. From the creator of Sonner (13M+ weekly npm downloads), Vaul, animations.dev, and Linear's web team. Use when user wants to polish UI, audit animations, review component interactions, add micro-feedback, or elevate motion quality.
 triggers:
@@ -31,7 +31,8 @@ metadata:
   source: https://github.com/emilkowalski/skill
 
   workflow: frontend
-  audience: designers---
+  audience: designers
+---
 
 
 # Design Engineering

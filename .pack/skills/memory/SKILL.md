@@ -19,8 +19,8 @@ negatives:
   - "file notes"
   - "backup"
   - "database"
-  - "memory admin" -> use chromadb
-  - "backup memory" -> use chromadb
+  - "memory admin (use chromadb)"
+  - "backup memory (use chromadb)"
 license: MIT
 compatibility: opencode
 metadata:

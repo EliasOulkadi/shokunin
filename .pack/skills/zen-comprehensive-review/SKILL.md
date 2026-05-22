@@ -8,18 +8,19 @@ triggers:
   - "costly review"
   - "thorough code review"
 negatives:
-license: MIT
-compatibility: opencode
   - "single model review"
   - "quick review"
   - "simple review"
   - "cross review"
   - "code review"
+license: MIT
+compatibility: opencode
 metadata:
   version: 1.2.1
 
   workflow: quality
-  audience: developers---
+  audience: developers
+---
 
 
 > **Note:** `scripts/post_review_strict.js` is distributed with the full Shokunin tooling. Manual posting to PRs is available without it.

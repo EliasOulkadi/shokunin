@@ -1,4 +1,4 @@
-﻿---
+---
 name: taste-minimalist
 description: "Clean editorial-style interfaces. Warm monochrome palette, typographic contrast, flat bento grids, muted pastels. No gradients, no heavy shadows. Based on taste-skill by Leon Lin & blueemi, improved by shokunin."
 triggers:
@@ -27,7 +27,8 @@ metadata:
   author: Leon Lin, blueemi, improved by shokunin
 
   workflow: frontend
-  audience: designers---
+  audience: designers
+---
 
 
 # Premium Utilitarian Minimalism & Editorial UI

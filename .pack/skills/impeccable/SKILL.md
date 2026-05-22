@@ -1,4 +1,4 @@
-﻿---
+---
 name: impeccable
 description: "Use when the user wants to design, redesign, shape, critique, audit, polish, clarify, distill, harden, optimize, adapt, animate, colorize, extract, or otherwise improve a frontend interface. Covers design systems, anti-pattern detection, brand vs product registers, typography, color (OKLCH), spacing, motion, copy, and accessibility. By Paul Bakaus (ex-Google, ex-Disney, ex-Unity). Full version includes 23 sub-commands, CLI detection, Chrome extension, and E2E test suite: npx skills add pbakaus/impeccable"
 triggers:
@@ -27,7 +27,8 @@ metadata:
   full_install: npx skills add pbakaus/impeccable
 
   workflow: frontend
-  audience: designers---
+  audience: designers
+---
 
 
 # Impeccable (Lite)

@@ -1,4 +1,4 @@
-﻿---
+---
 name: code-review
 description: "Review code changes for correctness, security, performance, and code quality. Use when the user asks to review a diff, review code changes, review commits, or perform a code review. Input can be: (1) a text diff pasted directly, (2) one or more git commit hashes to extract the diff from, or (3) a git range like abc123..def456. The user may also provide task description or requirements that motivated the change."
 triggers:
@@ -10,17 +10,18 @@ triggers:
   - "code quality review"
   - "review my PR"
 negatives:
-license: MIT
-compatibility: opencode
   - "comprehensive review"
   - "multi-model review"
   - "design review"
   - "UI review"
+license: MIT
+compatibility: opencode
 metadata:
   version: 1.0.0
 
   workflow: quality
-  audience: developers---
+  audience: developers
+---
 
 
 # Code Review
