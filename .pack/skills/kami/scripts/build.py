@@ -1,411 +1,980 @@
 #!/usr/bin/env python3
-"""Kami PDF Builder — Generates professional PDFs with the Shokunin design system.
+"""kami build & check
 
-Design: parchment (#f5f4ed), ink-blue (#1B365D), Charter serif, grain texture.
-Usage: python build.py <input.md> <output.pdf> [--title "Title"]
+Usage:
+    python3 scripts/build.py                      # build all examples (HTML + diagrams + PPTX)
+    python3 scripts/build.py resume               # build one template, print pages + fonts
+    python3 scripts/build.py --check              # scan templates for CSS rule violations
+    python3 scripts/build.py --check -v           # verbose (show each scanned file)
+    python3 scripts/build.py --sync               # check CSS token drift across templates
+    python3 scripts/build.py --verify             # build all + page count + font checks
+    python3 scripts/build.py --verify resume-en   # single target full verification
+    python3 scripts/build.py --check-placeholders path/to/doc.html
+    python3 scripts/build.py --check-orphans      # scan example PDFs for orphan text
+    python3 scripts/build.py --check-orphans path/to/doc.pdf
+    python3 scripts/build.py --check-density       # warn on pages with >25% trailing whitespace
+    python3 scripts/build.py --check-density path/to/doc.pdf
+    python3 scripts/build.py --check-rhythm       # warn on monotonous slide sequences
+    python3 scripts/build.py --check-rhythm slides slides-en
 """
+from __future__ import annotations
 
+import json
+import os
+import re
+import subprocess
 import sys
-from fpdf import FPDF
+from dataclasses import dataclass
+from pathlib import Path
 
-PARCHMENT = (245, 244, 237)
-INK_BLUE = (27, 54, 93)
-INK_LIGHT = (45, 90, 138)
-NEAR_BLACK = (20, 20, 19)
-DARK_WARM = (61, 61, 58)
-STONE = (107, 106, 100)
-BORDER = (232, 230, 220)
+from shared import (
+    COOL_GRAY_BLOCKLIST,
+    DIAGRAMS,
+    EXAMPLES,
+    PARCHMENT_RGB,
+    ROOT,
+    TEMPLATES,
+    TOKENS_FILE,
+    build_targets,
+    configure_weasyprint_runtime,
+)
 
+# name -> (source, max_pages). max_pages=0 means no hard check.
+# Sourced from shared.HTML_TEMPLATES so build.py and stabilize.py never drift.
+HTML_TARGETS: dict[str, tuple[str, int]] = build_targets()
+PPTX_TARGETS: dict[str, str] = {
+    "slides":    "slides.py",
+    "slides-en": "slides-en.py",
+}
 
-def _sanitize(text):
-    """Replace Unicode characters not supported by core PDF fonts."""
-    replacements = {
-        "\u2014": "--", "\u2013": "-", "\u2018": "'", "\u2019": "'",
-        "\u201c": '"', "\u201d": '"', "\u2026": "...", "\u2022": "-",
-        "\u00a0": " ", "\u2010": "-", "\u2011": "-", "\u2012": "-",
-    }
-    for u, a in replacements.items():
-        text = text.replace(u, a)
-    return text
-
-
-class KamiPDF(FPDF):
-    def header(self):
-        if self.page_no() > 1:
-            self.set_font("Helvetica", "B", 9)
-            self.set_text_color(*INK_BLUE)
-            self.cell(0, 5, self.title, align="R")
-            self.ln(8)
-
-    def footer(self):
-        self.set_y(-15)
-        self.set_font("Helvetica", "I", 7)
-        self.set_text_color(*STONE)
-        self.cell(0, 8, str(self.page_no()), align="C")
-
-    def section_title(self, text):
-        self.ln(6)
-        self.set_font("Helvetica", "B", 14)
-        self.set_text_color(*INK_BLUE)
-        self.cell(0, 8, _sanitize(text), new_x="LMARGIN", new_y="NEXT")
-        self.set_draw_color(*INK_LIGHT)
-        self.line(self.l_margin, self.get_y(), self.w - self.r_margin, self.get_y())
-        self.ln(5)
-
-    def body_text(self, text):
-        self.set_font("Helvetica", "", 10)
-        self.set_text_color(*NEAR_BLACK)
-        self.multi_cell(0, 5.5, _sanitize(text))
-        self.ln(2)
-
-    def body_list(self, items):
-        self.set_font("Helvetica", "", 10)
-        self.set_text_color(*NEAR_BLACK)
-        indent = self.l_margin + 8
-        width = self.w - self.l_margin - self.r_margin - 8
-        for item in items:
-            self.set_x(indent - 8)
-            self.cell(8, 5.5, "-")
-            self.set_x(indent)
-            self.multi_cell(width, 5.5, _sanitize(item))
-        self.ln(2)
-
-    def code_block(self, text):
-        self.set_font("Courier", "", 9)
-        self.set_fill_color(250, 250, 248)
-        self.set_text_color(*NEAR_BLACK)
-        self.multi_cell(0, 4.5, text, fill=True)
-        self.ln(3)
+# Diagram HTMLs live in a separate directory and have no page-count contract.
+DIAGRAM_TARGETS: dict[str, str] = {
+    "diagram-architecture": "architecture.html",
+    "diagram-flowchart":    "flowchart.html",
+    "diagram-quadrant":     "quadrant.html",
+    "diagram-bar-chart":    "bar-chart.html",
+    "diagram-line-chart":   "line-chart.html",
+    "diagram-donut-chart":  "donut-chart.html",
+    "diagram-state-machine": "state-machine.html",
+    "diagram-timeline":      "timeline.html",
+    "diagram-swimlane":      "swimlane.html",
+    "diagram-tree":          "tree.html",
+    "diagram-layer-stack":   "layer-stack.html",
+    "diagram-venn":          "venn.html",
+    "diagram-candlestick":   "candlestick.html",
+    "diagram-waterfall":     "waterfall.html",
+}
 
 
-def build_pdf(input_md=None, output_pdf=None, title="Shokunin Document"):
-    pdf = KamiPDF()
-    pdf.title = title
-    pdf.set_auto_page_break(auto=True, margin=20)
-    pdf.set_left_margin(20)
-    pdf.set_right_margin(20)
-    pdf.add_page()
+# ------------------------- build -------------------------
 
-    # Title page
-    pdf.ln(40)
-    pdf.set_font("Helvetica", "B", 28)
-    pdf.set_text_color(*INK_BLUE)
-    pdf.multi_cell(0, 12, title, align="C")
-    pdf.ln(4)
-    pdf.set_font("Helvetica", "", 12)
-    pdf.set_text_color(*DARK_WARM)
-    pdf.cell(0, 8, "github.com/EliasOulkadi/shokunin", align="C", new_x="LMARGIN", new_y="NEXT")
-    pdf.cell(0, 6, "62 Skills  |  Windows + Linux  |  Open Source MIT", align="C", new_x="LMARGIN", new_y="NEXT")
+def infer_author() -> str:
+    """Infer author name from git config or environment.
 
-    # If no input file, generate white paper
-    if input_md is None:
-        _build_whitepaper(pdf)
+    Priority:
+    1. git config user.name
+    2. KAMI_AUTHOR env var
+    3. fallback to "Kami"
+    """
+    try:
+        result = subprocess.run(
+            ["git", "config", "user.name"],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        if result.returncode == 0 and result.stdout.strip():
+            return result.stdout.strip()
+    except FileNotFoundError:
+        pass
+
+    if env_author := os.environ.get("KAMI_AUTHOR"):
+        return env_author
+
+    return "Kami"
+
+
+def set_pdf_metadata(pdf_path: Path, author: str | None = None) -> None:
+    """Set PDF metadata using pypdf, only if placeholders are still present."""
+    try:
+        from pypdf import PdfReader, PdfWriter
+    except ImportError:
+        return
+
+    if not pdf_path.exists():
+        return
+
+    reader = PdfReader(str(pdf_path))
+
+    # Read existing metadata from WeasyPrint
+    existing = reader.metadata or {}
+
+    # Check if we need to update anything
+    needs_update = False
+    metadata = dict(existing)  # Copy all existing metadata
+
+    # Only override author if it's still a placeholder
+    if author and existing.get("/Author"):
+        author_value = str(existing["/Author"])
+        if "{{" in author_value and "}}" in author_value:
+            metadata["/Author"] = author
+            needs_update = True
+
+    # Always set Producer and Creator to Kami
+    if metadata.get("/Producer") != "Kami":
+        metadata["/Producer"] = "Kami"
+        needs_update = True
+    if metadata.get("/Creator") != "Kami":
+        metadata["/Creator"] = "Kami"
+        needs_update = True
+
+    if not needs_update:
+        return
+
+    writer = PdfWriter()
+    for page in reader.pages:
+        writer.add_page(page)
+
+    writer.add_metadata(metadata)
+
+    with open(pdf_path, "wb") as f:
+        writer.write(f)
+
+
+def build_html(name: str, source: str, max_pages: int,
+               src_dir: Path = TEMPLATES) -> bool:
+    configure_weasyprint_runtime()
+    try:
+        from weasyprint import HTML
+        from pypdf import PdfReader
+    except ImportError:
+        print("ERROR: missing deps: pip install weasyprint pypdf --break-system-packages")
+        return False
+
+    src = src_dir / source
+    if not src.exists():
+        print(f"ERROR: {name}: source not found ({src})")
+        return False
+
+    EXAMPLES.mkdir(parents=True, exist_ok=True)
+    out = EXAMPLES / f"{name}.pdf"
+
+    # weasyprint resolves @font-face relative to CWD. Run from the source dir
+    # so fonts placed next to the HTML are found.
+    HTML(str(src), base_url=str(src.parent)).write_pdf(str(out))
+
+    # Set PDF metadata (only replaces placeholders, preserves filled values)
+    author = infer_author()
+    set_pdf_metadata(out, author=author)
+
+    n = len(PdfReader(str(out)).pages)
+    msg = f"OK: {name}: {n} pages"
+    if max_pages and n > max_pages:
+        msg = f"ERROR: {name}: {n} pages (limit {max_pages})"
+        print(msg)
+        return False
+    print(msg)
+    return True
+
+
+def build_slides(name: str = "slides") -> bool:
+    source = PPTX_TARGETS.get(name)
+    if source is None:
+        print(f"ERROR: {name}: unknown slides target")
+        return False
+    src = TEMPLATES / source
+    if not src.exists():
+        print(f"ERROR: {name}: source not found ({src})")
+        return False
+
+    EXAMPLES.mkdir(parents=True, exist_ok=True)
+    out = EXAMPLES / f"{name}.pptx"
+    result = subprocess.run(
+        [sys.executable, str(src)],
+        cwd=str(src.parent),
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode != 0:
+        print(f"ERROR: {name}: {result.stderr.strip() or 'script failed'}")
+        return False
+    # The script writes output.pptx in cwd; move to examples/ under our name.
+    generated = src.parent / "output.pptx"
+    if generated.exists():
+        generated.replace(out)
+        print(f"OK: {name}: generated {out.name}")
+        return True
+    print(f"ERROR: {name}: output.pptx not produced")
+    return False
+
+
+def build_all() -> int:
+    failures = 0
+    for name, (source, max_pages) in HTML_TARGETS.items():
+        if not build_html(name, source, max_pages):
+            failures += 1
+    for name, source in DIAGRAM_TARGETS.items():
+        if not build_html(name, source, 0, src_dir=DIAGRAMS):
+            failures += 1
+    for name in PPTX_TARGETS:
+        if not build_slides(name):
+            failures += 1
+    return failures
+
+
+def build_single(name: str) -> int:
+    if name in HTML_TARGETS:
+        source, max_pages = HTML_TARGETS[name]
+        ok = build_html(name, source, max_pages)
+        if ok:
+            show_fonts(EXAMPLES / f"{name}.pdf")
+        return 0 if ok else 1
+    if name in DIAGRAM_TARGETS:
+        source = DIAGRAM_TARGETS[name]
+        ok = build_html(name, source, 0, src_dir=DIAGRAMS)
+        return 0 if ok else 1
+    if name in PPTX_TARGETS:
+        return 0 if build_slides(name) else 1
+    known = list(HTML_TARGETS) + list(DIAGRAM_TARGETS) + list(PPTX_TARGETS)
+    print(f"ERROR: unknown target: {name}. Known: {', '.join(known)}")
+    return 2
+
+
+def show_fonts(pdf: Path) -> None:
+    if not pdf.exists():
+        return
+    try:
+        out = subprocess.run(["pdffonts", str(pdf)], capture_output=True, text=True, check=False)
+        if out.returncode == 0:
+            print("--- pdffonts ---")
+            print(out.stdout.rstrip())
+    except FileNotFoundError:
+        pass  # pdffonts not installed; silent
+
+
+# ------------------------- sync -------------------------
+
+ROOT_BLOCK = re.compile(r":root\s*\{([^}]*)\}", re.DOTALL)
+CSS_VAR = re.compile(r"--([\w-]+)\s*:\s*([^;]+);")
+PY_RGB = re.compile(
+    r"^([A-Z][A-Z_]+)\s*=\s*RGBColor\(\s*0x([0-9a-fA-F]{2})\s*,"
+    r"\s*0x([0-9a-fA-F]{2})\s*,\s*0x([0-9a-fA-F]{2})\s*\)",
+    re.MULTILINE,
+)
+# Python const name -> tokens.json key. Only constants that mirror a CSS token.
+PY_TOKEN_MAP = {
+    "PARCHMENT": "--parchment",
+    "IVORY": "--ivory",
+    "BRAND": "--brand",
+    "NEAR_BLACK": "--near-black",
+    "DARK_WARM": "--dark-warm",
+    "CHARCOAL": "--charcoal",
+    "OLIVE": "--olive",
+    "STONE": "--stone",
+}
+
+
+def sync_check(verbose: bool = False) -> int:
+    if not TOKENS_FILE.exists():
+        print(f"ERROR: tokens.json not found at {TOKENS_FILE.relative_to(ROOT)}")
+        return 1
+
+    try:
+        canonical: dict[str, str] = json.loads(TOKENS_FILE.read_text())
+    except json.JSONDecodeError as exc:
+        print(f"ERROR: tokens.json is malformed: {exc}")
+        return 1
+
+    targets: list[Path] = list(TEMPLATES.glob("*.html"))
+    if DIAGRAMS.exists():
+        targets.extend(DIAGRAMS.glob("*.html"))
+    py_targets: list[Path] = list(TEMPLATES.glob("*.py"))
+
+    drift: list[tuple[str, str, str, str]] = []  # (file, token, expected, actual)
+
+    for path in sorted(targets):
+        text = path.read_text(encoding="utf-8", errors="replace")
+        block_match = ROOT_BLOCK.search(text)
+        if not block_match:
+            if verbose:
+                print(f"  (skip {path.name}: no :root block)")
+            continue
+        root_block = block_match.group(1)
+        found: dict[str, str] = {
+            m.group(1): m.group(2).strip()
+            for m in CSS_VAR.finditer(root_block)
+        }
+        rel = path.relative_to(ROOT)
+        for token, expected in canonical.items():
+            name = token.lstrip("-")
+            actual = found.get(name)
+            # Only flag if the template defines the token but with a wrong value.
+            # Templates that don't use a token don't need to define it.
+            if actual is not None and actual.lower() != expected.lower():
+                drift.append((str(rel), token, expected, actual))
+
+    for path in sorted(py_targets):
+        text = path.read_text(encoding="utf-8", errors="replace")
+        rel = path.relative_to(ROOT)
+        for m in PY_RGB.finditer(text):
+            name = m.group(1)
+            token = PY_TOKEN_MAP.get(name)
+            if token is None:
+                continue
+            expected = canonical.get(token)
+            if expected is None:
+                continue
+            actual = f"#{m.group(2)}{m.group(3)}{m.group(4)}"
+            if actual.lower() != expected.lower():
+                drift.append((str(rel), token, expected, actual))
+
+    if not drift:
+        scanned = len(targets) + len(py_targets)
+        print(f"OK: tokens in sync across {scanned} template(s)")
+        return 0
+
+    print(f"\n[token-drift] {len(drift)}")
+    for file, token, expected, actual in drift:
+        print(f"  {file}: {token} expected {expected}, got {actual}")
+
+    return 1
+
+
+# ------------------------- verify -------------------------
+
+PLACEHOLDER = re.compile(r"\{\{[^}]+\}\}")
+
+# Primary fonts expected in embedded PDF font names
+CN_PRIMARY_FONTS = {"TsangerJinKai02"}
+EN_PRIMARY_FONTS = {"Charter"}
+
+
+def _pdf_font_names(pdf_path: Path) -> set[str]:
+    def _resolve_pdf_obj(obj):
+        if obj is None:
+            return None
+        try:
+            return obj.get_object() if hasattr(obj, "get_object") else obj
+        except Exception:
+            return obj
+
+    try:
+        from pypdf import PdfReader
+        reader = PdfReader(str(pdf_path))
+        fonts: set[str] = set()
+        for page in reader.pages:
+            resources = _resolve_pdf_obj(page.get("/Resources"))
+            if resources is None or not hasattr(resources, "get"):
+                continue
+            font_dict = _resolve_pdf_obj(resources.get("/Font"))
+            if font_dict is None or not hasattr(font_dict, "values"):
+                continue
+            for obj in font_dict.values():
+                resolved = _resolve_pdf_obj(obj)
+                if resolved is None or not hasattr(resolved, "get"):
+                    continue
+                base = resolved.get("/BaseFont")
+                if base:
+                    fonts.add(str(base).lstrip("/"))
+        return fonts
+    except Exception as exc:
+        print(f"  WARN: could not read font names from PDF: {exc}")
+        return set()
+
+
+def _check_font_sources(html_path: Path) -> list[str]:
+    """Return list of local @font-face src files that are missing on disk."""
+    text = html_path.read_text(encoding="utf-8", errors="replace")
+    missing: list[str] = []
+    for url in re.findall(r"""url\(["']?([^"')]+)["']?\)""", text):
+        if url.startswith(("http://", "https://", "data:", "#")):
+            continue
+        resolved = (html_path.parent / url).resolve()
+        if not resolved.exists():
+            missing.append(url)
+    return missing
+
+
+def verify_target(name: str, source: str, max_pages: int, src_dir: Path) -> list[str]:
+    issues: list[str] = []
+    src = src_dir / source
+    if not src.exists():
+        issues.append(f"source not found: {src}")
+        return issues
+
+    configure_weasyprint_runtime()
+    try:
+        from weasyprint import HTML
+        from pypdf import PdfReader
+    except ImportError:
+        issues.append("missing deps: pip install weasyprint pypdf --break-system-packages")
+        return issues
+
+    EXAMPLES.mkdir(parents=True, exist_ok=True)
+    out = EXAMPLES / f"{name}.pdf"
+
+    # Warn about missing local font files before rendering
+    missing_fonts = _check_font_sources(src)
+    if missing_fonts:
+        for mf in missing_fonts:
+            print(f"  [FONT MISS] {name}: {mf} not found")
+        print(f"  [FONT MISS] To fix: bash scripts/ensure-fonts.sh")
+        print(f"  [FONT MISS] Or install fallback: brew install --cask font-source-han-serif-sc")
+
+    HTML(str(src), base_url=str(src.parent)).write_pdf(str(out))
+
+    # Set PDF metadata (only replaces placeholders, preserves filled values)
+    author = infer_author()
+    set_pdf_metadata(out, author=author)
+
+    # page count check
+    n = len(PdfReader(str(out)).pages)
+    if max_pages and n > max_pages:
+        over = n - max_pages
+        hint = ""
+        if "resume" in name and over == 1:
+            hint = '; add class="resume--dense" to <body> or tighten .proj-text line-height to 1.38'
+        issues.append(f"page overflow: {n} pages (limit {max_pages}){hint}")
+
+    # font check
+    embedded = _pdf_font_names(out)
+    fallback_present = any(
+        kw in font for font in embedded
+        for kw in ("Georgia", "Palatino", "TsangerJinKai", "YuMincho", "Hiragino", "SourceHan", "Noto", "Charter", "Songti")
+    )
+
+    # Diagram templates are language-neutral and often rely on fallback stacks,
+    # so only enforce that at least one recognizable serif/sans fallback exists.
+    is_diagram = src_dir == DIAGRAMS
+    if is_diagram:
+        if not fallback_present:
+            issues.append(f"no recognizable font embedded in {out.name}")
+        return issues
+
+    is_en = name.endswith("-en")
+    expected = EN_PRIMARY_FONTS if is_en else CN_PRIMARY_FONTS
+    if not any(exp in font_name for exp in expected for font_name in embedded):
+        primary = next(iter(expected))
+        if not fallback_present:
+            issues.append(f"no recognizable font embedded in {out.name}")
+        else:
+            issues.append(f"primary font ({primary}) not embedded; using fallback")
+
+    return issues
+
+
+def verify_slides_target(name: str) -> list[str]:
+    return [] if build_slides(name) else ["slides build failed"]
+
+
+def verify_all(target: str | None = None) -> int:
+    targets_to_run: dict[str, tuple[str, int, Path] | None] = {}
+    if target:
+        if target in HTML_TARGETS:
+            src, mp = HTML_TARGETS[target]
+            targets_to_run[target] = (src, mp, TEMPLATES)
+        elif target in DIAGRAM_TARGETS:
+            targets_to_run[target] = (DIAGRAM_TARGETS[target], 0, DIAGRAMS)
+        elif target in PPTX_TARGETS:
+            targets_to_run[target] = None
+        else:
+            print(f"ERROR: unknown target: {target}")
+            return 2
     else:
-        with open(input_md, encoding="utf-8") as f:
-            content = f.read()
-        for section in content.split("\n## "):
-            if section.startswith("# "):
-                pdf.section_title(section[2:].strip())
+        for name, (src, mp) in HTML_TARGETS.items():
+            targets_to_run[name] = (src, mp, TEMPLATES)
+        for name, src in DIAGRAM_TARGETS.items():
+            targets_to_run[name] = (src, 0, DIAGRAMS)
+        for name in PPTX_TARGETS:
+            targets_to_run[name] = None
+
+    failures = 0
+    rows: list[tuple[str, str]] = []
+    for name, config in targets_to_run.items():
+        if config is None:
+            issues = verify_slides_target(name)
+        else:
+            source, max_pages, src_dir = config
+            issues = verify_target(name, source, max_pages, src_dir)
+        if issues:
+            rows.append((f"ERROR: {name}", "; ".join(issues)))
+            failures += 1
+        else:
+            rows.append((f"OK: {name}", "ok"))
+
+    for status, detail in rows:
+        print(f"{status}: {detail}")
+
+    return 0 if failures == 0 else 1
+
+
+def check_placeholders(paths: list[str]) -> int:
+    if not paths:
+        print("ERROR: provide at least one HTML file to scan")
+        return 2
+
+    failures = 0
+    for raw in paths:
+        path = Path(raw)
+        if not path.is_absolute():
+            path = ROOT / path
+        if not path.exists():
+            print(f"ERROR: {raw}: file not found")
+            failures += 1
+            continue
+        text = path.read_text(encoding="utf-8", errors="replace")
+        hits = list(dict.fromkeys(PLACEHOLDER.findall(text)))
+        rel = path.relative_to(ROOT) if path.is_relative_to(ROOT) else path
+        if hits:
+            print(f"ERROR: {rel}: unfilled placeholder(s): {', '.join(hits)}")
+            failures += 1
+        else:
+            print(f"OK: {rel}: no placeholders")
+
+    return 0 if failures == 0 else 1
+
+
+# ------------------------- orphan check -------------------------
+
+def check_orphans(paths: list[str]) -> int:
+    """Scan PDF for text blocks whose last line has <= 2 words and < 15 chars."""
+    try:
+        import fitz  # PyMuPDF
+    except ImportError:
+        print("ERROR: PyMuPDF required: pip install pymupdf --break-system-packages")
+        return 2
+
+    if not paths:
+        # Default: scan all example PDFs
+        if EXAMPLES.exists():
+            paths = [str(p) for p in sorted(EXAMPLES.glob("*.pdf"))]
+        if not paths:
+            print("ERROR: no PDF files to scan")
+            return 2
+
+    total = 0
+    missing = 0
+    scanned = 0
+    for raw in paths:
+        path = Path(raw)
+        if not path.exists():
+            print(f"ERROR: {raw}: not found")
+            missing += 1
+            continue
+        scanned += 1
+        doc = fitz.open(str(path))
+        rel = path.relative_to(ROOT) if path.is_relative_to(ROOT) else path
+        for page_num in range(len(doc)):
+            page = doc[page_num]
+            blocks = page.get_text("blocks")
+            for bx0, by0, bx1, by1, text, block_no, block_type in blocks:
+                if block_type != 0:  # text blocks only
+                    continue
+                lines = text.strip().splitlines()
+                if len(lines) < 2:
+                    continue
+                last = lines[-1].strip()
+                words = last.split()
+                if len(words) <= 2 and len(last) < 15:
+                    total += 1
+                    print(f"  {rel} p{page_num + 1}: orphan: \"{last}\" ({len(words)} word(s), {len(last)} chars)")
+        doc.close()
+
+    if scanned == 0:
+        print(f"ERROR: no PDFs scanned ({missing} missing)")
+        return 2
+
+    if total == 0 and missing == 0:
+        print(f"OK: no orphans found across {scanned} PDF(s)")
+        return 0
+
+    if total:
+        print(f"\n{total} orphan(s) found across {scanned} PDF(s)")
+    if missing:
+        print(f"{missing} input(s) missing")
+    return 1
+
+
+# ------------------------- density check -------------------------
+
+# Parchment background RGB for pixel comparison (sourced from shared.PARCHMENT_RGB).
+_BG_R, _BG_G, _BG_B = PARCHMENT_RGB
+_BG_TOLERANCE = 10
+
+
+def _last_content_y(samples: bytes, w: int, h: int, stride: int, n: int) -> int:
+    """Return the highest y row index that contains non-parchment content.
+
+    Uses numpy when available (vectorized scan, ~50-100x faster on multi-page
+    PDFs); falls back to a pure Python loop otherwise. Both paths sample every
+    fourth column for parity, so the result is identical.
+    """
+    try:
+        import numpy as np
+    except ImportError:
+        last_y = 0
+        for y in range(h - 1, -1, -1):
+            row_start = y * stride
+            is_bg = True
+            for x in range(0, w, 4):
+                offset = row_start + x * n
+                if (abs(samples[offset] - _BG_R) > _BG_TOLERANCE
+                        or abs(samples[offset + 1] - _BG_G) > _BG_TOLERANCE
+                        or abs(samples[offset + 2] - _BG_B) > _BG_TOLERANCE):
+                    is_bg = False
+                    break
+            if not is_bg:
+                last_y = y
+                break
+        return last_y
+
+    arr = np.frombuffer(samples, dtype=np.uint8).reshape((h, stride))
+    pixels = arr[:, : w * n].reshape((h, w, n))
+    rgb = pixels[:, ::4, :3].astype(np.int16)
+    bg = np.array([_BG_R, _BG_G, _BG_B], dtype=np.int16)
+    row_is_bg = (np.abs(rgb - bg).max(axis=2) <= _BG_TOLERANCE).all(axis=1)
+    non_bg = np.where(~row_is_bg)[0]
+    return int(non_bg[-1]) if non_bg.size else 0
+
+
+def check_density(paths: list[str]) -> int:
+    """Scan PDF pages for sparse content (large trailing whitespace from
+    break-inside:avoid pushing content to the next page)."""
+    try:
+        import fitz  # PyMuPDF
+    except ImportError:
+        print("ERROR: PyMuPDF required: pip install pymupdf --break-system-packages")
+        return 2
+
+    if not paths:
+        if EXAMPLES.exists():
+            paths = [str(p) for p in sorted(EXAMPLES.glob("*.pdf"))]
+        if not paths:
+            print("ERROR: no PDF files to scan")
+            return 2
+
+    warnings = 0
+    missing = 0
+    scanned = 0
+    for raw in paths:
+        path = Path(raw)
+        if not path.exists():
+            print(f"ERROR: {raw}: not found")
+            missing += 1
+            continue
+        scanned += 1
+        doc = fitz.open(str(path))
+        rel = path.relative_to(ROOT) if path.is_relative_to(ROOT) else path
+        for page_num in range(len(doc)):
+            if page_num == 0:
+                continue
+            page = doc[page_num]
+            pix = page.get_pixmap(dpi=36)
+            w, h = pix.width, pix.height
+            if h == 0:
+                continue
+            last_content_y = _last_content_y(pix.samples, w, h, pix.stride, pix.n)
+
+            empty = (h - last_content_y) / h
+            if empty > 0.50:
+                print(f"  SPARSE: {rel} p{page_num + 1}: {empty:.0%} trailing whitespace")
+                warnings += 1
+            elif empty > 0.25:
+                print(f"  WARN: {rel} p{page_num + 1}: {empty:.0%} trailing whitespace")
+                warnings += 1
+        doc.close()
+
+    if scanned == 0:
+        print(f"ERROR: no PDFs scanned ({missing} missing)")
+        return 2
+
+    if warnings == 0 and missing == 0:
+        print(f"OK: no density issues across {scanned} PDF(s)")
+        return 0
+
+    if warnings:
+        print(f"\n{warnings} density warning(s) across {scanned} PDF(s)")
+    if missing:
+        print(f"{missing} input(s) missing")
+    return 1
+
+
+# ------------------------- check -------------------------
+
+RGBA_BG_DIRECT = re.compile(r"background(?:-color)?\s*:\s*[^;]*rgba\s*\(", re.IGNORECASE)
+RGBA_VAR_DEF = re.compile(r"--([\w-]+)\s*:\s*[^;]*rgba\s*\(", re.IGNORECASE)
+BG_VAR_USE = re.compile(r"background(?:-color)?\s*:\s*[^;]*var\s*\(\s*--([\w-]+)", re.IGNORECASE)
+RGBA_BORDER_DIRECT = re.compile(r"border(?:-\w+)?\s*:\s*[^;]*rgba\s*\(", re.IGNORECASE)
+BORDER_VAR_USE = re.compile(r"border(?:-\w+)?\s*:\s*[^;]*var\s*\(\s*--([\w-]+)", re.IGNORECASE)
+LINE_HEIGHT_LOOSE = re.compile(r"line-height\s*:\s*1\.[6-9]\d*", re.IGNORECASE)
+UNICODE_ARROW = re.compile(r"→")  # U+2192; should not appear in EN template body
+HEX_ANY = re.compile(r"#[0-9a-fA-F]{3,6}\b")
+# Thin closed border: border shorthand (not single-side) with sub-1pt width — pitfall #2
+THIN_CLOSED_BORDER = re.compile(
+    r"border(?!-(?:left|right|top|bottom))\s*:\s*[^;]*0\.\d+pt",
+    re.IGNORECASE,
+)
+BORDER_RADIUS_PROP = re.compile(r"border-radius\s*:", re.IGNORECASE)
+
+
+@dataclass
+class Finding:
+    file: Path
+    line: int
+    rule: str
+    excerpt: str
+
+
+def scan_file(path: Path) -> list[Finding]:
+    findings: list[Finding] = []
+    text = path.read_text(encoding="utf-8", errors="replace")
+    lines = text.splitlines()
+
+    # Pass 1: collect variable names that hold rgba(...) so the tag-background
+    # bug can be detected through one level of indirection.
+    rgba_vars: set[str] = set()
+    for raw in lines:
+        m = RGBA_VAR_DEF.search(raw)
+        if m:
+            rgba_vars.add(m.group(1))
+
+    is_en = path.name.endswith("-en.html")
+
+    # Pass 2: per-line rule checks
+    is_python = path.suffix == ".py"
+    for i, raw in enumerate(lines, start=1):
+        line = raw.strip()
+        if not line:
+            continue
+        # Skip comment lines. Note: '#' alone is NOT a CSS or HTML comment; it
+        # is the start of a CSS id selector (e.g. `#hero-bg { … }`) or part of
+        # a hex literal. Only treat '#' as a comment when scanning Python.
+        if line.startswith("//"):
+            continue
+        if line.startswith("<!--"):
+            continue
+        if is_python and line.startswith("#"):
+            continue
+
+        if RGBA_BG_DIRECT.search(raw):
+            findings.append(Finding(path, i, "rgba-background",
+                                    "rgba() used directly on background (tag double-rectangle bug)"))
+
+        bg_var = BG_VAR_USE.search(raw)
+        if bg_var and bg_var.group(1) in rgba_vars:
+            findings.append(Finding(path, i, "rgba-background",
+                                    f"background: var(--{bg_var.group(1)}) resolves to rgba() (tag double-rectangle bug)"))
+
+        if RGBA_BORDER_DIRECT.search(raw):
+            findings.append(Finding(path, i, "rgba-border",
+                                    "rgba() used on border (violates solid-color invariant)"))
+
+        border_var = BORDER_VAR_USE.search(raw)
+        if border_var and border_var.group(1) in rgba_vars:
+            findings.append(Finding(path, i, "rgba-border",
+                                    f"border: var(--{border_var.group(1)}) resolves to rgba() (solid-color invariant)"))
+
+        if is_en and UNICODE_ARROW.search(raw):
+            # skip CSS comment lines (/* ... */) and the arrow-in-CSS-content patterns
+            stripped = raw.lstrip()
+            if not stripped.startswith("/*") and not stripped.startswith("*") and "content:" not in raw:
+                findings.append(Finding(path, i, "arrow-unicode-in-en",
+                                        "→ (U+2192) in English template; use 'to' or '->' per patterns §2"))
+
+        m = LINE_HEIGHT_LOOSE.search(raw)
+        if m:
+            findings.append(Finding(path, i, "line-height-too-loose",
+                                    f"{m.group(0)} exceeds 1.55 ceiling"))
+
+        for hex_match in HEX_ANY.finditer(raw):
+            h = hex_match.group(0).lower()
+            if h in COOL_GRAY_BLOCKLIST:
+                findings.append(Finding(path, i, "cool-gray",
+                                        f"{h} is a cool / neutral gray, use warm undertone"))
+
+    # Pass 3: thin-border-radius block scan (pitfall #2 double-ring).
+    # For each thin closed border line, scan backward to the block open and
+    # forward to the block close, checking for border-radius in the same block.
+    for i, raw in enumerate(lines):
+        if not THIN_CLOSED_BORDER.search(raw):
+            continue
+        if "skip-thin-border-radius" in raw:
+            continue
+        found = False
+        # Scan backward; stop at { or } (entering/leaving a block).
+        for j in range(i - 1, max(0, i - 6) - 1, -1):
+            if "{" in lines[j] or "}" in lines[j]:
+                break
+            if BORDER_RADIUS_PROP.search(lines[j]):
+                found = True
+                break
+        # Scan forward; stop at } (leaving the block).
+        if not found:
+            for j in range(i + 1, min(len(lines), i + 6)):
+                if "}" in lines[j]:
+                    break
+                if BORDER_RADIUS_PROP.search(lines[j]):
+                    found = True
+                    break
+        if found:
+            findings.append(Finding(path, i + 1, "thin-border-radius",
+                "thin border (<1pt) with border-radius -- pitfall #2 double-ring risk"))
+    return findings
+
+
+def check_all(verbose: bool) -> int:
+    targets: list[Path] = []
+    for p in TEMPLATES.glob("*.html"):
+        targets.append(p)
+    for p in TEMPLATES.glob("*.py"):
+        targets.append(p)
+    if DIAGRAMS.exists():
+        for p in DIAGRAMS.glob("*.html"):
+            targets.append(p)
+
+    findings: list[Finding] = []
+    for p in sorted(targets):
+        file_findings = scan_file(p)
+        findings.extend(file_findings)
+        if verbose:
+            print(f"scanned {p.relative_to(ROOT)}: {len(file_findings)} finding(s)")
+
+    if not findings:
+        print(f"OK: no violations across {len(targets)} templates")
+        return 0
+
+    by_rule: dict[str, list[Finding]] = {}
+    for f in findings:
+        by_rule.setdefault(f.rule, []).append(f)
+
+    print(f"ERROR: {len(findings)} violation(s) across {len({f.file for f in findings})} file(s)")
+    for rule, items in by_rule.items():
+        print(f"\n[{rule}] {len(items)}")
+        for f in items:
+            rel = f.file.relative_to(ROOT)
+            print(f"  {rel}:{f.line}  {f.excerpt}")
+    return 1
+
+
+# ------------------------- rhythm check -------------------------
+
+# Layout functions that count as "divider" slides (break monotony).
+_DIVIDER_FUNCS = {"chapter_slide"}
+# Layout functions that count as "density variation" slides.
+_DENSITY_VARIATION_FUNCS = {"quote_slide", "metrics_slide"}
+# Layout function call pattern in slides.py source.
+_SLIDE_CALL = re.compile(r"^\s*(\w+_slide)\s*\(")
+
+
+def _parse_slide_sequence(src: Path) -> list[str]:
+    """Return the ordered list of slide-function names called in main()."""
+    text = src.read_text(encoding="utf-8", errors="replace")
+    in_main = False
+    sequence: list[str] = []
+    for line in text.splitlines():
+        if re.match(r"^def main\s*\(", line):
+            in_main = True
+            continue
+        if in_main and re.match(r"^def \w", line):
+            break
+        if in_main:
+            m = _SLIDE_CALL.match(line)
+            if m:
+                sequence.append(m.group(1))
+    return sequence
+
+
+def check_rhythm(targets: list[str]) -> int:
+    """Scan slide templates for monotony: too many consecutive content_slides,
+    missing dividers, and missing density variation.
+
+    Usage: python3 scripts/build.py --check-rhythm [slides] [slides-en]
+    When no targets are given, checks all PPTX_TARGETS.
+    """
+    names = targets if targets else list(PPTX_TARGETS.keys())
+    failures = 0
+
+    for name in names:
+        source = PPTX_TARGETS.get(name)
+        if source is None:
+            print(f"ERROR: {name}: not a known slides target")
+            failures += 1
+            continue
+        src = TEMPLATES / source
+        if not src.exists():
+            print(f"ERROR: {name}: source not found ({src})")
+            failures += 1
+            continue
+
+        seq = _parse_slide_sequence(src)
+        if not seq:
+            print(f"ERROR: {name}: no slide calls found in main() (deck unparseable)")
+            failures += 1
+            continue
+
+        issues: list[str] = []
+
+        # Rule 1: no run of more than 5 consecutive content_slides.
+        run = 0
+        max_run = 0
+        for fn in seq:
+            if fn == "content_slide":
+                run += 1
+                max_run = max(max_run, run)
             else:
-                pdf.body_text(section.strip())
+                run = 0
+        if max_run > 5:
+            issues.append(f"longest content_slide run is {max_run} (limit 5)")
 
-    pdf.output(output_pdf)
-    print(f"PDF generated: {output_pdf} ({pdf.page_no()} pages)")
+        # Rule 2: decks >= 12 slides need at least one chapter_slide divider.
+        if len(seq) >= 12 and not any(fn in _DIVIDER_FUNCS for fn in seq):
+            issues.append(f"{len(seq)} slides with no chapter_slide divider")
+
+        # Rule 3: deck must contain at least one density-variation slide.
+        if not any(fn in _DENSITY_VARIATION_FUNCS for fn in seq):
+            issues.append("no quote_slide or metrics_slide for density variation")
+
+        if issues:
+            for issue in issues:
+                print(f"WARN: {name}: {issue}")
+            failures += 1
+        else:
+            print(f"OK: {name}: rhythm ok ({len(seq)} slides, max run {max_run})")
+
+    return 0 if failures == 0 else 1
 
 
-def _build_whitepaper(pdf):
-    # Page 1 — Title page
-    pdf.ln(20)
-    pdf.set_font("Helvetica", "", 10)
-    pdf.set_text_color(*STONE)
-    pdf.cell(0, 6, "Technical Overview", align="C", new_x="LMARGIN", new_y="NEXT")
-    pdf.cell(0, 6, "Open Source -- MIT License", align="C", new_x="LMARGIN", new_y="NEXT")
-    pdf.cell(0, 6, "github.com/EliasOulkadi/shokunin", align="C", new_x="LMARGIN", new_y="NEXT")
-    pdf.ln(16)
-    pdf.set_draw_color(*INK_BLUE)
-    pdf.set_line_width(0.5)
-    pdf.line(pdf.l_margin + 80, pdf.get_y(), pdf.w - pdf.r_margin - 80, pdf.get_y())
-    pdf.ln(16)
+# ------------------------- entry -------------------------
 
-    # Page 1 — Architecture Overview
-    pdf.section_title("1. Architecture Overview")
-    pdf.body_text(
-        "Shokunin is a production-grade AI coding ecosystem that provides persistent memory via ChromaDB, "
-        "62 specialized AI skills across 10 domains, MCP (Model Context Protocol) servers for tool "
-        "integration, and a declarative self-update system. It runs fully offline with zero server "
-        "infrastructure and zero API costs."
-    )
-    pdf.body_text(
-        "The ecosystem operates on two levels: a local runtime (~/.shokunin/) that manages memory, "
-        "sessions, and script execution, and a distribution layer (.pack/) that contains 62 skills, "
-        "MCP server implementations, CLI tools, and installer scripts. The update system uses a "
-        "declarative JSON manifest (shokunin.json) with template-based regeneration and backup/rollback."
-    )
-
-    pdf.section_title("2. Memory System Architecture")
-    pdf.body_text(
-        "The memory system stores AI agent context across sessions using three complementary layers:"
-    )
-    pdf.body_list([
-        "Layer 1 — ChromaDB Vector Store: Semantic embeddings enable similarity search across all "
-        "stored entries. Default embedding model is all-MiniLM-L6-v2 (384 dimensions), running "
-        "locally via ONNX with no API dependency. Collection stores documents with metadata including "
-        "type, tags, project, session_id, and timestamp.",
-        "Layer 2 — JSONL Transaction Log: Every interaction is logged as line-delimited JSON in "
-        "per-session files. Provides structured, machine-parseable records for programmatic analysis "
-        "and replay. Includes entry type, timestamp, session_id, content, and role tracking.",
-        "Layer 3 — Markdown Session Files: Human-readable summaries for manual review and debugging. "
-        "Each session produces a .md file with timestamped entries organized by type (decisions, files, "
-        "commands, checkpoints, session_end).",
-    ])
-    pdf.body_text(
-        "The MCP server (mcp-server.py, 559 lines) implements JSON-RPC 2.0 over stdin/stdout, "
-        "requiring zero network configuration. It exposes 9 tools for memory operations, session "
-        "management, and file path verification. All Python code is 100% type-annotated with lazy "
-        "ChromaDB initialization and double-checked locking for thread safety."
-    )
-
-    pdf.section_title("3. Multi-Strategy Search")
-    pdf.body_text(
-        "The multi_search_context tool combines four search strategies with Reciprocal Rank Fusion:"
-    )
-    pdf.body_list([
-        "Vector Search: ChromaDB semantic similarity using cosine distance on document embeddings.",
-        "BM25 Keyword Search: Term frequency-inverse document frequency with tunable k1 and b "
-        "parameters. Builds an index from session documents and tokenizes for full-text matching.",
-        "Temporal Filtering: Date-range filtering using ISO 8601 timestamps (from_date/to_date) "
-        "to narrow results to specific time windows.",
-        "Reciprocal Rank Fusion (RRF): Merges vector and BM25 result lists with a weighted k "
-        "constant (default 60). Entries appearing in both lists receive combined scores. "
-        "Deduplication by session_id + content hash prevents double-weighting.",
-    ])
-
-    # Page ~3 — Freshness Decay
-    pdf.section_title("4. Freshness Decay System")
-    pdf.body_text(
-        "One of the hardest problems in persistent memory is retrieval shaping: ensuring recent "
-        "context surfaces before stale claims. Shokunin solves this with exponential freshness "
-        "decay blended with vector similarity."
-    )
-    pdf.body_text(
-        "Each memory entry carries a UTC timestamp. When searching with freshness_boost > 0, "
-        "the similarity score becomes a weighted blend:"
-    )
-    pdf.code_block(
-        "  blended_score = (1 - freshness_boost) * vector_similarity\n"
-        "                  + freshness_boost * exp(-days_since_stored / 30)"
-    )
-    pdf.body_text(
-        "At freshness_boost = 0.0, results are purely relevance-based (default). At 0.5, "
-        "relevance and recency receive equal weight. At 1.0, results are purely recency-based. "
-        "The 30-day half-life means an entry from 30 days ago receives 50% of the recency weight "
-        "of an entry stored today. After 90 days, recency weight drops below 5%."
-    )
-    pdf.body_text(
-        "This system prevents the common failure mode where an agent recalls 'the auth helper lives "
-        "at src/x.ts' from a memory written two weeks ago, after the file has been refactored. "
-        "The freshness decay naturally deprioritizes stale claims, while the verify_file_path "
-        "tool (detailed below) provides explicit verification."
-    )
-
-    pdf.section_title("5. Claim Verification System")
-    pdf.body_text(
-        "The verify_file_path MCP tool is the centerpiece of Shokunin's approach to memory safety. "
-        "When an agent recalls a specific file path from old memory, the tool validates whether the "
-        "path still exists on the local filesystem before the agent acts on it."
-    )
-    pdf.body_text("The verification workflow:")
-    pdf.body_list([
-        "1. Agent recalls a memory mentioning a file path (e.g., 'auth helper at src/auth.ts')",
-        "2. Agent calls verify_file_path('src/auth.ts') before acting",
-        "3. If the file exists: returns {exists: true, path, last_modified, kind}",
-        "4. If the file does not exist: returns {exists: false}. Agent searches memory for newer "
-        "entries describing the refactoring, then greps the codebase for the current location",
-        "5. Agent acts only after confirming the path, never on stale claims alone",
-    ])
-    pdf.body_text(
-        "The CLAUDE.md and AGENTS.md files contain a mandatory CLAIM VERIFICATION section that "
-        "instructs the agent: 'When a memory mentions a specific FILE PATH, FUNCTION NAME, or "
-        "CONFIG FLAG: It is a CLAIM FROM A FROZEN POINT IN TIME — not guaranteed current. "
-        "BEFORE acting on it, verify the file/function/flag still exists.'"
-    )
-    pdf.body_text(
-        "Claim types (claim_file, claim_function, claim_flag, claim_api) extend VALID_TYPES to "
-        "enable structured fact tracking. Each claim carries enriched metadata including the "
-        "claimed path, function name, or flag value, plus a verified_at timestamp when the "
-        "claim is validated."
-    )
-
-    # Page ~5 — Full MCP Tools
-    pdf.section_title("6. MCP Tool Suite (9 Tools)")
-    pdf.body_text(
-        "All tools are exposed via the MCP server over JSON-RPC 2.0 stdin/stdout transport:"
-    )
-    pdf.body_list([
-        "store_context — Store text in persistent memory with type (12 valid types including "
-        "decision, file, command, preference, checkpoint, session_end, claim_file, "
-        "claim_function, claim_flag, claim_api), tags, project, and session_id",
-        "search_context — Vector similarity search with freshness_boost parameter (0.0-1.0). "
-        "Returns ranked results with similarity scores, metadata, and timestamps",
-        "get_session_summary — Retrieve all entries for a specific session with aggregated "
-        "statistics (tags, projects, types). Limited to 100 entries maximum to prevent OOM",
-        "multi_search_context — Combined vector + BM25 + temporal filter with RRF fusion. "
-        "Accepts freshness_boost and date range parameters",
-        "consolidate_memories — Summarize old entries per project by extracting common terms "
-        "and generating consolidated summary documents",
-        "list_sessions — Recent sessions with metadata (project, entry count, first/last "
-        "timestamp, types). Filters out healthcheck and test entries",
-        "continue_session — Full context load for session resume. Returns decisions, files, "
-        "commands, checkpoints, and JSONL message transcript",
-        "save_message — Record an individual message exchange (user or assistant) in the "
-        "session transcript as line-delimited JSON",
-        "verify_file_path — Validate file/directory existence on local filesystem. Supports "
-        "~ expansion and relative paths. Returns exists, path, last_modified, and kind",
-    ])
-
-    # Page ~6-7 — All 62 skills
-    pdf.section_title("7. Skills Ecosystem — 62 Skills")
-    pdf.body_text(
-        "Every skill includes YAML frontmatter with name and description for automatic trigger "
-        "matching. All 62 skills include four mandatory sections: Workflow (numbered procedural "
-        "steps), Error Handling (5+ Cause|Fix scenarios), Sources (5+ verifiable references), "
-        "and Anti-Patterns (5+ Pattern|Problem|Fix entries). Average skill length is 257 lines."
-    )
-
-    skill_categories = [
-        ("Infrastructure (5)", ["docker — Multi-stage Dockerfiles with BuildKit, distroless, "
-        "seccomp profiles, and CVE scanning", "kubernetes — Gateway API, zero-trust networking, "
-        "Helm charts, Kustomize overlays, pod hardening", "terraform — Remote state, modules, "
-        "Stacks, cost estimation, state surgery", "ci-cd — GitHub Actions, GitLab CI, CircleCI, "
-        "matrix builds, canary deployments", "db-admin — Replication, PITR, vacuum strategy, "
-        "connection pooling"]),
-        ("Backend (5)", ["api-forge — REST/GraphQL APIs with OpenAPI 3.1, rate limiting, "
-        "webhooks, idempotency", "auth-architect — OAuth2 + OIDC, PKCE, WebAuthn, RBAC/ABAC, "
-        "OWASP-aligned", "db-sculptor — Prisma/Drizzle schemas, PostgreSQL indexes (B-tree, "
-        "GIN, GiST), EXPLAIN ANALYZE", "error-handler — OpenTelemetry, circuit breaker, retry "
-        "with jitter, error budgets", "neon-postgres — Serverless Postgres, connection pooling, "
-        "branching workflows"]),
-        ("Frontend (11)", ["component-forge — React/Vue/Svelte components with 5 states "
-        "(loading/empty/error/success/idle)", "responsive-engine — Container Queries, clamp(), "
-        "dvh/svh, subgrid", "motion-craft — WAAPI, CSS animations, FLIP technique, 17-item "
-        "pre-flight checklist", "landing-craft — CRO frameworks, LIFT Model, A/B testing, "
-        "4 vibe archetypes", "aesthetic-web — OKLCH color, grain textures, gradient meshes, "
-        "3D scroll", "ui-ux-pro-max — 67 styles, 96 palettes, 57 font pairings, CLI tool",
-        "emil-design-eng — Sonner/Vaul/Linear patterns, animation decisions", "impeccable — "
-        "Paul Bakaus design laws, AI slop test, 10 manual checks", "taste — Leon Lin variance "
-        "engine, anti-center bias, GPU-safe rules", "taste-soft — Double-Bezel architecture, "
-        "Button-in-Button pattern", "taste-minimalist — Warm monochrome, bento grids, muted pastels"]),
-        ("Mobile (2)", ["flutter — Clean Architecture, Riverpod, GoRouter, Impeller, Pigeon",
-        "react-native — Expo Router, FlashList, Reanimated 4, New Architecture"]),
-        ("Quality (7)", ["test-commander — Testing Trophy (80% integration), MSW, Playwright, "
-        "visual regression", "performance-profiler — Lighthouse, Core Web Vitals, bundle analysis",
-        "code-review — Structured review P0-P3, security checklist, architectural review"]),
-    ]
-    for category, items in skill_categories:
-        pdf.set_font("Helvetica", "B", 10)
-        pdf.set_text_color(*INK_BLUE)
-        pdf.cell(0, 6, category, new_x="LMARGIN", new_y="NEXT")
-        pdf.set_font("Helvetica", "", 10)
-        for item in items:
-            pdf.set_text_color(*NEAR_BLACK)
-            pdf.cell(4)
-            pdf.cell(4, 5, "-")
-            pdf.multi_cell(pdf.w - pdf.l_margin - pdf.r_margin - 12, 5, _sanitize(item))
-        pdf.ln(1)
-
-    more_cats = [
-        ("Content & Business (6)", ["communication, content-marketing, business-proposals, seo-geo, translate-craft, documentation"]),
-        ("Productivity (8)", ["git-workflow, windows-powershell, runbook-gen, strategy, design, finance, legal-counsel, whendone-plus"]),
-        ("Documents (3)", ["kami, kagen, portfolio-auto"]),
-        ("AI Agents & Ecosystem (9)", ["agent-browser, agent-tools, skill-creator, shokunin-update, chromadb, memory"]),
-        ("Extras & Language (7)", ["playwright, web-security, plan, find-skills, efficient-coding, senior-engineer, humanize, research, init"]),
-    ]
-    for cat, items in more_cats:
-        pdf.set_font("Helvetica", "B", 10)
-        pdf.set_text_color(*INK_BLUE)
-        pdf.cell(4) 
-        pdf.cell(0, 5, cat, new_x="LMARGIN", new_y="NEXT")
-        pdf.set_font("Helvetica", "", 10)
-        pdf.set_text_color(*NEAR_BLACK)
-        pdf.set_x(pdf.l_margin + 8)
-        pdf.multi_cell(pdf.w - pdf.l_margin - pdf.r_margin - 8, 5, _sanitize(items[0]))
-        pdf.ln(1)
-
-    # Page ~8 — Quality
-    pdf.section_title("8. Quality and Testing Infrastructure")
-    pdf.body_list([
-        "29 integration tests covering security (path traversal sanitization with 21 test cases), "
-        "MCP protocol compliance (tools/list, invalid methods, tool not found), and ChromaDB "
-        "operations (save, search, recall, session management). All tests pass on every commit.",
-        "CI/CD pipeline with 3 workflows: CI (frontmatter validation, mypy type checking, "
-        "bandit security scanning), Memory Tests (lint, integration tests, cross-platform "
-        "validation on Windows and Linux), and Release (automatic versioning and deployment).",
-        "12 PowerShell scripts with Set-StrictMode -Version Latest, ErrorActionPreference, "
-        "CmdletBinding, and comment-based help on all public scripts.",
-        "100% type-annotated Python codebase (from __future__ import annotations). Lazy "
-        "ChromaDB initialization with threading.Lock for thread safety. _dispatch pattern "
-        "for JSON-RPC routing with proper notification suppression.",
-        "Dependabot for automated dependency updates, CODEOWNERS for review assignment, "
-        ".editorconfig for consistent formatting across editors.",
-    ])
-
-    pdf.section_title("9. Security Architecture")
-    pdf.body_list([
-        "Path traversal prevention via regex-based session ID sanitization (_sanitize_id / "
-        "_safe_id). All special characters replaced with safe alternatives before file I/O.",
-        "Error message sanitization: MCP server returns generic 'Internal server error' to "
-        "clients; full error details logged server-side only.",
-        "All exception handlers include logging with context (session ID, operation, data "
-        "involved). No bare except blocks remain in the codebase.",
-        "Double-checked locking pattern on ChromaDB initialization prevents race conditions "
-        "in multi-threaded access scenarios.",
-        "JSON-RPC 2.0 compliance: notifications (requests without id) receive no response, "
-        "preventing protocol-level information leaks.",
-    ])
-
-    pdf.section_title("10. Getting Started")
-    pdf.body_text("Windows one-command install:")
-    pdf.code_block("  irm https://raw.githubusercontent.com/EliasOulkadi/shokunin/master/install.ps1 | iex")
-    pdf.body_text("Linux:")
-    pdf.code_block("  bash <(curl -sSL https://raw.githubusercontent.com/EliasOulkadi/shokunin/master/install.sh)")
-    pdf.body_text(
-        "Requirements: Windows 10/11 or Linux, Node.js 18+, Python 3.11+, Git. "
-        "The installer sets up ChromaDB, 62 skills, PowerShell/Linux profiles, MCP servers, "
-        "scheduled maintenance tasks, and the OpenCode configuration. After installation, "
-        "open a new terminal and run 'opencode'. The ecosystem activates automatically with "
-        "persistent memory across sessions."
-    )
-    pdf.body_text(
-        "The skills browser at https://eliasoulkadi.github.io/shokunin/skills.html provides "
-        "an interactive catalog of all 62 skills with search, domain grouping, and expandable "
-        "content previews."
-    )
+def main(argv: list[str]) -> int:
+    args = argv[1:]
+    if not args:
+        return build_all()
+    if args[0] in ("-h", "--help"):
+        print(__doc__)
+        return 0
+    if args[0] == "--check":
+        verbose = "-v" in args[1:] or "--verbose" in args[1:]
+        css_result = check_all(verbose)
+        sync_result = sync_check(verbose)
+        return max(css_result, sync_result)
+    if args[0] == "--sync":
+        verbose = "-v" in args[1:] or "--verbose" in args[1:]
+        return sync_check(verbose)
+    if args[0] == "--verify":
+        target = args[1] if len(args) > 1 and not args[1].startswith("-") else None
+        return verify_all(target)
+    if args[0] == "--check-orphans":
+        return check_orphans(args[1:])
+    if args[0] == "--check-density":
+        return check_density(args[1:])
+    if args[0] in ("--check-placeholders", "--verify-filled"):
+        return check_placeholders(args[1:])
+    if args[0] == "--check-rhythm":
+        slide_targets = [a for a in args[1:] if not a.startswith("-")]
+        return check_rhythm(slide_targets)
+    return build_single(args[0])
 
 
 if __name__ == "__main__":
-    input_file = None
-    output_file = "output.pdf"
-    title = "Shokunin Technical Overview v4.2.2"
-    args = sys.argv[1:]
-    i = 0
-    while i < len(args):
-        if args[i] == "--title" and i + 1 < len(args):
-            title = args[i + 1]; i += 2
-        elif args[i] == "--output" and i + 1 < len(args):
-            output_file = args[i + 1]; i += 2
-        elif args[i] == "--input" and i + 1 < len(args):
-            input_file = args[i + 1]; i += 2
-        elif not args[i].startswith("--"):
-            if input_file is None:
-                input_file = args[i]
-            else:
-                output_file = args[i]
-            i += 1
-        else:
-            i += 1
-
-    build_pdf(
-        input_md=input_file,
-        output_pdf=output_file,
-        title=title,
-    )
+    sys.exit(main(sys.argv))

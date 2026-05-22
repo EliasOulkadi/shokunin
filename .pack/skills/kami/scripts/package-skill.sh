@@ -1,15 +1,36 @@
-#!/bin/bash
-# Package Kami skill for distribution
+#!/usr/bin/env bash
 set -euo pipefail
 
-VERSION="${1:-$(grep 'version:' SKILL.md | head -1 | awk '{print $2}' | tr -d '"')}"
-OUTPUT="kami-skill-v${VERSION}.tar.gz"
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+OUT="${1:-"$ROOT/dist/kami.zip"}"
 
-tar czf "$OUTPUT" \
-  SKILL.md \
-  references/ \
-  scripts/ \
-  assets/ \
-  CHEATSHEET.md
+mkdir -p "$(dirname "$OUT")"
+rm -f "$OUT"
 
-echo "Packaged: $OUTPUT"
+cd "$ROOT"
+
+MANIFEST="$(mktemp)"
+FILTERED_MANIFEST="$(mktemp)"
+trap 'rm -f "$MANIFEST" "$FILTERED_MANIFEST"' EXIT
+
+git ls-files > "$MANIFEST"
+awk '
+  /^assets\/fonts\/TsangerJinKai02-W0[45]\.ttf$/ { next }
+  /^assets\/examples\// { next }
+  /^assets\/illustrations\// { next }
+  /^dist\// { next }
+  /^\.vercel\// { next }
+  /(^|\/)__pycache__\// { next }
+  /\.pyc$/ { next }
+  /(^|\/)\.DS_Store$/ { next }
+  { print }
+' "$MANIFEST" > "$FILTERED_MANIFEST"
+
+zip -q "$OUT" -@ < "$FILTERED_MANIFEST"
+
+if zipinfo -1 "$OUT" | grep -qE 'assets/fonts/TsangerJinKai02-W0[45]\.ttf$'; then
+  echo "ERROR: bundled TsangerJinKai02 TTF found in $OUT" >&2
+  exit 1
+fi
+
+echo "OK: wrote $OUT"
