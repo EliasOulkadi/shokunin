@@ -1,16 +1,17 @@
-# Shokunin AI Ecosystem Installer v4.2.2
+# Shokunin AI Ecosystem Installer v4.2.3
 # One-command installer for the complete Shokunin AI ecosystem
 # Requires: Windows 10/11, PowerShell 5.1+, Node.js 18+, Python 3.11+
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
-$Host.UI.RawUI.WindowTitle = "Shokunin AI Ecosystem Installer v4.2.2"
-$script:version = "4.2.2"
+$Host.UI.RawUI.WindowTitle = "Shokunin AI Ecosystem Installer v4.2.3"
+$script:version = "4.2.3"
 $script:installDir = "$env:USERPROFILE\.shokunin"
 $script:skillsDir = "$env:USERPROFILE\.config\opencode\skills"
 $script:startupDir = [Environment]::GetFolderPath('Startup')
 $script:logFile = "$env:TEMP\shokunin-install-$(Get-Date -Format 'yyyyMMdd-HHmmss').log"
 $script:sourceDir = if ($PSScriptRoot) { $PSScriptRoot } else { (Get-Location).Path }
+$script:cloneDir = $null
 
 # Validate sourceDir has the required .pack folder.
 # When run via iex from the web, $PSScriptRoot is empty and
@@ -127,11 +128,12 @@ function Install-Skills {
 
     # Determine skills source: local clone or GitHub download
     if ($script:needsClone) {
-        $skillsSource = "$env:TEMP\shokunin-skills"
-        if (Test-Path $skillsSource) { Remove-Item -Recurse -Force $skillsSource -ErrorAction SilentlyContinue }
+        $clonePath = "$env:TEMP\shokunin-tmp"
+        if (Test-Path $clonePath) { Remove-Item -Recurse -Force $clonePath -ErrorAction SilentlyContinue }
         Write-Log "Cloning from GitHub..." Yellow
-        git clone --depth 1 https://github.com/EliasOulkadi/shokunin.git "$env:TEMP\shokunin-tmp" 2>&1 | Out-Null
-        $skillsSource = "$env:TEMP\shokunin-tmp\.pack\skills"
+        git clone --depth 1 https://github.com/EliasOulkadi/shokunin.git $clonePath 2>&1 | Out-Null
+        $script:cloneDir = $clonePath
+        $skillsSource = "$clonePath\.pack\skills"
     } else {
         $skillsSource = Join-Path $script:sourceDir ".pack\skills"
     }
@@ -146,11 +148,6 @@ function Install-Skills {
             Copy-Item -Recurse -Force "$($_.FullName)\*" "$target\" -ErrorAction SilentlyContinue
             $count++
         }
-    }
-
-    # Cleanup temp clone
-    if ($script:needsClone) {
-        Remove-Item -Recurse -Force "$env:TEMP\shokunin-tmp" -ErrorAction SilentlyContinue
     }
 
     if ($count -gt 0) {
@@ -224,7 +221,9 @@ function Install-NewScripts {
         "shokunin-update.ps1",
         "validate-skills.ps1",
         "seed-memory.ps1",
-        "scan-cleanup.ps1"
+        "scan-cleanup.ps1",
+        "profile.ps1",
+        "normalize-eol.ps1"
     )
 
     $count = 0
@@ -397,7 +396,31 @@ function Setup-ScheduledTasks {
 }
 
 # ============================================================
-# SECTION 11: EXTRAS (WezTerm, bookmarklet, dashboard)
+# SECTION 11: TEMPLATES (for shokunin-update apply)
+# ============================================================
+function Install-Templates {
+    Write-Step "Installing update templates..."
+
+    $tplDest = Join-Path $script:installDir "templates"
+    New-Item -ItemType Directory -Path $tplDest -Force | Out-Null
+
+    $tplSrc = if ($script:cloneDir) {
+        Join-Path $script:cloneDir ".pack\templates"
+    } else {
+        Join-Path $script:sourceDir ".pack\templates"
+    }
+
+    if (Test-Path $tplSrc) {
+        Copy-Item "$tplSrc\*" $tplDest -Recurse -Force -ErrorAction SilentlyContinue
+        $count = (Get-ChildItem $tplDest -File -ErrorAction SilentlyContinue).Count
+        Write-Log "$count templates installed in $tplDest" Green
+    } else {
+        Write-Log "Templates directory not found — shokunin-update apply may not work correctly" Yellow
+    }
+}
+
+# ============================================================
+# SECTION 12: EXTRAS (WezTerm, bookmarklet, dashboard)
 # ============================================================
 function Setup-Extras {
     Write-Step "Installing additional tools..."
@@ -491,8 +514,11 @@ Write-Host @"
 
 "@ -ForegroundColor Cyan
 
-$confirm = Read-Host "  Continue? (y/n)"
-if ($confirm -ne "y") { Write-Host "  Installation cancelled."; exit 0 }
+$skipConfirm = [Environment]::GetEnvironmentVariable('SHOKUNIN_YES') -eq '1'
+if (-not $skipConfirm) {
+    try { $confirm = Read-Host "  Continue? (y/n)" } catch { $confirm = "y" }
+    if ($confirm -ne "y") { Write-Host "  Installation cancelled."; exit 0 }
+}
 
 $script:step = 1
 Test-Prerequisites
@@ -500,12 +526,17 @@ Install-Dependencies
 Install-Skills
 Install-MemorySystem
 Install-NewScripts
+Install-Templates
 Setup-OpenCodeConfig
 Setup-PowerShellProfile
 Setup-Instructions
 Setup-ScheduledTasks
 Setup-Extras
 Show-Summary
+
+if ($script:cloneDir -and (Test-Path $script:cloneDir)) {
+    Remove-Item -Recurse -Force $script:cloneDir -ErrorAction SilentlyContinue
+}
 
 
 

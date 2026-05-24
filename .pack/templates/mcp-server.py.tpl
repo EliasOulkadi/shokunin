@@ -4,6 +4,7 @@ from __future__ import annotations
 import importlib.util
 import json
 import logging
+import logging.handlers
 import math
 import os
 import re
@@ -25,10 +26,14 @@ COLLECTION_NAME = "shokunin_memory"
 
 os.makedirs(BASE_DIR, exist_ok=True)
 
+log_handler = logging.handlers.RotatingFileHandler(
+    LOG_PATH, maxBytes=5 * 1024 * 1024, backupCount=3, encoding="utf-8",
+)
+log_handler.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s] %(message)s"))
+
 logging.basicConfig(
-    filename=LOG_PATH,
+    handlers=[log_handler],
     level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(message)s",
     force=True,
 )
 

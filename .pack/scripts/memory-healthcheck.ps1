@@ -122,8 +122,8 @@ Check -Name "sessions dir writable" -ScriptBlock {
     Remove-Item "$d\.write-test" -Force
 }
 
-Check -Name "current-session.json exists" -ScriptBlock {
-    if (-not (Test-Path "$env:USERPROFILE\.shokunin\current-session.json")) { throw "not found" }
+Warn -Name "current-session.json exists" -ScriptBlock {
+    if (-not (Test-Path "$env:USERPROFILE\.shokunin\current-session.json")) { throw "not found (run opencode once to create it)" }
 }
 
 # 7. Cleanup test data

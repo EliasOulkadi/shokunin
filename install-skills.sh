@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-# Shokunin Skills-Only Installer v4.2.2
+# Shokunin Skills-Only Installer v4.2.3
 # Installs only the 62 skills without the full ecosystem
 # Run: bash <(curl -sSL https://raw.githubusercontent.com/EliasOulkadi/shokunin/master/install-skills.sh)
 
 set -euo pipefail
 
 SKILLS_DIR="$HOME/.config/opencode/skills"
-VERSION="4.2.2"
+VERSION="4.2.3"
 
 echo ""
 echo "  Shokunin Skills Installer v$VERSION"

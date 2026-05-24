@@ -3,13 +3,17 @@ import os
 import subprocess
 import time
 
-CHROMA = os.path.expanduser("~/.shokunin/scripts/chroma-helper.py")
 TEST_PROJ = "pytest-ci"
+
+
+def _chroma_path() -> str:
+    home = os.environ.get("HOME") or os.environ.get("USERPROFILE") or os.path.expanduser("~")
+    return os.path.join(home, ".shokunin", "scripts", "chroma-helper.py")
 
 
 def _run(*args):
     result = subprocess.run(
-        ["python", CHROMA] + list(args),
+        ["python", _chroma_path()] + list(args),
         capture_output=True,
         text=True,
         timeout=30,
