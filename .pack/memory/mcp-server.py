@@ -1,6 +1,7 @@
 """Shokunin Memory MCP Server — JSON-RPC 2.0 over stdin/stdout."""
 from __future__ import annotations
 
+import hashlib
 import importlib.util
 import json
 import logging
@@ -65,13 +66,14 @@ def _get_ch() -> Any:
             raise RuntimeError(f"Cannot load chroma_helper_stub from {stub_path}")
         _ch_stub = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(_ch_stub)
+        ch_mod = sys.modules.get("chroma_helper")
+        if ch_mod and hasattr(ch_mod, "_get_db"):
+            ch_mod._get_db = _get_db
     return _ch_stub
 
 def _safe_id(sid: str) -> str:
-    safe = sid.replace(":", "-").replace("/", "-").replace("\\", "-")
-    while ".." in safe:
-        safe = safe.replace("..", "")
-    return re.sub(r'[<>"|?*\0]', '-', safe)
+    h = hashlib.sha256(sid.encode()).hexdigest()[:32]
+    return re.sub(r'[^a-zA-Z0-9_-]', '-', h)
 
 def _log_jsonl(session_id: str, entry_type: str, content: str, role: str | None = None) -> None:
     if not session_id:
@@ -280,13 +282,15 @@ def handle_store_context(args: dict[str, Any]) -> dict[str, Any]:
             metadatas=[metadata],
             ids=[entry_id],
         )
+        stored_ok = True
     except Exception as e:
         _LOGGER.error(f"Failed to store in ChromaDB: {e}")
+        stored_ok = False
 
     _save_to_markdown(text, session_id, entry_type, tags, project)
 
     _LOGGER.info(f"Stored {entry_type} | session={session_id} | project={project} | tags={tags} | id={entry_id}")
-    return {"id": entry_id, "type": entry_type, "stored": True}
+    return {"id": entry_id, "type": entry_type, "stored": stored_ok}
 
 
 def handle_search_context(args: dict[str, Any]) -> list[dict[str, Any]]:
@@ -353,8 +357,10 @@ def handle_search_context(args: dict[str, Any]) -> list[dict[str, Any]]:
             if ts_str:
                 try:
                     ts = datetime.fromisoformat(ts_str.replace("Z", "+00:00"))
+                    if ts.tzinfo is None:
+                        ts = ts.replace(tzinfo=timezone.utc)
                     days = (now - ts).total_seconds() / 86400.0
-                    recency = math.exp(-days / 30.0)
+                    recency = math.exp(-days * math.log(2) / 30.0)
                     entry["similarity"] = round((1.0 - freshness_boost) * entry["similarity"] + freshness_boost * recency, 4)
                 except (ValueError, TypeError):
                     pass
@@ -550,6 +556,9 @@ def _dispatch(request: dict[str, Any]) -> dict[str, Any] | None:
 
     if method == "notifications/initialized":
         return None
+
+    if method == "ping":
+        return {"jsonrpc": "2.0", "id": req_id, "result": {}}
 
     if method == "tools/list":
         result = handle_tools_list()

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-VERSION="4.2.2"
+VERSION="4.2.3"
 CORES_DIR="$HOME/.shokunin"
 SKILLS_DIR="$HOME/.config/opencode/skills"
 CONFIG_DIR="$HOME/.config/opencode"
@@ -158,6 +158,7 @@ log "$COUNT skills installed"
 step_msg "Installing memory system..."
 cp "$REPO_DIR/.pack/memory/mcp-server.py" "$CORES_DIR/memory/mcp-server.py" 2>/dev/null || curl -sL "https://raw.githubusercontent.com/EliasOulkadi/shokunin/master/.pack/memory/mcp-server.py" -o "$CORES_DIR/memory/mcp-server.py"
 cp "$REPO_DIR/.pack/scripts/chroma-helper.py" "$CORES_DIR/scripts/chroma-helper.py" 2>/dev/null || curl -sL "https://raw.githubusercontent.com/EliasOulkadi/shokunin/master/.pack/scripts/chroma-helper.py" -o "$CORES_DIR/scripts/chroma-helper.py"
+cp "$REPO_DIR/.pack/scripts/chroma_helper_stub.py" "$CORES_DIR/scripts/chroma_helper_stub.py" 2>/dev/null || curl -sL "https://raw.githubusercontent.com/EliasOulkadi/shokunin/master/.pack/scripts/chroma_helper_stub.py" -o "$CORES_DIR/scripts/chroma_helper_stub.py"
 ok
 
 # === LINUX SCRIPTS ===

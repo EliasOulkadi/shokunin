@@ -45,10 +45,8 @@ def _get_db() -> chromadb.Collection:
     return _collection
 
 def _sanitize_id(sid: str) -> str:
-    safe = sid.replace(":", "-").replace("/", "-").replace("\\", "-")
-    while ".." in safe:
-        safe = safe.replace("..", "")
-    return re.sub(r'[<>"|?*\0]', '-', safe)
+    h = hashlib.sha256(sid.encode()).hexdigest()[:32]
+    return re.sub(r'[^a-zA-Z0-9_-]', '-', h)
 
 def _freshness_score(timestamp: str, half_life_days: int = RECENCY_HALFLIFE_DAYS) -> float:
     """Decaying recency score. 1.0 = just stored, approaches 0 for old entries."""
@@ -56,8 +54,10 @@ def _freshness_score(timestamp: str, half_life_days: int = RECENCY_HALFLIFE_DAYS
         return 0.5
     try:
         ts = datetime.fromisoformat(timestamp.replace("Z", "+00:00"))
+        if ts.tzinfo is None:
+            ts = ts.replace(tzinfo=timezone.utc)
         days = (datetime.now(timezone.utc) - ts).total_seconds() / 86400.0
-        return math.exp(-days / max(half_life_days, 1))
+        return math.exp(-days * math.log(2) / max(half_life_days, 1))
     except (ValueError, TypeError):
         return 0.5
 
@@ -167,15 +167,7 @@ def _rrf_fuse(ranked_lists: list[tuple[list[dict[str, Any]], str]], k: int = 60)
             scores[key] = scores.get(key, 0) + 1.0 / (k + rank)
             all_items[key] = item
     ranked = sorted(scores.items(), key=lambda x: -x[1])
-    result = []
-    seen = set()
-    for key, _ in ranked:
-        item = all_items[key]
-        sid = item.get("session_id") or item.get("session", "")
-        if sid and sid not in seen:
-            result.append(item)
-            seen.add(sid)
-    return result
+    return [all_items[key] for key, _ in ranked]
 
 def recall(query: str, project: str | None = None, n_results: int = 10, from_date: str | None = None, to_date: str | None = None, freshness_boost: float = 0.0) -> list[dict[str, Any]]:
     vector_results = search(query, project, n_results * 2, freshness_boost=freshness_boost)
@@ -364,7 +356,7 @@ def _parse_session_text(text: str) -> dict[str, list[str]]:
 def session_continue(session_id: str, summary_only: bool = False) -> dict[str, Any]:
     if not session_id:
         return {"error": "session_id required", "entries": []}
-    all_data = _get_db().get(where={"session_id": session_id})
+    all_data = _get_db().get(where={"session_id": session_id}, limit=1000)
     if not all_data.get("ids"):
         return {"session_id": session_id, "entry_count": 0, "entries": []}
 
@@ -466,14 +458,14 @@ if __name__ == "__main__":
     elif cmd == "search" and len(sys.argv) >= 3:
         query = sys.argv[2]
         project = sys.argv[3] if len(sys.argv) > 3 else None  # type: ignore[assignment]
-        n_results = int(sys.argv[4]) if len(sys.argv) > 4 else 10
+        n_results = min(int(sys.argv[4]), 50) if len(sys.argv) > 4 else 10
         freshness_boost = float(sys.argv[5]) if len(sys.argv) > 5 else 0.0
         result: Any = search(query, project, n_results, freshness_boost)  # type: ignore[no-redef]
         print(json.dumps(result))
     elif cmd == "recall" and len(sys.argv) >= 3:
         query = sys.argv[2]
         project = sys.argv[3] if len(sys.argv) > 3 else None  # type: ignore[assignment]
-        n_results = int(sys.argv[4]) if len(sys.argv) > 4 else 10
+        n_results = min(int(sys.argv[4]), 50) if len(sys.argv) > 4 else 10
         from_date = sys.argv[5] if len(sys.argv) > 5 else None
         to_date = sys.argv[6] if len(sys.argv) > 6 else None
         freshness_boost = float(sys.argv[7]) if len(sys.argv) > 7 else 0.0
@@ -511,22 +503,24 @@ if __name__ == "__main__":
     elif cmd == "delete" and len(sys.argv) >= 3:
         tag_filter = sys.argv[2]
         try:
-            all_data = _get_db().get(limit=1000)
-            deleted = 0
-            if all_data.get("ids"):
-                ids_to_delete = []
-                for i in range(len(all_data["ids"])):
-                    meta = all_data["metadatas"][i]
+            ids_to_delete = []
+            offset = 0
+            while True:
+                batch = _get_db().get(limit=1000, offset=offset)
+                if not batch.get("ids"):
+                    break
+                for i in range(len(batch["ids"])):
+                    meta = batch["metadatas"][i]
                     try:
                         entry_tags = json.loads(meta.get("tags", "[]"))
                     except (json.JSONDecodeError, TypeError):
                         entry_tags = []
                     if tag_filter in entry_tags or meta.get("project") == tag_filter:
-                        ids_to_delete.append(all_data["ids"][i])
-                if ids_to_delete:
-                    _get_db().delete(ids=ids_to_delete)
-                    deleted = len(ids_to_delete)
-            print(json.dumps({"deleted": deleted, "tag_filter": tag_filter}))
+                        ids_to_delete.append(batch["ids"][i])
+                offset += len(batch["ids"])
+            if ids_to_delete:
+                _get_db().delete(ids=ids_to_delete)
+            print(json.dumps({"deleted": len(ids_to_delete), "tag_filter": tag_filter}))
         except Exception as e:
             print(json.dumps({"error": str(e), "deleted": 0}))
     elif cmd == "session" and len(sys.argv) >= 3:
