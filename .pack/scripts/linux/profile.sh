@@ -30,10 +30,9 @@ mkcd() { mkdir -p "$1" && cd "$1"; }
 opencode() {
     local wrapper="$SHOKUNIN_HOME/scripts/linux/run-opencode.sh"
     if [ -f "$wrapper" ]; then
-        bash "$wrapper"
+        bash "$wrapper" "$@"
     else
         command opencode "$@"
     fi
 }
 
-echo "Shokunin AI Ecosystem loaded"

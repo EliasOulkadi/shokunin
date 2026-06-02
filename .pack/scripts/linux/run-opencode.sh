@@ -38,11 +38,8 @@ TIMER_PID=$!
 
 START_TIME=$(date +%s)
 
-if command -v script &>/dev/null; then
-    script -q -c "opencode" "$LOG_DIR/$SESSION_ID-raw.log" 2>/dev/null || opencode
-else
-    opencode
-fi
+opencode
+OPENCODE_EXIT=$?
 
 kill $TIMER_PID 2>/dev/null || true
 
@@ -52,39 +49,10 @@ DURATION=$((END_TIME - START_TIME))
 echo ""
 echo "  Saving session context..."
 
-BUFFER_TEXT=""
-if [ -f "$LOG_DIR/$SESSION_ID-raw.log" ]; then
-    BUFFER_TEXT=$(python3 -c "
-import sys, re, os
-log_path = os.environ.get('LOG_FILE_PATH', '')
-if not log_path:
-    log_path = sys.argv[1] if len(sys.argv) > 1 else ''
-with open(log_path, errors='replace') as f:
-    raw = f.read()
-cleaned = re.sub(r'\x1b\[[0-9;]*[a-zA-Z]', '', raw)
-cleaned = re.sub(r'\x1b\][0-9;]*[a-zA-Z]', '', cleaned)
-start = cleaned.find('==========================================')
-if start >= 0:
-    cleaned = cleaned[start:]
-print(cleaned[:20000])
-" "$LOG_DIR/$SESSION_ID-raw.log" 2>/dev/null || echo "")
-fi
-
 SUMMARY="Session: $SESSION_ID
 Duration: ${DURATION}s
 Date: $(date -Iseconds)
 Project: $(pwd)"
-
-if [ -n "$BUFFER_TEXT" ] && [ ${#BUFFER_TEXT} -gt 100 ]; then
-    SUMMARY="$SUMMARY
-
-## Conversation Log
-$(echo "$BUFFER_TEXT" | head -c 10000)"
-fi
-
-if [ -n "$BUFFER_TEXT" ]; then
-    echo "$BUFFER_TEXT" > "$LOG_DIR/$SESSION_ID.log" 2>/dev/null || true
-fi
 
 SAVED=false
 for attempt in 1 2; do
