@@ -326,7 +326,7 @@
 <section class="hero">
   <span class="hero-bg japanese" aria-hidden="true">職人</span>
   <h1><span style="color:var(--ink-blue)">職人</span> Shokunin</h1>
-  <p class="hero-sub">Multi-strategy AI memory with 62 expert skills. Your context persists between sessions. Zero servers. No API calls. One command.</p>
+  <p class="hero-sub">Multi-strategy AI memory with 62 skills. Your context persists between sessions. No servers. Runs entirely locally. One command.</p>
   <div class="hero-proof">
     <span>62 skills</span>
     <span>6 runtimes</span>
@@ -338,7 +338,7 @@
   <div class="hero-cta">
     <a href="https://github.com/EliasOulkadi/shokunin" class="btn btn-primary"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg> View on GitHub</a>
     <a href="skills.html" class="btn" style="background:transparent; color:var(--ink-blue); border:1px solid var(--ink-tag)">Browse all 62 skills →</a>
-    <a href="https://github.com/EliasOulkadi/shokunin/raw/master/docs/Shokunin-Technical-Overview-v4.2.2.pdf" class="btn-secondary-text">Read the technical overview</a>
+    <a href="https://github.com/EliasOulkadi/shokunin/raw/master/docs/Shokunin-Technical-Overview-v4.2.3.pdf" class="btn-secondary-text">Read the technical overview</a>
   </div>
 </section>
 
@@ -351,7 +351,7 @@
   <div class="features-grid">
     <div class="feature-card reveal reveal-delay-1">
       <h3>Multi-strategy recall</h3>
-      <p>ChromaDB vector search combined with BM25 keyword matching, temporal date-range filters, and reciprocal rank fusion. Pure Python. Zero dependencies.</p>
+      <p>ChromaDB vector search combined with BM25 keyword matching, temporal date-range filters, and reciprocal rank fusion. Pure Python. No Docker.</p>
     </div>
     <div class="feature-card reveal reveal-delay-2">
       <h3>Session management</h3>
@@ -366,7 +366,7 @@
 
 <!-- STATS -->
 <section class="section reveal">
-  <p class="stats-line">Built on <strong>99+</strong> memory entries, <strong>62</strong> expert skills, <strong>9</strong> MCP tools, <strong>25+</strong> CI checks, and <strong>6</strong> AI runtimes.</p>
+  <p class="stats-line">Built on <strong>99+</strong> memory entries, <strong>62</strong> skills, <strong>9</strong> MCP tools, <strong>25+</strong> CI checks, and <strong>6</strong> AI runtimes.</p>
 </section>
 
 <!-- ARCHITECTURE -->
@@ -456,7 +456,7 @@ get_session_summary — summarize all entries in a given session
 <!-- SKILLS -->
 <section class="section section-mesh reveal">
   <h2>Skills</h2>
-  <p style="color:var(--dark-warm);max-width:650px;margin:8px 0 8px;">62 skills across 10 domains. Powered by Emil Kowalski (Sonner 13M+ weekly downloads, Linear), Paul Bakaus (ex-Google, ex-Disney, ex-Unity), and Leon Lin + blueemi. Each skill is a real engineering guide with Before/After tables, exact specs, pre-flight checklists, and cited sources.</p>
+  <p style="color:var(--dark-warm);max-width:650px;margin:8px 0 8px;">62 skills across 10 domains. Powered by Emil Kowalski (Sonner 13M+ weekly downloads, Linear), Paul Bakaus (ex-Google, ex-Disney, ex-Unity), and Leon Lin + blueemi.</p>
   <div class="features-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));gap:16px;margin-top:20px;">
     <div class="feature-card"><h3>Infrastructure</h3><p>docker, kubernetes, terraform, ci-cd, db-admin</p></div>
     <div class="feature-card"><h3>Backend</h3><p>auth-architect, api-forge, db-sculptor, error-handler</p></div>
@@ -469,7 +469,7 @@ get_session_summary — summarize all entries in a given session
     <div class="feature-card"><h3>AI Agents</h3><p>agent-browser, agent-tools, find-skills, skill-creator, research, humanize</p></div>
     <div class="feature-card" style="grid-column:span 2"><h3>System</h3><p>memory, chromadb, shokunin-update, init, efficient-coding, senior-engineer, plan, playwright, neon-postgres, web-security</p></div>
   </div>
-  <p style="color:var(--stone);font-size:13px;margin-top:16px;max-width:650px;">Every skill follows the same v4.0 structure: YAML frontmatter for auto-discovery, sub-commands (design / audit / optimize), exact specifications (100-160ms for button press, hash passwords with Argon2id memory=19456), Before/After review tables, error handling tables, pre-flight production checklists, banned patterns, and cited sources. The motion-craft skill, for example, is 20 KB covering Emil Kowalski's exact easing curves, duration tables by element type, and a mandatory review format.</p>
+  <p style="color:var(--stone);font-size:13px;margin-top:16px;max-width:650px;">Skills use a v4.0 structure with YAML frontmatter for auto-discovery, sub-commands (design / audit / optimize), exact specifications (100-160ms for button press), Before/After review tables, error handling tables, and pre-flight checklists. The motion-craft skill, for example, is 20 KB covering easing curves, duration tables by element type, and a mandatory review format.</p>
 </section>
 
 <div class="section-divider" aria-hidden="true"></div>
@@ -575,11 +575,11 @@ get_session_summary — summarize all entries in a given session
   <p>
     <a href="https://github.com/EliasOulkadi/shokunin">GitHub</a>
     <span class="sep" aria-hidden="true">·</span>
-    <a href="https://github.com/EliasOulkadi/shokunin/blob/master/docs/Shokunin-Technical-Overview-v4.2.2.pdf">Technical overview</a>
+    <a href="https://github.com/EliasOulkadi/shokunin/blob/master/docs/Shokunin-Technical-Overview-v4.2.3.pdf">Technical overview</a>
     <span class="sep" aria-hidden="true">·</span>
     <a href="https://github.com/EliasOulkadi/shokunin#readme">Docs</a>
     <span class="sep" aria-hidden="true">·</span>
-    MIT License · v4.2.2
+    MIT License · v4.2.3
   </p>
   <p style="margin-top:10px;"><span class="japanese">職人</span> the artisan spirit. Built with care.</p>
 </footer>

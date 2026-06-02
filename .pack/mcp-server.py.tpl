@@ -68,7 +68,7 @@ def _get_ch() -> Any:
         spec.loader.exec_module(_ch_stub)
         ch_mod = sys.modules.get("chroma_helper")
         if ch_mod and hasattr(ch_mod, "_get_db"):
-            ch_mod._get_db = _get_db
+            setattr(ch_mod, "_get_db", _get_db)
     return _ch_stub
 
 def _safe_id(sid: str) -> str:
