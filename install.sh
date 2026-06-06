@@ -169,11 +169,10 @@ for script in run-opencode.sh memory-healthcheck.sh weekly-maintenance.sh profil
         cp "$SRC" "$CORES_DIR/scripts/linux/$script"
         chmod +x "$CORES_DIR/scripts/linux/$script"
     else
-         curl -sL "https://raw.githubusercontent.com/EliasOulkadi/shokunin/master/.pack/scripts/linux/$script" -o "$CORES_DIR/scripts/linux/$script" 2>/dev/null
-         for retry in 1 2 3; do
-           curl -sL "https://raw.githubusercontent.com/EliasOulkadi/shokunin/master/.pack/scripts/linux/$script" -o "$CORES_DIR/scripts/linux/$script" 2>/dev/null && break
-           sleep 1
-         done
+        for retry in 1 2 3; do
+            curl -sL "https://raw.githubusercontent.com/EliasOulkadi/shokunin/master/.pack/scripts/linux/$script" -o "$CORES_DIR/scripts/linux/$script" 2>/dev/null && break
+            sleep 1
+        done
         chmod +x "$CORES_DIR/scripts/linux/$script" 2>/dev/null || true
     fi
 done
@@ -322,6 +321,15 @@ fi
 step_msg "Verifying installation..."
 if [ -f "$CORES_DIR/scripts/linux/memory-healthcheck.sh" ]; then
   bash "$CORES_DIR/scripts/linux/memory-healthcheck.sh" && ok || fail "Some checks failed"
+fi
+
+# === TEMPLATES ===
+step_msg "Installing update templates..."
+mkdir -p "$CORES_DIR/templates"
+if [ -d "$REPO_DIR/.pack/templates" ]; then
+    cp "$REPO_DIR/.pack/templates/"* "$CORES_DIR/templates/" 2>/dev/null || true
+    TCOUNT=$(ls "$CORES_DIR/templates/" 2>/dev/null | wc -l)
+    log "$TCOUNT templates installed"
 fi
 
 # === CLEANUP ===

@@ -229,7 +229,8 @@ function Apply-Plan($plan, $manifest) {
           Write-Host " (template not found)" -NoNewline
         }
       } elseif ($item.Action -eq "CREATE") {
-        New-Item -ItemType File -Path $item.Path -Force | Out-Null
+        Write-Host " (static file missing — skipped)" -ForegroundColor Yellow
+        continue
       }
       Write-Host "OK" -ForegroundColor Green
       $applied++

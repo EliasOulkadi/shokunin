@@ -6,14 +6,18 @@ import subprocess
 import sys
 from typing import Any
 
-MCP_SERVER = os.path.join(os.path.expanduser("~"), ".shokunin", "memory", "mcp-server.py")
 PYTHON = sys.executable
+
+
+def _mcp_server_path() -> str:
+    home = os.environ.get("HOME") or os.environ.get("USERPROFILE") or os.path.expanduser("~")
+    return os.path.join(home, ".shokunin", "memory", "mcp-server.py")
 
 
 def _mcp_request(method: str, params: dict[str, Any]) -> dict[str, Any]:
     payload = json.dumps({"jsonrpc": "2.0", "id": 1, "method": method, "params": params}) + "\n"
     result = subprocess.run(
-        [PYTHON, MCP_SERVER],
+        [PYTHON, _mcp_server_path()],
         input=payload,
         capture_output=True,
         text=True,

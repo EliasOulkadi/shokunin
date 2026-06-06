@@ -1,4 +1,4 @@
-# Shokunin Skills-Only Installer v4.2.2
+# Shokunin Skills-Only Installer v4.2.3
 # Installs only the 62 skills without the full ecosystem
 # Use when you already have OpenCode + ChromaDB but want updated skills
 # Run: irm https://raw.githubusercontent.com/EliasOulkadi/shokunin/master/install-skills.ps1 | iex
@@ -14,7 +14,7 @@ if (Test-Path "$env:USERPROFILE\.agents\skills") {
     $script:targets += "$env:USERPROFILE\.agents\skills"
 }
 
-Write-Host "`n  Shokunin Skills Installer v4.2.2" -ForegroundColor Cyan
+Write-Host "`n  Shokunin Skills Installer v4.2.3" -ForegroundColor Cyan
 Write-Host "  62 skills across 10 domains" -ForegroundColor DarkGray
 Write-Host ""
 

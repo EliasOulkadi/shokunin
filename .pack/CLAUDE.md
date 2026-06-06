@@ -110,24 +110,6 @@ python ~/.shokunin/scripts/chroma-helper.py session list 3
 Then ask: "Recent sessions. Do you want to continue one (number), search all (b), or start a new one (n)?"
 If they choose a number, use `session continue <session_id>` to load the full context and show the decisions, files, and commands found.
 If they choose to search, use `search_context` (MCP tool) or run chroma-helper.py search to find relevant context.
-Show the results to the user.
-
-### 2. DURING THE SESSION — automatic saving
-The MCP server automatically saves each interaction in sessions/<id>.jsonl.
-You don't need to do anything manually. The system captures:
-- Each `store_context` (checkpoints, decisions, files)
-- Each search (`search_context`, `multi_search_context`)
-- Each message saved with `save_message`
-
-### 3. AT END OF SESSION — full summary
-Use `/save` if you're in OpenCode, or run:
-```powershell
-python ~/.shokunin/scripts/chroma-helper.py save "SESSION SUMMARY\n## Decisions\n- ...\n## Files\n- ...\n## Commands\n- ..." "[session_id]" "session_end" "session-end,[project]" "[project]"
-```
-Then ask: "Recent sessions. Do you want to continue one (number), search all (b), or start a new one (n)?"
-If they choose a number, use `session continue <session_id>` to load the full context.
-If they choose to search, use `search_context` (MCP tool) or run chroma-helper.py search to find relevant context.
-Show the results to the user.
 
 **Windows:**
 ```powershell
@@ -151,7 +133,7 @@ Also, search without project filter:
 Use `store_context` (MCP tool) to save. You can also do it via script:
 
 ```powershell
-python {{SHOKUNIN_DIR}}/scripts/chroma-helper.py save "[checkpoint text]" "[session_id]" "checkpoint" "checkpoint,[project],[topic]" "[project]"
+python ~/.shokunin/scripts/chroma-helper.py save "[checkpoint text]" "[session_id]" "checkpoint" "checkpoint,[project],[topic]" "[project]"
 ```
 
 Also, after EACH important event:

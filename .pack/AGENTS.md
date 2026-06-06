@@ -92,7 +92,6 @@ They activate automatically based on what you ask. You don't need to name them.
 ## MCP Servers
 - **filesystem**: File access with path validation.
 - **fetch**: URL downloads, scraping, APIs.
-- **playwright**: Browser automation, screenshots, PDFs.
 
 ## Providers
 - **NVIDIA Kimi K2.6**: Main free model with reasoning.
