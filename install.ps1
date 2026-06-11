@@ -266,24 +266,57 @@ function Setup-OpenCodeConfig {
     if (Test-Path $configFile) {
         $backup = "$configFile.shokunin-backup-$(Get-Date -Format 'yyyyMMdd-HHmmss')"
         Copy-Item $configFile $backup
-        Write-Log "Backup of existing config: $backup" Green
-    }
+        Write-Log "Backup saved: $(Split-Path $backup -Leaf)" Green
 
-    # Generate config with proper paths
-    $templatePath = Join-Path $script:sourceDir ".pack\opencode.json"
-    if (Test-Path $templatePath) {
-        $template = Get-Content $templatePath -Raw
+        # User already has a config — ONLY add shokunin MCP servers that don't exist
+        $existing = Get-Content $configFile -Raw | ConvertFrom-Json -AsHashtable
+        $mcp = if ($existing.ContainsKey('mcp')) { $existing['mcp'] } else { @{} }
+
+        $shokuninMCP = @{
+            'filesystem' = @{
+                'type' = 'local'
+                'command' = @('npx', '-y', '@modelcontextprotocol/server-filesystem', $env:USERPROFILE)
+            }
+            'fetch' = @{
+                'type' = 'local'
+                'command' = @('python', '-m', 'mcp_server_fetch')
+                'environment' = @{ 'PYTHONIOENCODING' = 'utf-8' }
+            }
+            'memory' = @{
+                'type' = 'local'
+                'command' = @('python', "$env:USERPROFILE\.shokunin\memory\mcp-server.py")
+            }
+        }
+
+        $added = 0
+        foreach ($name in $shokuninMCP.Keys) {
+            if (-not $mcp.ContainsKey($name)) {
+                $mcp[$name] = $shokuninMCP[$name]
+                $added++
+            }
+        }
+        $existing['mcp'] = $mcp
+        $existing | ConvertTo-Json -Depth 10 | Set-Content $configFile -Force -Encoding UTF8
+        Write-Log "MCP servers added/verified: $added new" Green
     } else {
-        $url = "https://raw.githubusercontent.com/EliasOulkadi/shokunin/master/.pack/opencode.json"
-        $template = (Invoke-WebRequest -Uri $url).Content
-        Write-Log "Template downloaded from GitHub" Yellow
+        # New install — generate fresh config from template
+        $templatePath = Join-Path $script:sourceDir ".pack\opencode.json"
+        if (Test-Path $templatePath) {
+            $template = Get-Content $templatePath -Raw
+        } else {
+            $url = "https://raw.githubusercontent.com/EliasOulkadi/shokunin/master/.pack/opencode.json"
+            $template = (Invoke-WebRequest -Uri $url).Content
+            Write-Log "Template downloaded from GitHub" Yellow
+        }
+        $jsonPath = $env:USERPROFILE.Replace('\', '\\')
+        $template = $template -replace "{{MCP_ROOT_PATH}}", $jsonPath
+        $template = $template -replace "{{PYTHON_BIN}}", "python"
+        $rawMemory = $env:USERPROFILE + '\.shokunin\memory\mcp-server.py'
+        $jsonMemory = $rawMemory.Replace('\', '\\')
+        $template = $template -replace "{{MCP_MEMORY_PATH}}", $jsonMemory
+        $template | Set-Content $configFile -Force
+        Write-Log "Config created: $configFile" Green
     }
-    $jsonPath = $env:USERPROFILE.Replace('\', '\\')
-    $template = $template -replace "{{MCP_ROOT_PATH}}", $jsonPath
-    $template = $template -replace "{{PYTHON_BIN}}", "python"
-    $rawMemory = $env:USERPROFILE + '\.shokunin\memory\mcp-server.py'
-    $jsonMemory = $rawMemory.Replace('\', '\\')
-    $template = $template -replace "{{MCP_MEMORY_PATH}}", $jsonMemory
 
     # Check for NVIDIA API key
     $nvKey = [Environment]::GetEnvironmentVariable('NVIDIA_API_KEY','User')
@@ -307,8 +340,7 @@ function Setup-OpenCodeConfig {
         }
     }
 
-    $template | Set-Content $configFile -Force
-    Write-Log "Config generated: $configFile" Green
+    Write-Log "Config generated" Green
 }
 
 # ============================================================
@@ -357,21 +389,25 @@ function Setup-Instructions {
 
     $claudeTemplate = Join-Path $script:sourceDir ".pack\CLAUDE.md"
     if (Test-Path $claudeTemplate) {
-        $claudeContent = Get-Content $claudeTemplate -Raw
         if (Test-Path "$claudeDir\CLAUDE.md") {
-            $backup = "$claudeDir\CLAUDE.md.shokunin-backup-$(Get-Date -Format 'yyyyMMdd-HHmmss')"
-            Copy-Item "$claudeDir\CLAUDE.md" $backup
+            Write-Log "CLAUDE.md already exists — not overwriting" Yellow
+        } else {
+            $claudeContent = Get-Content $claudeTemplate -Raw
+            $claudeContent | Set-Content "$claudeDir\CLAUDE.md" -Force -Encoding UTF8
+            Write-Log "CLAUDE.md installed" Green
         }
-        $claudeContent | Set-Content "$claudeDir\CLAUDE.md" -Force -Encoding UTF8
-        Write-Log "CLAUDE.md configured" Green
     }
 
     # AGENTS.md
     $agentsTemplate = Join-Path $script:sourceDir ".pack\AGENTS.md"
     if (Test-Path $agentsTemplate) {
-        $agentsContent = Get-Content $agentsTemplate -Raw
-        $agentsContent | Set-Content "$env:USERPROFILE\AGENTS.md" -Force -Encoding UTF8
-        Write-Log "AGENTS.md configured" Green
+        if (Test-Path "$env:USERPROFILE\AGENTS.md") {
+            Write-Log "AGENTS.md already exists — not overwriting" Yellow
+        } else {
+            $agentsContent = Get-Content $agentsTemplate -Raw
+            $agentsContent | Set-Content "$env:USERPROFILE\AGENTS.md" -Force -Encoding UTF8
+            Write-Log "AGENTS.md installed" Green
+        }
     }
 }
 

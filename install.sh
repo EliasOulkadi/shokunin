@@ -207,48 +207,54 @@ if [ -f "$CONFIG_SRC" ]; then
         log "WARNING: Placeholders remain in template. Check the file."
     fi
 
-    # Merge with existing config if present (preserves user's providers/commands)
     if [ -f "$CONFIG_DIR/opencode.json" ]; then
-        cp "$CONFIG_DIR/opencode.json" "$CONFIG_DIR/opencode.json.shokunin-backup-$(date +%Y%m%d-%H%M%S)"
-        log "Backup saved: opencode.json.shokunin-backup-$(date +%Y%m%d-%H%M%S)"
+        BACKUP_FILE="$CONFIG_DIR/opencode.json.shokunin-backup-$(date +%Y%m%d-%H%M%S)"
+        cp "$CONFIG_DIR/opencode.json" "$BACKUP_FILE"
+        log "Backup saved: $(basename $BACKUP_FILE)"
 
-        # Use Python for deep merge: template wins for mcp/agent, user wins for provider/command
         $PYTHON_BIN -c "
-import json
+import json, sys
+
 with open('$CONFIG_DIR/opencode.json') as f:
-    existing = json.load(f)
-with open('/dev/stdin') as f:
-    tmpl = json.load(f)
+    config = json.load(f)
 
-merged = dict(tmpl)
+shokunin_mcp = {
+    'filesystem': {
+        'type': 'local',
+        'command': ['npx', '-y', '@modelcontextprotocol/server-filesystem', '$HOME']
+    },
+    'fetch': {
+        'type': 'local',
+        'command': ['$PYTHON_BIN', '-m', 'mcp_server_fetch'],
+        'environment': {'PYTHONIOENCODING': 'utf-8'}
+    },
+    'memory': {
+        'type': 'local',
+        'command': ['$PYTHON_BIN', '$CORES_DIR/memory/mcp-server.py']
+    }
+}
 
-# Preserve user's provider configs (they may have custom API keys)
-if 'provider' in existing:
-    merged['provider'] = existing['provider']
+existing_mcp = config.get('mcp', {})
+added = 0
+for name, server_cfg in shokunin_mcp.items():
+    if name not in existing_mcp:
+        config.setdefault('mcp', {})[name] = server_cfg
+        added += 1
 
-# Preserve user's commands
-if 'command' in existing:
-    merged['command'] = {**existing['command'], **merged.get('command', {})}
-
-# Preserve user's model preference
-if 'model' in existing and existing['model'] != merged.get('model'):
-    merged['model'] = existing['model']
-
-# Preserve any user-added MCP servers
-existing_mcp = existing.get('mcp', {})
-if existing_mcp:
-    for k, v in existing_mcp.items():
-        if k not in merged.get('mcp', {}):
-            merged.setdefault('mcp', {})[k] = v
-
-print(json.dumps(merged, indent=2))
-" <<< "$TEMPLATE_CONTENT" > "$CONFIG_DIR/opencode.json" 2>/dev/null || {
-        log "Merge failed, using template. Backup at opencode.json.shokunin-backup-*" Yellow
-        echo "$TEMPLATE_CONTENT" > "$CONFIG_DIR/opencode.json"
+with open('$CONFIG_DIR/opencode.json', 'w') as f:
+    json.dump(config, f, indent=2)
+    f.write(chr(10))
+if added > 0:
+    print(f'ADDED_MCP: {added}')
+else:
+    print('ALL_MCP_EXIST')
+" 2>&1 || {
+        log "Merge failed, restoring backup." Yellow
+        cp "$BACKUP_FILE" "$CONFIG_DIR/opencode.json" 2>/dev/null || true
     }
     else
         echo "$TEMPLATE_CONTENT" > "$CONFIG_DIR/opencode.json"
-        log "Config generated (new)"
+        log "Config created (new)"
     fi
 fi
 
@@ -266,16 +272,24 @@ log "Config generated"
 # === INSTRUCTIONS ===
 step_msg "Configuring global instructions..."
 CLAUDE_SRC="$REPO_DIR/.pack/CLAUDE.md"
+AGENTS_SRC="$REPO_DIR/.pack/AGENTS.md"
+
 if [ -f "$CLAUDE_SRC" ]; then
     if [ -f "$CLAUDE_DIR/CLAUDE.md" ]; then
-        cp "$CLAUDE_DIR/CLAUDE.md" "$CLAUDE_DIR/CLAUDE.md.shokunin-backup-$(date +%Y%m%d-%H%M%S)"
+        skip "CLAUDE.md already exists — not overwriting"
+    else
+        cp "$CLAUDE_SRC" "$CLAUDE_DIR/CLAUDE.md"
+        ok "CLAUDE.md installed"
     fi
-    cp "$CLAUDE_SRC" "$CLAUDE_DIR/CLAUDE.md"
 fi
 
-AGENTS_SRC="$REPO_DIR/.pack/AGENTS.md"
 if [ -f "$AGENTS_SRC" ]; then
-    cp "$AGENTS_SRC" "$HOME/AGENTS.md"
+    if [ -f "$HOME/AGENTS.md" ]; then
+        skip "AGENTS.md already exists — not overwriting"
+    else
+        cp "$AGENTS_SRC" "$HOME/AGENTS.md"
+        ok "AGENTS.md installed"
+    fi
 fi
 log "Instructions configured"
 
