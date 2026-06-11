@@ -1,16 +1,17 @@
 #!/usr/bin/env bash
-# Shokunin Skills-Only Installer v4.2.2
+# Shokunin Skills-Only Installer v4.2.3
 # Installs only the 62 skills without the full ecosystem
 # Run: bash <(curl -sSL https://raw.githubusercontent.com/EliasOulkadi/shokunin/master/install-skills.sh)
 
 set -euo pipefail
 
-SKILLS_DIR="$HOME/.config/opencode/skills"
-VERSION="4.2.2"
+SKILLS_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/opencode/skills"
+VERSION="4.2.3"
 
 echo ""
 echo "  Shokunin Skills Installer v$VERSION"
 echo "  62 skills across 10 domains"
+echo "  Target: $SKILLS_DIR"
 echo ""
 
 mkdir -p "$SKILLS_DIR"
@@ -29,10 +30,15 @@ if [ ! -d "$REPO_DIR" ]; then
 fi
 
 COUNT=0
+SKIPPED=0
 for dir in "$REPO_DIR/.pack/skills"/*/; do
+    NAME=$(basename "$dir")
+    TARGET="$SKILLS_DIR/$NAME"
+    if [ -d "$TARGET" ] && [ -f "$TARGET/SKILL.md" ]; then
+        SKIPPED=$((SKIPPED + 1))
+        continue
+    fi
     if [ -f "${dir}SKILL.md" ]; then
-        NAME=$(basename "$dir")
-        TARGET="$SKILLS_DIR/$NAME"
         mkdir -p "$TARGET"
         cp -r "${dir}"* "$TARGET/" 2>/dev/null || true
         COUNT=$((COUNT + 1))
@@ -40,5 +46,6 @@ for dir in "$REPO_DIR/.pack/skills"/*/; do
 done
 
 rm -rf "$REPO_DIR"
-echo "  $COUNT skills installed to $SKILLS_DIR"
+echo "  $COUNT new skills installed, $SKIPPED already exist (skipped)"
+echo "  Location: $SKILLS_DIR"
 echo ""
