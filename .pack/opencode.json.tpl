@@ -1,6 +1,5 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "model": "opencode-go/deepseek-v4-flash",
   "provider": {
     "nvidia": {
       "npm": "@ai-sdk/openai-compatible",
