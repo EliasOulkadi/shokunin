@@ -1,19 +1,19 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head><meta charset="UTF-8"><title>Shokunin Bookmarklet</title>
 <style>body{font-family:Charter,Georgia,serif;background:#f5f4ed;color:#141413;max-width:600px;margin:80px auto;padding:0 20px;line-height:1.6}h1{color:#1B365D;border-left:3px solid #1B365D;padding-left:12px}.bookmarklet{display:inline-block;background:#1B365D;color:#fff;padding:12px 24px;border-radius:4px;font-size:18px;text-decoration:none;margin:20px 0;cursor:grab}.bookmarklet:hover{background:#2D5A8A}code{background:#faf9f5;padding:1px 4px;border-radius:2px;font-size:14px}.steps{background:#faf9f5;border-left:2px solid #1B365D;padding:12px 16px;border-radius:3px;margin:20px 0}</style></head>
 <body>
 <h1>Shokunin Bookmarklet</h1>
-<p>Arrastra este link a la barra de marcadores:</p>
-<a class="bookmarklet" href="javascript:(function(){var t=document.title,u=location.href,s=window.getSelection()?.toString()||'',c=(document.body?.innerText||'').substring(0,3000);var msg='Titulo: '+t+'\nURL: '+u+'\nSeleccion: '+s+'\n\n'+c;var f=new Blob([msg],{type:'text/plain'});var a=document.createElement('a');a.href=URL.createObjectURL(f);a.download='opencode-context-'+Date.now()+'.txt';a.click();alert('Archivo guardado.\nArrastralo a OpenCode o escribe: /load contexto')})()">Enviar a OpenCode</a>
+<p>Drag this link to your bookmarks bar:</p>
+<a class="bookmarklet" href="javascript:(function(){var t=document.title,u=location.href,s=window.getSelection()?.toString()||'',c=(document.body?.innerText||'').substring(0,3000);var msg='Title: '+t+'\nURL: '+u+'\nSelection: '+s+'\n\n'+c;var f=new Blob([msg],{type:'text/plain'});var a=document.createElement('a');a.href=URL.createObjectURL(f);a.download='opencode-context-'+Date.now()+'.txt';a.click();alert('File saved.\nDrag it into OpenCode or write: /load context')})()">Send to OpenCode</a>
 
 <div class="steps">
-<strong>Como funciona:</strong><br>
-1. Arrastra el link rojo a la barra de marcadores<br>
-2. En cualquier pagina, haz clic en el marcador<br>
-3. Se descarga un archivo .txt con el contenido<br>
-4. Arrastra el archivo a la terminal de OpenCode
+<strong>How it works:</strong><br>
+1. Drag the red link to your bookmarks bar<br>
+2. On any page, click the bookmark<br>
+3. A .txt file downloads with the page content<br>
+4. Drag the file into the OpenCode terminal
 </div>
-<p><small>No instala nada. No corre en background. No necesita API.</small></p>
+<p><small>Zero install. No background processes. No API needed.</small></p>
 </body>
 </html>

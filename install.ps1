@@ -1,11 +1,11 @@
-# Shokunin AI Ecosystem Installer v4.2.2
+# Shokunin AI Ecosystem Installer v4.2.3
 # One-command installer for the complete Shokunin AI ecosystem
 # Requires: Windows 10/11, PowerShell 5.1+, Node.js 18+, Python 3.11+
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
-$Host.UI.RawUI.WindowTitle = "Shokunin AI Ecosystem Installer v4.2.2"
-$script:version = "4.2.2"
+$Host.UI.RawUI.WindowTitle = "Shokunin AI Ecosystem Installer v4.2.3"
+$script:version = "4.2.3"
 $script:installDir = "$env:USERPROFILE\.shokunin"
 $script:skillsDir = "$env:USERPROFILE\.config\opencode\skills"
 $script:startupDir = [Environment]::GetFolderPath('Startup')
@@ -21,13 +21,9 @@ if (-not (Test-Path (Join-Path $script:sourceDir ".pack\skills"))) {
     Write-Log "Repo not found locally, will clone from GitHub" Yellow
 }
 
-# Known SHA256 checksums for critical scripts (updated per release)
-# These are verified after download to prevent tampering
-$script:knownChecksums = @{
-    "mcp-server.py" = ""
-    "chroma-helper.py" = ""
-    "run-opencode.ps1" = ""
-}
+# Checksums reserved for future use when real hashes can be pre-computed.
+# Currently all downloads go direct from GitHub, so verification is NOP.
+$script:knownChecksums = @{}
 
 # ============================================================
 # SECTION 1: LOGGING & DISPLAY

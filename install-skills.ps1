@@ -1,4 +1,4 @@
-# Shokunin Skills-Only Installer v4.2.2
+# Shokunin Skills-Only Installer v4.2.3
 # Installs only the 62 skills without the full ecosystem
 # Use when you already have OpenCode + ChromaDB but want updated skills
 # Run: irm https://raw.githubusercontent.com/EliasOulkadi/shokunin/master/install-skills.ps1 | iex

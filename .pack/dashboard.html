@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <title>Shokunin Ecosystem Dashboard</title>
@@ -28,36 +28,34 @@
 </head>
 <body>
 <h1>Shokunin Ecosystem</h1>
-<p class="sub" id="timestamp">Cargando...</p>
+<p class="sub" id="timestamp">Loading...</p>
 
 <h2>Skills</h2>
 <div class="grid">
   <div class="card"><h3>Infrastructure</h3><p>5 — docker, kubernetes, terraform, ci-cd, db-admin</p></div>
-  <div class="card"><h3>Backend</h3><p>4 — auth-architect, api-forge, db-sculptor, error-handler</p></div>
+  <div class="card"><h3>Backend</h3><p>5 — api-forge, auth-architect, db-sculptor, error-handler, neon-postgres</p></div>
   <div class="card"><h3>Frontend</h3><p>11 — component-forge, responsive-engine, motion-craft, landing-craft, aesthetic-web, ui-ux-pro-max, emil-design-eng, impeccable, taste, taste-soft, taste-minimalist</p></div>
   <div class="card"><h3>Mobile</h3><p>2 — flutter, react-native</p></div>
   <div class="card"><h3>Quality</h3><p>7 — test-commander, performance-profiler, code-review, comprehensive-review, cross-review, zen-review, zen-comprehensive-review</p></div>
   <div class="card"><h3>Content</h3><p>6 — communication, content-marketing, business-proposals, seo-geo, translate-craft, documentation</p></div>
-  <div class="card"><h3>Productivity</h3><p>7 — git-workflow, windows-powershell, runbook-gen, strategy, finance, legal-counsel, whendone-plus</p></div>
-  <div class="card"><h3>Documents</h3><p>2 — kami, portfolio-auto</p></div>
-  <div class="card"><h3>AI Agents</h3><p>3 — agent-browser, agent-tools, skill-creator</p></div>
-  <div class="card"><h3>System</h3><p>8 — playwright, web-security, plan, find-skills, efficient-coding, senior-engineer, research, humanize, init, neon-postgres</p></div>
-  <div class="card"><h3>Ecosystem</h3><p>3 — shokunin-update, chromadb, memory</p></div>
-  <div class="card"><h3>Extras</h3><p>4 — code-review, comprehensive-review, cross-review, zen-review</p></div>
+  <div class="card"><h3>Productivity</h3><p>8 — git-workflow, windows-powershell, runbook-gen, strategy, brand-design, finance, legal-counsel, whendone-plus</p></div>
+  <div class="card"><h3>Documents</h3><p>3 — kami, portfolio-auto, kagen</p></div>
+  <div class="card"><h3>AI Agents</h3><p>6 — agent-browser, agent-tools, skill-creator, find-skills, research, humanize</p></div>
+  <div class="card"><h3>System</h3><p>9 — memory, chromadb, shokunin-update, init, efficient-coding, senior-engineer, plan, playwright, web-security</p></div>
 </div>
 <p style="text-align:right;font-size:13px;font-weight:500;color:#1B365D">Total: <span id="skill-count">62</span> skills</p>
 
 <h2>Live Status</h2>
 <div class="grid" id="live-status">
-  <div class="card"><h3>ChromaDB</h3><p id="memory-status">Consultando...</p></div>
-  <div class="card"><h3>MCP memory</h3><p id="mcp-status">Consultando...</p></div>
-  <div class="card"><h3>Skills dir</h3><p id="skills-dir">Consultando...</p></div>
-  <div class="card"><h3>Last backup</h3><p id="backup-status">Consultando...</p></div>
+  <div class="card"><h3>ChromaDB</h3><p id="memory-status">Checking...</p></div>
+  <div class="card"><h3>MCP memory</h3><p id="mcp-status">Checking...</p></div>
+  <div class="card"><h3>Skills dir</h3><p id="skills-dir">Checking...</p></div>
+  <div class="card"><h3>Last backup</h3><p id="backup-status">Checking...</p></div>
 </div>
 
 <h2>Quick Links</h2>
 <table>
-  <tr><th>Recurso</th><th>Link / Ruta</th></tr>
+  <tr><th>Resource</th><th>Link / Path</th></tr>
   <tr><td>GitHub Repo</td><td><a href="https://github.com/EliasOulkadi/shokunin">github.com/EliasOulkadi/shokunin</a></td></tr>
   <tr><td>Skills</td><td><code>~/.config/opencode/skills/</code></td></tr>
   <tr><td>Memory Data</td><td><code>~/.shokunin/memory/</code></td></tr>
@@ -67,36 +65,36 @@
 </table>
 
 <div class="footer">
-  Shokunin v3.2 · <a href="https://github.com/EliasOulkadi/shokunin">github.com/EliasOulkadi/shokunin</a>
+  Shokunin v4.2.3 · <a href="https://github.com/EliasOulkadi/shokunin">github.com/EliasOulkadi/shokunin</a>
 </div>
 
 <script>
-document.getElementById('timestamp').textContent = 'Cargando: ' + new Date().toLocaleString('es-ES');
+document.getElementById('timestamp').textContent = 'Loading: ' + new Date().toISOString();
 
 // Live status checks
 async function checkMemory() {
   try {
     const req = await fetch('http://localhost:5172/api/chat', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({message:'/status'}), signal: AbortSignal.timeout(2000) });
-    document.getElementById('memory-status').innerHTML = '<span class="green">OpenCode activo</span>';
+    document.getElementById('memory-status').innerHTML = '<span class="green">OpenCode active</span>';
   } catch {
-    document.getElementById('memory-status').innerHTML = '<span class="yellow">OpenCode no responde</span>';
+    document.getElementById('memory-status').innerHTML = '<span class="yellow">OpenCode not responding</span>';
   }
 }
 
 async function checkMCP() {
-  document.getElementById('mcp-status').innerHTML = 'Esperando...';
+  document.getElementById('mcp-status').innerHTML = 'Pending...';
 }
 
 async function checkSkillsDir() {
-  document.getElementById('skills-dir').innerHTML = '35 skills';
+  document.getElementById('skills-dir').innerHTML = '62 skills';
 }
 
 async function checkBackup() {
-  document.getElementById('backup-status').innerHTML = 'Domingos 21:00';
+  document.getElementById('backup-status').innerHTML = 'Sundays 21:00';
 }
 
 checkMemory();
-document.getElementById('timestamp').textContent = 'Actualizado: ' + new Date().toLocaleString('es-ES');
+document.getElementById('timestamp').textContent = 'Updated: ' + new Date().toISOString();
 </script>
 </body>
 </html>

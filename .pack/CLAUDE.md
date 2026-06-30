@@ -1,4 +1,4 @@
-# Claude Global Instructions — swagger
+# Claude Global Instructions — shokunin
 
 ## Identity
 

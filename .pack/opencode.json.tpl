@@ -54,7 +54,10 @@
     },
     "fetch": {
       "type": "local",
-      "command": ["npx", "-y", "@modelcontextprotocol/server-fetch"]
+      "command": ["{{PYTHON_BIN}}", "-m", "mcp_server_fetch"],
+      "environment": {
+        "PYTHONIOENCODING": "utf-8"
+      }
     },
     "memory": {
       "type": "local",

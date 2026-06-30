@@ -28,10 +28,6 @@ sessions/
 logs/
 *.log
 
-# Python cache
-__pycache__/
-*.pyc
-
 # Benchmarks
 benchmarks/results/
 

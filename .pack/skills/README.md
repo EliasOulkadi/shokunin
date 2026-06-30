@@ -1,6 +1,6 @@
 ﻿# Shokunin · 職人
 
-**62 agent skills for developers, designers, writers, and operators.** *(Merged from 62 — consolidated related skills into combined power skills.)*
+**62 agent skills for developers, designers, writers, and operators.**
 
 Portable skill files compatible with OpenCode, Claude Code, Cursor, and any agent that supports `SKILL.md` format with YAML frontmatter.
 
@@ -36,20 +36,18 @@ ln -s $(pwd)/shokunin/backend ~/.config/opencode/skills/
 
 | Domain | Skills | Count |
 |--------|--------|-------|
-| **Backend** | api-forge, auth-architect, db-sculptor, error-handler, test-commander | 5 |
-| **DevOps & Infra** | ci-cd, docker, kubernetes, terraform | 4 |
-| **Frontend** | component-forge, landing-craft, motion-craft, responsive-engine | 4 |
+| **Infrastructure** | docker, kubernetes, terraform, ci-cd, db-admin | 5 |
+| **Backend** | api-forge, auth-architect, db-sculptor, error-handler, neon-postgres | 5 |
+| **Frontend** | component-forge, responsive-engine, motion-craft, landing-craft, aesthetic-web, ui-ux-pro-max, emil-design-eng, impeccable, taste, taste-soft, taste-minimalist | 11 |
 | **Mobile** | flutter, react-native | 2 |
-| **Content Marketing** | content-marketing | 1 |
-| **Business Proposals** | business-proposals | 1 |
-| **Communication** | communication, translate-craft | 2 |
-| **Documentation** | documentation | 1 |
-| **Design** | design, ui-ux-pro-max | 2 |
-| **Strategy** | strategy, finance, legal-counsel | 3 |
-| **Automation** | portfolio-auto, whendone-plus | 2 |
-| **.agents (custom)** | aesthetic-web, agent-browser, agent-tools, code-review, comprehensive-review, cross-review, efficient-coding, find-skills, humanize, init, kagen, kami, plan, play-wright, research, senior-engineer, skill-creator, web-security, zen-comprehensive-review, zen-review | 20 |
+| **Quality** | test-commander, performance-profiler, code-review, comprehensive-review, cross-review, zen-review, zen-comprehensive-review | 7 |
+| **Content & Business** | communication, content-marketing, business-proposals, seo-geo, translate-craft, documentation | 6 |
+| **Documents** | kami, portfolio-auto, kagen | 3 |
+| **Productivity** | git-workflow, windows-powershell, runbook-gen, strategy, brand-design, finance, legal-counsel, whendone-plus | 8 |
+| **AI Agents** | agent-browser, agent-tools, find-skills, skill-creator, research, humanize | 6 |
+| **System** | memory, chromadb, shokunin-update, init, efficient-coding, senior-engineer, plan, playwright, web-security | 9 |
 
-**Total: 30 skills across 7 domains (Shokunin) + 20 custom skills (.agents)**
+**Total: 62 skills across 10 domains**
 
 ---
 

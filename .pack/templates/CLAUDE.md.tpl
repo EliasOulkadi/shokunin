@@ -1,4 +1,4 @@
-# Claude Global Instructions — swagger
+# Claude Global Instructions — shokunin
 
 ## Identity
 
@@ -84,56 +84,57 @@ Auto-apply on every web UI:
 
 ## Skills Ecosystem
 
-Tengo 62+ skills instaladas en `~/.config/opencode/skills/`. Se activan solas según lo que pida:
+I have 62+ skills installed in `~/.config/opencode/skills/`. They activate automatically based on what you ask:
 
-- **docker/kubernetes/terraform/ci-cd/db-admin** → infraestructura
+- **docker/kubernetes/terraform/ci-cd/db-admin** → infrastructure
 - **auth-architect/api-forge/db-sculptor/error-handler** → backend
 - **component-forge/responsive-engine/motion-craft/landing-craft/aesthetic-web** → frontend
 - **flutter/react-native** → mobile
-- **test-commander/performance-profiler/code-review** → calidad
-- **communication/content-marketing/business-proposals/seo-geo** → contenido y negocio
-- **git-workflow/windows-powershell/runbook-gen/strategy** → productividad
-- **kami/portfolio-auto** → documentos
-- **shokunin-update/memory/chromadb** → ecosistema
-- **agent-browser/agent-tools/skill-creator/research** → agentes IA
+- **test-commander/performance-profiler/code-review** → quality
+- **communication/content-marketing/business-proposals/seo-geo** → content & business
+- **git-workflow/windows-powershell/runbook-gen/strategy** → productivity
+- **kami/portfolio-auto** → documents
+- **shokunin-update/memory/chromadb** → ecosystem
+- **agent-browser/agent-tools/skill-creator/research** → AI agents
 
-## MEMORY SYSTEM — INSTRUCCIONES OBLIGATORIAS
+## MEMORY SYSTEM — MANDATORY INSTRUCTIONS
 
-Este sistema usa ChromaDB para memoria persistente entre sesiones. Sigue estas instrucciones ESTRICTAMENTE.
+This system uses ChromaDB for persistent memory between sessions. Follow these instructions STRICTLY.
 
-### 1. AL INICIAR SESIÓN — buscar contexto previo (OBLIGATORIO)
+### 1. AT SESSION START — search for previous context (MANDATORY)
 
-Primero, lista las sesiones recientes para que el usuario elija cuál continuar:
+First, list recent sessions so the user can choose which one to continue:
 ```powershell
 python ~/.shokunin/scripts/chroma-helper.py session list 3
 ```
-Luego pregunta: "Sesiones recientes. ¿Quieres continuar alguna (número), buscar en todas (b) o empezar una nueva (n)?"
-Si elige un número, usa `session continue <session_id>` para cargar el contexto completo y muestra las decisiones, archivos y comandos encontrados.
-Si elige buscar, usa `search_context` (MCP tool) o ejecuta chroma-helper.py search para buscar contexto relevante.
-Muestra los resultados al usuario.
+Then ask: "Recent sessions. Do you want to continue one (number), search all (b), or start a new one (n)?"
+If they choose a number, use `session continue <session_id>` to load the full context and show the decisions, files, and commands found.
+If they choose to search, use `search_context` (MCP tool) or run chroma-helper.py search to find relevant context.
+Show the results to the user.
 
-### 2. DURANTE LA SESIÓN — guardado automático
-El MCP server guarda automáticamente cada interacción en sessions/<id>.jsonl.
-No necesitas hacer nada manualmente. El sistema captura:
-- Cada `store_context` (checkpoints, decisiones, archivos)
-- Cada búsqueda (`search_context`, `multi_search_context`)
-- Cada mensaje guardado con `save_message`
+### 2. DURING THE SESSION — automatic saving
+The MCP server automatically saves each interaction in sessions/<id>.jsonl.
+You don't need to do anything manually. The system captures:
+- Each `store_context` (checkpoints, decisions, files)
+- Each search (`search_context`, `multi_search_context`)
+- Each message saved with `save_message`
 
-### 3. AL FINAL DE LA SESIÓN — resumen completo
-Usa `/save` si estás en OpenCode, o ejecuta:
+### 3. AT END OF SESSION — full summary
+Use `/save` if you're in OpenCode, or run:
 ```powershell
-python ~/.shokunin/scripts/chroma-helper.py save "SESSION SUMMARY\n## Decisions\n- ...\n## Files\n- ...\n## Commands\n- ..." "[session_id]" "session_end" "session-end,[proyecto]" "[proyecto]"
+python ~/.shokunin/scripts/chroma-helper.py save "SESSION SUMMARY\n## Decisions\n- ...\n## Files\n- ...\n## Commands\n- ..." "[session_id]" "session_end" "session-end,[project]" "[project]"
 ```
 
-### Session ID automático
-El wrapper setea estas variables:
-- `$env:SHOKUNIN_SESSION_ID` — ID de la sesión actual
-- `$env:SHOKUNIN_PROJECT` — directorio del proyecto
-- `$env:SHOKUNIN_MCP_HEALTHY` — "1" si MCP funciona, "0" si no
-También escribe `~/.shokunin/current-session.json` con la info de sesión.
+### Session ID
+The wrapper sets these environment variables:
+- `$env:SHOKUNIN_SESSION_ID` — ID of the current session
+- `$env:SHOKUNIN_PROJECT` — project directory
+- `$env:SHOKUNIN_MCP_HEALTHY` — "1" if MCP server is working, "0" if not
 
-### IMPORTANTE
-- NUNCA te saltes search_context al inicio
-- NUNCA termines sin guardar session_end
-- Usa `python chroma-helper.py` mediante Bash tool. Esto funciona SIEMPRE, independientemente del MCP server.
-- Si el comando chroma-helper.py falla, escribe manualmente a un archivo markdown en `~/.shokunin/memory/sessions/`.
+Also writes `~/.shokunin/current-session.json` with session info.
+
+### IMPORTANT
+- NEVER skip search_context at the start
+- NEVER end without saving session_end
+- Use `python chroma-helper.py` via Bash tool. This ALWAYS works, regardless of the MCP server.
+- If the chroma-helper.py command fails, manually write to a markdown file in `~/.shokunin/memory/sessions/`.

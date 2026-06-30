@@ -157,7 +157,7 @@ def _rrf_fuse(ranked_lists: list[tuple[list[dict[str, Any]], str]], k: int = 60)
         for rank, item in enumerate(rank_list):
             sid = item.get("session_id") or item.get("session", "")
             txt = item.get("text", "")[:80]
-            key = f"{sid}:{hash(txt)}"
+            key = f"{sid}:{hashlib.md5(txt.encode()).hexdigest()}"
             scores[key] = scores.get(key, 0) + 1.0 / (k + rank)
             all_items[key] = item
     ranked = sorted(scores.items(), key=lambda x: -x[1])
