@@ -4,7 +4,7 @@ Protocol version: `2024-11-05` (JSON-RPC 2.0 over stdin/stdout)
 
 ## Overview
 
-The Shokunin Memory MCP Server provides 9 tools for persistent AI memory. It runs locally as a stdin/stdout JSON-RPC process — no HTTP server, no cloud dependency, no API keys.
+The Shokunin Memory MCP Server provides 12 tools for persistent AI memory. It runs locally as a stdin/stdout JSON-RPC process — no HTTP server, no cloud dependency, no API keys.
 
 **Storage**: ChromaDB (SQLite-backed, file-based) at `~/.shokunin/memory/chroma_db/`
 **Session logs**: `~/.shokunin/memory/sessions/<id>.jsonl`
@@ -294,6 +294,76 @@ Verify whether a file or directory path exists on the local filesystem. Use this
 ```
 
 **When to use:** Memory entries are claims from a frozen point in time. Always verify file paths before acting on them. Entry types `claim_file` and `claim_function` with `verified_at` set are pre-verified.
+
+---
+
+### memory_index
+
+Generate the MEMORY.md index file from recent sessions, decisions, and files. Run at session start to load working-memory context.
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `project` | string | No | Filter by project |
+
+**Returns:**
+```json
+{
+  "paths": ["~/.shokunin/memory/MEMORY.md"],
+  "sessions": 5,
+  "decisions": 4,
+  "size_bytes": 2526
+}
+```
+
+**When to use:** At the beginning of every session to hydrate working memory, and after `consolidate_memories` to refresh the index.
+
+---
+
+### memory_stats
+
+Memory statistics: entries by type, signal-to-noise ratio, storage usage.
+
+**Parameters:**
+
+None.
+
+**Returns:**
+```json
+{
+  "total_entries": 487,
+  "by_type": {"checkpoint": 461, "session_end": 9, "decision": 4},
+  "by_project": {"project-a": 461, "project-b": 7},
+  "noise_count": 3
+}
+```
+
+**When to use:** To inspect memory health, detect noise-heavy checkpoints, or audit storage growth before consolidation.
+
+---
+
+### memory_forget
+
+Mark memories as superseded by storing a note. Original entries are preserved but deprioritized.
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `session_id` | string | Yes | Session ID to supersede |
+| `text_pattern` | string | No | Optional text pattern to match entries |
+
+**Returns:**
+```json
+{
+  "superseded": true,
+  "session_id": "session-20260518-103000-0001",
+  "note_stored": true
+}
+```
+
+**When to use:** When a session is superseded by newer work, to deprioritize stale context without deleting historical entries.
 
 ---
 

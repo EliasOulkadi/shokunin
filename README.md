@@ -15,7 +15,7 @@
 
 **62 engineering skills + persistent AI memory. One command. Zero servers.**
 
-**v4.2.3** adds freshness decay (time-weighted memory), claim verification (verify_file_path MCP tool), 9 MCP tools (was 8), and 30+ bug fixes.
+**v4.2.3** adds freshness decay (time-weighted memory), claim verification (verify_file_path MCP tool), 12 MCP tools (was 8), and 30+ bug fixes.
 
 > *職人 (shokunin) means artisan in Japanese. These skills aim for that standard: every detail crafted, every edge case handled, every workflow automated.*
 
@@ -30,7 +30,7 @@ bash <(curl -sL https://raw.githubusercontent.com/EliasOulkadi/shokunin/master/i
 ```
 
 ```powershell
-# Skills-only install (Windows — no ChromaDB, no MCP)
+# Skills-only install (Windows - no ChromaDB, no MCP)
 irm https://raw.githubusercontent.com/EliasOulkadi/shokunin/master/install-skills.ps1 | iex
 ```
 
@@ -148,9 +148,9 @@ opencode
 
 Multi-strategy recall (vector + BM25 + temporal + reciprocal rank fusion). Session management with explicit continue (no guessing which session to resume).
 
-- **Freshness decay**: exponential recency blending — old memories fade over 30-day half-life so stale claims don't drown out recent context
-- **Claim verification**: `verify_file_path` MCP tool validates file paths from old memory before the agent acts on them — treats memory as claims from a frozen point in time, not facts
-- **9 MCP tools** (up from 8): store_context, search_context, get_session_summary, multi_search_context (vector+BM25+RRF+temporal), consolidate_memories, list_sessions, continue_session, save_message, verify_file_path
+- **Freshness decay**: exponential recency blending, old memories fade over 30-day half-life so stale claims don't drown out recent context
+- **Claim verification**: `verify_file_path` MCP tool validates file paths from old memory before the agent acts on them, treating memory as claims from a frozen point in time, not facts
+- **12 MCP tools** (up from 8): store_context, search_context, get_session_summary, multi_search_context (vector+BM25+RRF+temporal), consolidate_memories, list_sessions, continue_session, save_message, verify_file_path, memory_index, memory_stats, memory_forget
 
 ```bash
 # List recent sessions
@@ -218,12 +218,12 @@ The ecosystem works across multiple AI coding runtimes. The core (skills, memory
 
 | Runtime | Skills | Memory | MCP | Scripts | Config template |
 |---------|--------|--------|-----|---------|-----------------|
-| **OpenCode** | ✅ Native | ✅ Native | ✅ .pack/opencode.json | ✅ .ps1 + .sh | Built-in |
-| **Claude Code** | ✅ Reads SKILL.md | ✅ Via MCP | ✅ .pack/templates/claude-code.json | ✅ .ps1 + .sh | Copy template |
-| **Cline** (VS Code) | ✅ Reads SKILL.md | ✅ Via MCP | ✅ .pack/templates/cline-settings.json | ✅ .ps1 + .sh | Add to settings.json |
-| **Cursor** | ✅ Reads SKILL.md | ✅ Via rules | ✅ .pack/templates/cursor-mcp.json | ✅ .ps1 + .sh | Copy to .cursor/ |
-| **Continue.dev** | ✅ Reads SKILL.md | ✅ Via rules | ✅ .pack/templates/continue-config.yaml | ✅ .ps1 + .sh | Copy to .continue/ |
-| **Windsurf** | ✅ Reads SKILL.md | ✅ Via rules | ✅ .pack/templates/windsurf-mcp.json | ✅ .sh | Copy template |
+| **OpenCode** | Native | Native | .pack/opencode.json | .ps1 + .sh | Built-in |
+| **Claude Code** | Reads SKILL.md | Via MCP | .pack/templates/claude-code.json | .ps1 + .sh | Copy template |
+| **Cline** (VS Code) | Reads SKILL.md | Via MCP | .pack/templates/cline-settings.json | .ps1 + .sh | Add to settings.json |
+| **Cursor** | Reads SKILL.md | Via rules | .pack/templates/cursor-mcp.json | .ps1 + .sh | Copy to .cursor/ |
+| **Continue.dev** | Reads SKILL.md | Via rules | .pack/templates/continue-config.yaml | .ps1 + .sh | Copy to .continue/ |
+| **Windsurf** | Reads SKILL.md | Via rules | .pack/templates/windsurf-mcp.json.tpl | .sh | Copy template |
 
 ### Setup per runtime
 
@@ -235,7 +235,7 @@ The ecosystem works across multiple AI coding runtimes. The core (skills, memory
 
 **Continue.dev:** Copy `.pack/templates/continue-config.yaml` to `.continue/config.yaml`. Add `.pack/rules/continue-memory.md` to `.continue/rules/`.
 
-**Windsurf:** Copy `.pack/templates/windsurf-mcp.json` MCP config. Copy `.pack/rules/windsurf-memory.md` to `.windsurf/rules/memory.md`.
+**Windsurf:** Copy the MCP config from `.pack/templates/windsurf-mcp.json.tpl`. Copy `.pack/rules/windsurf-memory.md` to `.windsurf/rules/memory.md`.
 
 ## Links
 

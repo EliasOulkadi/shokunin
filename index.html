@@ -359,7 +359,7 @@
     </div>
     <div class="feature-card reveal reveal-delay-3">
       <h3>MCP auto-logging</h3>
-      <p>Every MCP tool call logged to sessions/&lt;id&gt;.jsonl. 9 tools across 6 AI coding runtimes. Works in OpenCode, Claude Code, Cursor, Windsurf, Cline, and Continue. Zero agent coordination needed.</p>
+      <p>Every MCP tool call logged to sessions/&lt;id&gt;.jsonl. 12 tools across 6 AI coding runtimes. Works in OpenCode, Claude Code, Cursor, Windsurf, Cline, and Continue. Zero agent coordination needed.</p>
     </div>
   </div>
 </section>
@@ -412,7 +412,7 @@ Infrastructure ~/.shokunin/backups/      backups, logs, database files
 <!-- MCP TOOLS -->
 <section class="section reveal">
   <h2>MCP tools</h2>
-  <p style="color:var(--dark-warm);max-width:600px;margin:8px 0 20px;">Nine tools across six AI coding runtimes. All tools auto-logged to JSONL.</p>
+  <p style="color:var(--dark-warm);max-width:600px;margin:8px 0 20px;">Twelve tools across six AI coding runtimes. All tools auto-logged to JSONL.</p>
   <div class="arch-diagram" style="text-align:left;">
 store_context  — save text with type, tags, project, session_id<br>
 search_context: vector similarity search with project/tag filters<br>
@@ -422,7 +422,10 @@ list_sessions  — list recent sessions with metadata (v4.2.2)<br>
 continue_session — load full session context with parsed decisions/files (v4.2.2)<br>
 save_message   — record individual message in session JSONL transcript<br>
 verify_file_path — verify file/directory exists with metadata (v4.2.2)<br>
-get_session_summary — summarize all entries in a given session
+get_session_summary — summarize all entries in a given session<br>
+memory_index   — generate MEMORY.md index from recent sessions, decisions, files<br>
+memory_stats   — entries by type, signal-to-noise ratio, storage usage<br>
+memory_forget  — mark memories as superseded, preserving original entries
   </div>
   <div style="display:flex;flex-wrap:wrap;gap:24px;justify-content:center;margin-top:32px;">
     <div class="tool-icon" style="text-align:center"><svg width="32" height="32" viewBox="0 0 512 512" fill="none"><rect width="512" height="512" rx="64" fill="#131010"/><path d="M384 416H128V96H384V416ZM320 160H192V352H320V160Z" fill="white"/></svg><span style="display:block;font-size:12px;color:var(--stone);text-transform:uppercase;letter-spacing:1px;margin-top:4px;">OpenCode</span></div>

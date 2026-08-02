@@ -226,6 +226,36 @@ _TOOLS = {
                 },
             },
         },
+        {
+            "name": "memory_index",
+            "description": "Generate MEMORY.md index file from recent sessions, decisions, and files. Run at session start for context.",
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "project": {"type": "string", "description": "Filter by project"},
+                },
+            },
+        },
+        {
+            "name": "memory_stats",
+            "description": "Memory statistics: entries by type, signal-to-noise ratio, storage usage.",
+            "inputSchema": {
+                "type": "object",
+                "properties": {},
+            },
+        },
+        {
+            "name": "memory_forget",
+            "description": "Mark memories as superseded by storing a note. Original entries preserved but deprioritized.",
+            "inputSchema": {
+                "type": "object",
+                "required": ["session_id"],
+                "properties": {
+                    "session_id": {"type": "string", "description": "Session ID to supersede"},
+                    "text_pattern": {"type": "string", "description": "Optional text pattern to match entries"},
+                },
+            },
+        },
     ],
 }
 
@@ -522,6 +552,23 @@ def handle_verify_file_path(args: dict[str, Any]) -> dict[str, Any]:
     return {"exists": exists, "path": expanded, "last_modified": mtime, "kind": kind}
 
 
+def handle_memory_index(args: dict[str, Any]) -> dict[str, Any]:
+    ch = _get_ch()
+    return ch.index(args.get("project"))
+
+
+def handle_memory_stats(args: dict[str, Any]) -> dict[str, Any]:
+    ch = _get_ch()
+    return ch.stats()
+
+
+def handle_memory_forget(args: dict[str, Any]) -> dict[str, Any]:
+    if not args or not args.get("session_id"):
+        return {"error": "session_id required"}
+    ch = _get_ch()
+    return ch.forget(args["session_id"], args.get("text_pattern", ""))
+
+
 TOOL_HANDLERS = {
     "store_context": handle_store_context,
     "search_context": handle_search_context,
@@ -532,6 +579,9 @@ TOOL_HANDLERS = {
     "continue_session": handle_continue_session,
     "save_message": handle_save_message,
     "verify_file_path": handle_verify_file_path,
+    "memory_index": handle_memory_index,
+    "memory_stats": handle_memory_stats,
+    "memory_forget": handle_memory_forget,
 }
 
 

@@ -238,7 +238,7 @@
 <section class="break">
   <h1>5. MCP Tools Reference</h1>
 
-  <p>Nine tools over JSON-RPC 2.0 on stdin/stdout. No HTTP, no cloud.</p>
+  <p>Twelve tools over JSON-RPC 2.0 on stdin/stdout. No HTTP, no cloud.</p>
 
   <table>
     <thead><tr><th>Tool</th><th>Purpose</th><th>Key Parameters</th></tr></thead>
@@ -252,6 +252,9 @@
       <tr><td><code>save_message</code></td><td>Record message in session transcript</td><td>text, session_id, role</td></tr>
       <tr><td><code>get_session_summary</code></td><td>Summarize all entries in a session</td><td>session_id</td></tr>
       <tr><td><code>verify_file_path</code></td><td>Validate file/dir path exists</td><td>path</td></tr>
+      <tr><td><code>memory_index</code></td><td>Generate MEMORY.md index</td><td>project (optional)</td></tr>
+      <tr><td><code>memory_stats</code></td><td>Entries by type, noise, storage</td><td>none</td></tr>
+      <tr><td><code>memory_forget</code></td><td>Supersede stale session memories</td><td>session_id, text_pattern</td></tr>
     </tbody>
   </table>
 

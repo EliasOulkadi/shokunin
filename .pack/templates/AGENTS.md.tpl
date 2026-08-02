@@ -3,7 +3,7 @@
 ## Profile
 Senior full-stack dev / indie-hacker. I build backend, frontend, mobile, content, business. Windows 11.
 
-## Skills available (62 v4.2.2)
+## Skills available (62 v4.2.3)
 They activate automatically based on what you ask. You don't need to name them.
 
 ### Infrastructure
@@ -19,7 +19,7 @@ They activate automatically based on what you ask. You don't need to name them.
 - **db-sculptor**: Prisma/Drizzle schemas, indexes, EXPLAIN ANALYZE, migrations.
 - **error-handler**: OpenTelemetry, error budgets, circuit breaker, logging.
 
-### Frontend (v4.2.2 enhanced with Emil Kowalski + Impeccable patterns)
+### Frontend (v4.2.3 enhanced with Emil Kowalski + Impeccable patterns)
 - **component-forge**: React/Vue/Svelte components with all states, a11y, tactile buttons.
 - **responsive-engine**: Container Queries, clamp(), :has(), subgrid, mobile collapse rules.
 - **motion-craft**: WAAPI + CSS + springs + clip-path + Before/After tables mandatory. Exact durations.

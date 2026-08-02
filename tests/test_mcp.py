@@ -31,7 +31,10 @@ def test_list_tools() -> None:
     assert "store_context" in tool_names
     assert "search_context" in tool_names
     assert "get_session_summary" in tool_names
-    assert len(tools) == 9
+    assert "memory_index" in tool_names
+    assert "memory_stats" in tool_names
+    assert "memory_forget" in tool_names
+    assert len(tools) == 12
 
 
 def test_invalid_method() -> None:

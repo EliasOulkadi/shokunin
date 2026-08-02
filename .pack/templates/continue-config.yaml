@@ -1,0 +1,42 @@
+name: Shokunin AI Ecosystem
+version: 1.0.0
+schema: v1
+
+models:
+  - name: Free AI
+    provider: openai
+    model: gpt-4o-mini
+    roles:
+      - chat
+      - edit
+      - apply
+
+mcpServers:
+  - name: filesystem
+    command: npx
+    args:
+      - -y
+      - "@modelcontextprotocol/server-filesystem"
+      - "~"
+  - name: fetch
+    command: npx
+    args:
+      - -y
+      - "@modelcontextprotocol/server-fetch"
+  - name: memory
+    command: python
+    args:
+      - "~/.shokunin/memory/mcp-server.py"
+
+rules:
+  - "Always check memory before starting a new task"
+  - "Save important decisions and file changes to memory"
+  - "Use chroma-helper.py for direct ChromaDB access when MCP is unavailable"
+
+prompts:
+  - name: memory-search
+    description: Search past sessions for context
+    prompt: "Search memory for: {{input}}"
+  - name: memory-save
+    description: Save current context to memory
+    prompt: "Save to memory: {{input}}"

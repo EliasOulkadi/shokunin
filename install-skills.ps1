@@ -14,7 +14,7 @@ if (Test-Path "$env:USERPROFILE\.agents\skills") {
     $script:targets += "$env:USERPROFILE\.agents\skills"
 }
 
-Write-Host "`n  Shokunin Skills Installer v4.2.2" -ForegroundColor Cyan
+Write-Host "`n  Shokunin Skills Installer v4.2.3" -ForegroundColor Cyan
 Write-Host "  62 skills across 10 domains" -ForegroundColor DarkGray
 Write-Host ""
 
